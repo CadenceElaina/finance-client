@@ -1,10 +1,13 @@
 import React from 'react'
+import DashboardPage from '../Dashboard/DashboardPage'
 
 // DEMO USER's settings and data
 
 const DemoPage = () => {
     return (
-        <div>DemoPage</div>
+        <>
+            <DashboardPage />
+        </>
     )
 }
 

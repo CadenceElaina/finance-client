@@ -73,3 +73,58 @@ a:hover {
     margin: 0 auto;
     padding: 0 var(--space-md);
 }
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    padding: var(--space-xs) var(--space-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+button:hover,
+input:hover,
+select:hover,
+textarea:hover {
+    filter: var(--hover-brightness);
+    border-color: var(--color-primary);
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
+}
+
+.card {
+    background-color: var(--surface-light);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-md);
+    transition: transform var(--transition-speed-fast) var(--transition-ease),
+        box-shadow var(--transition-speed-fast) var(--transition-ease);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}

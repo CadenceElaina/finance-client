@@ -1,4 +1,13 @@
 :root {
+    /* Gradient for modern flair */
+    --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
+    --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
+
+    /* Enhanced Shadows */
+    --shadow-elevated: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+    /* Hover Effects */
+    --hover-brightness: brightness(1.1);
     /* Base Colors (Dark Theme Defaults) */
     --color-primary: #00B1C7;
     /* Slightly brighter teal for dark mode */

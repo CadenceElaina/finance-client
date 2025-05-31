@@ -5,7 +5,6 @@ import Header from '../../components/layout/Header/Header'
 const HomePage = () => {
     return (
         <>
-            <Header />
             <div>HomePage
 
                 <Link to={"/demo"}>Demo</Link>

@@ -1,37 +1,44 @@
 import React from 'react';
-// This path assumes Header.jsx is in 'src/components/layout/Header/'
-// and ThemeContext.jsx is in 'src/contexts/'.
-// Path: Header -> layout -> components -> src -> contexts
+import { Link } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext.jsx';
-import { Moon, Sun } from 'lucide-react'; // Import icons
-// This path assumes Header.module.css is in the same directory as Header.jsx
+import { Moon, Sun } from 'lucide-react';
 import styles from './Header.module.css';
 
 const Header = () => {
     const { theme, toggleTheme } = useTheme();
 
+    const isLoggedIn = false; // Replace with real auth logic later
+
     return (
         <header className={styles.header}>
             <div className={styles.logo}>
-                {/* Placeholder for your app logo */}
-                <span className={styles.logoText}>FinApp</span>
+                <Link to="/" className={styles.logoText}>FinApp</Link>
             </div>
+
             <nav className={styles.navigation}>
-                {/* Navigation links can go here */}
-                {/* Example: <a href="/" className={styles.navLink}>Dashboard</a> */}
-                {/* Example: <a href="/education" className={styles.navLink}>Education</a> */}
+                <Link to="/" className={styles.navLink}>Home</Link>
+                <Link to="/demo" className={styles.navLink}>Demo</Link>
+                <Link to="/education" className={styles.navLink}>Education</Link>
+                {isLoggedIn && (
+                    <Link to="/dashboard" className={styles.navLink}>Dashboard</Link>
+                )}
+                {isLoggedIn ? (
+                    <button className={styles.navLink} onClick={() => {/* handle logout */ }}>Logout</button>
+                ) : (
+                    <>
+                        <Link to="/login" className={styles.navLink}>Login</Link>
+                        <Link to="/signup" className={styles.navLink}>Sign Up</Link>
+                    </>
+                )}
             </nav>
+
             <div className={styles.themeToggleContainer}>
                 <button
                     className={styles.themeToggleButton}
                     onClick={toggleTheme}
                     aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                 >
-                    {theme === 'dark' ? (
-                        <Sun size={24} className={styles.icon} /> // Show sun icon in dark mode
-                    ) : (
-                        <Moon size={24} className={styles.icon} /> // Show moon icon in light mode
-                    )}
+                    {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
                 </button>
             </div>
         </header>
