@@ -1,0 +1,87 @@
+:root {
+    /* Base Colors (Dark Theme Defaults) */
+    --color-primary: #00B1C7;
+    /* Slightly brighter teal for dark mode */
+    --color-primary-light: #00A3B8;
+    --color-primary-dark: #005F6B;
+
+    --color-secondary: #FFB09C;
+    /* Adjusted coral */
+    --color-secondary-light: #FFB09C;
+
+    --color-success: #4CAF50;
+    /* Green */
+    --color-warning: #FF9800;
+    /* Orange */
+    --color-danger: #EF5350;
+    /* Red */
+
+    /* Neutral Colors (Dark Theme Defaults) */
+    --background-light: #1A202C;
+    /* Dark background */
+    --surface-light: #2D3748;
+    /* Darker card background */
+    --border-light: #4A5568;
+    /* Darker borders */
+
+    --text-primary: #EDF2F7;
+    /* Light text */
+    --text-secondary: #A0AEC0;
+    /* Lighter secondary text */
+    --text-tertiary: #718096;
+    /* Even lighter tertiary text */
+
+    /* Typography */
+    --font-family-base: 'Inter', 'Open Sans', 'Roboto', sans-serif;
+    --font-size-base: 1rem;
+    --font-size-sm: 0.875rem;
+    --font-size-lg: 1.125rem;
+
+    /* Spacing Scale */
+    --space-xxs: 4px;
+    --space-xs: 8px;
+    --space-sm: 16px;
+    --space-md: 24px;
+    --space-lg: 32px;
+    --space-xl: 48px;
+    --space-xxl: 64px;
+
+    /* Border Radii */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-circle: 50%;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    /* Transitions */
+    --transition-speed-fast: 0.15s;
+    --transition-speed-normal: 0.3s;
+    --transition-ease: ease-in-out;
+}
+
+/* Light Mode (apply to a parent selector, e.g., body[data-theme="light"]) */
+body[data-theme="light"] {
+    --background-light: #F8F9FA;
+    /* Off-white page background */
+    --surface-light: #FFFFFF;
+    /* Card/container background */
+    --border-light: #E0E0E0;
+    /* Light gray borders */
+
+    --text-primary: #212529;
+    /* Dark gray for main text */
+    --text-secondary: #6C757D;
+    /* Medium gray for secondary text/labels */
+    --text-tertiary: #ADB5BD;
+    /* Light gray for subtle text */
+
+    /* Keep primary, secondary, and semantic colors consistent or slightly adjusted for contrast */
+    --color-primary: #007B8C;
+    /* Deep Teal */
+    --color-secondary: #FF8C69;
+    /* Soft Coral */
+}

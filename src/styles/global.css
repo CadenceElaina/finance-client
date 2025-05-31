@@ -1,0 +1,75 @@
+@import './variables.css';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: var(--font-size-base);
+    /* Base font size, for responsive rem units */
+}
+
+body {
+    font-family: var(--font-family-base);
+    color: var(--text-primary);
+    background-color: var(--background-light);
+    line-height: 1.6;
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease);
+    /* For smooth theme transition */
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+/* 40px */
+h2 {
+    font-size: 2rem;
+}
+
+/* 32px */
+/* ... define others */
+
+/* Links */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed-fast) var(--transition-ease);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+/* Global Utility Classes (Optional but helpful) */
+.text-center {
+    text-align: center;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
