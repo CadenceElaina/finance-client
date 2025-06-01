@@ -1,90 +1,253 @@
-/* Layout */
+/*dashboard.css */
+@import '../../styles/variables.css';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: var(--font-size-base);
+}
+
+body {
+    font-family: var(--font-family-base);
+    color: var(--text-primary);
+    background-color: var(--background-light);
+    line-height: 1.6;
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease);
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 700;
+    margin-bottom: var(--space-sm);
+    color: var(--text-primary);
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+
+/* Links */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    transition: color var(--transition-speed-fast) var(--transition-ease);
+}
+
+a:hover {
+    color: var(--color-primary-dark);
+    text-decoration: underline;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-md);
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+    font-size: 1rem;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    padding: var(--space-xs) var(--space-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+button:hover,
+input:hover,
+select:hover,
+textarea:hover {
+    filter: var(--hover-brightness);
+    border-color: var(--color-primary);
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
+}
+
+.card {
+    background-color: var(--surface-light);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-md);
+    transition: transform var(--transition-speed-fast) var(--transition-ease),
+        box-shadow var(--transition-speed-fast) var(--transition-ease);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
 .dashboard-container {
-    padding: 1rem;
-    background: var(--background);
+    padding: var(--space-md);
+    background: var(--background-light);
     min-height: 100vh;
     color: var(--text-primary);
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .app-launcher {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
 }
 
-/* Buttons */
 .app-launcher button {
     background: var(--gradient-primary);
-    color: var(--text-light);
-    border: none;
-    padding: 0.5rem 1rem;
+    color: var(--app-launcher-button-text, var(--text-light));
+    /* NEW: Use a dedicated variable for button border color with fallback */
+    border: 1px solid var(--app-launcher-button-border-color, var(--border-light));
+    padding: var(--space-xs) var(--space-sm);
     border-radius: var(--border-radius-md);
     cursor: pointer;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    box-shadow: var(--shadow-sm);
 }
 
-.app-launcher button:hover {
+.app-launcher button.active {
+    border: 2px solid var(--border-active);
+    box-shadow: 0 0 0 2px var(--border-active), var(--shadow-elevated);
+    filter: brightness(1.2);
+}
+
+
+.app-launcher button:hover:not(.active) {
     filter: var(--hover-brightness);
-    box-shadow: var(--shadow-elevated);
+    /* NEW: Use a dedicated variable for button hover border color with fallback */
+    border-color: var(--app-launcher-button-hover-border-color, var(--color-primary));
 }
 
-/* App Window Grid */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 1rem;
+    gap: var(--space-md);
 }
 
-/* App Card */
 .app-window {
     background: var(--surface-light);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--transition-speed-fast) var(--transition-ease),
+        box-shadow var(--transition-speed-fast) var(--transition-ease),
+        background-color var(--transition-speed-normal) var(--transition-ease),
+        border-color var(--transition-speed-normal) var(--transition-ease);
+    border: 1px solid var(--border-light);
 }
 
-.app-window:hover {
+.app-window.active-app {
+    border: 2px solid var(--border-active);
+    box-shadow: 0 0 0 2px var(--border-active), var(--shadow-elevated);
+}
+
+
+.app-window:hover:not(.active-app) {
     transform: translateY(-2px);
     box-shadow: var(--shadow-elevated);
+    border-color: var(--color-primary);
 }
 
-/* App Header */
 .app-header {
     background: var(--surface-dark);
     color: var(--text-light);
-    padding: 0.75rem 1rem;
+    padding: var(--space-xs) var(--space-sm);
     border-top-left-radius: var(--border-radius-lg);
     border-top-right-radius: var(--border-radius-lg);
     display: flex;
     justify-content: space-between;
     align-items: center;
     font-weight: 600;
+    border-bottom: 1px solid var(--border-light);
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease),
+        border-color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .app-header button {
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     color: var(--text-light);
     font-size: 1.2rem;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform var(--transition-speed-fast) var(--transition-ease),
+        color var(--transition-speed-fast) var(--transition-ease),
+        border-color var(--transition-speed-fast) var(--transition-ease);
+    border-radius: var(--border-radius-sm);
+    padding: 0.1rem 0.2rem;
 }
 
 .app-header button:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
-/* App Body */
 .app-body {
-    padding: 1rem;
+    padding: var(--space-md);
     background: var(--surface-light);
     color: var(--text-primary);
     border-bottom-left-radius: var(--border-radius-lg);
     border-bottom-right-radius: var(--border-radius-lg);
+    flex-grow: 1;
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease);
+}
+
+/* Global Focus-Visible Styling (high contrast accessibility) */
+:focus-visible {
+    outline: 2px solid var(--border-active);
+    /* Use active border for focus */
+    outline-offset: 2px;
 }
 
 .glass {

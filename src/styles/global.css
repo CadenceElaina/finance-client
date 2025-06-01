@@ -8,7 +8,6 @@
 
 html {
     font-size: var(--font-size-base);
-    /* Base font size, for responsive rem units */
 }
 
 body {
@@ -18,7 +17,6 @@ body {
     line-height: 1.6;
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
-    /* For smooth theme transition */
 }
 
 /* Headings */
@@ -37,13 +35,10 @@ h1 {
     font-size: 2.5rem;
 }
 
-/* 40px */
 h2 {
     font-size: 2rem;
 }
 
-/* 32px */
-/* ... define others */
 
 /* Links */
 a {
@@ -57,7 +52,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Global Utility Classes (Optional but helpful) */
 .text-center {
     text-align: center;
 }

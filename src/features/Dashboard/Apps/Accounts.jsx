@@ -1,11 +1,11 @@
 import React from 'react'
 
-const Networth = () => {
-  return (
-    <>
-    <div>Networth</div>
-    </>
-  )
+const Accounts = () => {
+    return (
+        <>
+            <div>Accounts</div>
+        </>
+    )
 }
 
-export default Networth
+export default Accounts

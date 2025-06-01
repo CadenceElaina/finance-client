@@ -3,16 +3,19 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1.5rem;
-    background: var(--surface-dark);
-    color: var(--text-light);
+    background: var(--surface-light);
+    color: var(--text-primary);
     box-shadow: var(--shadow-md);
+    transition: background-color var(--transition-speed-normal) var(--transition-ease),
+        color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .logoText {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--text-light);
+    color: var(--color-primary);
     text-decoration: none;
+    transition: color var(--transition-speed-fast) var(--transition-ease);
 }
 
 .navigation {
@@ -22,16 +25,17 @@
 }
 
 .navLink {
-    color: var(--text-light);
+    color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-sm);
-    transition: background 0.2s;
+    transition: background 0.2s, color var(--transition-speed-fast) var(--transition-ease);
 }
 
 .navLink:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--surface-light);
+    color: var(--color-primary);
 }
 
 .themeToggleContainer {
@@ -39,14 +43,35 @@
     align-items: center;
 }
 
-.themeToggleButton {
-    background: none;
-    border: none;
-    color: var(--text-light);
-    cursor: pointer;
-    transition: transform 0.2s ease;
+.themeToggleContainer label {
+    margin: 0 5px 0 0;
 }
 
-.themeToggleButton:hover {
-    transform: scale(1.2);
+.themeSelect {
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22currentColor%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 0.8em;
+    padding-right: 2.5rem;
+}
+
+.themeSelect:hover {
+    filter: var(--hover-brightness);
+    border-color: var(--color-primary);
+}
+
+.themeSelect:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
 }

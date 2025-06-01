@@ -1,13 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext.jsx';
-import { Moon, Sun } from 'lucide-react';
 import styles from './Header.module.css';
 
 const Header = () => {
-    const { theme, toggleTheme } = useTheme();
+    const { theme, changeTheme } = useTheme();
 
-    const isLoggedIn = false; // Replace with real auth logic later
+    const isLoggedIn = false;
+
+    const themes = [
+        { value: 'light', label: 'Light' },
+        { value: 'dark', label: 'Dark' },
+        { value: 'ultra-dark', label: 'Ultra Dark' },
+        { value: 'high-contrast-dark', label: 'High Contrast Dark' },
+        { value: 'vibrant-green', label: 'Vibrant Green' },
+        { value: 'vibrant-orange', label: 'Vibrant Orange' },
+    ];
+
+    const handleThemeChange = (event) => {
+        changeTheme(event.target.value);
+    };
 
     return (
         <header className={styles.header}>
@@ -33,13 +45,19 @@ const Header = () => {
             </nav>
 
             <div className={styles.themeToggleContainer}>
-                <button
-                    className={styles.themeToggleButton}
-                    onClick={toggleTheme}
-                    aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                <label htmlFor="theme-select" className="">Choose Theme</label> {/* For accessibility */}
+                <select
+                    id="theme-select"
+                    className={styles.themeSelect} /* Apply styling via CSS module */
+                    value={theme}
+                    onChange={handleThemeChange}
                 >
-                    {theme === 'dark' ? <Sun size={24} /> : <Moon size={24} />}
-                </button>
+                    {themes.map((t) => (
+                        <option key={t.value} value={t.value}>
+                            {t.label}
+                        </option>
+                    ))}
+                </select>
             </div>
         </header>
     );

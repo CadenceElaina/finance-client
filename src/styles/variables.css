@@ -1,5 +1,5 @@
 :root {
-    /* Gradient for modern flair */
+    /* Gradient for modern flair (Default/Dark Theme) */
     --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
     --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
 
@@ -8,6 +8,7 @@
 
     /* Hover Effects */
     --hover-brightness: brightness(1.1);
+
     /* Base Colors (Dark Theme Defaults) */
     --color-primary: #00B1C7;
     /* Slightly brighter teal for dark mode */
@@ -30,6 +31,8 @@
     /* Dark background */
     --surface-light: #2D3748;
     /* Darker card background */
+    --surface-dark: #1A202C;
+    /* Added for app header */
     --border-light: #4A5568;
     /* Darker borders */
 
@@ -39,6 +42,9 @@
     /* Lighter secondary text */
     --text-tertiary: #718096;
     /* Even lighter tertiary text */
+    --text-light: #FFFFFF;
+    /* For elements on dark backgrounds */
+
 
     /* Typography */
     --font-family-base: 'Inter', 'Open Sans', 'Roboto', sans-serif;
@@ -72,25 +78,147 @@
     --transition-ease: ease-in-out;
 }
 
-/* Light Mode (apply to a parent selector, e.g., body[data-theme="light"]) */
+/* Light Mode */
 body[data-theme="light"] {
     --background-light: #F8F9FA;
-    /* Off-white page background */
     --surface-light: #FFFFFF;
-    /* Card/container background */
+    --surface-dark: #E0E0E0;
     --border-light: #E0E0E0;
-    /* Light gray borders */
 
     --text-primary: #212529;
-    /* Dark gray for main text */
     --text-secondary: #6C757D;
-    /* Medium gray for secondary text/labels */
     --text-tertiary: #ADB5BD;
-    /* Light gray for subtle text */
+    --text-light: #212529;
 
-    /* Keep primary, secondary, and semantic colors consistent or slightly adjusted for contrast */
     --color-primary: #007B8C;
-    /* Deep Teal */
+    --color-primary-light: #00AEBF;
+    --color-primary-dark: #005F6B;
     --color-secondary: #FF8C69;
-    /* Soft Coral */
+    --color-secondary-light: #FF9B7A;
+
+    --gradient-primary: linear-gradient(135deg, #007B8C 0%, #00AEBF 100%);
+    --gradient-secondary: linear-gradient(135deg, #FF8C69 0%, #FFB09C 100%);
+}
+
+/* Ultra Dark Mode */
+body[data-theme="ultra-dark"] {
+    --background-light: #0D1117;
+    --surface-light: #161B22;
+    --surface-dark: #0D1117;
+    --border-light: #30363D;
+
+    --text-primary: #C9D1D9;
+    --text-secondary: #8B949E;
+    --text-tertiary: #6E7681;
+    --text-light: #C9D1D9;
+
+    --dashboard-button-bg: #1F252E;
+    --dashboard-button-text: #E0E0E0;
+
+    --color-primary: #4A90E2;
+    --color-primary-light: #6BA0ED;
+    --color-primary-dark: #2F6DB5;
+
+    --color-secondary: #FF6B6B;
+    --color-secondary-light: #FF8F8F;
+
+    --gradient-primary: linear-gradient(135deg, #4A90E2 0%, #6BA0ED 100%);
+    --gradient-secondary: linear-gradient(135deg, #FF6B6B 0%, #FF8F8F 100%);
+}
+
+/* High Contrast Dark Mode */
+body[data-theme="high-contrast-dark"] {
+    --background-light: #000000;
+    --surface-light: #1C1C1C;
+    --surface-dark: #000000;
+    --border-light: #FFFFFF;
+    /* Retained for general borders */
+    --border-active: #00FFFF;
+    --color-accent-highlight: #00FFFF;
+
+    --text-primary: #FFFFFF;
+    --text-secondary: #E0E0E0;
+    --text-tertiary: #C0C0C0;
+    --text-light: #FFFFFF;
+
+    --dashboard-button-bg: #0A0A0A;
+    --dashboard-button-text: #FFFFFF;
+    --app-launcher-button-text: #000000;
+    /* Text is black on the bright gradient */
+
+    /* Custom variables for app launcher button borders and hover in High Contrast Dark */
+    --app-launcher-button-border-color: #333333;
+    /* NEW: Dark border for buttons */
+    --app-launcher-button-hover-border-color: #007070;
+    /* NEW: Darker hover color for buttons */
+
+    /* Adjusted primary colors for a slightly darker cyan gradient */
+    --color-primary: #00A0A0;
+    /* Changed: Darker cyan for primary */
+    --color-primary-light: #00CACA;
+    /* Changed: Darker light primary for gradient */
+    --color-primary-dark: #007070;
+
+    --color-secondary: #FFD700;
+    --color-secondary-light: #FFE033;
+
+    --gradient-primary: linear-gradient(135deg, #00A0A0 0%, #00CACA 100%);
+    /* Updated gradient */
+    --gradient-secondary: linear-gradient(135deg, #FFD700 0%, #FFCC00 100%);
+}
+
+/* Vibrant Green Theme */
+body[data-theme="vibrant-green"] {
+    --background-light: #001A0F;
+    --surface-light: #0B3322;
+    --surface-dark: #001A0F;
+    --border-light: #3A7F67;
+
+    --text-primary: #D1FFEC;
+    --text-secondary: #8BCDA7;
+    --text-tertiary: #5E9B7A;
+    --text-light: #D1FFEC;
+
+    --dashboard-button-bg: #1A7A4A;
+    --dashboard-button-text: #F0F0F0;
+
+    /* Critical change for Vibrant Green app launcher button text */
+    --app-launcher-button-text: #FFFFFF;
+    /* Changed: White text on the gradient */
+
+    /* Adjusted primary colors for a slightly darker, but still vibrant green gradient */
+    --color-primary: #00E080;
+    /* Changed: Slightly darker vibrant green */
+    --color-primary-light: #33F09C;
+    /* Changed: Adjusted light primary for gradient */
+    --color-primary-dark: #00B36B;
+
+    --color-secondary: #FF66CC;
+    --color-secondary-light: #FF80D4;
+
+    --gradient-primary: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
+    /* Updated gradient */
+    --gradient-secondary: linear-gradient(135deg, #FF66CC 0%, #FF4DBC 100%);
+}
+
+/* Vibrant Orange Theme */
+body[data-theme="vibrant-orange"] {
+    --background-light: #26160A;
+    --surface-light: #4A2B14;
+    --surface-dark: #26160A;
+    --border-light: #9B5D34;
+
+    --text-primary: #FFF0E0;
+    --text-secondary: #FFB880;
+    --text-tertiary: #E09060;
+    --text-light: #FFF0E0;
+
+    --color-primary: #FFA500;
+    --color-primary-light: #FFB833;
+    --color-primary-dark: #CC8400;
+    --color-secondary: #8A2BE2;
+    --color-secondary-light: #A050EA;
+
+    --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #7B1BE0 100%);
 }
