@@ -1,9 +1,12 @@
 import React from 'react'
 
-const Budget = () => {
+const Budget = ({ data }) => {
     return (
-        <div>Budget</div>
-    )
-}
-
+        <div>
+            <h3>Budget Overview</h3>
+            <p>This is your budget data: {JSON.stringify(data)}</p>
+            {/* Add actual budget UI here */}
+        </div>
+    );
+};
 export default Budget

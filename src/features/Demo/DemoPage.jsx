@@ -1,6 +1,6 @@
-import React from 'react'
-import DashboardPage from '../Dashboard/DashboardPage'
 
+import DashboardPage from '../Dashboard/DashboardPage'
+import React from 'react';
 // DEMO USER's settings and data
 
 const DemoPage = () => {

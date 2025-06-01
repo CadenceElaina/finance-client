@@ -1,4 +1,7 @@
-import React from 'react'
+import React from 'react';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+
 import Accounts from "./Apps/Accounts"
 import Assistant from './Apps/Assistant'
 import Budget from './Apps/Budget'
@@ -29,10 +32,10 @@ const DashboardApp = ({ appId, userData, closeApp }) => {
         <div className="app-window glass">
             <div className="app-header">
                 <span>{appId.toUpperCase()}</span>
-                <button onClick={() => closeApp(appId)}>✕</button>
+                <button onClick={(e) => { e.stopPropagation(); closeApp(appId); }} className="no-drag">✕</button>
             </div>
             <div className="app-body">
-                <Component data={userData} />
+                {Component ? <Component data={userData} /> : <div>App not found</div>}
             </div>
         </div>
     );

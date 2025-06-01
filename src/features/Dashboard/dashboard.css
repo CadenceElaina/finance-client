@@ -1,131 +1,4 @@
-/*dashboard.css */
-@import '../../styles/variables.css';
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    font-size: var(--font-size-base);
-}
-
-body {
-    font-family: var(--font-family-base);
-    color: var(--text-primary);
-    background-color: var(--background-light);
-    line-height: 1.6;
-    transition: background-color var(--transition-speed-normal) var(--transition-ease),
-        color var(--transition-speed-normal) var(--transition-ease);
-}
-
-/* Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-    font-weight: 700;
-    margin-bottom: var(--space-sm);
-    color: var(--text-primary);
-}
-
-h1 {
-    font-size: 2.5rem;
-}
-
-h2 {
-    font-size: 2rem;
-}
-
-
-/* Links */
-a {
-    color: var(--color-primary);
-    text-decoration: none;
-    transition: color var(--transition-speed-fast) var(--transition-ease);
-}
-
-a:hover {
-    color: var(--color-primary-dark);
-    text-decoration: underline;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.flex-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 var(--space-md);
-}
-
-button,
-input,
-select,
-textarea {
-    font-family: inherit;
-    font-size: 1rem;
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    background-color: var(--surface-light);
-    color: var(--text-primary);
-    padding: var(--space-xs) var(--space-sm);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-}
-
-button:hover,
-input:hover,
-select:hover,
-textarea:hover {
-    filter: var(--hover-brightness);
-    border-color: var(--color-primary);
-}
-
-button:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
-}
-
-.card {
-    background-color: var(--surface-light);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    padding: var(--space-md);
-    transition: transform var(--transition-speed-fast) var(--transition-ease),
-        box-shadow var(--transition-speed-fast) var(--transition-ease);
-}
-
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-elevated);
-}
-
-.glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-}
-
 .dashboard-container {
-    padding: var(--space-md);
     background: var(--background-light);
     min-height: 100vh;
     color: var(--text-primary);
@@ -133,17 +6,20 @@ textarea:focus {
         color var(--transition-speed-normal) var(--transition-ease);
 }
 
+.react-grid-item {
+    overflow: visible !important;
+}
+
 .app-launcher {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-xs);
-    margin-bottom: var(--space-md);
+    padding: var(--space-md);
 }
 
 .app-launcher button {
     background: var(--gradient-primary);
     color: var(--app-launcher-button-text, var(--text-light));
-    /* NEW: Use a dedicated variable for button border color with fallback */
     border: 1px solid var(--app-launcher-button-border-color, var(--border-light));
     padding: var(--space-xs) var(--space-sm);
     border-radius: var(--border-radius-md);
@@ -159,43 +35,11 @@ textarea:focus {
     filter: brightness(1.2);
 }
 
-
 .app-launcher button:hover:not(.active) {
     filter: var(--hover-brightness);
-    /* NEW: Use a dedicated variable for button hover border color with fallback */
     border-color: var(--app-launcher-button-hover-border-color, var(--color-primary));
 }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--space-md);
-}
-
-.app-window {
-    background: var(--surface-light);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-md);
-    display: flex;
-    flex-direction: column;
-    transition: transform var(--transition-speed-fast) var(--transition-ease),
-        box-shadow var(--transition-speed-fast) var(--transition-ease),
-        background-color var(--transition-speed-normal) var(--transition-ease),
-        border-color var(--transition-speed-normal) var(--transition-ease);
-    border: 1px solid var(--border-light);
-}
-
-.app-window.active-app {
-    border: 2px solid var(--border-active);
-    box-shadow: 0 0 0 2px var(--border-active), var(--shadow-elevated);
-}
-
-
-.app-window:hover:not(.active-app) {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-elevated);
-    border-color: var(--color-primary);
-}
 
 .app-header {
     background: var(--surface-dark);
@@ -211,6 +55,18 @@ textarea:focus {
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease),
         border-color var(--transition-speed-normal) var(--transition-ease);
+    cursor: grab;
+
+}
+
+.app-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.app-header:active {
+    cursor: grabbing;
 }
 
 .app-header button {
@@ -234,11 +90,12 @@ textarea:focus {
 
 .app-body {
     padding: var(--space-md);
-    background: var(--surface-light);
+    background: transparent;
     color: var(--text-primary);
     border-bottom-left-radius: var(--border-radius-lg);
     border-bottom-right-radius: var(--border-radius-lg);
     flex-grow: 1;
+    overflow: auto;
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
 }
@@ -246,7 +103,6 @@ textarea:focus {
 /* Global Focus-Visible Styling (high contrast accessibility) */
 :focus-visible {
     outline: 2px solid var(--border-active);
-    /* Use active border for focus */
     outline-offset: 2px;
 }
 
@@ -254,4 +110,33 @@ textarea:focus {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-lg);
+}
+
+.react-grid-item {
+    z-index: 1;
+}
+
+/* 2. While you’re dragging, bump its z-index up so it floats above everything else: */
+.react-grid-item.react-draggable-dragging {
+    z-index: 50;
+    /* pick a value above any other elements on your page */
+}
+
+.react-resizable-handle {
+    /* keep your custom size/look */
+    background-color: var(--color-primary) !important;
+    width: 25px !important;
+    height: 25px !important;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: 9999 !important;
+    position: absolute;
+}
+
+/* position the handle exactly at the bottom‐right corner (inside) */
+.react-resizable-handle-se {
+    bottom: 0 !important;
+    right: 0 !important;
+    cursor: se-resize;
 }
