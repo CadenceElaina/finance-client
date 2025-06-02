@@ -8,6 +8,8 @@ import GridItemWrapper from './GridItemWrapper';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import './dashboard.css';
+import './AppMenu/apporblauncher.css';
+import AppOrbLauncher from './AppMenu/AppOrbLauncher';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -102,44 +104,41 @@ const DashboardPage = ({ userData = demoUser }) => {
   };
 
   return (
-    <div className="dashboard-container">
-      <div className="app-launcher">
-        {appsList.map(app => (
-          <button
-            key={app.id}
-            onClick={() => openApp(app.id)}
-            className={openAppIds.includes(app.id) ? 'active' : ''}
-          >
-            {app.name}
-          </button>
-        ))}
+    <>
+      <div className="dashboard-container">
+
+        <ResponsiveGridLayout
+          className="dashboard-grid"
+          layouts={layouts}
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+          containerPadding={[0, 0]}
+          margin={[10, 10]}
+          rowHeight={50}
+          isResizable={true}
+          onLayoutChange={onLayoutChange}
+          draggableHandle=".app-header"
+          draggableCancel=".no-drag"
+          resizeHandles={['se']}
+        >
+          {openAppIds.map(appId => {
+
+            return (
+              <GridItemWrapper key={appId}>
+                <DashboardApp appId={appId} userData={userData} closeApp={closeApp} />
+              </GridItemWrapper>
+            );
+
+          })}
+        </ResponsiveGridLayout>
+
       </div>
-
-      <ResponsiveGridLayout
-        className="dashboard-grid"
-        layouts={layouts}
-        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-        cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-        containerPadding={[0, 0]}
-        margin={[10, 10]}
-        rowHeight={50}
-        isResizable={true}
-        onLayoutChange={onLayoutChange}
-        draggableHandle=".app-header"
-        resizeHandles={['se']}
-      >
-        {openAppIds.map(appId => {
-
-          return (
-            // Wrap DashboardApp in GridItemWrapper
-            <GridItemWrapper key={appId}>
-              <DashboardApp appId={appId} userData={userData} closeApp={closeApp} />
-            </GridItemWrapper>
-          );
-
-        })}
-      </ResponsiveGridLayout>
-    </div>
+      <AppOrbLauncher
+        appsList={appsList}
+        openApp={openApp}
+        openAppIds={openAppIds}
+      />
+    </>
   );
 };
 

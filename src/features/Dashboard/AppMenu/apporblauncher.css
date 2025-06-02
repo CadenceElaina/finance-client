@@ -1,0 +1,155 @@
+.app-orb-launcher-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    /* min-height: 385px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-orb,
+.app-orb-menu {
+    pointer-events: auto;
+}
+
+.app-orb {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 2;
+    color: var(--text-light);
+    position: relative;
+}
+
+.app-orb:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+.app-orb.active {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
+    /* Slightly smaller active border */
+}
+
+.orb-icon {
+    font-size: 2rem;
+    /* Slightly smaller icon */
+    font-weight: 200;
+    line-height: 1;
+}
+
+.app-orb-menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.app-orb-launcher-container .app-orb-menu {
+    pointer-events: none;
+}
+
+.app-orb-launcher-container .app-orb.active~.app-orb-menu,
+.app-orb-launcher-container .app-orb-menu:has(.app-orb.active) {
+    pointer-events: auto;
+}
+
+.app-orb.active+.app-orb-menu {
+    pointer-events: auto;
+    /* Enabled when orb is active */
+}
+
+.app-orb-item {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    background: var(--surface-dark);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    pointer-events: auto;
+    border: 1px solid var(--border-light);
+    margin-left: -30px;
+    margin-top: -30px;
+
+    /* Adjust position so its center is at (x,y) from JS */
+    /* Negative half of new width */
+    /* Negative half of new height */
+
+    transform-origin: center center;
+    /* Ensure transform-origin is center for stable scaling */
+}
+
+.app-orb.active+.app-orb-menu .app-orb-item {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.app-orb-item:hover {
+    transform: scale(1.08);
+    /* Slightly less scaling on hover */
+    filter: brightness(1.2);
+    border-color: var(--color-primary);
+}
+
+.app-orb-item.active {
+    border: 1px solid var(--border-active);
+    /* Smaller active border */
+    box-shadow: 0 0 0 1px var(--border-active), var(--shadow-md);
+    /* Smaller active shadow */
+    filter: brightness(1.2);
+}
+
+.app-orb-item-icon {
+    font-size: 1.6rem;
+    /* Smaller icon in items */
+    font-weight: bold;
+}
+
+.app-orb-item-label {
+    font-size: 0.7rem;
+    /* Smaller label font size */
+    text-align: center;
+}
+
+/* Add media queries for smaller screens if needed */
+@media (max-width: 768px) {
+    .app-orb {
+        width: 40px;
+        height: 40px;
+    }
+
+    .orb-icon {
+        font-size: 1.6rem;
+    }
+
+    .app-orb-item {
+        width: 50px;
+        height: 50px;
+        margin-left: -25px;
+        margin-top: -25px;
+    }
+
+    .app-orb-item-icon {
+        font-size: 1.4rem;
+    }
+
+    .app-orb-item-label {
+        font-size: 0.6rem;
+    }
+}

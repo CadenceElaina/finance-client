@@ -1,14 +1,13 @@
 .dashboard-container {
     background: var(--background-light);
-    min-height: 100vh;
+    /* min-height: 100vh; */
     color: var(--text-primary);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
+
 }
 
-.react-grid-item {
-    overflow: visible !important;
-}
+.react-grid-item {}
 
 .app-launcher {
     display: flex;
@@ -113,30 +112,20 @@
     border-radius: var(--border-radius-lg);
 }
 
-.react-grid-item {
-    z-index: 1;
-}
+
 
 /* 2. While you’re dragging, bump its z-index up so it floats above everything else: */
 .react-grid-item.react-draggable-dragging {
     z-index: 50;
-    /* pick a value above any other elements on your page */
 }
 
 .react-resizable-handle {
-    /* keep your custom size/look */
-    background-color: var(--color-primary) !important;
-    width: 25px !important;
-    height: 25px !important;
+    background-color: var(--color-primary);
     border-radius: 50%;
     opacity: 0.8;
-    z-index: 9999 !important;
-    position: absolute;
+
 }
 
-/* position the handle exactly at the bottom‐right corner (inside) */
 .react-resizable-handle-se {
-    bottom: 0 !important;
-    right: 0 !important;
     cursor: se-resize;
 }
