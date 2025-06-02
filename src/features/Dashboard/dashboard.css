@@ -1,10 +1,14 @@
 .dashboard-container {
     background: var(--background-light);
-    /* min-height: 100vh; */
     color: var(--text-primary);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
-
+    height: 100vh;
+    /* Make it fill the viewport */
+    overflow: auto;
+    /* Enable scrolling */
+    position: relative;
+    /* Needed for absolute children */
 }
 
 .react-grid-item {}

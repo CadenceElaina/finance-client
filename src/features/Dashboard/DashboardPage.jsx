@@ -166,6 +166,16 @@ const DashboardPage = ({ userData = demoUser }) => {
             setSelectedAppId(visualOrder[(idx - 1 + visualOrder.length) % visualOrder.length]);
           }
         }
+        // Jump to first app
+        if (e.code === 'ArrowUp' && visualOrder.length > 0) {
+          e.preventDefault();
+          setSelectedAppId(visualOrder[0]);
+        }
+        // Jump to last app
+        if (e.code === 'ArrowDown' && visualOrder.length > 0) {
+          e.preventDefault();
+          setSelectedAppId(visualOrder[visualOrder.length - 1]);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -173,11 +183,13 @@ const DashboardPage = ({ userData = demoUser }) => {
   }, [selectedAppId, openAppIds, layouts, closeApp, setOpenAppIds, setLayouts]);
 
   useEffect(() => {
-    if (selectedAppId && appRefs.current[selectedAppId]) {
-      appRefs.current[selectedAppId].scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "center"
+    // Find the selected app by its class
+    const selectedEl = document.querySelector('.app-window.selected');
+    if (selectedEl) {
+      selectedEl.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
       });
     }
   }, [selectedAppId]);
