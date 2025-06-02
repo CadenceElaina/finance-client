@@ -83,12 +83,31 @@ textarea {
     transition: all var(--transition-speed-fast) var(--transition-ease);
 }
 
-button:hover,
-input:hover,
+button:hover {
+    filter: var(--hover-brightness);
+    border-color: var(--color-primary);
+    background: var(--button-hover-bg);
+}
+
 select:hover,
+input:hover,
 textarea:hover {
     filter: var(--hover-brightness);
     border-color: var(--color-primary);
+}
+
+button:hover:focus,
+select:hover:focus,
+input:hover:focus,
+textarea:hover:focus {
+    /* Remove hover effect when focused */
+    filter: none;
+    border-color: var(--color-primary);
+    background: inherit;
+}
+
+button:active {
+    background: var(--button-active-bg);
 }
 
 button:focus,
@@ -96,7 +115,8 @@ input:focus,
 select:focus,
 textarea:focus {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
+    box-shadow: var(--focus-ring);
+    /* Use theme variable for all focus rings */
 }
 
 .card {
@@ -120,6 +140,6 @@ textarea:focus {
 }
 
 :focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+    outline: none;
+    box-shadow: var(--focus-ring);
 }

@@ -51,8 +51,8 @@
     background-color: var(--surface-light);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
-    padding: 0.5rem 1rem;
     border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
     cursor: pointer;
     font-size: var(--font-size-sm);
     transition: all var(--transition-speed-fast) var(--transition-ease);
@@ -71,7 +71,10 @@
     border-color: var(--color-primary);
 }
 
-.themeSelect:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 177, 199, 0.4);
+.themeSelect,
+.themeSelect:focus,
+.themeSelect:active,
+.themeSelect:hover {
+    outline: none !important;
+    box-shadow: none !important;
 }

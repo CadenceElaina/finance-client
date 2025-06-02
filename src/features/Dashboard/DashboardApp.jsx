@@ -26,10 +26,10 @@ const components = {
     settings: Settings
 };
 
-const DashboardApp = ({ appId, userData, closeApp }) => {
+const DashboardApp = ({ appId, userData, closeApp, isSelected }) => {
     const Component = components[appId];
     return (
-        <div className="app-window glass">
+        <div className={`app-window glass${isSelected ? ' selected' : ''}`}>
             <div className="app-header">
                 <span>{appId.toUpperCase()}</span>
                 <button onClick={(e) => { e.stopPropagation(); closeApp(appId); }} className="no-drag">✕</button>

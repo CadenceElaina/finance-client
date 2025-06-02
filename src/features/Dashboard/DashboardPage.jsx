@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Responsive, WidthProvider } from 'react-grid-layout';
 
 import { demoUser } from '../Demo/demoData';
@@ -46,8 +46,8 @@ const DashboardPage = ({ userData = demoUser }) => {
         y: y,
         w: defaultWidth,
         h: defaultHeight,
-        minW: 4,
-        minH: 3,
+        minW: 2,
+        minH: 2,
         resizeHandles: availableHandles
       });
     });
@@ -59,6 +59,8 @@ const DashboardPage = ({ userData = demoUser }) => {
     lg: generateInitialLayout(initialAppIds, 12, DEFAULT_APP_WIDTH, DEFAULT_APP_HEIGHT)
   }));
   const [openAppIds, setOpenAppIds] = useState([...initialAppIds]);
+  const [selectedAppId, setSelectedAppId] = useState(null);
+  const appRefs = useRef({});
 
   const closeApp = (id) => {
     setOpenAppIds(prevIds => prevIds.filter(appId => appId !== id));
@@ -84,8 +86,8 @@ const DashboardPage = ({ userData = demoUser }) => {
           y: Infinity,
           w: DEFAULT_APP_WIDTH,
           h: DEFAULT_APP_HEIGHT,
-          minW: 4,
-          minH: 3,
+          minW: 2,
+          minH: 2,
           resizeHandles: availableHandles
         };
 
@@ -102,6 +104,92 @@ const DashboardPage = ({ userData = demoUser }) => {
   const onLayoutChange = (currentLayout, allLayouts) => {
     setLayouts(allLayouts);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.shiftKey) {
+        if (e.code === 'Digit1') {
+          setOpenAppIds(appsList.map(app => app.id)); // Open all
+        }
+        if (e.code === 'Digit2') {
+          setOpenAppIds([]); // Close all
+        }
+        if (e.code === 'Digit3' && selectedAppId) {
+          setLayouts(prev => {
+            const newLayouts = { ...prev };
+            for (const bp in newLayouts) {
+              // Find the maximized app and others
+              const maximized = newLayouts[bp].find(item => item.i === selectedAppId);
+              const others = newLayouts[bp].filter(item => item.i !== selectedAppId);
+
+              // Sort others by their current y/x order
+              others.sort((a, b) => a.y - b.y || a.x - b.x);
+
+              // Set maximized app to y:0, x:0, w:12, h:12
+              const newMaximized = { ...maximized, x: 0, y: 0, w: 12, h: 12 };
+
+              // Reassign y for others starting from 1
+              const newOthers = others.map((item, idx) => ({
+                ...item,
+                y: idx + 1
+              }));
+
+              // Compose new layout: maximized first, then others
+              newLayouts[bp] = [newMaximized, ...newOthers];
+            }
+            return newLayouts;
+          });
+        }
+        if (e.code === 'Digit4' && selectedAppId) {
+          closeApp(selectedAppId);
+        }
+
+        // Cycle to next app
+        const visualOrder = getVisualOrder(openAppIds, layouts);
+
+        if (e.code === 'ArrowRight' && visualOrder.length > 0) {
+          e.preventDefault();
+          if (!selectedAppId) {
+            setSelectedAppId(visualOrder[0]);
+          } else {
+            const idx = visualOrder.indexOf(selectedAppId);
+            setSelectedAppId(visualOrder[(idx + 1) % visualOrder.length]);
+          }
+        }
+        // Cycle to previous app
+        if (e.code === 'ArrowLeft' && visualOrder.length > 0) {
+          e.preventDefault();
+          if (!selectedAppId) {
+            setSelectedAppId(visualOrder[visualOrder.length - 1]);
+          } else {
+            const idx = visualOrder.indexOf(selectedAppId);
+            setSelectedAppId(visualOrder[(idx - 1 + visualOrder.length) % visualOrder.length]);
+          }
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedAppId, openAppIds, layouts, closeApp, setOpenAppIds, setLayouts]);
+
+  useEffect(() => {
+    if (selectedAppId && appRefs.current[selectedAppId]) {
+      appRefs.current[selectedAppId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center"
+      });
+    }
+  }, [selectedAppId]);
+
+  function getVisualOrder(openAppIds, layouts) {
+    const layout = layouts.lg || [];
+    // Only include open apps, sort by y then x
+    return layout
+      .filter(item => openAppIds.includes(item.i))
+      .sort((a, b) => a.y - b.y || a.x - b.x)
+      .map(item => item.i);
+  }
 
   return (
     <>
@@ -122,13 +210,21 @@ const DashboardPage = ({ userData = demoUser }) => {
           resizeHandles={['se']}
         >
           {openAppIds.map(appId => {
-
+            const isSelected = selectedAppId === appId;
             return (
-              <GridItemWrapper key={appId}>
-                <DashboardApp appId={appId} userData={userData} closeApp={closeApp} />
+              <GridItemWrapper
+                key={appId}
+                onClick={() => setSelectedAppId(appId)}
+                ref={el => { appRefs.current[appId] = el; }}
+              >
+                <DashboardApp
+                  appId={appId}
+                  userData={userData}
+                  closeApp={closeApp}
+                  isSelected={isSelected}
+                />
               </GridItemWrapper>
             );
-
           })}
         </ResponsiveGridLayout>
 
@@ -141,5 +237,4 @@ const DashboardPage = ({ userData = demoUser }) => {
     </>
   );
 };
-
 export default DashboardPage;

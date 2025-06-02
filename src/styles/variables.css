@@ -76,6 +76,13 @@
     --transition-speed-fast: 0.15s;
     --transition-speed-normal: 0.3s;
     --transition-ease: ease-in-out;
+
+    --focus-ring: 0 0 0 3px var(--color-primary);
+    --button-hover-bg: var(--gradient-primary);
+    --button-active-bg: var(--color-primary-dark);
+    --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
 }
 
 /* Light Mode */
@@ -129,42 +136,45 @@ body[data-theme="ultra-dark"] {
 /* High Contrast Dark Mode */
 body[data-theme="high-contrast-dark"] {
     --background-light: #000000;
-    --surface-light: #1C1C1C;
+    --surface-light: #1B1B1B;
     --surface-dark: #000000;
     --border-light: #FFFFFF;
-    /* Retained for general borders */
-    --border-active: #00FFFF;
+    --border-active: #FFFF00;
+    /* VS Code uses yellow for focus */
     --color-accent-highlight: #00FFFF;
 
     --text-primary: #FFFFFF;
-    --text-secondary: #E0E0E0;
-    --text-tertiary: #C0C0C0;
+    --text-secondary: #C0C0C0;
+    --text-tertiary: #808080;
     --text-light: #FFFFFF;
 
-    --dashboard-button-bg: #0A0A0A;
+    --dashboard-button-bg: #1B1B1B;
     --dashboard-button-text: #FFFFFF;
+
     --app-launcher-button-text: #000000;
-    /* Text is black on the bright gradient */
 
-    /* Custom variables for app launcher button borders and hover in High Contrast Dark */
-    --app-launcher-button-border-color: #333333;
-    /* NEW: Dark border for buttons */
-    --app-launcher-button-hover-border-color: #007070;
-    /* NEW: Darker hover color for buttons */
+    --app-launcher-button-border-color: #FFFFFF;
+    --app-launcher-button-hover-border-color: #FFFF00;
 
-    /* Adjusted primary colors for a slightly darker cyan gradient */
-    --color-primary: #00A0A0;
-    /* Changed: Darker cyan for primary */
-    --color-primary-light: #00CACA;
-    /* Changed: Darker light primary for gradient */
+    --color-primary: #00FFFF;
+    /* Cyan accent */
+    --color-primary-light: #6FC3DF;
     --color-primary-dark: #007070;
 
-    --color-secondary: #FFD700;
-    --color-secondary-light: #FFE033;
+    --color-secondary: #FFFF00;
+    /* Yellow accent */
+    --color-secondary-light: #FFFF99;
 
-    --gradient-primary: linear-gradient(135deg, #00A0A0 0%, #00CACA 100%);
-    /* Updated gradient */
-    --gradient-secondary: linear-gradient(135deg, #FFD700 0%, #FFCC00 100%);
+    --gradient-primary: none;
+    /* No gradients in high contrast */
+    --gradient-secondary: none;
+
+    --focus-ring: 0 0 0 3px #FFFF00;
+    --button-hover-bg: #1B1B1B;
+    --button-active-bg: #333333;
+    --app-orb-shadow: 0 0 0 3px #FFFF00, 0 6px 20px rgba(255, 255, 0, 0.2);
+    --app-orb-menu-bg: #1B1B1B;
+    --app-orb-menu-shadow: 0 10px 30px rgba(255, 255, 0, 0.15);
 }
 
 /* Vibrant Green Theme */
@@ -199,6 +209,13 @@ body[data-theme="vibrant-green"] {
     --gradient-primary: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
     /* Updated gradient */
     --gradient-secondary: linear-gradient(135deg, #FF66CC 0%, #FF4DBC 100%);
+
+    --focus-ring: 0 0 0 3px #00E080;
+    --button-hover-bg: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
+    --button-active-bg: #00B36L;
+    --app-orb-shadow: 0 0 0 3px #00E080, 0 6px 20px rgba(0, 224, 128, 0.2);
+    --app-orb-menu-bg: #0B3322;
+    --app-orb-menu-shadow: 0 10px 30px rgba(0, 224, 128, 0.15);
 }
 
 /* Vibrant Orange Theme */
@@ -221,4 +238,33 @@ body[data-theme="vibrant-orange"] {
 
     --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #7B1BE0 100%);
+
+    --focus-ring: 0 0 0 3px #FFA500;
+    --button-hover-bg: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    --button-active-bg: #CC8400;
+    --app-orb-shadow: 0 0 0 3px #FFA500, 0 6px 20px rgba(255, 140, 0, 0.2);
+    --app-orb-menu-bg: #4A2B14;
+    --app-orb-menu-shadow: 0 10px 30px rgba(255, 140, 0, 0.15);
+}
+
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    /* <-- theme variable, e.g. yellow in high contrast */
+}
+
+button:focus:hover,
+select:focus:hover,
+input:focus:hover,
+textarea:focus:hover {
+    filter: none;
+    background: inherit;
 }

@@ -64,6 +64,11 @@
     height: 100%;
 }
 
+.app-window.selected {
+    box-shadow: 0 0 0 3px var(--color-primary), var(--shadow-elevated);
+    border: 2px solid var(--color-primary);
+}
+
 .app-header:active {
     cursor: grabbing;
 }
