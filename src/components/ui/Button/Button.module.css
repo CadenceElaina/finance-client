@@ -1,59 +1,42 @@
+/* src/components/Button/Button.module.css */
 .button {
-    padding: var(--space-xs) var(--space-md);
+    background: var(--gradient-primary);
+    /* Use your primary gradient */
+    color: var(--text-light);
+    /* Use text-light for better contrast on gradients */
+    padding: var(--space-xs) var(--space-sm);
     border: none;
-    border-radius: var(--border-radius-sm);
+    /* No border for gradient buttons usually */
+    border-radius: var(--border-radius-md);
     cursor: pointer;
-    font-family: var(--font-family-base);
     font-size: var(--font-size-base);
-    font-weight: 500;
     transition: background-color var(--transition-speed-fast) var(--transition-ease),
-        box-shadow var(--transition-speed-fast) var(--transition-ease);
+        filter var(--transition-speed-fast) var(--transition-ease);
+    /* Add filter for hover */
+    min-width: 120px;
+    font-weight: 600;
+    /* Make text a bit bolder */
 }
 
-.primary {
-    background-color: var(--color-primary);
-    color: var(--surface-light);
-    /* White text on primary background */
-    box-shadow: var(--shadow-sm);
+.button:hover {
+    filter: var(--hover-brightness);
+    /* Use your hover effect variable */
+    background: var(--button-hover-bg);
+    /* Use specific hover background if defined */
 }
 
-.primary:hover {
-    background-color: var(--color-primary-dark);
-    box-shadow: var(--shadow-md);
+.button:active {
+    background: var(--button-active-bg);
+    /* Use specific active background if defined */
 }
 
-.secondary {
-    background-color: var(--color-secondary);
-    color: var(--surface-light);
-}
-
-.secondary:hover {
-    background-color: var(--color-secondary-light);
-}
-
-.outline {
-    background-color: transparent;
-    color: var(--color-primary);
-    border: 1px solid var(--color-primary);
-}
-
-.outline:hover {
-    background-color: var(--color-primary-light);
-    color: var(--surface-light);
-}
-
-/* Sizes */
-.sm {
-    padding: var(--space-xxs) var(--space-sm);
-    font-size: var(--font-size-sm);
-}
-
-.md {
-    padding: var(--space-xs) var(--space-md);
-    font-size: var(--font-size-base);
-}
-
-.lg {
-    padding: var(--space-sm) var(--space-lg);
-    font-size: var(--font-size-lg);
+.button:disabled {
+    background-color: var(--surface-dark);
+    /* A neutral background for disabled state */
+    color: var(--text-tertiary);
+    /* Lighter text for disabled state */
+    cursor: not-allowed;
+    filter: none;
+    /* Remove any hover effects when disabled */
+    opacity: 0.7;
 }

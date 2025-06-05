@@ -1,23 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
-
-import { demoUser } from '../Demo/demoData';
-import DashboardApp from './DashboardApp';
-import GridItemWrapper from './GridItemWrapper';
-
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import './dashboard.css';
-import './AppMenu/apporblauncher.css';
-import AppOrbLauncher from './AppMenu/AppOrbLauncher';
+import '../styles/global.css';
+import '../features/Dashboard/dashboard.css'
+import '../features/Dashboard/AppMenu/apporblauncher.css';
+import { Responsive, WidthProvider } from 'react-grid-layout';
+import { demoUser } from '../data/demoData';
+import { useAuth } from '../contexts/AuthContext';
+import DashboardApp from '../features/Dashboard/DashboardApp';
+import GridItemWrapper from '../features/Dashboard/GridItemWrapper';
+import AppOrbLauncher from '../features/Dashboard/AppMenu/AppOrbLauncher';
+
+
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const appsList = [
+  { id: 'accounts', name: 'My Accounts' },
   { id: 'budget', name: 'Budget' },
   { id: 'plan', name: 'Plan' },
   { id: 'reports', name: 'Reports' },
-  { id: 'accounts', name: 'My Accounts' },
   { id: 'debt', name: 'Debt' },
   { id: 'education', name: 'Education Center' },
   { id: 'projections', name: 'Projections' },
@@ -27,10 +29,8 @@ const appsList = [
 const DashboardPage = ({ userData = demoUser }) => {
   const DEFAULT_APP_WIDTH = 6;
   const DEFAULT_APP_HEIGHT = 6;
-
   const availableHandles = ['se'];
-
-  const initialAppIds = ['budget', 'accounts', 'reports', 'plan'];
+  const initialAppIds = ['budget', 'accounts', 'plan', 'reports'];
 
   const generateInitialLayout = (ids, cols, defaultWidth, defaultHeight) => {
     const layout = [];
@@ -105,6 +105,16 @@ const DashboardPage = ({ userData = demoUser }) => {
     setLayouts(allLayouts);
   };
 
+  //Handle keyboard shortcuts for app management
+  // Ctrl + Shift + 1: Open all apps
+  // Ctrl + Shift + 2: Close all apps
+  // Ctrl + Shift + 3: Maximize selected app
+  // Ctrl + Shift + 4: Close selected app
+  // Arrow keys: Navigate through open apps
+  // ArrowRight: Cycle to next app
+  // ArrowLeft: Cycle to previous app
+  // ArrowUp: Jump to first app
+  // ArrowDown: Jump to last app
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.shiftKey) {
@@ -182,6 +192,7 @@ const DashboardPage = ({ userData = demoUser }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedAppId, openAppIds, layouts, closeApp, setOpenAppIds, setLayouts]);
 
+  // Scroll to selected app when it changes
   useEffect(() => {
     // Find the selected app by its class
     const selectedEl = document.querySelector('.app-window.selected');

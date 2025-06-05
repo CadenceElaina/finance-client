@@ -247,6 +247,65 @@ body[data-theme="vibrant-orange"] {
     --app-orb-menu-shadow: 0 10px 30px rgba(255, 140, 0, 0.15);
 }
 
+/* Tokyo Night Theme */
+body[data-theme="tokyo-night"] {
+    --background-light: #1A1B26;
+    /* Dark indigo background */
+    --surface-light: #24283B;
+    /* Slightly lighter surface for cards */
+    --surface-dark: #16161E;
+    /* Even darker for header/footer */
+    --border-light: #414868;
+    /* Muted blue-grey border */
+
+    --text-primary: #C0CAF5;
+    /* Light blue-grey for main text */
+    --text-secondary: #A9B1D6;
+    /* Slightly darker secondary text */
+    --text-tertiary: #7F849C;
+    /* Muted grey for tertiary text */
+    --text-light: #C0CAF5;
+    /* Text on dark backgrounds */
+
+    --color-primary: #7AA2F7;
+    /* Vibrant blue */
+    --color-primary-light: #89B0FA;
+    /* Lighter blue for gradients */
+    --color-primary-dark: #5B7DD2;
+    /* Darker blue for active states */
+
+    --color-secondary: #BB9AF7;
+    /* Soft purple accent */
+    --color-secondary-light: #C8A8FB;
+    /* Lighter purple for gradients */
+
+    --color-success: #9ECE6A;
+    /* Green */
+    --color-warning: #E0AF68;
+    /* Orange */
+    --color-danger: #F7768E;
+    /* Pinkish red */
+
+    --gradient-primary: linear-gradient(135deg, #7AA2F7 0%, #89B0FA 100%);
+    /* Blue gradient */
+    --gradient-secondary: linear-gradient(135deg, #BB9AF7 0%, #C8A8FB 100%);
+    /* Purple gradient */
+
+    --focus-ring: 0 0 0 3px #7AA2F7;
+    --button-hover-bg: var(--gradient-primary);
+    --button-active-bg: var(--color-primary-dark);
+    --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
+
+    /* Specific to Tokyo Night if needed, similar to dashboard-button-bg */
+    --dashboard-button-bg: #292E42;
+    --dashboard-button-text: #C0CAF5;
+    --app-launcher-button-text: #C0CAF5;
+    --app-launcher-button-border-color: #414868;
+    --app-launcher-button-hover-border-color: #7AA2F7;
+}
+
 button:focus,
 input:focus,
 select:focus,

@@ -1,6 +1,8 @@
+/* client/src/components/Header/Header.module.css */
 .header {
     display: flex;
     justify-content: space-between;
+    /* Keeps logo, nav, and auth sections spread out */
     align-items: center;
     padding: 0.75rem 1.5rem;
     background: var(--surface-light);
@@ -20,8 +22,16 @@
 
 .navigation {
     display: flex;
+    /* --- NEW --- */
+    flex-grow: 1;
+    /* Allows navigation to take up available space */
+    justify-content: center;
+    /* Centers navigation links within its expanded space */
+    /* --- END NEW --- */
     gap: 1rem;
     align-items: center;
+    margin: 0 2rem;
+    /* Add some margin from logo and auth section */
 }
 
 .navLink {
@@ -31,6 +41,9 @@
     padding: 0.25rem 0.5rem;
     border-radius: var(--border-radius-sm);
     transition: background 0.2s, color var(--transition-speed-fast) var(--transition-ease);
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
 
 .navLink:hover {
@@ -38,13 +51,30 @@
     color: var(--color-primary);
 }
 
+.authSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.welcomeMessage {
+    color: var(--color-primary);
+    font-weight: 600;
+    margin-right: 0.5rem;
+    white-space: nowrap;
+    /* Prevent username from wrapping */
+}
+
 .themeToggleContainer {
     display: flex;
     align-items: center;
+    margin-left: 1rem;
 }
 
 .themeToggleContainer label {
     margin: 0 5px 0 0;
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
 }
 
 .themeSelect {
@@ -64,6 +94,7 @@
     background-position: right 0.75rem center;
     background-size: 0.8em;
     padding-right: 2.5rem;
+    padding: var(--space-xxs) var(--space-sm);
 }
 
 .themeSelect:hover {

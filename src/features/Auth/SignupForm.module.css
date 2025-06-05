@@ -1,0 +1,64 @@
+.signupForm {
+    padding: var(--space-md);
+    border-radius: var(--border-radius-lg);
+    background-color: var(--surface-light);
+    /* Use surface-light for card background */
+    box-shadow: var(--shadow-md);
+    /* Use shadow-md */
+    transition: transform var(--transition-speed-fast) var(--transition-ease),
+        box-shadow var(--transition-speed-fast) var(--transition-ease);
+}
+
+.signupForm:hover {
+    box-shadow: var(--shadow-elevated);
+}
+
+.formGroup {
+    margin-bottom: var(--space-md);
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    color: var(--text-primary);
+    font-weight: 600;
+    /* Use a slightly bolder font weight */
+}
+
+.signupForm input {
+    width: 100%;
+    padding: var(--space-xs) var(--space-sm);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    background-color: var(--surface-dark);
+    /* Use surface-dark for input fields */
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    box-sizing: border-box;
+    /* Ensures padding doesn't increase width */
+    transition: border-color var(--transition-speed-fast) var(--transition-ease);
+}
+
+.signupForm input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.signupForm input:focus,
+.signupForm input:focus-visible {
+    outline: none !important;
+    box-shadow: var(--focus-ring) !important;
+}
+
+.errorText {
+    color: var(--color-danger);
+    /* Use your danger color for errors */
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-xxs);
+    margin-bottom: 0;
+}
+
+.signupForm button[type="submit"] {
+    width: 100%;
+    margin-top: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
+}

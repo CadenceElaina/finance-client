@@ -1,13 +1,16 @@
 
 import './App.css'
-import './styles/global.css';
-import AuthPage from './features/Auth/AuthPage'
-import DemoPage from './features/Demo/DemoPage'
-import HomePage from './features/Home/HomePage'
+import HomePage from './pages/HomePage';
+import SignupPage from './pages/SignupPage';
+import DemoPage from './pages/DemoPage';
+import DashboardPage from './pages/DashboardPage';
+import Header from './components/layout/Header/Header';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
-import DashboardPage from './features/Dashboard/DashboardPage';
-import Header from './components/layout/Header/Header';
+import { AuthProvider } from './contexts/AuthContext';
+import LoginPage from './pages/LoginPage';
+
+
 
 function App() {
 
@@ -16,24 +19,26 @@ function App() {
     <>
       <Router>
         <ThemeProvider >
-          <Header />
-          <main>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<AuthPage />} />
-              <Route path="/signup" element={<AuthPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/demo" element={<DemoPage />} />
+          <AuthProvider>
+            <Header />
+            <main>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/demo" element={<DemoPage />} />
 
 
-              {/* TODO - Protected Routes */}
-              <Route path='/' element={<HomePage />} />
+                {/* TODO - Protected Routes */}
+                <Route path='/' element={<HomePage />} />
 
-              {/* Catch-all for 404 (optional) */}
-              <Route path="*" element={<div>404 Not Found</div>} />
+                {/* Catch-all for 404*/}
+                <Route path="*" element={<div>404 Not Found</div>} />
 
-            </Routes>
-          </main>
+              </Routes>
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </Router>
 
