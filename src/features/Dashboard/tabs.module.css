@@ -1,0 +1,77 @@
+/* src/components/ui/Tabs/tabs.module.css */
+
+.tabsContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Ensure it fills its parent container */
+    overflow: hidden;
+    /* Hide overflow for tab content */
+}
+
+.tabHeaders {
+    display: flex;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: var(--space-sm);
+    flex-shrink: 0;
+    /* Prevent headers from shrinking */
+}
+
+.tabHeader {
+    background-color: transparent;
+    border: none;
+    padding: var(--space-xs) var(--space-sm);
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: color var(--transition-speed-fast) var(--transition-ease),
+        border-bottom var(--transition-speed-fast) var(--transition-ease);
+    border-bottom: 2px solid transparent;
+    /* For the active indicator */
+    margin-right: var(--space-xs);
+    /* Space between tabs */
+    white-space: nowrap;
+    /* Prevent tab labels from wrapping */
+}
+
+.tabHeader:hover {
+    color: var(--color-primary);
+}
+
+.tabHeader.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.tabHeader:disabled {
+    cursor: not-allowed;
+    color: var(--text-tertiary);
+}
+
+.tabContent {
+    flex-grow: 1;
+    /* Allow content to fill remaining space */
+    overflow-y: auto;
+    /* Allow content to scroll independently */
+    padding-top: var(--space-xs);
+    /* Small padding at the top of content */
+}
+
+/* Optional: Adjust for smaller screens if tabs overflow */
+@media (max-width: 600px) {
+    .tabHeaders {
+        overflow-x: auto;
+        /* Allow horizontal scrolling for tab headers */
+        -webkit-overflow-scrolling: touch;
+        /* Smooth scrolling on iOS */
+        scrollbar-width: none;
+        /* Hide scrollbar for Firefox */
+        -ms-overflow-style: none;
+        /* Hide scrollbar for IE and Edge */
+    }
+
+    .tabHeaders::-webkit-scrollbar {
+        display: none;
+        /* Hide scrollbar for Chrome, Safari, Opera */
+    }
+}

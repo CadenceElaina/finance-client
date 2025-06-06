@@ -1,0 +1,371 @@
+/* src/features/Dashboard/Apps/Budget/budget.module.css (Updated with new styles) */
+
+/* Add this new class for the overall app container that holds the tabs */
+.budgetAppContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    /* Important for the inner tab content scrolling */
+    background-color: var(--surface-light);
+    /* Apply card background here */
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-md);
+    /* Overall padding for the app */
+}
+
+/* The previous .budgetContainer is now .budgetContentWrapper */
+.budgetContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    height: 100%;
+    /* No overflow-y: auto here, as it's handled by .tabContent */
+    /* No background-color/border-radius here, as it's handled by .budgetAppContainer */
+}
+
+
+.budgetTitle {
+    text-align: center;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-lg);
+}
+
+.summarySection {
+    background-color: var(--surface-dark);
+    /* Slightly darker background */
+    padding: var(--space-sm);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.summarySection h3 {
+    margin-bottom: var(--space-xs);
+    color: var(--text-secondary);
+}
+
+.summarySection p {
+    margin-bottom: var(--space-xxs);
+    font-size: var(--font-size-base);
+    display: flex;
+    justify-content: space-between;
+}
+
+.summarySection p strong {
+    color: var(--text-primary);
+}
+
+.negative {
+    color: var(--color-danger);
+    /* Red for negative values */
+    font-weight: bold;
+}
+
+.section {
+    background-color: var(--surface-light);
+    padding: var(--space-sm);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+}
+
+.section h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.incomeInputs,
+.formGroup {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.formGroup label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+/* Specific styling for radio button group */
+.radioGroup {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-xxs);
+}
+
+.radioGroup label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+}
+
+.radioGroup input[type="radio"] {
+    /* Basic styling for radio buttons, you can customize further */
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border-light);
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.radioGroup input[type="radio"]::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform var(--transition-speed-fast) var(--transition-ease);
+    box-shadow: inset 1em 1em var(--color-primary);
+    /* Fill color */
+}
+
+.radioGroup input[type="radio"]:checked::before {
+    transform: scale(1);
+}
+
+.radioGroup input[type="radio"]:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+
+.formGroup input[type="number"],
+.formGroup input[type="text"],
+.select {
+    padding: var(--space-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.formGroup input:focus,
+.select:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-primary);
+}
+
+.expenseTableContainer {
+    overflow-x: auto;
+    margin-bottom: var(--space-md);
+}
+
+.expenseTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+    /* Ensure table doesn't get too small */
+}
+
+.expenseTable th,
+.expenseTable td {
+    border: 1px solid var(--border-light);
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    color: var(--text-primary);
+}
+
+.expenseTable th {
+    background-color: var(--surface-dark);
+    font-weight: bold;
+    color: var(--text-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.expenseTable tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.03);
+    /* Subtle stripe for readability */
+}
+
+.expenseTable tr:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+    /* Hover effect for rows */
+}
+
+.tableInput,
+.tableSelect {
+    width: 100%;
+    padding: var(--space-xxs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.tableInput:focus,
+.tableSelect:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-primary);
+}
+
+.removeButton,
+.addButton {
+    padding: var(--space-xxs) var(--space-sm);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.removeButton {
+    background-color: var(--color-danger);
+    color: var(--text-light);
+    border: 1px solid var(--color-danger);
+}
+
+.removeButton:hover {
+    background-color: var(--color-danger);
+    filter: brightness(0.9);
+}
+
+.addButton {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: 1px solid var(--color-primary);
+}
+
+.addButton:hover {
+    background-color: var(--color-primary);
+    filter: brightness(0.9);
+}
+
+.controlPanel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-light);
+}
+
+.controlButton {
+    padding: var(--space-xs) var(--space-md);
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color var(--transition-speed-fast) var(--transition-ease);
+}
+
+.controlButton:hover {
+    filter: brightness(1.1);
+}
+
+.controlButton:disabled {
+    background-color: var(--text-tertiary);
+    cursor: not-allowed;
+}
+
+.dangerButton {
+    background-color: var(--color-danger);
+}
+
+.dangerButton:hover {
+    filter: brightness(0.9);
+}
+
+.persistenceOption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.persistenceLabel {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.error {
+    color: var(--color-danger);
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Ensure the full width of the section for income details */
+.fullWidth {
+    grid-column: 1 / -1;
+    /* Occupy full width of the grid */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .incomeInputs {
+        grid-template-columns: 1fr;
+        /* Stack income inputs on smaller screens */
+    }
+
+    .expenseTable thead {
+        display: none;
+        /* Hide table headers on small screens */
+    }
+
+    .expenseTable,
+    .expenseTable tbody,
+    .expenseTable tr,
+    .expenseTable td {
+        display: block;
+        /* Make table elements behave like blocks */
+        width: 100%;
+    }
+
+    .expenseTable tr {
+        margin-bottom: var(--space-sm);
+        border: 1px solid var(--border-light);
+        border-radius: var(--border-radius-md);
+        background-color: var(--surface-dark);
+        padding: var(--space-sm);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .expenseTable td {
+        border: none;
+        position: relative;
+        padding-left: 50%;
+        /* Space for pseudo-element labels */
+        text-align: right;
+    }
+
+    .expenseTable td::before {
+        content: attr(data-label);
+        /* Use data-label for content */
+        position: absolute;
+        left: 6px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--text-secondary);
+    }
+
+    /* IMPORTANT: You need to manually add `data-label` to your <td> elements
+       in ExpensesSection.jsx for this to work correctly on mobile.
+       e.g., <td data-label="Name"><input ... /></td> */
+}

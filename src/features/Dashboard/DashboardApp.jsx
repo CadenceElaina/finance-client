@@ -4,7 +4,7 @@ import 'react-resizable/css/styles.css';
 
 import Accounts from "./Apps/Accounts"
 import Assistant from './Apps/Assistant'
-import Budget from './Apps/Budget'
+import Budget from './Apps/budget/Budget'
 import Debt from './Apps/Debt'
 import Education from './Apps/Education'
 import Goals from './Apps/Goals'
