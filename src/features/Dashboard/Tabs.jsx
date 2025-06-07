@@ -1,4 +1,4 @@
-// src/components/ui/Tabs/Tabs.jsx
+// src/Dashboard/Apps/Tabs.jsx
 import React, { useState } from 'react';
 import styles from './tabs.module.css';
 

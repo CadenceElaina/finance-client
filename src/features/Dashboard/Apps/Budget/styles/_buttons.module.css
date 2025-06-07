@@ -1,0 +1,198 @@
+/* src/features/Dashboard/Apps/Budget/styles/_buttons.module.css */
+
+/* General Button Styles */
+.removeButton,
+.addButton {
+    padding: var(--space-xxs) var(--space-sm);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    white-space: nowrap;
+    min-width: unset;
+}
+
+.removeButton {
+    background-color: var(--color-danger);
+    color: var(--text-light);
+    border: 1px solid var(--color-danger);
+}
+
+.removeButton:hover {
+    background-color: var(--color-danger);
+    filter: brightness(0.9);
+}
+
+.addButton {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: 1px solid var(--color-primary);
+}
+
+.addButton:hover {
+    background-color: var(--color-primary);
+    filter: brightness(0.9);
+}
+
+/* Control Panel Buttons */
+.controlPanel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    justify-content: center;
+    border-top: 1px solid var(--border-light);
+}
+
+.controlButton {
+    padding: var(--space-xs) var(--space-md);
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color var(--transition-speed-fast) var(--transition-ease);
+}
+
+.controlButton:hover {
+    filter: brightness(1.1);
+}
+
+.controlButton:disabled {
+    background-color: var(--text-tertiary);
+    cursor: not-allowed;
+}
+
+.dangerButton {
+    background-color: var(--color-danger);
+}
+
+.dangerButton:hover {
+    filter: brightness(0.9);
+}
+
+/* Overview Controls Buttons */
+.overviewControls {
+    display: flex;
+    gap: var(--space-md);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.overviewButton {
+    font-weight: 500;
+    background: var(--surface-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    padding: var(--space-xxs) var(--space-xs);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-size: var(--font-size-sm);
+    border-radius: var(--border-radius-sm);
+    flex: 1;
+    text-align: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.overviewButton.active,
+.overviewButton:focus {
+    background: var(--color-primary);
+    color: var(--text-light);
+    border-color: var(--color-primary);
+}
+
+/* Stacked Controls (Period/Tax) */
+.stackedControls {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-xxs);
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.stackedButtonGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+    width: 100%;
+    max-width: 50%;
+    box-sizing: border-box;
+}
+
+.stackedButtonGroup .overviewButton {
+    width: 100%;
+}
+
+/* Small App Tab Buttons */
+.smallAppTabButtons {
+    display: flex;
+    padding-left: var(--space-xs);
+    gap: var(--space-xs);
+}
+
+.smallAppTabButton {
+    padding: var(--space-xxs) var(--space-md);
+    background-color: var(--surface-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.smallAppTabButton.active {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border-color: var(--color-primary);
+}
+
+.smallAppTabButton:hover:not(.active) {
+    background-color: var(--surface-light);
+    color: var(--text-primary);
+}
+
+@media (max-width: 1112px),
+(max-height: 552.6px) {
+    .controlPanel {
+        gap: 6px;
+        padding: 4px 0;
+        border-top-width: 1px;
+    }
+
+    .controlButton {
+        padding: 2px 8px;
+        font-size: var(--font-size-xs);
+        border-radius: var(--border-radius-sm);
+        min-width: 0;
+        height: 24px;
+    }
+
+    .dangerButton {
+        font-size: var(--font-size-xs);
+        padding: 2px 8px;
+    }
+
+    .persistenceOption {
+        gap: 2px;
+    }
+
+    .persistenceLabel {
+        font-size: 0.7rem;
+    }
+
+    .select {
+        font-size: 0.7rem;
+        padding: 1px 4px;
+        min-height: 20px;
+        height: 22px;
+        max-width: 80px;
+    }
+}

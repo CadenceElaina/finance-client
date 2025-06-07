@@ -9,19 +9,19 @@ import {
 } from "../utils/localStorageUtils";
 
 const BudgetContext = createContext();
-
+//
 // Define a default/demo budget structure
 const DEFAULT_DEMO_BUDGET = {
-    // UPDATED INCOME STRUCTURE
+    // 
     income: {
         type: "salary", // 'salary' or 'hourly'
         salary: 3500, // Monthly salary amount
+        totalIncomeAfterTax: 30000, // hourlyRate * expectedAnnualHours + bonus + additionalIncome or monthlyIncomeAfterTaxes * 12 + bonus + additionalIncome
         hourlyRate: null,
         expectedAnnualHours: null,
-        bonus: 500, // Annual bonus amount
-        additionalIncome: 100, // Annual additional income
-        // monthlyIncomeAfterTaxes: { amount: 3000, frequencyProvided: "monthly" }, // This remains user-provided net monthly
-        monthlyIncomeAfterTaxes: 3000 // Simplified to just the amount
+        bonus: 0, // Annual bonus amount after taxes
+        additionalIncome: 0, // Annual additional income after taxes
+        monthlyIncomeAfterTaxes: 3000 // 
     },
     monthlyExpenses: [
         { id: "exp-1", name: "Rent/Mortgage", cost: 1200, category: "required" },

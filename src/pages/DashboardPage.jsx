@@ -11,8 +11,6 @@ import DashboardApp from '../features/Dashboard/DashboardApp';
 import GridItemWrapper from '../features/Dashboard/GridItemWrapper';
 import AppOrbLauncher from '../features/Dashboard/AppMenu/AppOrbLauncher';
 
-
-
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const appsList = [

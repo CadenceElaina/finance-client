@@ -1,4 +1,11 @@
-/* src/features/Dashboard/Apps/Budget/budget.module.css (Updated with new styles) */
+/* src/features/Dashboard/Apps/Budget/budget.module.css */
+
+/* Import other style modules */
+@import './styles/_sections.module.css';
+@import './styles/_buttons.module.css';
+@import './styles/_responsive.module.css';
+
+/* Base Layout and General Styles */
 .budgetAppContainer {
     display: flex;
     flex-direction: column;
@@ -7,7 +14,6 @@
     background-color: var(--surface-light);
     border-radius: var(--border-radius-lg);
     padding: 0;
-
     overflow-y: auto;
 }
 
@@ -35,9 +41,8 @@
     height: 100%;
     min-height: 0;
     overflow-y: auto;
-    /* Ensure scrolling within the tab content */
+    padding: 0;
 }
-
 
 .budgetContentWrapper {
     display: flex;
@@ -47,72 +52,24 @@
     min-height: 0;
     min-width: 0;
     overflow-y: auto;
+    /* This padding now defines the internal spacing for the WHOLE budget overview content */
+    padding: 0 var(--space-sm);
+    box-sizing: border-box;
 }
-
 
 .budgetTitle {
     text-align: center;
     color: var(--color-primary);
-
     font-size: var(--font-size-lg);
 }
 
-.summarySection {
-    background-color: var(--surface-dark);
-    /* Slightly darker background */
-    padding: var(--space-sm);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    min-width: 240px;
-    /* Adjusted for better flow */
-    max-width: 100%;
-    /* Ensure it doesn't break layout */
-    width: 100%;
-    /* Take full available width in grid cell */
-}
-
-.summarySection h3 {
-    margin-bottom: var(--space-xs);
-    color: var(--text-secondary);
-}
-
-.summarySection p {
-    margin-bottom: var(--space-xxs);
-    font-size: var(--font-size-base);
-    display: flex;
-    justify-content: space-between;
-}
-
-.summarySection p strong {
-    color: var(--text-primary);
-}
-
-.negative {
+.error {
     color: var(--color-danger);
-    /* Red for negative values */
     font-weight: bold;
-}
-
-.section {
-    background-color: var(--surface-light);
-    padding: var(--space-xs);
-    /* Increased padding for sections */
-    border-radius: var(--border-radius-lg);
-    /* Slightly larger border radius */
-    box-shadow: var(--shadow-md);
-    /* Slightly more prominent shadow */
-    border: 1px solid var(--border-light);
-    /* Added border */
-}
-
-.section h3 {
-    margin-bottom: var(--space-sm);
-    color: var(--text-primary);
-    /* Primary text for section headers */
     text-align: center;
 }
 
+/* Form Elements */
 .incomeInputs,
 .formGroup {
     display: grid;
@@ -132,7 +89,7 @@
     color: var(--text-secondary);
 }
 
-/* Specific styling for radio button group */
+/* Radio Button Group */
 .radioGroup {
     display: flex;
     gap: var(--space-sm);
@@ -158,7 +115,6 @@
     place-content: center;
     transition: all var(--transition-speed-fast) var(--transition-ease);
     flex-shrink: 0;
-    /* Prevent radio button from shrinking */
 }
 
 .radioGroup input[type="radio"]::before {
@@ -169,7 +125,6 @@
     transform: scale(0);
     transition: transform var(--transition-speed-fast) var(--transition-ease);
     box-shadow: inset 1em 1em var(--color-primary);
-    /* Fill color */
 }
 
 .radioGroup input[type="radio"]:checked::before {
@@ -181,16 +136,20 @@
     box-shadow: var(--focus-ring);
 }
 
-
 .formGroup input[type="number"],
 .formGroup input[type="text"],
 .select {
-    padding: var(--space-xs);
+    padding: 2px 8px;
+    font-size: var(--font-size-xs);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
     color: var(--text-primary);
     transition: all var(--transition-speed-fast) var(--transition-ease);
+    min-height: 24px;
+    height: 28px;
+    max-width: 120px;
+    box-sizing: border-box;
 }
 
 .formGroup input:focus,
@@ -200,156 +159,8 @@
     border-color: var(--color-primary);
 }
 
-.expenseTableContainer {
-    overflow-x: auto;
-    margin-bottom: var(--space-md);
-    background-color: var(--surface-dark);
-    /* Apply background to the container for a unified look */
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-sm);
-    /* Add padding to the container, not individual cells */
-}
-
-.expenseTable {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 500px;
-    /* Ensure table doesn't get too small */
-}
-
-.expenseTable th,
-.expenseTable td {
-    /* Remove individual borders from cells to prevent double borders */
-    border: none;
-    padding: var(--space-xs) var(--space-sm);
-    /* Slightly reduce padding for compactness */
-    text-align: left;
-    color: var(--text-primary);
-    /* Add a bottom border for separation */
-    border-bottom: 1px solid var(--border-light);
-    vertical-align: middle;
-}
-
-.expenseTable th {
-    background-color: var(--surface-dark);
-    /* Keep header background */
-    font-weight: bold;
-    color: var(--text-light);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid var(--border-light);
-    /* Ensure header has a bottom border */
-}
-
-/* Remove striping from individual rows if the container has a background */
-.expenseTable tr:nth-child(even) {
-    background-color: transparent;
-    /* Remove explicit stripe */
-}
-
-.expenseTable tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    /* Lighter hover effect */
-}
-
-/* Compact inputs and selects within the table */
-.tableInput,
-.tableSelect {
-    width: 100%;
-    padding: var(--space-xxs);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    background-color: var(--background-light);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    /* Calculate height to be snug, font-size + 2*padding + 2*border */
-    height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
-    box-sizing: border-box;
-    /* Include padding/border in height */
-}
-
-.tableInput:focus,
-.tableSelect:focus {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-color: var(--color-primary);
-}
-
-.removeButton,
-.addButton {
-    padding: var(--space-xxs) var(--space-sm);
-    /* Smaller padding for buttons */
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    white-space: nowrap;
-    /* Prevent text wrapping on buttons */
-    min-width: unset;
-    /* Remove min-width inherited from global button style if any */
-}
-
-.removeButton {
-    background-color: var(--color-danger);
-    color: var(--text-light);
-    border: 1px solid var(--color-danger);
-}
-
-.removeButton:hover {
-    background-color: var(--color-danger);
-    filter: brightness(0.9);
-}
-
-.addButton {
-    background-color: var(--color-primary);
-    color: var(--text-light);
-    border: 1px solid var(--color-primary);
-}
-
-.addButton:hover {
-    background-color: var(--color-primary);
-    filter: brightness(0.9);
-}
-
-.controlPanel {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-sm);
-    justify-content: center;
-    border-top: 1px solid var(--border-light);
-}
-
-.controlButton {
-    padding: var(--space-xs) var(--space-md);
-    background-color: var(--color-primary);
-    color: var(--text-light);
-    border: none;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color var(--transition-speed-fast) var(--transition-ease);
-}
-
-.controlButton:hover {
-    filter: brightness(1.1);
-}
-
-.controlButton:disabled {
-    background-color: var(--text-tertiary);
-    cursor: not-allowed;
-}
-
-.dangerButton {
-    background-color: var(--color-danger);
-}
-
-.dangerButton:hover {
-    filter: brightness(0.9);
+.fullWidth {
+    grid-column: 1 / -1;
 }
 
 .persistenceOption {
@@ -363,269 +174,257 @@
     font-size: var(--font-size-sm);
 }
 
-.error {
-    color: var(--color-danger);
-    font-weight: bold;
-    text-align: center;
-}
-
-/* Ensure the full width of the section for income details */
-.fullWidth {
-    grid-column: 1 / -1;
-    /* Occupy full width of the grid */
-}
-
-.overviewGrid {
-    display: grid;
-    grid-template-columns: 1fr 1.5fr;
-    gap: var(--space-lg);
-    width: 100%;
-    height: 100%;
-}
-
-.overviewTitle {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    margin-bottom: var(--space-xs);
-    text-align: left;
-    letter-spacing: -1px;
-}
-
-.overviewControls {
-    display: flex;
-    gap: var(--space-md);
+/* Table Styles */
+.expenseTableContainer {
+    overflow-x: auto;
     margin-bottom: var(--space-md);
-    flex-wrap: wrap;
-}
-
-.overviewButton {
-    margin-right: 4px;
-    font-weight: 500;
-    background: var(--surface-light);
-    color: var(--text-primary);
-    border: 1px solid var(--border-light);
-    border-radius: 4px;
-    padding: 2px 12px;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-
-.overviewButton.active,
-.overviewButton:focus {
-    background: var(--color-primary);
-    color: var(--text-light);
-    border-color: var(--color-primary);
-}
-
-/* Custom grid: left (summary) smaller, right (expenses) larger */
-.overviewGridCustom {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    /* Changed to 1fr 1fr for equal width */
-    gap: 16px;
-    /* Reduced gap */
-    width: 100%;
-    /* Changed to 100% to fill the tab content */
-    max-width: none;
-    /* Remove max-width constraint */
-    margin: 0;
-    /* Remove auto margin */
-    height: 100%;
-    /* Ensure grid takes full height available from parent */
-    align-items: flex-start;
-    justify-content: center;
-    overflow: auto;
-    /* Allow grid to scroll if needed */
-}
-
-/* Make both sections flexible and equal width */
-.summarySectionCustom,
-.expensesSectionCustom {
     background-color: var(--surface-dark);
-    padding: 12px 10px;
-    /* Reduced padding */
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
-    min-width: 0;
-    max-width: none;
+    padding: var(--space-sm);
+    display: flex;
+    justify-content: center;
     width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.expenseTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.expenseTable th,
+.expenseTable td {
+    border: none;
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+}
+
+.expenseTable th {
+    background-color: var(--surface-dark);
+    font-weight: bold;
+    color: var(--text-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.expenseTable tr:nth-child(even) {
+    background-color: transparent;
+}
+
+.expenseTable tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tableInput,
+.tableSelect {
+    width: 100%;
+    padding: var(--space-xxs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
+    box-sizing: border-box;
+}
+
+.tableInput:focus,
+.tableSelect:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-primary);
+}
+
+/* Small App Internal Tabs - Adjusted for hierarchy and positioning */
+.smallAppTabsContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-height: 0;
+    box-sizing: border-box;
+    /* Ensure content inside doesn't overflow from top */
+    margin-top: 0;
+    /* Ensure no extra margin pushes it down */
+}
+
+.smallAppTabHeaderRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.smallAppTabButtons {
+    flex-shrink: 0;
+}
+
+.smallAppTabControls {
+    flex-shrink: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.smallAppTabButtons {
+    display: flex;
+    gap: var(--space-xs);
+    /*     border-bottom: 1px solid var(--border-light); */
+    /* margin-bottom: var(--space-sm); */
+    padding-bottom: var(--space-xxs);
+    padding-top: var(--space-xxs);
+}
+
+.smallAppTabButton {
+    padding: var(--space-xxs) var(--space-sm);
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: var(--font-size-xs);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+
+.smallAppTabContent {
+    flex: 1;
+    overflow-y: auto;
+    /*   padding-top: var(--space-xs); */
+    padding-left: 0;
+    /* Inner content will be indented by .smallAppTabsContainer */
+    padding-right: 0;
+    padding-bottom: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    height: fit-content;
-    /* Allow height to adjust to content */
+    /* Align content to the start (left) */
+    width: 100%;
+    box-sizing: border-box;
 }
 
-/* For the expenses section, if you want it to look the same as the summary, keep surface-dark.
-   If you want it to be brighter, like the previous setting was: */
-.expensesSectionCustom {
-    /* background-color: var(--surface-light); Remove or uncomment this if you prefer the previous brighter look */
+.smallAppTabContent>div {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
-
-/* Stack controls as two columns */
 .stackedControls {
     display: flex;
     flex-direction: row;
-    gap: 8px;
-    /* Reduced gap */
-    margin-bottom: 10px;
-    /* Reduced margin */
+    gap: var(--space-xs);
     width: 100%;
-    justify-content: flex-start;
-    align-items: flex-start;
+    justify-content: flex-end;
+    /* Align to start */
+    align-items: center;
+    /* Center vertically */
+    flex-wrap: wrap;
+    margin-bottom: var(--space-xs);
 }
 
 .stackedButtonGroup {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Horizontal: label beside select */
+    align-items: center;
     gap: 4px;
-    /* Reduced gap */
+    min-width: 0;
+    flex: none;
     width: auto;
-    min-width: 100px;
+    max-width: none;
+    box-sizing: border-box;
 }
 
-/* Center content in the summary section */
+.stackedButtonGroup label {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 0;
+    margin-right: 2px;
+    white-space: nowrap;
+}
+
+.select {
+    padding: 1px 6px;
+    font-size: var(--font-size-xs);
+    min-height: 22px;
+    height: 24px;
+    max-width: 100px;
+}
+
+.overviewGridCustom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    align-items: stretch;
+    /* <-- changed from flex-start to stretch */
+    justify-content: center;
+    overflow: auto;
+}
+
 .summarySectionCustom {
     align-items: center;
     text-align: center;
-}
-
-.overviewTitle {
-    text-align: center;
-    width: 100%;
-}
-
-/* Center the stacked controls (period/tax buttons) */
-.stackedControls {
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-}
-
-/* Center summary values and align label/value with space between */
-.summarySectionCustom .summaryValues {
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
+    height: 100%;
+    /* <-- ensure it fills the grid cell vertically */
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    /* Reduced gap */
+    justify-content: flex-start;
 }
 
-.summaryRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    font-size: var(--font-size-base);
-    padding: 1px 0;
-    /* Reduced padding */
+/* Compact styles for small app size */
+.smallApp .controlPanel {
+    gap: 6px;
+    padding: 4px 0;
+    border-top-width: 1px;
 }
 
-.summaryRow strong {
-    color: var(--text-primary);
-    font-weight: 600;
+.smallApp .controlButton {
+    padding: 2px 8px;
+    font-size: var(--font-size-xs);
+    border-radius: var(--border-radius-sm);
+    min-width: 0;
+    height: 24px;
 }
 
-/* Center the expenses section and table */
-.expensesSectionCustom {
-    align-items: center;
-    text-align: center;
+.smallApp .dangerButton {
+    font-size: var(--font-size-xs);
+    padding: 2px 8px;
 }
 
-.expensesSectionCustom h3 {
-    text-align: center;
-    width: 100%;
-    margin-bottom: var(--space-sm);
+.smallApp .persistenceOption {
+    gap: 2px;
 }
 
-.expenseTableContainer {
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    justify-content: center;
-    width: 100%;
+.smallApp .persistenceLabel {
+    font-size: 0.7rem;
 }
 
-.expenseTable {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Responsive: stack vertically on small screens */
-@media (max-width: 900px) {
-    .overviewGridCustom {
-        grid-template-columns: 1fr;
-        width: 100%;
-        max-width: 100%;
-        gap: 8px;
-    }
-
-    .stackedControls {
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .stackedButtonGroup {
-        width: 100%;
-        min-width: 0;
-    }
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-    .incomeInputs {
-        grid-template-columns: 1fr;
-        /* Stack income inputs on smaller screens */
-    }
-
-    .expenseTable thead {
-        display: none;
-        /* Hide table headers on small screens */
-    }
-
-    .expenseTable,
-    .expenseTable tbody,
-    .expenseTable tr,
-    .expenseTable td {
-        display: block;
-        /* Make table elements behave like blocks */
-        width: 100%;
-    }
-
-    .expenseTable tr {
-        margin-bottom: var(--space-sm);
-        border: 1px solid var(--border-light);
-        border-radius: var(--border-radius-md);
-        background-color: var(--surface-dark);
-        padding: var(--space-sm);
-        display: flex;
-        flex-direction: column;
-    }
-
-    .expenseTable td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        /* Space for pseudo-element labels */
-        text-align: right;
-    }
-
-    .expenseTable td::before {
-        content: attr(data-label);
-        /* Use data-label for content */
-        position: absolute;
-        left: 6px;
-        width: 45%;
-        padding-right: 10px;
-        white-space: nowrap;
-        text-align: left;
-        font-weight: bold;
-        color: var(--text-secondary);
-    }
+.smallApp .select {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+    min-height: 20px;
+    height: 22px;
+    max-width: 80px;
 }

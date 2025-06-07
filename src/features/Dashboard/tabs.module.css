@@ -1,37 +1,33 @@
-/* src/components/ui/Tabs/tabs.module.css */
+/* src/Dashboard/tabs.module.css */
 
 .tabsContainer {
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Ensure it fills its parent container */
     overflow: hidden;
-    /* Hide overflow for tab content */
 }
 
 .tabHeaders {
     display: flex;
-    border-bottom: 1px solid var(--border-light);
+    /*     border-bottom: 1px solid var(--border-light); */
     flex-shrink: 0;
-    /* Prevent headers from shrinking */
+    padding: var(--space-xxs) var(--space-sm);
+    /* Removed margin-bottom */
 }
 
 .tabHeader {
     background-color: transparent;
     border: none;
-    padding: var(--space-xxs) var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
     cursor: pointer;
     font-weight: 600;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     transition: color var(--transition-speed-fast) var(--transition-ease),
         border-bottom var(--transition-speed-fast) var(--transition-ease);
     border-bottom: 2px solid transparent;
-    /* For the active indicator */
-    margin-right: var(--space-xs);
-    /* Space between tabs */
+    margin-right: var(--space-sm);
     white-space: nowrap;
-    /* Prevent tab labels from wrapping */
 }
 
 .tabHeader:hover {
@@ -50,25 +46,20 @@
 
 .tabContent {
     flex-grow: 1;
-    /* Allow content to fill remaining space */
     overflow-y: auto;
+    /* REMOVED ALL PADDING HERE. budgetContentWrapper will handle it. */
+    padding: 0;
 }
 
-/* Optional: Adjust for smaller screens if tabs overflow */
 @media (max-width: 600px) {
     .tabHeaders {
         overflow-x: auto;
-        /* Allow horizontal scrolling for tab headers */
         -webkit-overflow-scrolling: touch;
-        /* Smooth scrolling on iOS */
         scrollbar-width: none;
-        /* Hide scrollbar for Firefox */
         -ms-overflow-style: none;
-        /* Hide scrollbar for IE and Edge */
     }
 
     .tabHeaders::-webkit-scrollbar {
         display: none;
-        /* Hide scrollbar for Chrome, Safari, Opera */
     }
 }
