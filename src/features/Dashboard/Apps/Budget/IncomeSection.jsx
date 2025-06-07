@@ -26,34 +26,45 @@ const IncomeSection = () => {
                         <input
                             type="radio"
                             name="incomeType"
-                            value="salary"
-                            checked={income.type === 'salary'}
-                            onChange={handleIncomeTypeChange}
-                        /> Salary
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="incomeType"
                             value="hourly"
                             checked={income.type === 'hourly'}
                             onChange={handleIncomeTypeChange}
                         /> Hourly
                     </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="incomeType"
+                            value="salary"
+                            checked={income.type === 'salary'}
+                            onChange={handleIncomeTypeChange}
+                        /> Salary
+                    </label>
+
                 </div>
             </div>
 
             {income.type === 'salary' && (
                 <div className={styles.formGroup}>
-                    <label htmlFor="salary">Monthly Salary:</label>
+                    <label htmlFor="salary">Annual Salary (Pre-tax):</label>
                     <input
                         type="number"
                         id="salary"
                         name="salary"
                         value={income.salary || ''}
                         onChange={handleChange}
-                        placeholder="e.g. 5000"
+                        placeholder="e.g. 30000"
                     />
+                    <label htmlFor="salary">Monthly Salary (After-tax):</label>
+                    <input
+                        type="number"
+                        id="salary"
+                        name="salary"
+                        value={income.salary || ''}
+                        onChange={handleChange}
+                        placeholder="e.g. 2500"
+                    />
+
                 </div>
             )}
 
@@ -85,7 +96,7 @@ const IncomeSection = () => {
             )}
 
             <div className={styles.formGroup}>
-                <label htmlFor="monthlyIncomeAfterTaxes">Net Monthly Income (After Taxes):</label>
+                <label htmlFor="monthlyIncomeAfterTaxes">Net Monthly Income (After-tax):</label>
                 <input
                     type="number"
                     id="monthlyIncomeAfterTaxes"
@@ -98,7 +109,7 @@ const IncomeSection = () => {
             </div>
 
             <div className={styles.formGroup}>
-                <label htmlFor="bonus">Annual Bonus (Pre-tax):</label>
+                <label htmlFor="bonus">Annual Bonus (After-tax):</label>
                 <input
                     type="number"
                     id="bonus"
@@ -110,7 +121,7 @@ const IncomeSection = () => {
             </div>
 
             <div className={styles.formGroup}>
-                <label htmlFor="additionalIncome">Annual Additional Income (Pre-tax):</label>
+                <label htmlFor="additionalIncome">Annual Additional Income (After-tax):</label>
                 <input
                     type="number"
                     id="additionalIncome"
@@ -121,10 +132,6 @@ const IncomeSection = () => {
                 />
             </div>
 
-            <div className={styles.summarySection}>
-                <h4>Calculated Pre-tax Income:</h4>
-                <p><strong>Estimated Annual Pre-tax Income:</strong> ${budget?.preTaxIncomeAnnually?.toFixed(2) || '0.00'}</p>
-            </div>
         </div>
     );
 };

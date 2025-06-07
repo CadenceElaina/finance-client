@@ -1,11 +1,10 @@
-// src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
 import styles from './budget.module.css';
 
 const ExpensesSection = ({ expenses }) => {
     const { addExpense, updateExpense, removeExpense } = useBudget();
-    const [newExpense, setNewExpense] = useState({ name: '', cost: '', category: 'required', isRecurring: true });
+    const [newExpense, setNewExpense] = useState({ name: '', cost: '', category: 'required' });
 
     const handleNewExpenseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -18,7 +17,7 @@ const ExpensesSection = ({ expenses }) => {
     const handleAddExpense = () => {
         if (newExpense.name.trim() && newExpense.cost !== '') {
             addExpense(newExpense);
-            setNewExpense({ name: '', cost: '', category: 'required', isRecurring: true }); // Reset form
+            setNewExpense({ name: '', cost: '', category: 'required' }); // Reset form
         }
     };
 
@@ -30,7 +29,7 @@ const ExpensesSection = ({ expenses }) => {
     const expenseCategories = ["required", "flexible", "non-essential"];
 
     return (
-        <div className={styles.section}>
+        <div className={styles.expensesSectionCustom}>
             <h3>Monthly Expenses</h3>
             <div className={styles.expenseTableContainer}>
                 <table className={styles.expenseTable}>
@@ -39,14 +38,13 @@ const ExpensesSection = ({ expenses }) => {
                             <th>Name</th>
                             <th>Cost</th>
                             <th>Category</th>
-                            <th>Recurring?</th>
-                            <th>Actions</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {expenses.map(exp => (
                             <tr key={exp.id}>
-                                <td>
+                                <td data-label="Name"> {/* Added data-label */}
                                     <input
                                         type="text"
                                         value={exp.name}
@@ -54,7 +52,7 @@ const ExpensesSection = ({ expenses }) => {
                                         className={styles.tableInput}
                                     />
                                 </td>
-                                <td>
+                                <td data-label="Cost"> {/* Added data-label */}
                                     <input
                                         type="number"
                                         value={exp.cost}
@@ -62,7 +60,7 @@ const ExpensesSection = ({ expenses }) => {
                                         className={styles.tableInput}
                                     />
                                 </td>
-                                <td>
+                                <td data-label="Category"> {/* Added data-label */}
                                     <select
                                         value={exp.category}
                                         onChange={(e) => handleUpdateExpense(exp.id, 'category', e.target.value)}
@@ -73,14 +71,7 @@ const ExpensesSection = ({ expenses }) => {
                                         ))}
                                     </select>
                                 </td>
-                                <td>
-                                    <input
-                                        type="checkbox"
-                                        checked={exp.isRecurring}
-                                        onChange={(e) => handleUpdateExpense(exp.id, 'isRecurring', e.target.checked)}
-                                    />
-                                </td>
-                                <td>
+                                <td data-label="Action"> {/* Added data-label */}
                                     <button onClick={() => removeExpense(exp.id)} className={styles.removeButton}>
                                         Remove
                                     </button>
@@ -89,7 +80,7 @@ const ExpensesSection = ({ expenses }) => {
                         ))}
                         {/* New expense row */}
                         <tr>
-                            <td>
+                            <td data-label="New Name"> {/* Added data-label */}
                                 <input
                                     type="text"
                                     name="name"
@@ -99,7 +90,7 @@ const ExpensesSection = ({ expenses }) => {
                                     className={styles.tableInput}
                                 />
                             </td>
-                            <td>
+                            <td data-label="New Cost"> {/* Added data-label */}
                                 <input
                                     type="number"
                                     name="cost"
@@ -109,7 +100,7 @@ const ExpensesSection = ({ expenses }) => {
                                     className={styles.tableInput}
                                 />
                             </td>
-                            <td>
+                            <td data-label="New Category"> {/* Added data-label */}
                                 <select
                                     name="category"
                                     value={newExpense.category}
@@ -121,15 +112,7 @@ const ExpensesSection = ({ expenses }) => {
                                     ))}
                                 </select>
                             </td>
-                            <td>
-                                <input
-                                    type="checkbox"
-                                    name="isRecurring"
-                                    checked={newExpense.isRecurring}
-                                    onChange={handleNewExpenseChange}
-                                />
-                            </td>
-                            <td>
+                            <td data-label="Add Action"> {/* Added data-label */}
                                 <button onClick={handleAddExpense} className={styles.addButton}>
                                     Add
                                 </button>

@@ -24,13 +24,13 @@ const DEFAULT_DEMO_BUDGET = {
         monthlyIncomeAfterTaxes: 3000 // Simplified to just the amount
     },
     monthlyExpenses: [
-        { id: "exp-1", name: "Rent/Mortgage", cost: 1200, category: "required", isRecurring: true },
-        { id: "exp-2", name: "Groceries", cost: 400, category: "flexible", isRecurring: true },
-        { id: "exp-3", name: "Utilities", cost: 150, category: "required", isRecurring: true },
-        { id: "exp-4", name: "Internet", cost: 70, category: "required", isRecurring: true },
-        { id: "exp-5", name: "Transportation", cost: 100, category: "flexible", isRecurring: true },
-        { id: "exp-6", name: "Dining Out", cost: 200, category: "non-essential", isRecurring: true },
-        { id: "exp-7", name: "Entertainment", cost: 100, category: "non-essential", isRecurring: true },
+        { id: "exp-1", name: "Rent/Mortgage", cost: 1200, category: "required" },
+        { id: "exp-2", name: "Groceries", cost: 400, category: "flexible" },
+        { id: "exp-3", name: "Utilities", cost: 150, category: "required" },
+        { id: "exp-4", name: "Internet", cost: 70, category: "required" },
+        { id: "exp-5", name: "Transportation", cost: 100, category: "flexible" },
+        { id: "exp-6", name: "Dining Out", cost: 200, category: "non-essential" },
+        { id: "exp-7", name: "Entertainment", cost: 100, category: "non-essential" },
     ],
 };
 
