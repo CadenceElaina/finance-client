@@ -19,7 +19,7 @@
 .tabHeader {
     background-color: transparent;
     border: none;
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-xxs) var(--space-xxs);
     cursor: pointer;
     font-weight: 600;
     font-size: var(--font-size-xs);

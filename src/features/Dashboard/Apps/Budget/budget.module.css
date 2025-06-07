@@ -96,7 +96,7 @@
 
 .section {
     background-color: var(--surface-light);
-    padding: var(--space-md);
+    padding: var(--space-xs);
     /* Increased padding for sections */
     border-radius: var(--border-radius-lg);
     /* Slightly larger border radius */
@@ -118,7 +118,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--space-sm);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-xs);
 }
 
 .formGroup {

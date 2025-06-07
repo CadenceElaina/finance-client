@@ -1,68 +1,80 @@
 /* client/src/components/Header/Header.module.css */
+@import '../../../styles/variables.css';
+@import '../../../styles/global.css';
+
 .header {
     display: flex;
     justify-content: space-between;
-    /* Keeps logo, nav, and auth sections spread out */
     align-items: center;
-    padding: 0.75rem 1.5rem;
+    padding: var(--space-xxs) var(--space-xs);
+    /* Smaller padding */
     background: var(--surface-light);
     color: var(--text-primary);
     box-shadow: var(--shadow-md);
+    font-size: var(--font-size-sm);
+    /* Reduce base font size */
+    min-height: 40px;
+    /* Optional: set a smaller min height */
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .logoText {
-    font-size: 1.5rem;
+    font-size: var(--font-size-lg);
+    /* Use smaller heading size */
     font-weight: bold;
     color: var(--color-primary);
     text-decoration: none;
     transition: color var(--transition-speed-fast) var(--transition-ease);
+    line-height: 1.1;
+    padding: 0;
 }
 
 .navigation {
     display: flex;
-    /* --- NEW --- */
     flex-grow: 1;
-    /* Allows navigation to take up available space */
     justify-content: center;
-    /* Centers navigation links within its expanded space */
-    /* --- END NEW --- */
-    gap: 1rem;
+    gap: var(--space-xs);
+    /* Reduce gap */
     align-items: center;
-    margin: 0 2rem;
-    /* Add some margin from logo and auth section */
+    margin: 0 var(--space-sm);
+    /* Less margin */
+    font-size: var(--font-size-sm);
+    /* Smaller nav font */
 }
 
 .navLink {
     color: var(--text-primary);
     text-decoration: none;
     font-weight: 500;
-    padding: 0.25rem 0.5rem;
+    padding: var(--space-xxs) var(--space-xs);
+    /* Smaller padding */
     border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    /* Smaller font */
     transition: background 0.2s, color var(--transition-speed-fast) var(--transition-ease);
     background: transparent;
     border: none;
     cursor: pointer;
-}
-
-.navLink:hover {
-    background: var(--surface-light);
-    color: var(--color-primary);
+    line-height: 1.2;
 }
 
 .authSection {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-xs);
+    /* Reduce gap */
+    font-size: var(--font-size-sm);
+    /* Smaller font */
 }
 
 .welcomeMessage {
     color: var(--color-primary);
     font-weight: 600;
-    margin-right: 0.5rem;
+    margin-right: var(--space-xxs);
     white-space: nowrap;
-    /* Prevent username from wrapping */
+    font-size: var(--font-size-sm);
+    /* Smaller font */
 }
 
 .themeToggleContainer {
@@ -73,18 +85,24 @@
 
 .themeToggleContainer label {
     margin: 0 5px 0 0;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
+    /* Even smaller for label */
     color: var(--text-secondary);
 }
 
 .themeSelect {
+    font-size: var(--font-size-xs);
+    /* Smaller select font */
+    padding: var(--space-xxs) var(--space-xs);
+    padding-right: 2rem;
+    min-height: 28px;
+    height: 28px;
     background-color: var(--surface-light);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     cursor: pointer;
-    font-size: var(--font-size-sm);
     transition: all var(--transition-speed-fast) var(--transition-ease);
     appearance: none;
     -webkit-appearance: none;
@@ -93,8 +111,6 @@
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 0.8em;
-    padding-right: 2.5rem;
-    padding: var(--space-xxs) var(--space-sm);
 }
 
 .themeSelect:hover {

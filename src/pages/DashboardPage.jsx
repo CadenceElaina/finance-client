@@ -27,8 +27,8 @@ const appsList = [
 ];
 
 const DashboardPage = ({ userData = demoUser }) => {
-  const DEFAULT_APP_WIDTH = 6;
-  const DEFAULT_APP_HEIGHT = 6;
+  const DEFAULT_APP_WIDTH = 6;  // was 6
+  const DEFAULT_APP_HEIGHT = 7.5; // was 8
   const availableHandles = ['se'];
   const initialAppIds = ['budget', 'accounts', 'plan', 'reports'];
 
@@ -46,8 +46,8 @@ const DashboardPage = ({ userData = demoUser }) => {
         y: y,
         w: defaultWidth,
         h: defaultHeight,
-        minW: 2,
-        minH: 2,
+        minW: 4,
+        minH: 4,
         resizeHandles: availableHandles
       });
     });

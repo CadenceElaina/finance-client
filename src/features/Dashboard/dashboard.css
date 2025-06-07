@@ -3,8 +3,7 @@
     color: var(--text-primary);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
-    height: 100vh;
-    /* Make it fill the viewport */
+    /*     height: 100vh; */
     overflow: auto;
     /* Enable scrolling */
     position: relative;
@@ -47,7 +46,8 @@
 .app-header {
     background: var(--surface-dark);
     color: var(--text-light);
-    padding: var(--space-xs) var(--space-sm);
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-sm);
     border-top-left-radius: var(--border-radius-lg);
     border-top-right-radius: var(--border-radius-lg);
     display: flex;
@@ -81,13 +81,13 @@
     background: transparent;
     border: 1px solid transparent;
     color: var(--text-light);
-    font-size: 1.2rem;
+    font-size: var(--font-size-sm);
     cursor: pointer;
     transition: transform var(--transition-speed-fast) var(--transition-ease),
         color var(--transition-speed-fast) var(--transition-ease),
         border-color var(--transition-speed-fast) var(--transition-ease);
     border-radius: var(--border-radius-sm);
-    padding: 0.1rem 0.2rem;
+    padding: 0.05rem 0.15rem;
 }
 
 .app-header button:hover {
@@ -104,6 +104,8 @@
     border-bottom-right-radius: var(--border-radius-lg);
     flex-grow: 1;
     overflow: auto;
+    /* padding: var(--space-xs); */
+    font-size: var(--font-size-sm);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
 }
