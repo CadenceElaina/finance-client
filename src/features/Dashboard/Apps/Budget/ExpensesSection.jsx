@@ -30,7 +30,6 @@ const ExpensesSection = ({ expenses }) => {
 
     return (
         <div className={styles.expensesSectionCustom}>
-            <h3>Monthly Expenses</h3>
             <div className={styles.expenseTableContainer}>
                 <table className={styles.expenseTable}>
                     <thead>

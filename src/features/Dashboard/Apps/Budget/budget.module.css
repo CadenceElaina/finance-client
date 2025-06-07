@@ -175,7 +175,7 @@
 }
 
 /* Table Styles */
-.expenseTableContainer {
+/* .expenseTableContainer {
     overflow-x: auto;
     margin-bottom: var(--space-md);
     background-color: var(--surface-dark);
@@ -188,7 +188,7 @@
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-}
+} */
 
 .expenseTable {
     width: 100%;
@@ -265,29 +265,24 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    /* Tabs left, selects right */
     width: 100%;
     gap: 8px;
     margin-bottom: 4px;
-}
-
-.smallAppTabButtons {
-    flex-shrink: 0;
-}
-
-.smallAppTabControls {
-    flex-shrink: 1;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    padding: 0 4px;
 }
 
 .smallAppTabButtons {
     display: flex;
     gap: var(--space-xs);
-    /*     border-bottom: 1px solid var(--border-light); */
-    /* margin-bottom: var(--space-sm); */
-    padding-bottom: var(--space-xxs);
-    padding-top: var(--space-xxs);
+    flex-shrink: 0;
+}
+
+.smallAppTabControls {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .smallAppTabButton {
@@ -387,7 +382,7 @@
     align-items: center;
     text-align: center;
     height: 100%;
-    /* <-- ensure it fills the grid cell vertically */
+    padding-top: 0 !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -427,4 +422,41 @@
     min-height: 20px;
     height: 22px;
     max-width: 80px;
+}
+
+.summaryHeaderRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+.summaryHeaderLeft,
+.summaryHeaderRight {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.summaryHeaderLeft {
+    justify-content: flex-start;
+}
+
+.summaryHeaderRight {
+    justify-content: flex-end;
+}
+
+.summaryHeaderTitle {
+    flex: 1 1 0;
+    text-align: center;
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 0;
 }

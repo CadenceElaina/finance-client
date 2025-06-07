@@ -16,13 +16,31 @@ const TAX_OPTIONS = [
     { id: 'both', label: 'Both' },
 ];
 
+// --- Responsive breakpoints for small app mode ---
+// Change these values to adjust when the app switches to "small" layout
 const SMALL_APP_WIDTH_BREAKPOINT = 1112;
-const SMALL_APP_HEIGHT_BREAKPOINT = 552.6;
+const SMALL_APP_HEIGHT_BREAKPOINT = 351; // Only trigger small app if height is 350px or less
+
+/**
+ * Returns true if the app should use "small" layout (internal tabs).
+ * - If width is below the threshold, always small app.
+ * - If width is above threshold, only use small app if height is extremely small (<= 350px).
+ */
+function isSmallApp(size) {
+    if (size.width > 0 && size.width < SMALL_APP_WIDTH_BREAKPOINT) {
+        return true;
+    }
+    // Only trigger small app for very short heights, regardless of width
+    if (size.width >= SMALL_APP_WIDTH_BREAKPOINT && size.height > 0 && size.height <= SMALL_APP_HEIGHT_BREAKPOINT) {
+        return true;
+    }
+    return false;
+}
 
 const Overview = () => {
     const { budget, isLoading, error, userSignedIn } = useBudget();
     const [period, setPeriod] = useState('both');
-    const [tax, setTax] = useState('after');
+    const [tax, setTax] = useState('both');
 
     // State for observing container size
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
@@ -57,10 +75,8 @@ const Overview = () => {
         };
     }, []);
 
-    // Show internal tabs if width or height is below breakpoint
-    const showInternalTabs =
-        (containerSize.width > 0 && containerSize.width < SMALL_APP_WIDTH_BREAKPOINT) ||
-        (containerSize.height > 0 && containerSize.height < SMALL_APP_HEIGHT_BREAKPOINT);
+    // Determine if we should use small app mode
+    const smallApp = isSmallApp(containerSize);
 
     if (isLoading) return <div className={styles.budgetContentWrapper} ref={budgetOverviewRef}>Loading budget overview...</div>;
     if (error) return <div className={`${styles.budgetContentWrapper} ${styles.error}`} ref={budgetOverviewRef}>{error}</div>;
@@ -82,7 +98,39 @@ const Overview = () => {
     const monthlyDiscretionaryPT = monthlyIncomePT - monthlyExpenses;
     const annualDiscretionaryPT = (monthlyIncomePT * 12) - annualExpenses;
 
-    // --- UI for summary section (No longer contains BudgetControlPanel) ---
+    // --- Controls for period/tax ---
+    const Controls = (
+        <div className={styles.stackedControls}>
+            <div className={styles.stackedButtonGroup}>
+                <label htmlFor="period-select" style={{ fontSize: '0.95em', marginBottom: 2 }}>Period</label>
+                <select
+                    id="period-select"
+                    className={styles.select}
+                    value={period}
+                    onChange={e => setPeriod(e.target.value)}
+                >
+                    {PERIOD_OPTIONS.map(opt => (
+                        <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                </select>
+            </div>
+            <div className={styles.stackedButtonGroup}>
+                <label htmlFor="tax-select" style={{ fontSize: '0.95em', marginBottom: 2 }}>Tax</label>
+                <select
+                    id="tax-select"
+                    className={styles.select}
+                    value={tax}
+                    onChange={e => setTax(e.target.value)}
+                >
+                    {TAX_OPTIONS.map(opt => (
+                        <option key={opt.id} value={opt.id}>{opt.label}</option>
+                    ))}
+                </select>
+            </div>
+        </div>
+    );
+
+    // --- UI for summary section ---
     const SummarySectionContent = () => {
         const format = (val) =>
             `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -115,7 +163,31 @@ const Overview = () => {
 
             return (
                 <div className={styles.summarySectionCustom}>
-                    <h3>Summary</h3>
+                    <div className={styles.summaryHeaderRow}>
+                        <div className={styles.summaryHeaderLeft}>
+                            {smallApp && (
+                                <div className={styles.smallAppTabButtons}>
+                                    <button
+                                        className={`${styles.smallAppTabButton} ${activeInternalTab === 'summary' ? styles.active : ''}`}
+                                        onClick={() => setActiveInternalTab('summary')}
+                                    >
+                                        Overview
+                                    </button>
+                                    <button
+                                        className={`${styles.smallAppTabButton} ${activeInternalTab === 'expenses' ? styles.active : ''}`}
+                                        onClick={() => setActiveInternalTab('expenses')}
+                                    >
+                                        Expenses
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                        <h3 className={styles.summaryHeaderTitle}>Summary</h3>
+                        <div className={styles.summaryHeaderRight}>
+                            {/* Only show controls if in summary tab */}
+                            {(!smallApp || activeInternalTab === 'summary') && Controls}
+                        </div>
+                    </div>
                     <div className={styles.summaryBothGrid}>
                         {/* Left: Monthly */}
                         <div className={styles.summaryBothCol}>
@@ -216,50 +288,10 @@ const Overview = () => {
 
     // --- UI for expenses section ---
     const ExpensesSectionWrapper = () => (
-        <ExpensesSection expenses={budget.monthlyExpenses} />
-    );
-
-    // --- Controls for period/tax ---
-    const Controls = (
-        <div className={styles.stackedControls}>
-            <div className={styles.stackedButtonGroup}>
-                <label htmlFor="period-select" style={{ fontSize: '0.95em', marginBottom: 2 }}>Period</label>
-                <select
-                    id="period-select"
-                    className={styles.select}
-                    value={period}
-                    onChange={e => setPeriod(e.target.value)}
-                >
-                    {PERIOD_OPTIONS.map(opt => (
-                        <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                </select>
-            </div>
-            <div className={styles.stackedButtonGroup}>
-                <label htmlFor="tax-select" style={{ fontSize: '0.95em', marginBottom: 2 }}>Tax</label>
-                <select
-                    id="tax-select"
-                    className={styles.select}
-                    value={tax}
-                    onChange={e => setTax(e.target.value)}
-                >
-                    {TAX_OPTIONS.map(opt => (
-                        <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                </select>
-            </div>
-        </div>
-    );
-
-    return (
-        <div
-            className={`${styles.budgetContentWrapper} ${showInternalTabs ? styles.smallApp : ''}`}
-            ref={budgetOverviewRef}
-        >
-            {/* Main content area: either grid or internal tabs */}
-            {showInternalTabs ? (
-                <div className={styles.smallAppTabsContainer}>
-                    <div className={styles.smallAppTabHeaderRow}>
+        <div className={styles.summarySectionCustom}>
+            <div className={styles.summaryHeaderRow}>
+                <div className={styles.summaryHeaderLeft}>
+                    {smallApp && (
                         <div className={styles.smallAppTabButtons}>
                             <button
                                 className={`${styles.smallAppTabButton} ${activeInternalTab === 'summary' ? styles.active : ''}`}
@@ -274,27 +306,33 @@ const Overview = () => {
                                 Expenses
                             </button>
                         </div>
-                        <div className={styles.smallAppTabControls}>
-                            {Controls}
-                        </div>
-                    </div>
-                    <div className={styles.smallAppTabContent}>
-                        {activeInternalTab === 'summary' && <SummarySectionContent />}
-                        {activeInternalTab === 'expenses' && <ExpensesSectionWrapper />}
-                    </div>
+                    )}
+                </div>
+                <h3 className={styles.summaryHeaderTitle}>Monthly Expenses</h3>
+                <div className={styles.summaryHeaderRight} />
+            </div>
+            <ExpensesSection expenses={budget.monthlyExpenses} />
+        </div>
+    );
+
+    return (
+        <div
+            className={`${styles.budgetContentWrapper} ${smallApp ? styles.smallApp : ''}`}
+            ref={budgetOverviewRef}
+        >
+            {smallApp ? (
+                <div className={styles.smallAppTabsContainer}>
+                    {activeInternalTab === 'summary' && <SummarySectionContent />}
+                    {activeInternalTab === 'expenses' && <ExpensesSectionWrapper />}
                 </div>
             ) : (
                 <div className={styles.overviewGridCustom}>
-                    {/* Left: Overall Summary (now with Controls inside this section too, for layout consistency) */}
                     <div>
-                        {Controls}
                         <SummarySectionContent />
                     </div>
-                    {/* Right: Expenses */}
                     <ExpensesSectionWrapper />
                 </div>
             )}
-            {/* BudgetControlPanel is now a direct child of budgetContentWrapper, always visible */}
             <BudgetControlPanel userSignedIn={userSignedIn} />
         </div>
     );

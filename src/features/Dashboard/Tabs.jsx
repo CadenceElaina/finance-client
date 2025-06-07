@@ -32,4 +32,4 @@ const Tabs = ({ tabs, initialTabId, className, contentClassName }) => {
     );
 };
 
-export default Tabs;
+export default Tabs; // 

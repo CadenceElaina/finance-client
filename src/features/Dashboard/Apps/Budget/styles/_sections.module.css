@@ -82,22 +82,25 @@
 .summarySectionCustom,
 .expensesSectionCustom {
     background-color: var(--surface-dark);
-    padding: 12px 10px;
+
+    /* Increased padding */
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-sm);
     min-width: 0;
-    max-width: none;
     width: 100%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     height: fit-content;
+    font-size: 0.98rem;
+    /* Adjusted for normal mode */
 }
 
 .summarySectionCustom {
     align-items: center;
     text-align: center;
+
 }
 
 .summarySectionCustom h3 {
@@ -126,20 +129,48 @@
 
 }
 
+.summaryRow {
+    font-size: 1rem;
+    /* Adjusted for normal mode */
+    gap: 48px;
+    /* Slightly reduced gap for balance */
+    padding: 3px 0;
+    min-height: 26px;
+}
+
 .summaryRow strong {
     color: var(--text-primary);
     font-weight: 600;
 }
 
 .expensesSectionCustom {
-    align-items: center;
+    width: 100%;
+    max-width: none;
+    align-items: stretch;
     text-align: center;
+    border: none !important;
+    /* Remove any side padding if present */
+    padding-left: 0 !important;
+    padding-right: 0 !important;
 }
 
-.expensesSectionCustom h3 {
-    text-align: center;
+.expenseTableContainer {
     width: 100%;
-    margin-bottom: var(--space-sm);
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: stretch;
+}
+
+.expenseTable {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+    /* Ensures columns expand evenly */
 }
 
 /* Small App Internal Tabs */
@@ -181,44 +212,6 @@
     gap: 16px;
 }
 
-@media (max-width: 1112px),
-(max-height: 552.6px) {
-
-    .summarySectionCustom,
-    .expensesSectionCustom {
-        padding: 4px 2px;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.68rem;
-    }
-
-    .summarySectionCustom h3,
-    .expensesSectionCustom h3 {
-        font-size: 0.92rem;
-        margin-bottom: 2px;
-    }
-
-    .overviewTitle {
-        font-size: 0.92rem;
-        margin-bottom: 1px;
-        font-weight: 600;
-    }
-
-    .summaryRow {
-        font-size: 0.68rem;
-        gap: 8px;
-        padding: 0;
-        min-height: 20px;
-    }
-
-    .summaryBothGrid {
-        gap: 6px;
-        max-width: 100%;
-    }
-
-    .summaryBothCol {
-        gap: 4px;
-    }
-}
 
 .smallApp .summarySectionCustom,
 .smallApp .expensesSectionCustom {
@@ -253,4 +246,65 @@
 
 .smallApp .summaryBothCol {
     gap: 10px;
+}
+
+/* Compact styles for small app size */
+.smallApp .expensesSectionCustom {
+    padding: 8px 4px;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.85rem;
+}
+
+.smallApp .expenseTable th,
+.smallApp .expenseTable td {
+    padding: 4px 6px;
+    font-size: 0.85rem;
+}
+
+.smallApp .expenseTable {
+    min-width: 320px;
+    font-size: 0.85rem;
+}
+
+.smallApp .tableInput,
+.smallApp .tableSelect {
+    font-size: 0.85rem;
+    padding: 2px 4px;
+    height: 22px;
+}
+
+.smallApp .addButton,
+.smallApp .removeButton {
+    font-size: 0.85rem;
+    padding: 2px 8px;
+    min-width: unset;
+    height: 22px;
+}
+
+.expenseTable th,
+.expenseTable td {
+    border: none;
+    /* Remove border-bottom for a borderless look */
+    border-bottom: none;
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    color: var(--text-primary);
+    vertical-align: middle;
+}
+
+.expenseTable th:last-child,
+.expenseTable td:last-child {
+    width: 10%;
+    min-width: 80px;
+    max-width: 100px;
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.expenseTable td:last-child button {
+    width: 100%;
+    min-width: 60px;
+    max-width: 100px;
+    box-sizing: border-box;
 }
