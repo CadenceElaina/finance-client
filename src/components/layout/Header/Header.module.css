@@ -7,21 +7,17 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-xxs) var(--space-xs);
-    /* Smaller padding */
     background: var(--surface-light);
     color: var(--text-primary);
     box-shadow: var(--shadow-md);
     font-size: var(--font-size-sm);
-    /* Reduce base font size */
     min-height: 40px;
-    /* Optional: set a smaller min height */
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .logoText {
     font-size: var(--font-size-lg);
-    /* Use smaller heading size */
     font-weight: bold;
     color: var(--color-primary);
     text-decoration: none;
@@ -35,12 +31,9 @@
     flex-grow: 1;
     justify-content: center;
     gap: var(--space-xs);
-    /* Reduce gap */
     align-items: center;
     margin: 0 var(--space-sm);
-    /* Less margin */
     font-size: var(--font-size-sm);
-    /* Smaller nav font */
 }
 
 .navLink {
@@ -48,10 +41,8 @@
     text-decoration: none;
     font-weight: 500;
     padding: var(--space-xxs) var(--space-xs);
-    /* Smaller padding */
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
-    /* Smaller font */
     transition: background 0.2s, color var(--transition-speed-fast) var(--transition-ease);
     background: transparent;
     border: none;
@@ -63,9 +54,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-xs);
-    /* Reduce gap */
     font-size: var(--font-size-sm);
-    /* Smaller font */
 }
 
 .welcomeMessage {
@@ -74,7 +63,6 @@
     margin-right: var(--space-xxs);
     white-space: nowrap;
     font-size: var(--font-size-sm);
-    /* Smaller font */
 }
 
 .themeToggleContainer {
@@ -86,13 +74,11 @@
 .themeToggleContainer label {
     margin: 0 5px 0 0;
     font-size: var(--font-size-xs);
-    /* Even smaller for label */
     color: var(--text-secondary);
 }
 
 .themeSelect {
     font-size: var(--font-size-xs);
-    /* Smaller select font */
     padding: var(--space-xxs) var(--space-xs);
     padding-right: 2rem;
     min-height: 28px;
@@ -111,17 +97,11 @@
     background-repeat: no-repeat;
     background-position: right 0.75rem center;
     background-size: 0.8em;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .themeSelect:hover {
     filter: var(--hover-brightness);
     border-color: var(--color-primary);
-}
-
-.themeSelect,
-.themeSelect:focus,
-.themeSelect:active,
-.themeSelect:hover {
-    outline: none !important;
-    box-shadow: none !important;
 }

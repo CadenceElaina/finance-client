@@ -3,9 +3,8 @@
 /* Import other style modules */
 @import './styles/_sections.module.css';
 @import './styles/_buttons.module.css';
-@import './styles/_responsive.module.css';
 
-/* Base Layout and General Styles */
+/* --- Base Layout and General Styles --- */
 .budgetAppContainer {
     display: flex;
     flex-direction: column;
@@ -34,16 +33,6 @@
     flex-direction: column;
 }
 
-.budgetTabContent {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-    overflow-y: auto;
-    padding: 0;
-}
-
 .budgetContentWrapper {
     display: flex;
     flex-direction: column;
@@ -52,7 +41,6 @@
     min-height: 0;
     min-width: 0;
     overflow-y: auto;
-    /* This padding now defines the internal spacing for the WHOLE budget overview content */
     padding: 0 var(--space-sm);
     box-sizing: border-box;
 }
@@ -69,7 +57,7 @@
     text-align: center;
 }
 
-/* Form Elements */
+/* --- Form Elements --- */
 .incomeInputs,
 .formGroup {
     display: grid;
@@ -89,7 +77,6 @@
     color: var(--text-secondary);
 }
 
-/* Radio Button Group */
 .radioGroup {
     display: flex;
     gap: var(--space-sm);
@@ -174,22 +161,7 @@
     font-size: var(--font-size-sm);
 }
 
-/* Table Styles */
-/* .expenseTableContainer {
-    overflow-x: auto;
-    margin-bottom: var(--space-md);
-    background-color: var(--surface-dark);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-sm);
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-} */
-
+/* --- Table Styles --- */
 .expenseTable {
     width: 100%;
     border-collapse: collapse;
@@ -220,6 +192,7 @@
 
 .expenseTable tr:nth-child(even) {
     background-color: transparent;
+    /* change to something that stands out more? */
 }
 
 .expenseTable tr:hover {
@@ -247,88 +220,14 @@
     border-color: var(--color-primary);
 }
 
-/* Small App Internal Tabs - Adjusted for hierarchy and positioning */
-.smallAppTabsContainer {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    min-height: 0;
-    box-sizing: border-box;
-    /* Ensure content inside doesn't overflow from top */
-    margin-top: 0;
-    /* Ensure no extra margin pushes it down */
-}
-
-.smallAppTabHeaderRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    /* Tabs left, selects right */
-    width: 100%;
-    gap: 8px;
-    margin-bottom: 4px;
-    padding: 0 4px;
-}
-
-.smallAppTabButtons {
-    display: flex;
-    gap: var(--space-xs);
-    flex-shrink: 0;
-}
-
-.smallAppTabControls {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-    margin-left: auto;
-}
-
-.smallAppTabButton {
-    padding: var(--space-xxs) var(--space-sm);
-    background-color: transparent;
-    color: var(--text-secondary);
-    border: none;
-    border-radius: var(--border-radius-sm);
-    cursor: pointer;
-    font-weight: 500;
-    font-size: var(--font-size-xs);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-}
-
-
-.smallAppTabContent {
-    flex: 1;
-    overflow-y: auto;
-    /*   padding-top: var(--space-xs); */
-    padding-left: 0;
-    /* Inner content will be indented by .smallAppTabsContainer */
-    padding-right: 0;
-    padding-bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    /* Align content to the start (left) */
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.smallAppTabContent>div {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-
+/* --- Stacked Controls (Period/Tax) --- */
 .stackedControls {
     display: flex;
     flex-direction: row;
     gap: var(--space-xs);
     width: 100%;
     justify-content: flex-end;
-    /* Align to start */
     align-items: center;
-    /* Center vertically */
     flex-wrap: wrap;
     margin-bottom: var(--space-xs);
 }
@@ -336,7 +235,6 @@
 .stackedButtonGroup {
     display: flex;
     flex-direction: row;
-    /* Horizontal: label beside select */
     align-items: center;
     gap: 4px;
     min-width: 0;
@@ -373,7 +271,6 @@
     margin: 0;
     height: 100%;
     align-items: stretch;
-    /* <-- changed from flex-start to stretch */
     justify-content: center;
     overflow: auto;
 }
@@ -382,81 +279,7 @@
     align-items: center;
     text-align: center;
     height: 100%;
-    padding-top: 0 !important;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-}
-
-/* Compact styles for small app size */
-.smallApp .controlPanel {
-    gap: 6px;
-    padding: 4px 0;
-    border-top-width: 1px;
-}
-
-.smallApp .controlButton {
-    padding: 2px 8px;
-    font-size: var(--font-size-xs);
-    border-radius: var(--border-radius-sm);
-    min-width: 0;
-    height: 24px;
-}
-
-.smallApp .dangerButton {
-    font-size: var(--font-size-xs);
-    padding: 2px 8px;
-}
-
-.smallApp .persistenceOption {
-    gap: 2px;
-}
-
-.smallApp .persistenceLabel {
-    font-size: 0.7rem;
-}
-
-.smallApp .select {
-    font-size: 0.7rem;
-    padding: 1px 4px;
-    min-height: 20px;
-    height: 22px;
-    max-width: 80px;
-}
-
-.summaryHeaderRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    gap: 8px;
-    margin-bottom: 8px;
-    padding: 0 4px;
-}
-
-.summaryHeaderLeft,
-.summaryHeaderRight {
-    flex: 1 1 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-}
-
-.summaryHeaderLeft {
-    justify-content: flex-start;
-}
-
-.summaryHeaderRight {
-    justify-content: flex-end;
-}
-
-.summaryHeaderTitle {
-    flex: 1 1 0;
-    text-align: center;
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 0;
 }

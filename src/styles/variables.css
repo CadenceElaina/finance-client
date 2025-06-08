@@ -1,66 +1,65 @@
 :root {
-    /* Gradient for modern flair (Default/Dark Theme) */
+    --breakpoint-small-app: 1112px;
+    --breakpoint-small-app-height: 351px;
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
     --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
 
-    /* Enhanced Shadows */
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
     --shadow-elevated: 0 6px 20px rgba(0, 0, 0, 0.2);
 
     /* Hover Effects */
     --hover-brightness: brightness(1.1);
 
-    /* Base Colors (Dark Theme Defaults) */
+    /* Colors (Dark Theme Defaults) */
     --color-primary: #00B1C7;
-    /* Slightly brighter teal for dark mode */
     --color-primary-light: #00A3B8;
     --color-primary-dark: #005F6B;
-
     --color-secondary: #FFB09C;
-    /* Adjusted coral */
     --color-secondary-light: #FFB09C;
-
     --color-success: #4CAF50;
-    /* Green */
     --color-warning: #FF9800;
-    /* Orange */
     --color-danger: #EF5350;
-    /* Red */
 
-    /* Neutral Colors (Dark Theme Defaults) */
+    /* Neutral Colors */
     --background-light: #1A202C;
-    /* Dark background */
     --surface-light: #2D3748;
-    /* Darker card background */
     --surface-dark: #1A202C;
-    /* Added for app header */
     --border-light: #4A5568;
-    /* Darker borders */
 
     --text-primary: #EDF2F7;
-    /* Light text */
     --text-secondary: #A0AEC0;
-    /* Lighter secondary text */
     --text-tertiary: #718096;
-    /* Even lighter tertiary text */
     --text-light: #FFFFFF;
-    /* For elements on dark backgrounds */
-
 
     /* Typography */
     --font-family-base: 'Inter', 'Open Sans', 'Roboto', sans-serif;
-    --font-size-base: 1rem;
     --font-size-xs: 0.75rem;
     --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-md: 0.98rem;
     --font-size-lg: 1.125rem;
 
-    /* Spacing Scale */
-    --space-xxs: 4px;
-    --space-xs: 8px;
-    --space-sm: 16px;
-    --space-md: 24px;
-    --space-lg: 32px;
-    --space-xl: 48px;
-    --space-xxl: 64px;
+    /* Space */
+    --space-xxs: 2px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+
+    /* Section Styles */
+    --section-padding: 8px;
+    --section-padding-compact: 4px;
+    --section-font-size-compact: 0.75rem;
+    --section-font-size-sm: 0.875rem;
+    --section-font-size: 0.98rem;
+    --section-header-font-size: 1.1rem;
+    --section-header-font-size-compact: 1.08rem;
 
     /* Border Radii */
     --border-radius-sm: 4px;
@@ -68,23 +67,25 @@
     --border-radius-lg: 12px;
     --border-radius-circle: 50%;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-
     /* Transitions */
     --transition-speed-fast: 0.15s;
     --transition-speed-normal: 0.3s;
     --transition-ease: ease-in-out;
 
+    /* Focus & Button Styles */
     --focus-ring: 0 0 0 3px var(--color-primary);
     --button-hover-bg: var(--gradient-primary);
     --button-active-bg: var(--color-primary-dark);
+
+    /* App Orb Styles */
     --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
     --app-orb-menu-bg: var(--surface-light);
     --app-orb-menu-shadow: var(--shadow-lg);
+
+
 }
+
+/* --- Theme Overrides --- */
 
 /* Light Mode */
 body[data-theme="light"] {
@@ -92,18 +93,15 @@ body[data-theme="light"] {
     --surface-light: #FFFFFF;
     --surface-dark: #E0E0E0;
     --border-light: #E0E0E0;
-
     --text-primary: #212529;
     --text-secondary: #6C757D;
     --text-tertiary: #ADB5BD;
     --text-light: #212529;
-
     --color-primary: #007B8C;
     --color-primary-light: #00AEBF;
     --color-primary-dark: #005F6B;
     --color-secondary: #FF8C69;
     --color-secondary-light: #FF9B7A;
-
     --gradient-primary: linear-gradient(135deg, #007B8C 0%, #00AEBF 100%);
     --gradient-secondary: linear-gradient(135deg, #FF8C69 0%, #FFB09C 100%);
 }
@@ -114,22 +112,17 @@ body[data-theme="ultra-dark"] {
     --surface-light: #161B22;
     --surface-dark: #0D1117;
     --border-light: #30363D;
-
     --text-primary: #C9D1D9;
     --text-secondary: #8B949E;
     --text-tertiary: #6E7681;
     --text-light: #C9D1D9;
-
     --dashboard-button-bg: #1F252E;
     --dashboard-button-text: #E0E0E0;
-
     --color-primary: #4A90E2;
     --color-primary-light: #6BA0ED;
     --color-primary-dark: #2F6DB5;
-
     --color-secondary: #FF6B6B;
     --color-secondary-light: #FF8F8F;
-
     --gradient-primary: linear-gradient(135deg, #4A90E2 0%, #6BA0ED 100%);
     --gradient-secondary: linear-gradient(135deg, #FF6B6B 0%, #FF8F8F 100%);
 }
@@ -141,35 +134,23 @@ body[data-theme="high-contrast-dark"] {
     --surface-dark: #000000;
     --border-light: #FFFFFF;
     --border-active: #FFFF00;
-    /* VS Code uses yellow for focus */
     --color-accent-highlight: #00FFFF;
-
     --text-primary: #FFFFFF;
     --text-secondary: #C0C0C0;
     --text-tertiary: #808080;
     --text-light: #FFFFFF;
-
     --dashboard-button-bg: #1B1B1B;
     --dashboard-button-text: #FFFFFF;
-
     --app-launcher-button-text: #000000;
-
     --app-launcher-button-border-color: #FFFFFF;
     --app-launcher-button-hover-border-color: #FFFF00;
-
     --color-primary: #00FFFF;
-    /* Cyan accent */
     --color-primary-light: #6FC3DF;
     --color-primary-dark: #007070;
-
     --color-secondary: #FFFF00;
-    /* Yellow accent */
     --color-secondary-light: #FFFF99;
-
     --gradient-primary: none;
-    /* No gradients in high contrast */
     --gradient-secondary: none;
-
     --focus-ring: 0 0 0 3px #FFFF00;
     --button-hover-bg: #1B1B1B;
     --button-active-bg: #333333;
@@ -184,36 +165,23 @@ body[data-theme="vibrant-green"] {
     --surface-light: #0B3322;
     --surface-dark: #001A0F;
     --border-light: #3A7F67;
-
     --text-primary: #D1FFEC;
     --text-secondary: #8BCDA7;
     --text-tertiary: #5E9B7A;
     --text-light: #D1FFEC;
-
     --dashboard-button-bg: #1A7A4A;
     --dashboard-button-text: #F0F0F0;
-
-    /* Critical change for Vibrant Green app launcher button text */
     --app-launcher-button-text: #FFFFFF;
-    /* Changed: White text on the gradient */
-
-    /* Adjusted primary colors for a slightly darker, but still vibrant green gradient */
     --color-primary: #00E080;
-    /* Changed: Slightly darker vibrant green */
     --color-primary-light: #33F09C;
-    /* Changed: Adjusted light primary for gradient */
     --color-primary-dark: #00B36B;
-
     --color-secondary: #FF66CC;
     --color-secondary-light: #FF80D4;
-
     --gradient-primary: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
-    /* Updated gradient */
     --gradient-secondary: linear-gradient(135deg, #FF66CC 0%, #FF4DBC 100%);
-
     --focus-ring: 0 0 0 3px #00E080;
     --button-hover-bg: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
-    --button-active-bg: #00B36L;
+    --button-active-bg: #00B36B;
     --app-orb-shadow: 0 0 0 3px #00E080, 0 6px 20px rgba(0, 224, 128, 0.2);
     --app-orb-menu-bg: #0B3322;
     --app-orb-menu-shadow: 0 10px 30px rgba(0, 224, 128, 0.15);
@@ -225,21 +193,17 @@ body[data-theme="vibrant-orange"] {
     --surface-light: #4A2B14;
     --surface-dark: #26160A;
     --border-light: #9B5D34;
-
     --text-primary: #FFF0E0;
     --text-secondary: #FFB880;
     --text-tertiary: #E09060;
     --text-light: #FFF0E0;
-
     --color-primary: #FFA500;
     --color-primary-light: #FFB833;
     --color-primary-dark: #CC8400;
     --color-secondary: #8A2BE2;
     --color-secondary-light: #A050EA;
-
     --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #7B1BE0 100%);
-
     --focus-ring: 0 0 0 3px #FFA500;
     --button-hover-bg: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     --button-active-bg: #CC8400;
@@ -251,74 +215,60 @@ body[data-theme="vibrant-orange"] {
 /* Tokyo Night Theme */
 body[data-theme="tokyo-night"] {
     --background-light: #1A1B26;
-    /* Dark indigo background */
     --surface-light: #24283B;
-    /* Slightly lighter surface for cards */
     --surface-dark: #16161E;
-    /* Even darker for header/footer */
     --border-light: #414868;
-    /* Muted blue-grey border */
 
     --text-primary: #C0CAF5;
-    /* Light blue-grey for main text */
     --text-secondary: #A9B1D6;
-    /* Slightly darker secondary text */
-    --text-tertiary: #7F849C;
-    /* Muted grey for tertiary text */
+    --text-tertiary: #414868;
     --text-light: #C0CAF5;
-    /* Text on dark backgrounds */
 
     --color-primary: #7AA2F7;
-    /* Vibrant blue */
-    --color-primary-light: #89B0FA;
-    /* Lighter blue for gradients */
-    --color-primary-dark: #5B7DD2;
-    /* Darker blue for active states */
-
+    /* blue */
+    --color-primary-light: #7DCFFF;
+    /* cyan */
+    --color-primary-dark: #414868;
+    /* dark blue */
     --color-secondary: #BB9AF7;
-    /* Soft purple accent */
-    --color-secondary-light: #C8A8FB;
-    /* Lighter purple for gradients */
-
+    /* purple */
+    --color-secondary-light: #A9B1D6;
+    /* light blue/gray */
     --color-success: #9ECE6A;
-    /* Green */
+    /* green */
     --color-warning: #E0AF68;
-    /* Orange */
+    /* yellow */
     --color-danger: #F7768E;
-    /* Pinkish red */
+    /* red/pink */
+    --color-info: #7DCFFF;
+    /* cyan */
 
-    --gradient-primary: linear-gradient(135deg, #7AA2F7 0%, #89B0FA 100%);
-    /* Blue gradient */
-    --gradient-secondary: linear-gradient(135deg, #BB9AF7 0%, #C8A8FB 100%);
-    /* Purple gradient */
+    --gradient-primary: linear-gradient(135deg, #7AA2F7 0%, #7DCFFF 100%);
+    --gradient-secondary: linear-gradient(135deg, #BB9AF7 0%, #A9B1D6 100%);
 
     --focus-ring: 0 0 0 3px #7AA2F7;
     --button-hover-bg: var(--gradient-primary);
     --button-active-bg: var(--color-primary-dark);
-    --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
+
+    --app-orb-shadow: 0 0 0 3px var(--border-light), var(--shadow-elevated);
     --app-orb-menu-bg: var(--surface-light);
     --app-orb-menu-shadow: var(--shadow-lg);
 
-    /* Specific to Tokyo Night if needed, similar to dashboard-button-bg */
-    --dashboard-button-bg: #292E42;
+    --dashboard-button-bg: #414868;
     --dashboard-button-text: #C0CAF5;
     --app-launcher-button-text: #C0CAF5;
     --app-launcher-button-border-color: #414868;
     --app-launcher-button-hover-border-color: #7AA2F7;
 }
 
+/* --- Focus Styles --- */
 button:focus,
 input:focus,
 select:focus,
-textarea:focus {
-    outline: none;
-    box-shadow: var(--focus-ring);
-}
-
+textarea:focus,
 :focus-visible {
     outline: none;
     box-shadow: var(--focus-ring);
-    /* <-- theme variable, e.g. yellow in high contrast */
 }
 
 button:focus:hover,

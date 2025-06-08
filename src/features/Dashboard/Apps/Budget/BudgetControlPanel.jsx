@@ -1,6 +1,7 @@
 // src/features/Dashboard/Apps/Budget/BudgetControlPanel.jsx
 import React from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
+import Button from '../../../../components/ui/Button/Button';
 import styles from './budget.module.css';
 
 const BudgetControlPanel = ({ userSignedIn }) => {
@@ -8,15 +9,15 @@ const BudgetControlPanel = ({ userSignedIn }) => {
 
     return (
         <div className={styles.controlPanel}>
-            <button onClick={saveBudget} disabled={isLoading} className={styles.controlButton}>
+            <Button onClick={saveBudget} disabled={isLoading} variant="primary">
                 {isLoading ? 'Saving...' : 'Save Budget'}
-            </button>
-            <button onClick={resetBudget} disabled={isLoading} className={styles.controlButton}>
+            </Button>
+            <Button onClick={resetBudget} disabled={isLoading} variant="warning">
                 Reset to Demo
-            </button>
-            <button onClick={clearBudget} disabled={isLoading} className={`${styles.controlButton} ${styles.dangerButton}`}>
+            </Button>
+            <Button onClick={clearBudget} disabled={isLoading} variant="danger">
                 Clear All
-            </button>
+            </Button>
 
             {userSignedIn && (
                 <div className={styles.persistenceOption}>

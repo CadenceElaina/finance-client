@@ -9,10 +9,8 @@
 
 .tabHeaders {
     display: flex;
-    /*     border-bottom: 1px solid var(--border-light); */
     flex-shrink: 0;
     padding: var(--space-xxs) var(--space-sm);
-    /* Removed margin-bottom */
 }
 
 .tabHeader {
@@ -30,13 +28,17 @@
     white-space: nowrap;
 }
 
-.tabHeader:hover {
-    color: var(--color-primary);
+.tabHeader:hover:not(.active):not(:disabled) {
+    color: var(--color-primary-light);
+    border-bottom: 2px solid var(--color-primary-light);
+    background: transparent;
 }
 
-.tabHeader.active {
+.tabHeader.active,
+.tabHeader[aria-current="true"] {
     color: var(--color-primary);
-    border-bottom-color: var(--color-primary);
+    border-bottom: 2px solid var(--color-primary);
+    background: transparent;
 }
 
 .tabHeader:disabled {
@@ -47,7 +49,6 @@
 .tabContent {
     flex-grow: 1;
     overflow-y: auto;
-    /* REMOVED ALL PADDING HERE. budgetContentWrapper will handle it. */
     padding: 0;
 }
 

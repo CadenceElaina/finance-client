@@ -1,0 +1,89 @@
+.tableContainer {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: var(--font-size-md);
+}
+
+
+th,
+td {
+    border: none;
+    padding: var(--space-xs) var(--space-sm);
+    text-align: left;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+    font-size: inherit;
+}
+
+th {
+    background: var(--surface-dark);
+    color: var(--text-light);
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid var(--border-light);
+}
+
+tr:nth-child(even) {
+    background: transparent;
+}
+
+tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tableInput,
+.tableSelect {
+    width: 100%;
+    padding: var(--space-xxs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
+    box-sizing: border-box;
+}
+
+.tableInput:focus,
+.tableSelect:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-primary);
+}
+
+/* --- Compact styles for small app --- */
+.smallApp .table {
+    font-size: var(--font-size-sm);
+}
+
+.smallApp th,
+.smallApp td {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-sm);
+}
+
+.smallApp .tableInput,
+.smallApp .tableSelect {
+    font-size: 0.85rem;
+    padding: 2px 4px;
+    height: 22px;
+}
+
+.tableHeaderTitle {
+    font-size: 1.08rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    text-align: center;
+}

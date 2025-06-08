@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
 import styles from './budget.module.css';
+import Button from '../../../../components/ui/Button/Button';
+import Table from '../../../../components/ui/Table/Table';
+import tableStyles from '../../../../components/ui/Table/Table.module.css';
+import Section from '../../../../components/ui/Section/Section';
+import sectionStyles from '../../../../components/ui/Section/Section.module.css';
 
-const ExpensesSection = ({ expenses }) => {
+const ExpensesSection = ({
+    expenses,
+    smallApp,
+    activeInternalTab,
+    setActiveInternalTab
+}) => {
     const { addExpense, updateExpense, removeExpense } = useBudget();
     const [newExpense, setNewExpense] = useState({ name: '', cost: '', category: 'required' });
 
@@ -28,99 +38,139 @@ const ExpensesSection = ({ expenses }) => {
 
     const expenseCategories = ["required", "flexible", "non-essential"];
 
-    return (
-        <div className={styles.expensesSectionCustom}>
-            <div className={styles.expenseTableContainer}>
-                <table className={styles.expenseTable}>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Cost</th>
-                            <th>Category</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {expenses.map(exp => (
-                            <tr key={exp.id}>
-                                <td data-label="Name"> {/* Added data-label */}
-                                    <input
-                                        type="text"
-                                        value={exp.name}
-                                        onChange={(e) => handleUpdateExpense(exp.id, 'name', e.target.value)}
-                                        className={styles.tableInput}
-                                    />
-                                </td>
-                                <td data-label="Cost"> {/* Added data-label */}
-                                    <input
-                                        type="number"
-                                        value={exp.cost}
-                                        onChange={(e) => handleUpdateExpense(exp.id, 'cost', e.target.value)}
-                                        className={styles.tableInput}
-                                    />
-                                </td>
-                                <td data-label="Category"> {/* Added data-label */}
-                                    <select
-                                        value={exp.category}
-                                        onChange={(e) => handleUpdateExpense(exp.id, 'category', e.target.value)}
-                                        className={styles.tableSelect}
-                                    >
-                                        {expenseCategories.map(cat => (
-                                            <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                                        ))}
-                                    </select>
-                                </td>
-                                <td data-label="Action"> {/* Added data-label */}
-                                    <button onClick={() => removeExpense(exp.id)} className={styles.removeButton}>
-                                        Remove
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        {/* New expense row */}
-                        <tr>
-                            <td data-label="New Name"> {/* Added data-label */}
-                                <input
-                                    type="text"
-                                    name="name"
-                                    value={newExpense.name}
-                                    onChange={handleNewExpenseChange}
-                                    placeholder="New Expense Name"
-                                    className={styles.tableInput}
-                                />
-                            </td>
-                            <td data-label="New Cost"> {/* Added data-label */}
-                                <input
-                                    type="number"
-                                    name="cost"
-                                    value={newExpense.cost}
-                                    onChange={handleNewExpenseChange}
-                                    placeholder="Cost"
-                                    className={styles.tableInput}
-                                />
-                            </td>
-                            <td data-label="New Category"> {/* Added data-label */}
-                                <select
-                                    name="category"
-                                    value={newExpense.category}
-                                    onChange={handleNewExpenseChange}
-                                    className={styles.tableSelect}
-                                >
-                                    {expenseCategories.map(cat => (
-                                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
-                                    ))}
-                                </select>
-                            </td>
-                            <td data-label="Add Action"> {/* Added data-label */}
-                                <button onClick={handleAddExpense} className={styles.addButton}>
-                                    Add
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    const columns = [
+        { key: 'name', label: 'Name' },
+        { key: 'cost', label: 'Cost' },
+        { key: 'category', label: 'Category' },
+        { key: 'action', label: 'Action' }
+    ];
+
+    const renderRow = (exp, idx) => (
+        <tr key={exp.id}>
+            <td>
+                <input
+                    type="text"
+                    value={exp.name}
+                    onChange={(e) => handleUpdateExpense(exp.id, 'name', e.target.value)}
+                    className={tableStyles.tableInput}
+                />
+            </td>
+            <td>
+                <input
+                    type="number"
+                    value={exp.cost}
+                    onChange={(e) => handleUpdateExpense(exp.id, 'cost', e.target.value)}
+                    className={tableStyles.tableInput}
+                />
+            </td>
+            <td>
+                <select
+                    value={exp.category}
+                    onChange={(e) => handleUpdateExpense(exp.id, 'category', e.target.value)}
+                    className={tableStyles.tableSelect}
+                >
+                    {expenseCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                    ))}
+                </select>
+            </td>
+            <td>
+                <Button
+                    variant="danger"
+                    onClick={() => removeExpense(exp.id)}
+                >
+                    Remove
+                </Button>
+            </td>
+        </tr>
+    );
+
+    // New expense row
+    const renderNewExpenseRow = () => (
+        <tr>
+            <td>
+                <input
+                    type="text"
+                    name="name"
+                    value={newExpense.name}
+                    onChange={handleNewExpenseChange}
+                    placeholder="New Expense Name"
+                    className={tableStyles.tableInput}
+                />
+            </td>
+            <td>
+                <input
+                    type="number"
+                    name="cost"
+                    value={newExpense.cost}
+                    onChange={handleNewExpenseChange}
+                    placeholder="Cost"
+                    className={tableStyles.tableInput}
+                />
+            </td>
+            <td>
+                <select
+                    name="category"
+                    value={newExpense.category}
+                    onChange={handleNewExpenseChange}
+                    className={tableStyles.tableSelect}
+                >
+                    {expenseCategories.map(cat => (
+                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                    ))}
+                </select>
+            </td>
+            <td>
+                <Button
+                    variant="primary"
+                    onClick={handleAddExpense}
+                >
+                    Add
+                </Button>
+            </td>
+        </tr>
+    );
+
+    // --- Header Row (matches Overview) ---
+    const renderTabButtons = () => (
+        <div className={styles.smallAppTabButtons}>
+            <Button
+                tab
+                active={activeInternalTab === 'summary'}
+                onClick={() => setActiveInternalTab('summary')}
+            >
+                Overview
+            </Button>
+            <Button
+                tab
+                active={activeInternalTab === 'expenses'}
+                onClick={() => setActiveInternalTab('expenses')}
+            >
+                Expenses
+            </Button>
         </div>
+    );
+
+    return (
+        <Section className={sectionStyles.sectionDark}>
+            <div className={styles.expensesSectionCustom}>
+                <div className={styles.summaryHeaderRow}>
+                    <div className={styles.summaryHeaderLeft}>
+                        {smallApp && renderTabButtons()}
+                    </div>
+                    <h3 className={styles.summaryHeaderTitle}>Monthly Expenses</h3>
+                    <div className={styles.summaryHeaderRight} />
+                </div>
+                <Table
+                    columns={columns}
+                    data={expenses}
+                    renderRow={renderRow}
+                    className={styles.expenseTable}
+                    smallApp={smallApp}
+                    extraRow={renderNewExpenseRow}
+                />
+            </div>
+        </Section>
     );
 };
 

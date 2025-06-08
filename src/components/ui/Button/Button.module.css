@@ -1,42 +1,140 @@
 /* src/components/Button/Button.module.css */
+/* Base Button */
 .button {
     background: var(--gradient-primary);
-    /* Use your primary gradient */
     color: var(--text-light);
-    /* Use text-light for better contrast on gradients */
     padding: var(--space-xs) var(--space-sm);
     border: none;
-    /* No border for gradient buttons usually */
     border-radius: var(--border-radius-md);
     cursor: pointer;
     font-size: var(--font-size-base);
-    transition: background-color var(--transition-speed-fast) var(--transition-ease),
-        filter var(--transition-speed-fast) var(--transition-ease);
-    /* Add filter for hover */
-    min-width: 120px;
     font-weight: 600;
-    /* Make text a bit bolder */
+    min-width: 120px;
+    transition: background-color var(--transition-speed-fast) var(--transition-ease),
+        filter var(--transition-speed-fast) var(--transition-ease),
+        box-shadow var(--transition-speed-fast) var(--transition-ease);
+    outline: none;
 }
 
-.button:hover {
-    filter: var(--hover-brightness);
-    /* Use your hover effect variable */
-    background: var(--button-hover-bg);
-    /* Use specific hover background if defined */
+/* Primary (default) */
+.button.primary {
+    background: var(--gradient-primary);
+    color: var(--text-light);
+    border: none;
 }
 
-.button:active {
-    background: var(--button-active-bg);
-    /* Use specific active background if defined */
+.button.primary:hover,
+.button.primary:focus {
+    filter: brightness(1.08);
+    box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(0, 177, 199, 0.15);
 }
 
+/* Secondary */
+.button.secondary {
+    background: var(--surface-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+}
+
+.button.secondary:hover,
+.button.secondary:focus {
+    background: var(--surface-light);
+    color: var(--text-primary);
+    border-color: var(--color-primary);
+}
+
+/* Danger (Remove, Clear All, etc.) */
+.button.danger {
+    background: var(--color-danger);
+    color: var(--text-light);
+    border: 1px solid var(--color-danger);
+}
+
+.button.danger:hover,
+.button.danger:focus {
+    background: var(--color-danger);
+    color: var(--text-light);
+    filter: brightness(1.15);
+    box-shadow: 0 0 0 2px var(--color-danger), 0 2px 8px rgba(239, 83, 80, 0.2);
+}
+
+/* Warning */
+.button.warning {
+    background: var(--color-warning);
+    color: var(--text-light);
+    border: 1px solid var(--color-warning);
+}
+
+.button.warning:hover,
+.button.warning:focus {
+    background: var(--color-warning);
+    color: var(--text-light);
+    filter: brightness(1.1);
+    box-shadow: 0 0 0 2px var(--color-warning), 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+/* --- Small App Tab Button Variant --- */
+.button.tab {
+    padding: var(--space-xxs) var(--space-md);
+    background: var(--surface-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-xs);
+    min-width: 90px;
+    font-weight: 500;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.button.tab.active,
+.button.tab[aria-current="true"] {
+    background: var(--color-primary);
+    color: var(--text-light);
+    border-color: var(--color-primary);
+}
+
+.button.tab:hover:not(.active):not([aria-current="true"]) {
+    background: var(--surface-light);
+    color: var(--text-primary);
+}
+
+/* Disabled */
 .button:disabled {
     background-color: var(--surface-dark);
     /* A neutral background for disabled state */
     color: var(--text-tertiary);
     /* Lighter text for disabled state */
     cursor: not-allowed;
+    opacity: 0.7;
     filter: none;
     /* Remove any hover effects when disabled */
-    opacity: 0.7;
+}
+
+/* Responsive/compact for smallApp */
+@media (max-width: 1112px),
+(max-height: 552.6px) {
+
+    .button,
+    .button.secondary,
+    .button.tab {
+        font-size: var(--font-size-sm);
+        padding: var(--space-xxs) var(--space-xs);
+        min-width: unset;
+        height: 22px;
+    }
+
+    .button.danger {
+        font-size: var(--font-size-xs);
+        padding: 2px 8px;
+    }
+}
+
+/* Make table action buttons more compact in small app mode */
+.smallApp .expenseTable td button,
+.smallApp .expenseTable td .button {
+    min-width: 40px !important;
+    max-width: 60px !important;
+    padding: 2px 4px !important;
+    font-size: var(--font-size-xs) !important;
+    height: 20px !important;
 }
