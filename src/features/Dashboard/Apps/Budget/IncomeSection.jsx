@@ -1,8 +1,9 @@
-// src/features/Dashboard/Apps/Budget/IncomeDetailsSection.jsx
 import React from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
-import styles from './budget.module.css';
 import Section from '../../../../components/ui/Section/Section';
+import SectionHeader from '../../../../components/ui/Section/SectionHeader';
+import FormLayout from '../../../../components/ui/Form/FormLayout';
+import formStyles from '../../../../components/ui/Form/FormLayout.module.css';
 
 const IncomeSection = () => {
     const { budget, updateIncome } = useBudget();
@@ -14,65 +15,68 @@ const IncomeSection = () => {
 
     const handleChange = (e) => {
         const { name, value, type } = e.target;
-        updateIncome({ [name]: type === 'number' ? parseFloat(value) || 0 : value });
+        updateIncome({ [name]: type === 'number' ? parseFloat(value) || 0 : (type === 'checkbox' ? checked : value) });
     };
 
     return (
-        <Section>
-            <div className={`${styles.section} ${styles.fullWidth}`}>
-                <div className={styles.formGroup}>
-                    <label>Income Type:</label>
-                    <div className={styles.radioGroup}>
-                        <label>
-                            <input
-                                type="radio"
-                                name="incomeType"
-                                value="hourly"
-                                checked={income.type === 'hourly'}
-                                onChange={handleIncomeTypeChange}
-                            /> Hourly
-                        </label>
-                        <label>
-                            <input
-                                type="radio"
-                                name="incomeType"
-                                value="salary"
-                                checked={income.type === 'salary'}
-                                onChange={handleIncomeTypeChange}
-                            /> Salary
-                        </label>
-
-                    </div>
+        <Section header={<SectionHeader title="Income Details" />}>
+            {/* Centered radio group at the top */}
+            <div className={formStyles.radioRowTop}>
+                <label className={formStyles.radioRowLabel}>Income Type:</label>
+                <div className={formStyles.radioRowGroup}>
+                    <label>
+                        <input
+                            type="radio"
+                            name="incomeType"
+                            value="hourly"
+                            checked={income.type === 'hourly'}
+                            onChange={handleIncomeTypeChange}
+                        /> Hourly
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="incomeType"
+                            value="salary"
+                            checked={income.type === 'salary'}
+                            onChange={handleIncomeTypeChange}
+                        /> Salary
+                    </label>
                 </div>
-
+            </div>
+            <FormLayout>
                 {income.type === 'salary' && (
-                    <div className={styles.formGroup}>
-                        <label htmlFor="salary">Annual Salary (Pre-tax):</label>
-                        <input
-                            type="number"
-                            id="salary"
-                            name="salary"
-                            value={income.salary || ''}
-                            onChange={handleChange}
-                            placeholder="e.g. 30000"
-                        />
-                        <label htmlFor="salary">Monthly Salary (After-tax):</label>
-                        <input
-                            type="number"
-                            id="salary"
-                            name="salary"
-                            value={income.salary || ''}
-                            onChange={handleChange}
-                            placeholder="e.g. 2500"
-                        />
-
-                    </div>
+                    <>
+                        <div className={formStyles.formGroup}>
+                            <label htmlFor="annualPreTax">Annual Salary (Pre-tax):</label>
+                            <input
+                                type="number"
+                                id="annualPreTax"
+                                name="annualPreTax"
+                                value={income.annualPreTax || ''}
+                                onChange={handleChange}
+                                placeholder="e.g. 60000"
+                                min="0"
+                            />
+                        </div>
+                        <div className={formStyles.formGroup}>
+                            <label htmlFor="monthlyAfterTax">Monthly Net Income (After-tax):</label>
+                            <input
+                                type="number"
+                                id="monthlyAfterTax"
+                                name="monthlyAfterTax"
+                                value={income.monthlyAfterTax || ''}
+                                onChange={handleChange}
+                                placeholder="e.g. 3000"
+                                min="0"
+                            />
+                        </div>
+                    </>
                 )}
-
                 {income.type === 'hourly' && (
                     <>
-                        <div className={styles.formGroup}>
-                            <label htmlFor="hourlyRate">Hourly Rate:</label>
+                        <div className={formStyles.formGroup}>
+                            <label htmlFor="hourlyRate">Hourly Rate (Pre-tax):</label>
                             <input
                                 type="number"
                                 id="hourlyRate"
@@ -80,9 +84,10 @@ const IncomeSection = () => {
                                 value={income.hourlyRate || ''}
                                 onChange={handleChange}
                                 placeholder="e.g. 25"
+                                min="0"
                             />
                         </div>
-                        <div className={styles.formGroup}>
+                        <div className={formStyles.formGroup}>
                             <label htmlFor="expectedAnnualHours">Expected Annual Hours:</label>
                             <input
                                 type="number"
@@ -91,49 +96,48 @@ const IncomeSection = () => {
                                 value={income.expectedAnnualHours || ''}
                                 onChange={handleChange}
                                 placeholder="e.g. 2080"
+                                min="0"
+                            />
+                        </div>
+                        <div className={formStyles.formGroup}>
+                            <label htmlFor="monthlyAfterTax">Monthly Net Income (After-tax):</label>
+                            <input
+                                type="number"
+                                id="monthlyAfterTax"
+                                name="monthlyAfterTax"
+                                value={income.monthlyAfterTax || ''}
+                                onChange={handleChange}
+                                placeholder="e.g. 3000"
+                                min="0"
                             />
                         </div>
                     </>
                 )}
-
-                <div className={styles.formGroup}>
-                    <label htmlFor="monthlyIncomeAfterTaxes">Net Monthly Income (After-tax):</label>
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="bonusAfterTax">Annual Bonus (After-tax):</label>
                     <input
                         type="number"
-                        id="monthlyIncomeAfterTaxes"
-                        name="monthlyIncomeAfterTaxes"
-                        value={income.monthlyIncomeAfterTaxes || ''}
-                        onChange={handleChange}
-                        placeholder="e.g. 3000"
-                        required
-                    />
-                </div>
-
-                <div className={styles.formGroup}>
-                    <label htmlFor="bonus">Annual Bonus (After-tax):</label>
-                    <input
-                        type="number"
-                        id="bonus"
-                        name="bonus"
-                        value={income.bonus || ''}
+                        id="bonusAfterTax"
+                        name="bonusAfterTax"
+                        value={income.bonusAfterTax || ''}
                         onChange={handleChange}
                         placeholder="e.g. 500"
+                        min="0"
                     />
                 </div>
-
-                <div className={styles.formGroup}>
-                    <label htmlFor="additionalIncome">Annual Additional Income (After-tax):</label>
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="additionalIncomeAfterTax">Annual Additional Income (After-tax):</label>
                     <input
                         type="number"
-                        id="additionalIncome"
-                        name="additionalIncome"
-                        value={income.additionalIncome || ''}
+                        id="additionalIncomeAfterTax"
+                        name="additionalIncomeAfterTax"
+                        value={income.additionalIncomeAfterTax || ''}
                         onChange={handleChange}
                         placeholder="e.g. 100"
+                        min="0"
                     />
                 </div>
-
-            </div>
+            </FormLayout>
         </Section>
     );
 };

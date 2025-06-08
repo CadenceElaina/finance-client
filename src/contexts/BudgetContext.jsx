@@ -12,16 +12,17 @@ const BudgetContext = createContext();
 //
 // Define a default/demo budget structure
 const DEFAULT_DEMO_BUDGET = {
-    // 
     income: {
         type: "salary", // 'salary' or 'hourly'
-        salary: 3500, // Monthly salary amount
-        totalIncomeAfterTax: 30000, // hourlyRate * expectedAnnualHours + bonus + additionalIncome or monthlyIncomeAfterTaxes * 12 + bonus + additionalIncome
+        // For salary users:
+        monthlyAfterTax: 4100, // Net monthly income (after tax)
+        annualPreTax: 75000,   // Gross annual salary (pre-tax)
+        // For hourly users, you would use hourlyRate and expectedAnnualHours instead
         hourlyRate: null,
         expectedAnnualHours: null,
-        bonus: 0, // Annual bonus amount after taxes
-        additionalIncome: 0, // Annual additional income after taxes
-        monthlyIncomeAfterTaxes: 3000 // 
+        // These are always after-tax:
+        bonusAfterTax: 5000,
+        additionalIncomeAfterTax: 0,
     },
     monthlyExpenses: [
         { id: "exp-1", name: "Rent/Mortgage", cost: 1200, category: "required" },
@@ -61,13 +62,19 @@ export const BudgetProvider = ({ children }) => {
             if (user && persistencePreference === 'server') {
                 loadedBudget = await budgetService.fetchBudget(token);
                 if (!loadedBudget) {
-                    // If no server budget, use a default empty structure for new users
+                    // Use canonical field names!
                     loadedBudget = {
-                        income: { type: "salary", salary: 0, hourlyRate: null, expectedAnnualHours: null, bonus: 0, additionalIncome: 0, monthlyIncomeAfterTaxes: 0 },
+                        income: {
+                            type: "salary",
+                            annualPreTax: 0,
+                            monthlyAfterTax: 0,
+                            hourlyRate: null,
+                            expectedAnnualHours: null,
+                            bonusAfterTax: 0,
+                            additionalIncomeAfterTax: 0,
+                        },
                         monthlyExpenses: [],
                     };
-                    // Optionally, save this initial empty budget to server if you want it to exist immediately
-                    // await budgetService.saveBudget(loadedBudget, token);
                 }
             } else {
                 // Load from local storage for unsigned users or signed-in with local preference
@@ -95,30 +102,40 @@ export const BudgetProvider = ({ children }) => {
     const calculatedBudget = budget ? (() => {
         const totalMonthlyExpenses = budget.monthlyExpenses.reduce((acc, item) => acc + item.cost, 0);
 
-        // Calculate Pre-tax Annual Income
-        let preTaxIncomeAnnually = 0;
-        if (budget.income.type === 'salary' && typeof budget.income.salary === 'number') {
-            preTaxIncomeAnnually = budget.income.salary * 12; // Assuming monthly salary
-        } else if (budget.income.type === 'hourly' && typeof budget.income.hourlyRate === 'number' && typeof budget.income.expectedAnnualHours === 'number') {
-            preTaxIncomeAnnually = budget.income.hourlyRate * budget.income.expectedAnnualHours;
+        let annualPreTax = 0;
+        let monthlyAfterTax = 0;
+
+        if (budget.income.type === 'salary') {
+            annualPreTax = budget.income.annualPreTax || 0;
+            monthlyAfterTax = budget.income.monthlyAfterTax || 0;
+        } else if (budget.income.type === 'hourly') {
+            annualPreTax = (budget.income.hourlyRate || 0) * (budget.income.expectedAnnualHours || 0);
+            monthlyAfterTax = budget.income.monthlyAfterTax || 0;
         }
-        preTaxIncomeAnnually += (budget.income.bonus || 0);
-        preTaxIncomeAnnually += (budget.income.additionalIncome || 0);
 
+        // After-tax annual income
+        const annualAfterTax =
+            (monthlyAfterTax * 12) +
+            (budget.income.bonusAfterTax || 0) +
+            (budget.income.additionalIncomeAfterTax || 0);
 
-        const averageIncomeAfterTaxMonthly = typeof budget.income.monthlyIncomeAfterTaxes === 'number' ? budget.income.monthlyIncomeAfterTaxes : 0;
-        const discretionaryIncomeAnnually = (averageIncomeAfterTaxMonthly * 12) - (totalMonthlyExpenses * 12);
-        const averageDiscretionaryIncomeMonthly = averageIncomeAfterTaxMonthly - totalMonthlyExpenses;
+        // Pre-tax monthly income (for salary, just annualPreTax / 12)
+        const monthlyPreTax =
+            budget.income.type === 'salary'
+                ? (annualPreTax / 12)
+                : (annualPreTax / 12);
+
+        // Discretionary income (after-tax monthly - expenses)
+        const discretionaryIncome = monthlyAfterTax - totalMonthlyExpenses;
 
         return {
             ...budget,
             totalMonthlyExpenses,
-            preTaxIncomeAnnually,
-            discretionaryIncomeAnnually,
-            averageIncomeAfterTaxMonthly,
-            averageDiscretionaryIncomeMonthly,
-            // Keep the previous discretionaryIncome for clarity if still needed (based on provided monthly income)
-            discretionaryIncome: averageIncomeAfterTaxMonthly - totalMonthlyExpenses // Monthly discretionary
+            annualPreTax,
+            monthlyAfterTax,
+            annualAfterTax,
+            monthlyPreTax,
+            discretionaryIncome,
         };
     })() : null;
 
@@ -189,7 +206,13 @@ export const BudgetProvider = ({ children }) => {
     const clearBudget = useCallback(async () => {
         setBudget({
             income: {
-                type: "salary", salary: 0, hourlyRate: null, expectedAnnualHours: null, bonus: 0, additionalIncome: 0, monthlyIncomeAfterTaxes: 0
+                type: "salary",
+                annualPreTax: 0,
+                monthlyAfterTax: 0,
+                hourlyRate: null,
+                expectedAnnualHours: null,
+                bonusAfterTax: 0,
+                additionalIncomeAfterTax: 0,
             },
             monthlyExpenses: [],
         });

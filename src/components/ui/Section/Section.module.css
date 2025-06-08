@@ -1,9 +1,12 @@
+/* src/components/ui/Section/Section.module.css */
+
 .section {
     background: var(--surface-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-md);
     padding: 0 var(--section-padding);
-    margin-bottom: var(--space-md);
+    /* This padding might be an issue if we want internal padding per section */
+    /*     margin-bottom: var(--space-md); */
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -11,14 +14,17 @@
 }
 
 .sectionHeader {
+    /* This is a wrapper for the actual header content (title or SectionHeader component) */
     font-size: var(--section-header-font-size);
     font-weight: 600;
-    margin-bottom: var(--space-sm);
+    /*    margin-bottom: var(--space-sm); */
     text-align: left;
     color: var(--text-primary);
     padding-left: var(--space-xs);
+    /* This padding is on the sectionHeader div, not the content */
 }
 
+/* These styles are used by SectionHeader.jsx, which is good. */
 .sectionHeaderRow {
     display: flex;
     flex-direction: row;
@@ -57,6 +63,7 @@
 .sectionContent {
     width: 100%;
     padding: 0;
+    /* This means internal padding must be handled by the children directly */
 }
 
 .twoColumn {
@@ -65,7 +72,6 @@
     gap: var(--space-md);
     width: 100%;
 }
-
 
 .oneColumn {
     display: flex;

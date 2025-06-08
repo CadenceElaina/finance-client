@@ -2,6 +2,15 @@
     --breakpoint-small-app: 1112px;
     --breakpoint-small-app-height: 351px;
 
+    --transition-speed-fast: 0.15s;
+    --transition-speed-normal: 0.25s;
+    --transition-speed-slow: 0.4s;
+    --transition-ease: ease-in-out;
+    /* Consider more specific hover effects than just brightness */
+    --button-hover-filter: brightness(1.1);
+    /* if you want to keep brightness */
+    --button-hover-transform: translateY(-1px);
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
     --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
@@ -38,11 +47,17 @@
 
     /* Typography */
     --font-family-base: 'Inter', 'Open Sans', 'Roboto', sans-serif;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-md: 0.98rem;
+    --font-size-xxs: 0.75rem;
+    --font-size-xs: 0.875rem;
+    --font-size-sm: 0.9375rem;
     --font-size-base: 1rem;
-    --font-size-lg: 1.125rem;
+    --font-size-md: 1.125rem;
+    --font-size-lg: 1.25rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    --font-size-h1: 2.5rem;
+    --font-size-h2: 2rem;
+    --font-size-h3: 1.75rem;
 
     /* Space */
     --space-xxs: 2px;
@@ -86,179 +101,453 @@
 }
 
 /* --- Theme Overrides --- */
-
+/* Light Mode */
 /* Light Mode */
 body[data-theme="light"] {
+    /* Base Colors */
     --background-light: #F8F9FA;
     --surface-light: #FFFFFF;
     --surface-dark: #E0E0E0;
     --border-light: #E0E0E0;
+
+    /* Text Colors */
     --text-primary: #212529;
     --text-secondary: #6C757D;
     --text-tertiary: #ADB5BD;
     --text-light: #212529;
+    --text-on-primary: #FFFFFF;
+    --text-on-secondary: #FFFFFF;
+    --text-disabled: #ADB5BD;
+
+    /* Brand/Accent Colors */
     --color-primary: #007B8C;
     --color-primary-light: #00AEBF;
     --color-primary-dark: #005F6B;
     --color-secondary: #FF8C69;
     --color-secondary-light: #FF9B7A;
+    --color-secondary-dark: #CC7054;
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #007B8C 0%, #00AEBF 100%);
     --gradient-secondary: linear-gradient(135deg, #FF8C69 0%, #FFB09C 100%);
+
+    /* Status Colors */
+    --status-success: #28A745;
+    --status-warning: #FFC107;
+    --status-danger: #DC3545;
+    --status-info: #17A2B8;
+
+    /* Interactive States */
+    --focus-ring: 0 0 0 3px rgba(0, 123, 140, 0.5);
+    --button-hover-bg: var(--color-primary-light);
+    --button-active-bg: var(--color-primary-dark);
+    --link-color: var(--color-primary);
+    --link-hover-color: var(--color-primary-dark);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #E9ECEF;
+    --interactive-disabled-text: var(--text-tertiary);
+
+    /* Component Specific */
+    --dashboard-button-bg: var(--surface-dark);
+    --dashboard-button-text: var(--text-primary);
+    --app-launcher-button-text: var(--text-primary);
+    --app-launcher-button-border-color: var(--border-light);
+    --app-launcher-button-hover-border-color: var(--color-primary);
+
+    --table-row-even-bg: rgba(0, 0, 0, 0.02);
+    --table-row-hover-bg: rgba(0, 0, 0, 0.05);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
+    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.12);
+
+    --app-orb-shadow: var(--shadow-md);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
+
+    /* Glass Effect */
+    --glass-background: rgba(0, 0, 0, 0.03);
+    /* Subtle dark overlay for glass on light bg */
+    --glass-border: rgba(0, 0, 0, 0.1);
+    /* Subtle dark border */
 }
 
 /* Ultra Dark Mode */
 body[data-theme="ultra-dark"] {
+    /* Base Colors */
     --background-light: #0D1117;
     --surface-light: #161B22;
     --surface-dark: #0D1117;
     --border-light: #30363D;
+
+    /* Text Colors */
     --text-primary: #C9D1D9;
     --text-secondary: #8B949E;
     --text-tertiary: #6E7681;
     --text-light: #C9D1D9;
-    --dashboard-button-bg: #1F252E;
-    --dashboard-button-text: #E0E0E0;
+    --text-on-primary: #FFFFFF;
+    --text-on-secondary: #FFFFFF;
+    --text-disabled: #444C56;
+
+    /* Brand/Accent Colors */
     --color-primary: #4A90E2;
     --color-primary-light: #6BA0ED;
     --color-primary-dark: #2F6DB5;
     --color-secondary: #FF6B6B;
     --color-secondary-light: #FF8F8F;
+    --color-secondary-dark: #CC5555;
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #4A90E2 0%, #6BA0ED 100%);
     --gradient-secondary: linear-gradient(135deg, #FF6B6B 0%, #FF8F8F 100%);
+
+    /* Status Colors */
+    --status-success: #2ECC71;
+    --status-warning: #F1C40F;
+    --status-danger: #E74C3C;
+    --status-info: #3498DB;
+
+    /* Interactive States */
+    --focus-ring: 0 0 0 3px rgba(74, 144, 226, 0.5);
+    --button-hover-bg: var(--color-primary-light);
+    --button-active-bg: var(--color-primary-dark);
+    --link-color: var(--color-primary-light);
+    --link-hover-color: var(--color-primary);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #21262D;
+    --interactive-disabled-text: var(--text-tertiary);
+
+    /* Component Specific */
+    --dashboard-button-bg: #1F252E;
+    --dashboard-button-text: #E0E0E0;
+    --app-launcher-button-text: var(--text-primary);
+    --app-launcher-button-border-color: var(--border-light);
+    --app-launcher-button-hover-border-color: var(--color-primary);
+
+    --table-row-even-bg: rgba(255, 255, 255, 0.02);
+    /* Subtle light for dark themes */
+    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+    /* Slightly brighter hover fo
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.35);
+
+    --app-orb-shadow: var(--shadow-md);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
+
+    /* Glass Effect */
+    --glass-background: rgba(255, 255, 255, 0.05);
+    /* Light overlay for glass on dark bg */
+    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Light border */
 }
 
 /* High Contrast Dark Mode */
 body[data-theme="high-contrast-dark"] {
+    /* Base Colors */
     --background-light: #000000;
     --surface-light: #1B1B1B;
     --surface-dark: #000000;
     --border-light: #FFFFFF;
     --border-active: #FFFF00;
-    --color-accent-highlight: #00FFFF;
+
+    /* Text Colors */
     --text-primary: #FFFFFF;
     --text-secondary: #C0C0C0;
     --text-tertiary: #808080;
     --text-light: #FFFFFF;
-    --dashboard-button-bg: #1B1B1B;
-    --dashboard-button-text: #FFFFFF;
-    --app-launcher-button-text: #000000;
-    --app-launcher-button-border-color: #FFFFFF;
-    --app-launcher-button-hover-border-color: #FFFF00;
+    --text-on-primary: #000000;
+    --text-on-secondary: #000000;
+    --text-disabled: #404040;
+
+    /* Brand/Accent Colors */
     --color-primary: #00FFFF;
     --color-primary-light: #6FC3DF;
     --color-primary-dark: #007070;
     --color-secondary: #FFFF00;
     --color-secondary-light: #FFFF99;
+    --color-secondary-dark: #CCBB00;
+    --color-accent-highlight: #00FFFF;
+
+    /* Gradients */
     --gradient-primary: none;
     --gradient-secondary: none;
+
+    /* Status Colors */
+    --status-success: #00FF00;
+    --status-warning: #FFFF00;
+    --status-danger: #FF0000;
+    --status-info: #00FFFF;
+
+    /* Interactive States */
     --focus-ring: 0 0 0 3px #FFFF00;
     --button-hover-bg: #1B1B1B;
     --button-active-bg: #333333;
+    --link-color: var(--color-primary);
+    --link-hover-color: var(--color-secondary);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #000000;
+    --interactive-disabled-text: #404040;
+
+    --table-row-even-bg: rgba(255, 255, 255, 0.02);
+    /* Very subtle white for high contrast */
+    --table-row-hover-bg: rgba(255, 255, 255, 0.1);
+
+    /* Component Specific */
+    --dashboard-button-bg: #1B1B1B;
+    --dashboard-button-text: #FFFFFF;
+    --app-launcher-button-text: #000000;
+    --app-launcher-button-border-color: #FFFFFF;
+    --app-launcher-button-hover-border-color: #FFFF00;
+
+    /* Shadows */
+    --shadow-sm: 0 0 0 1px #808080;
+    --shadow-md: 0 0 0 2px #C0C0C0;
+    --shadow-lg: 0 0 0 3px #FFFFFF;
+    --shadow-elevated: 0 0 0 4px #FFFF00;
+
     --app-orb-shadow: 0 0 0 3px #FFFF00, 0 6px 20px rgba(255, 255, 0, 0.2);
     --app-orb-menu-bg: #1B1B1B;
     --app-orb-menu-shadow: 0 10px 30px rgba(255, 255, 0, 0.15);
+
+    /* Glass Effect */
+    --glass-background: rgba(255, 255, 255, 0.02);
+    /* Very subtle white for glass on black bg */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    /* Slightly stronger white border */
 }
 
 /* Vibrant Green Theme */
 body[data-theme="vibrant-green"] {
+    /* Base Colors */
     --background-light: #001A0F;
     --surface-light: #0B3322;
     --surface-dark: #001A0F;
     --border-light: #3A7F67;
+
+    /* Text Colors */
     --text-primary: #D1FFEC;
     --text-secondary: #8BCDA7;
     --text-tertiary: #5E9B7A;
     --text-light: #D1FFEC;
-    --dashboard-button-bg: #1A7A4A;
-    --dashboard-button-text: #F0F0F0;
-    --app-launcher-button-text: #FFFFFF;
+    --text-on-primary: #000000;
+    --text-on-secondary: #000000;
+    --text-disabled: #2A5E42;
+
+    /* Brand/Accent Colors */
     --color-primary: #00E080;
     --color-primary-light: #33F09C;
     --color-primary-dark: #00B36B;
     --color-secondary: #FF66CC;
     --color-secondary-light: #FF80D4;
+    --color-secondary-dark: #CC4D99;
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
     --gradient-secondary: linear-gradient(135deg, #FF66CC 0%, #FF4DBC 100%);
+
+    /* Status Colors */
+    --status-success: #00E080;
+    --status-warning: #FFD700;
+    --status-danger: #FF4444;
+    --status-info: #00BFFF;
+
+    /* Interactive States */
     --focus-ring: 0 0 0 3px #00E080;
     --button-hover-bg: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
     --button-active-bg: #00B36B;
+    --link-color: var(--color-primary-light);
+    --link-hover-color: var(--color-primary);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #1B4A34;
+    --interactive-disabled-text: var(--text-tertiary);
+
+    --table-row-even-bg: rgba(255, 255, 255, 0.02);
+    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+
+    /* Component Specific */
+    --dashboard-button-bg: #1A7A4A;
+    --dashboard-button-text: #F0F0F0;
+    --app-launcher-button-text: #FFFFFF;
+    --app-launcher-button-border-color: var(--border-light);
+    --app-launcher-button-hover-border-color: var(--color-primary);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(0, 224, 128, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 224, 128, 0.2);
+    --shadow-lg: 0 10px 20px rgba(0, 224, 128, 0.3);
+    --shadow-elevated: 0 5px 15px rgba(0, 224, 128, 0.25);
+
     --app-orb-shadow: 0 0 0 3px #00E080, 0 6px 20px rgba(0, 224, 128, 0.2);
     --app-orb-menu-bg: #0B3322;
     --app-orb-menu-shadow: 0 10px 30px rgba(0, 224, 128, 0.15);
+
+    /* Glass Effect */
+    --glass-background: rgba(255, 255, 255, 0.05);
+    /* White overlay for glass on dark green bg */
+    --glass-border: rgba(255, 255, 255, 0.1);
+    /* White border */
 }
 
 /* Vibrant Orange Theme */
 body[data-theme="vibrant-orange"] {
+    /* Base Colors */
     --background-light: #26160A;
     --surface-light: #4A2B14;
     --surface-dark: #26160A;
     --border-light: #9B5D34;
+
+    /* Text Colors */
     --text-primary: #FFF0E0;
     --text-secondary: #FFB880;
     --text-tertiary: #E09060;
     --text-light: #FFF0E0;
+    --text-on-primary: #000000;
+    --text-on-secondary: #FFFFFF;
+    --text-disabled: #6B4D2F;
+
+    /* Brand/Accent Colors */
     --color-primary: #FFA500;
     --color-primary-light: #FFB833;
     --color-primary-dark: #CC8400;
     --color-secondary: #8A2BE2;
     --color-secondary-light: #A050EA;
+    --color-secondary-dark: #6F20B6;
+
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #7B1BE0 100%);
+
+    /* Status Colors */
+    --status-success: #7CFC00;
+    --status-warning: #FFD700;
+    --status-danger: #FF4500;
+    --status-info: #00BFFF;
+
+    /* Interactive States */
     --focus-ring: 0 0 0 3px #FFA500;
     --button-hover-bg: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
     --button-active-bg: #CC8400;
+    --link-color: var(--color-primary-light);
+    --link-hover-color: var(--color-primary);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #5C3A1E;
+    --interactive-disabled-text: var(--text-tertiary);
+
+    --table-row-even-bg: rgba(255, 255, 255, 0.02);
+    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+
+    /* Component Specific */
+    --dashboard-button-bg: var(--surface-dark);
+    --dashboard-button-text: var(--text-primary);
+    --app-launcher-button-text: var(--text-primary);
+    --app-launcher-button-border-color: var(--border-light);
+    --app-launcher-button-hover-border-color: var(--color-primary);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(255, 165, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(255, 165, 0, 0.2);
+    --shadow-lg: 0 10px 20px rgba(255, 165, 0, 0.3);
+    --shadow-elevated: 0 5px 15px rgba(255, 140, 0, 0.25);
+
     --app-orb-shadow: 0 0 0 3px #FFA500, 0 6px 20px rgba(255, 140, 0, 0.2);
     --app-orb-menu-bg: #4A2B14;
     --app-orb-menu-shadow: 0 10px 30px rgba(255, 140, 0, 0.15);
+
+    /* Glass Effect */
+    --glass-background: rgba(255, 255, 255, 0.05);
+    /* White overlay for glass on dark orange bg */
+    --glass-border: rgba(255, 255, 255, 0.1);
+    /* White border */
 }
 
 /* Tokyo Night Theme */
 body[data-theme="tokyo-night"] {
+    /* Gogh Theme Inspiration (for reference) */
+    /* #414868 - Your current border/tertiary, also primary-dark */
+    /* #F7768E - Danger */
+    /* #9ECE6A - Success */
+    /* #E0AF68 - Warning */
+    /* #7AA2F7 - Primary */
+    /* #BB9AF7 - Secondary */
+    /* #7DCFFF - Primary Light / Info */
+    /* #A9B1D6 - Secondary Light / Secondary Text */
+    /* #C0CAF5 - Primary Text */
+
+    /* Base Colors */
     --background-light: #1A1B26;
     --surface-light: #24283B;
     --surface-dark: #16161E;
     --border-light: #414868;
 
+    /* Text Colors */
     --text-primary: #C0CAF5;
     --text-secondary: #A9B1D6;
     --text-tertiary: #414868;
     --text-light: #C0CAF5;
+    --text-on-primary: #1A1B26;
+    --text-on-secondary: #1A1B26;
+    --text-disabled: #414868;
 
+    /* Brand/Accent Colors - Directly from Gogh Palette */
     --color-primary: #7AA2F7;
-    /* blue */
     --color-primary-light: #7DCFFF;
-    /* cyan */
     --color-primary-dark: #414868;
-    /* dark blue */
     --color-secondary: #BB9AF7;
-    /* purple */
     --color-secondary-light: #A9B1D6;
-    /* light blue/gray */
-    --color-success: #9ECE6A;
-    /* green */
-    --color-warning: #E0AF68;
-    /* yellow */
-    --color-danger: #F7768E;
-    /* red/pink */
-    --color-info: #7DCFFF;
-    /* cyan */
+    --color-secondary-dark: #7B68A6;
 
+    /* Gradients */
     --gradient-primary: linear-gradient(135deg, #7AA2F7 0%, #7DCFFF 100%);
     --gradient-secondary: linear-gradient(135deg, #BB9AF7 0%, #A9B1D6 100%);
 
+    /* Status Colors - Directly from Gogh Palette */
+    --status-success: #9ECE6A;
+    --status-warning: #E0AF68;
+    --status-danger: #F7768E;
+    --status-info: #7DCFFF;
+
+    /* Interactive States */
     --focus-ring: 0 0 0 3px #7AA2F7;
     --button-hover-bg: var(--gradient-primary);
     --button-active-bg: var(--color-primary-dark);
+    --link-color: var(--color-primary-light);
+    --link-hover-color: var(--color-primary);
+    --link-active-color: var(--color-primary-dark);
+    --interactive-disabled-bg: #2B2F44;
+    --interactive-disabled-text: var(--text-tertiary);
 
-    --app-orb-shadow: 0 0 0 3px var(--border-light), var(--shadow-elevated);
-    --app-orb-menu-bg: var(--surface-light);
-    --app-orb-menu-shadow: var(--shadow-lg);
-
+    /* Component Specific */
     --dashboard-button-bg: #414868;
     --dashboard-button-text: #C0CAF5;
     --app-launcher-button-text: #C0CAF5;
     --app-launcher-button-border-color: #414868;
     --app-launcher-button-hover-border-color: #7AA2F7;
+
+    --table-row-even-bg: rgba(255, 255, 255, 0.02);
+    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
+    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.4);
+
+    --app-orb-shadow: 0 0 0 3px var(--border-light), var(--shadow-elevated);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
+
+    /* Glass Effect */
+    --glass-background: rgba(255, 255, 255, 0.05);
+    /* White overlay for glass on dark bg */
+    --glass-border: rgba(255, 255, 255, 0.1);
+    /* White border */
 }
 
 /* --- Focus Styles --- */

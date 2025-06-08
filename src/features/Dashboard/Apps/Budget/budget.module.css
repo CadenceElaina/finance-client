@@ -32,12 +32,74 @@
     text-align: center;
     color: var(--color-primary);
     font-size: var(--font-size-lg);
+    font-size: var(--font-size-lg);
+    margin-top: var(--space-md);
+    margin-bottom: var(--space-md);
 }
 
 .error {
     color: var(--color-danger);
     font-weight: bold;
     text-align: center;
+    padding: var(--space-md);
+}
+
+/* --- Income Details Section Specific Styles --- */
+.incomeSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    /* Create responsive columns */
+    gap: var(--space-md);
+    /* Space between grid items */
+    padding: var(--space-md);
+    /* Internal padding for the section */
+}
+
+.incomeSection>div {
+    /* Target direct children of incomeSection (our form groups) */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.incomeSection label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-xxs);
+    /* Space between label and input */
+}
+
+.incomeSection .radioGroup {
+    flex-direction: row;
+    /* Ensure radios are in a row */
+    align-items: center;
+    /* Align radio and label vertically */
+    margin-top: 0;
+    /* Reset any default top margin */
+    margin-bottom: var(--space-sm);
+    /* Add some space below the radio group */
+}
+
+.incomeSection .radioGroup label {
+    margin-right: var(--space-md);
+    /* Space between radio options */
+}
+
+.incomeSection input,
+.incomeSection select {
+    max-width: 100%;
+    /* Ensure inputs take full width of their grid cell */
+}
+
+/* Style for the calculated read-only input */
+.incomeSection input:read-only,
+.incomeSection input:disabled {
+    background-color: var(--surface-dark);
+    /* Slightly darker background to indicate read-only */
+    color: var(--text-tertiary);
+    /* Muted text color */
+    border-color: var(--border-dark);
+    cursor: not-allowed;
 }
 
 /* --- Form Elements --- */
@@ -49,99 +111,17 @@
     margin-bottom: var(--space-xs);
 }
 
-.formGroup {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xxs);
-}
-
-.formGroup label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-}
-
-.radioGroup {
-    display: flex;
-    gap: var(--space-sm);
-    margin-top: var(--space-xxs);
-}
-
-.radioGroup label {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xxs);
-    cursor: pointer;
-    font-size: var(--font-size-base);
-    color: var(--text-primary);
-}
-
-.radioGroup input[type="radio"] {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--border-light);
-    border-radius: 50%;
-    display: grid;
-    place-content: center;
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    flex-shrink: 0;
-}
-
-.radioGroup input[type="radio"]::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    transform: scale(0);
-    transition: transform var(--transition-speed-fast) var(--transition-ease);
-    box-shadow: inset 1em 1em var(--color-primary);
-}
-
-.radioGroup input[type="radio"]:checked::before {
-    transform: scale(1);
-}
-
-.radioGroup input[type="radio"]:focus-visible {
-    outline: none;
-    box-shadow: var(--focus-ring);
-}
-
-.formGroup input[type="number"],
-.formGroup input[type="text"],
-.select {
-    padding: 2px 8px;
-    font-size: var(--font-size-xs);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    background-color: var(--background-light);
-    color: var(--text-primary);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    min-height: 24px;
-    height: 28px;
-    max-width: 120px;
-    box-sizing: border-box;
-}
-
-.formGroup input:focus,
-.select:focus {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-color: var(--color-primary);
-}
-
-.fullWidth {
-    grid-column: 1 / -1;
-}
-
 .persistenceOption {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
+    margin-top: var(--space-sm);
 }
 
 .persistenceLabel {
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
+    white-space: nowrap;
 }
 
 /* --- Table Styles --- */
@@ -182,26 +162,7 @@
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-.tableInput,
-.tableSelect {
-    width: 100%;
-    padding: var(--space-xxs);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    background-color: var(--background-light);
-    color: var(--text-primary);
-    font-size: var(--font-size-sm);
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-    height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
-    box-sizing: border-box;
-}
 
-.tableInput:focus,
-.tableSelect:focus {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-color: var(--color-primary);
-}
 
 /* --- Stacked Controls (Period/Tax) --- */
 .stackedControls {
@@ -237,7 +198,8 @@
     white-space: nowrap;
 }
 
-.select {
+.stackedButtonGroup select {
+    /* More specific selector for the select in stacked controls */
     padding: 1px 6px;
     font-size: var(--font-size-xs);
     min-height: 22px;
@@ -248,7 +210,7 @@
 .overviewGridCustom {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: var(--space-md);
     width: 100%;
     max-width: none;
     margin: 0;
@@ -256,4 +218,91 @@
     align-items: stretch;
     justify-content: center;
     overflow: auto;
+    margin-bottom: var(--space-sm);
+}
+
+.overviewTitle {
+    text-align: center;
+    font-size: var(--font-size-md);
+    color: var(--text-secondary)
+}
+
+
+/* Small app specific adjustments */
+.smallAppTabsContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.smallAppTabButtons {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+    flex-wrap: wrap;
+    padding: var(--space-xs) 0;
+}
+
+/* Summary section specific styles */
+.summaryBothGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    /* Larger gap between monthly/annual columns */
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: var(--space-sm) 0;
+    /* Add some vertical padding */
+}
+
+.summaryBothGrid.centered {
+    justify-content: center;
+    grid-template-columns: 1fr !important;
+}
+
+.summaryBothCol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    /* Gap between individual summary blocks */
+}
+
+.summarySectionNoBorder {
+    border: none;
+    /* New class to remove border for specific summary sections */
+    box-shadow: none;
+    /* Remove shadow too if border is removed */
+    background-color: transparent;
+    /* Keep background transparent if no border/shadow */
+}
+
+.summaryRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: var(--font-size-base);
+    gap: var(--space-xs);
+    /* Reduced gap, text will wrap if needed */
+    padding: var(--space-xxs) var(--space-sm);
+    /* Horizontal padding for better appearance */
+    min-height: 26px;
+    color: var(--text-primary);
+    /* Ensure consistent text color */
+}
+
+.summaryRow strong {
+    color: var(--color-primary);
+    /* Make values stand out */
+    font-weight: 600;
+}
+
+.negative {
+    color: var(--color-danger) !important;
+    /* Keep important for strong visual cue */
+    font-weight: bold;
 }

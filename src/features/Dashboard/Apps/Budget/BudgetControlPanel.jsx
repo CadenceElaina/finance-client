@@ -26,7 +26,7 @@ const BudgetControlPanel = ({ userSignedIn }) => {
                         id="persistence-pref"
                         value={persistencePreference}
                         onChange={(e) => setBudgetPersistencePreference(e.target.value)}
-                        className={styles.select}
+                        // className={styles.select} REMOVED: now handled by general select styles
                         disabled={isLoading}
                     >
                         <option value="server">Server (Cloud)</option>

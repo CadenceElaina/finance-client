@@ -35,6 +35,7 @@
     border: 2px solid var(--border-active);
     box-shadow: 0 0 0 2px var(--border-active), var(--shadow-elevated);
     filter: brightness(1.2);
+    background: var(--button-active-bg)
 }
 
 .app-launcher button:hover:not(.active) {
@@ -53,7 +54,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-weight: 900;
+    font-weight: 700;
     border-bottom: 1px solid var(--border-light);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease),
@@ -117,9 +118,9 @@
 }
 
 .glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-background);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
     border-radius: var(--border-radius-lg);
 }
 
@@ -132,10 +133,36 @@
 
 .react-resizable-handle {
     background-color: var(--color-primary);
-    border-radius: 50%;
-    opacity: 0.8;
+    opacity: 0.6;
+    /* Slightly less opaque by default */
+    transition: opacity var(--transition-speed-fast) var(--transition-ease);
+    /* Make it less intrusive but still functional */
+    width: 16px !important;
+    /* Smaller target */
+    height: 16px !important;
+    right: -8px !important;
+    /* Position it on the edge */
+    bottom: -8px !important;
 
+    /* Visual cue like a small triangle or dots */
+    &::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-bottom: 2px solid var(--text-on-primary);
+        /* Or a specific handle color */
+        border-right: 2px solid var(--text-on-primary);
+        right: 4px;
+        bottom: 4px;
+    }
 }
+
+.react-resizable-handle:hover {
+    opacity: 1;
+    /* Fully opaque on hover */
+}
+
 
 .react-resizable-handle-se {
     cursor: se-resize;

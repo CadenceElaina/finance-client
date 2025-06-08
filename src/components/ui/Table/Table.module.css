@@ -7,53 +7,66 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0 auto;
     font-size: var(--font-size-md);
 }
 
-
-th,
-td {
+/* Scoped table elements */
+.table th,
+.table td {
     border: none;
+    /* Reset default table borders */
     padding: var(--space-xs) var(--space-sm);
     text-align: left;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
+    /* Apply bottom border */
     vertical-align: middle;
     font-size: inherit;
+    /* Inherit font size from .table or parent */
 }
 
-th {
+.table th {
     background: var(--surface-dark);
     color: var(--text-light);
     font-weight: bold;
     position: sticky;
+    /* Sticky header for scrolling tables */
     top: 0;
     z-index: 1;
+    /* Ensure header stays above content */
     border-bottom: 1px solid var(--border-light);
+    /* Consistent border */
 }
 
-tr:nth-child(even) {
-    background: transparent;
+.table tr:nth-child(even) {
+    background: var(--table-row-even-bg);
+    /* Use new theme-aware variable */
 }
 
-tr:hover {
-    background: rgba(255, 255, 255, 0.05);
+.table tr:hover {
+    background: var(--table-row-hover-bg);
+    /* Use new theme-aware variable */
 }
 
+/* Input/Select within table cells (Unified with general input styles) */
 .tableInput,
 .tableSelect {
     width: 100%;
-    padding: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    /* Smaller padding for compact table cells */
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
     color: var(--text-primary);
     font-size: var(--font-size-sm);
+    /* Use standard font size */
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
+    /* Calc height for consistency */
     box-sizing: border-box;
+    max-width: none;
+    /* Override any max-width from general input styles */
 }
 
 .tableInput:focus,
@@ -66,23 +79,28 @@ tr:hover {
 /* --- Compact styles for small app --- */
 .smallApp .table {
     font-size: var(--font-size-sm);
+    min-width: unset;
+    /* Allow table to shrink more in small app mode */
 }
 
-.smallApp th,
-.smallApp td {
+.smallApp .table th,
+.smallApp .table td {
     padding: var(--space-xxs) var(--space-xs);
     font-size: var(--font-size-sm);
 }
 
 .smallApp .tableInput,
 .smallApp .tableSelect {
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
+    /* Smaller font for inputs in small app mode */
     padding: 2px 4px;
     height: 22px;
 }
 
 .tableHeaderTitle {
+    /* This style seems to be for internal use in Table.jsx or similar. */
     font-size: 1.08rem;
+    /* Consider using a variable */
     font-weight: 600;
     color: var(--color-primary);
     text-align: center;

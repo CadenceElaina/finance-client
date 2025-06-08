@@ -86,6 +86,7 @@ textarea {
 button:hover {
     filter: var(--hover-brightness);
     border-color: var(--color-primary);
+    transform: var(--button-hover-transform);
     background: var(--button-hover-bg);
 }
 
@@ -117,6 +118,28 @@ textarea:focus {
     box-shadow: var(--focus-ring);
 }
 
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-tertiary);
+    opacity: 1;
+    /* Firefox default is lower */
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    background-color: var(--interactive-disabled-bg);
+    color: var(--interactive-disabled-text);
+    border-color: var(--border-light);
+    box-shadow: none;
+    filter: none;
+    /* Remove hover/active effects */
+}
+
+
+
 /* Card & Glass Styles */
 .card {
     background-color: var(--surface-light);
@@ -133,9 +156,12 @@ textarea:focus {
 }
 
 .glass {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-background);
+    /* Now uses theme-specific glass background */
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--glass-border);
+    /* Now uses theme-specific glass border */
+    border-radius: var(--border-radius-lg);
 }
 
 /* Focus Styles */

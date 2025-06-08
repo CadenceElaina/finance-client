@@ -1,13 +1,17 @@
+import React, { useEffect } from 'react';
 import DashboardPage from './DashboardPage';
-import React from 'react';
-// DEMO USER's settings and data
+import { useBudget } from '../contexts/BudgetContext';
+import { clearBudgetDataFromLocal } from '../utils/localStorageUtils';
 
 const DemoPage = () => {
-    return (
-        <>
-            <DashboardPage />
-        </>
-    )
-}
+    const { resetBudget } = useBudget();
 
-export default DemoPage
+    useEffect(() => {
+        clearBudgetDataFromLocal();
+        resetBudget();
+    }, [resetBudget]);
+
+    return <DashboardPage />;
+};
+
+export default DemoPage;

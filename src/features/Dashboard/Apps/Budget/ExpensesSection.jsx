@@ -3,9 +3,31 @@ import { useBudget } from '../../../../contexts/BudgetContext';
 import styles from './budget.module.css';
 import Button from '../../../../components/ui/Button/Button';
 import Table from '../../../../components/ui/Table/Table';
-import tableStyles from '../../../../components/ui/Table/Table.module.css';
+import tableStyles from '../../../../components/ui/Table/Table.module.css'; // Good to keep this for specific table elements
 import Section from '../../../../components/ui/Section/Section';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
+
+// New component for small app internal tab buttons (duplicated here for visibility, but ideally imported)
+// For demonstration purposes, assuming it's available.
+const SmallAppTabButtons = ({ activeInternalTab, setActiveInternalTab }) => (
+    <div className={styles.smallAppTabButtons}>
+        <Button
+            tab
+            active={activeInternalTab === 'summary'}
+            onClick={() => setActiveInternalTab('summary')}
+        >
+            Overview
+        </Button>
+        <Button
+            tab
+            active={activeInternalTab === 'expenses'}
+            onClick={() => setActiveInternalTab('expenses')}
+        >
+            Expenses
+        </Button>
+    </div>
+);
+
 
 const ExpensesSection = ({
     expenses,
@@ -20,7 +42,7 @@ const ExpensesSection = ({
         const { name, value, type, checked } = e.target;
         setNewExpense(prev => ({
             ...prev,
-            [name]: type === 'number' ? parseFloat(value) : (type === 'checkbox' ? checked : value)
+            [name]: type === 'number' ? parseFloat(value) || 0 : (type === 'checkbox' ? checked : value)
         }));
     };
 
@@ -131,32 +153,12 @@ const ExpensesSection = ({
         </tr>
     );
 
-    // --- Header Row (matches Overview) ---
-    const renderTabButtons = () => (
-        <div className={styles.smallAppTabButtons}>
-            <Button
-                tab
-                active={activeInternalTab === 'summary'}
-                onClick={() => setActiveInternalTab('summary')}
-            >
-                Overview
-            </Button>
-            <Button
-                tab
-                active={activeInternalTab === 'expenses'}
-                onClick={() => setActiveInternalTab('expenses')}
-            >
-                Expenses
-            </Button>
-        </div>
-    );
-
     return (
         <Table
             columns={columns}
             data={expenses}
             renderRow={renderRow}
-            className={styles.expenseTable}
+            className={styles.expenseTable} // This class will now correctly apply styles from Table.module.css
             smallApp={smallApp}
             extraRow={renderNewExpenseRow}
         />
