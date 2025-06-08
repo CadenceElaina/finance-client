@@ -16,23 +16,6 @@
     overflow-y: auto;
 }
 
-.tabsRow {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    width: 100%;
-    flex: 1 1 auto;
-}
-
-.budgetTabs {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
 .budgetContentWrapper {
     display: flex;
     flex-direction: column;
@@ -273,13 +256,4 @@
     align-items: stretch;
     justify-content: center;
     overflow: auto;
-}
-
-.summarySectionCustom {
-    align-items: center;
-    text-align: center;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
 }

@@ -5,7 +5,7 @@ import Button from '../../../../components/ui/Button/Button';
 import Table from '../../../../components/ui/Table/Table';
 import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import Section from '../../../../components/ui/Section/Section';
-import sectionStyles from '../../../../components/ui/Section/Section.module.css';
+import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
 const ExpensesSection = ({
     expenses,
@@ -152,25 +152,14 @@ const ExpensesSection = ({
     );
 
     return (
-        <Section className={sectionStyles.sectionDark}>
-            <div className={styles.expensesSectionCustom}>
-                <div className={styles.summaryHeaderRow}>
-                    <div className={styles.summaryHeaderLeft}>
-                        {smallApp && renderTabButtons()}
-                    </div>
-                    <h3 className={styles.summaryHeaderTitle}>Monthly Expenses</h3>
-                    <div className={styles.summaryHeaderRight} />
-                </div>
-                <Table
-                    columns={columns}
-                    data={expenses}
-                    renderRow={renderRow}
-                    className={styles.expenseTable}
-                    smallApp={smallApp}
-                    extraRow={renderNewExpenseRow}
-                />
-            </div>
-        </Section>
+        <Table
+            columns={columns}
+            data={expenses}
+            renderRow={renderRow}
+            className={styles.expenseTable}
+            smallApp={smallApp}
+            extraRow={renderNewExpenseRow}
+        />
     );
 };
 

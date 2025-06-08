@@ -7,6 +7,7 @@ import { isSmallApp } from '../../../../utils/isSmallApp';
 import Button from '../../../../components/ui/Button/Button';
 import Section from '../../../../components/ui/Section/Section';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
+import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
 
 const PERIOD_OPTIONS = [
@@ -119,6 +120,9 @@ const Overview = () => {
         const format = (val) =>
             `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+        const showAfter = tax === 'after' || tax === 'both';
+        const showPre = tax === 'pre' || tax === 'both';
+
         // Helper to render a section for a given period/tax
         const renderSummarySection = (periodLabel, income, expenses, discretionary, taxLabel) => (
             <div className={styles.summarySection + 'noBorder'}>
@@ -159,25 +163,20 @@ const Overview = () => {
             </div>
         );
 
-        if (period === 'both') {
-            // Decide which sections to show based on tax
-            const showAfter = tax === 'after' || tax === 'both';
-            const showPre = tax === 'pre' || tax === 'both';
-
-            return (
-                <div className={styles.summarySectionCustom}>
-                    <div className={styles.summaryHeaderRow}>
-                        <div className={styles.summaryHeaderLeft}>
-                            {smallApp && renderTabButtons()}
-                        </div>
-                        <h3 className={styles.summaryHeaderTitle}>Summary</h3>
-                        <div className={styles.summaryHeaderRight}>
-                            {/* Only show controls if in summary tab */}
-                            {(!smallApp || activeInternalTab === 'summary') && Controls}
-                        </div>
-                    </div>
-                    <div className={styles.summaryBothGrid}>
-                        {/* Left: Monthly */}
+        // Use Section for all summary content
+        return (
+            <Section
+                header={
+                    <SectionHeader
+                        left={smallApp ? renderTabButtons() : null}
+                        title="Summary"
+                        right={(!smallApp || activeInternalTab === 'summary') ? Controls : null}
+                    />
+                }
+            >
+                <div className={styles.summaryBothGrid}>
+                    {/* Left: Monthly */}
+                    {showMonthly && (
                         <div className={styles.summaryBothCol}>
                             {showAfter &&
                                 renderSummarySection(
@@ -196,7 +195,9 @@ const Overview = () => {
                                     'Pre-tax'
                                 )}
                         </div>
-                        {/* Right: Annual */}
+                    )}
+                    {/* Right: Annual */}
+                    {showAnnual && (
                         <div className={styles.summaryBothCol}>
                             {showAfter &&
                                 renderSummarySection(
@@ -215,102 +216,67 @@ const Overview = () => {
                                     'Pre-tax'
                                 )}
                         </div>
-                    </div>
+                    )}
                 </div>
-            );
-        }
-
-        // Handle single period, but possibly both tax statuses
-        if (period === 'monthly' || period === 'annual') {
-            let sections = [];
-
-            if (tax === 'after' || tax === 'both') {
-                if (period === 'monthly') {
-                    sections.push(renderSummarySection(
-                        'Monthly',
-                        monthlyIncomeAT,
-                        monthlyExpenses,
-                        monthlyDiscretionaryAT,
-                        'After-tax'
-                    ));
-                } else {
-                    sections.push(renderSummarySection(
-                        'Annual',
-                        annualIncomeAT,
-                        annualExpenses,
-                        annualDiscretionaryAT,
-                        'After-tax'
-                    ));
-                }
-            }
-            if (tax === 'pre' || tax === 'both') {
-                if (period === 'monthly') {
-                    sections.push(renderSummarySection(
-                        'Monthly',
-                        monthlyIncomePT,
-                        monthlyExpenses,
-                        monthlyDiscretionaryPT,
-                        'Pre-tax'
-                    ));
-                } else {
-                    sections.push(renderSummarySection(
-                        'Annual',
-                        annualIncomePT,
-                        annualExpenses,
-                        annualDiscretionaryPT,
-                        'Pre-tax'
-                    ));
-                }
-            }
-
-            return (
-                <div className={styles.summarySectionCustom}>
-                    <h3>Summary</h3>
-                    {sections}
-                </div>
-            );
-        }
-
-        return null;
+            </Section>
+        );
     };
 
     // --- UI for expenses section ---
-    const ExpensesSectionWrapper = () => (
-        <ExpensesSection
-            expenses={budget.monthlyExpenses}
-            smallApp={smallApp}
-            activeInternalTab={activeInternalTab}
-            setActiveInternalTab={setActiveInternalTab}
-        />
-    );
+    const ExpensesSectionWrapper = () => {
+        const renderTabButtons = () => (
+            <div className={styles.smallAppTabButtons}>
+                <Button
+                    tab
+                    active={activeInternalTab === 'summary'}
+                    onClick={() => setActiveInternalTab('summary')}
+                >
+                    Overview
+                </Button>
+                <Button
+                    tab
+                    active={activeInternalTab === 'expenses'}
+                    onClick={() => setActiveInternalTab('expenses')}
+                >
+                    Expenses
+                </Button>
+            </div>
+        );
+
+        return (
+            <Section
+                header={
+                    <SectionHeader
+                        left={smallApp ? renderTabButtons() : null}
+                        title="Monthly Expenses"
+                        right={null}
+                    />
+                }
+            >
+                <ExpensesSection
+                    expenses={budget.monthlyExpenses}
+                    smallApp={smallApp}
+                    activeInternalTab={activeInternalTab}
+                    setActiveInternalTab={setActiveInternalTab}
+                />
+            </Section>
+        );
+    };
+
+    const showMonthly = period === 'monthly' || period === 'both';
+    const showAnnual = period === 'annual' || period === 'both';
 
     return (
         <div className={`${styles.budgetContentWrapper} ${smallApp ? 'smallApp' : ''}`} ref={budgetOverviewRef}>
             {smallApp ? (
                 <div className={styles.smallAppTabsContainer}>
-                    {activeInternalTab === 'summary' && (
-                        <Section>
-                            <SummarySectionContent />
-                        </Section>
-                    )}
-                    {activeInternalTab === 'expenses' && (
-                        <Section>
-                            <ExpensesSectionWrapper />
-                        </Section>
-                    )}
+                    {activeInternalTab === 'summary' && <SummarySectionContent />}
+                    {activeInternalTab === 'expenses' && <ExpensesSectionWrapper />}
                 </div>
             ) : (
                 <TwoColumnLayout
-                    left={
-                        <Section>
-                            <SummarySectionContent />
-                        </Section>
-                    }
-                    right={
-                        <Section>
-                            <ExpensesSectionWrapper />
-                        </Section>
-                    }
+                    left={<SummarySectionContent />}
+                    right={<ExpensesSectionWrapper />}
                     smallApp={false}
                 />
             )}

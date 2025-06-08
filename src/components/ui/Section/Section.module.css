@@ -2,8 +2,8 @@
     background: var(--surface-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-md);
-    /*  padding: var(--space-md);
-    margin-bottom: var(--space-md); */
+    padding: 0 var(--section-padding);
+    margin-bottom: var(--space-md);
     width: 100%;
     box-sizing: border-box;
     display: flex;
@@ -11,14 +11,52 @@
 }
 
 .sectionHeader {
-    font-size: 1.2rem;
+    font-size: var(--section-header-font-size);
     font-weight: 600;
     margin-bottom: var(--space-sm);
+    text-align: left;
+    color: var(--text-primary);
+    padding-left: var(--space-xs);
+}
+
+.sectionHeaderRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: var(--space-xs);
+    padding: 0 var(--space-xs);
+}
+
+.sectionHeaderLeft,
+.sectionHeaderRight {
+    flex: 1 1 0;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+}
+
+.sectionHeaderLeft {
+    justify-content: flex-start;
+}
+
+.sectionHeaderRight {
+    justify-content: flex-end;
+}
+
+.sectionHeaderTitle {
+    flex: 1 1 0;
     text-align: center;
+    margin: 0;
+    font-size: var(--section-header-font-size);
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 0;
 }
 
 .sectionContent {
     width: 100%;
+    padding: 0;
 }
 
 .twoColumn {
