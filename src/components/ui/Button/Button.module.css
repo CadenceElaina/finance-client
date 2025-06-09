@@ -1,4 +1,4 @@
-/* src/components/Button/Button.module.css */
+/* src/ui/Button/Button.module.css */
 /* Base Button */
 .button {
     background: var(--gradient-primary);

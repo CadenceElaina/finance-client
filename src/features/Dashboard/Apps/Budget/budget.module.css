@@ -2,307 +2,38 @@
 
 /* Import other style modules */
 @import './styles/_sections.module.css';
-@import './styles/_buttons.module.css';
 
-/* --- Base Layout and General Styles --- */
-.budgetAppContainer {
+.controlPanel {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    background-color: var(--surface-light);
-    border-radius: var(--border-radius-lg);
-    padding: 0;
-    overflow-y: auto;
-}
-
-.budgetContentWrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    min-height: 0;
-    min-width: 0;
-    overflow-y: auto;
-    padding: 0 var(--space-sm);
-    box-sizing: border-box;
-}
-
-.budgetTitle {
-    text-align: center;
-    color: var(--color-primary);
-    font-size: var(--font-size-lg);
-    font-size: var(--font-size-lg);
-    margin-top: var(--space-md);
-    margin-bottom: var(--space-md);
-}
-
-.error {
-    color: var(--color-danger);
-    font-weight: bold;
-    text-align: center;
-    padding: var(--space-md);
-}
-
-/* --- Income Details Section Specific Styles --- */
-.incomeSection {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    /* Create responsive columns */
-    gap: var(--space-md);
-    /* Space between grid items */
-    padding: var(--space-md);
-    /* Internal padding for the section */
-}
-
-.incomeSection>div {
-    /* Target direct children of incomeSection (our form groups) */
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xxs);
-}
-
-.incomeSection label {
-    font-size: var(--font-size-sm);
-    color: var(--text-secondary);
-    margin-bottom: var(--space-xxs);
-    /* Space between label and input */
-}
-
-.incomeSection .radioGroup {
-    flex-direction: row;
-    /* Ensure radios are in a row */
-    align-items: center;
-    /* Align radio and label vertically */
-    margin-top: 0;
-    /* Reset any default top margin */
-    margin-bottom: var(--space-sm);
-    /* Add some space below the radio group */
-}
-
-.incomeSection .radioGroup label {
-    margin-right: var(--space-md);
-    /* Space between radio options */
-}
-
-.incomeSection input,
-.incomeSection select {
-    max-width: 100%;
-    /* Ensure inputs take full width of their grid cell */
-}
-
-/* Style for the calculated read-only input */
-.incomeSection input:read-only,
-.incomeSection input:disabled {
-    background-color: var(--surface-dark);
-    /* Slightly darker background to indicate read-only */
-    color: var(--text-tertiary);
-    /* Muted text color */
-    border-color: var(--border-dark);
-    cursor: not-allowed;
-}
-
-/* --- Form Elements --- */
-.incomeInputs,
-.formGroup {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-sm);
-    margin-bottom: var(--space-xs);
-}
-
-.persistenceOption {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    margin-top: var(--space-sm);
-}
-
-.persistenceLabel {
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    white-space: nowrap;
-}
-
-/* --- Table Styles --- */
-.expenseTable {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.expenseTable th,
-.expenseTable td {
-    border: none;
-    padding: var(--space-xs) var(--space-sm);
-    text-align: left;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-light);
-    vertical-align: middle;
-}
-
-.expenseTable th {
-    background-color: var(--surface-dark);
-    font-weight: bold;
-    color: var(--text-light);
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 1px solid var(--border-light);
-}
-
-.expenseTable tr:nth-child(even) {
-    background-color: transparent;
-    /* change to something that stands out more? */
-}
-
-.expenseTable tr:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
-
-
-/* --- Stacked Controls (Period/Tax) --- */
-.stackedControls {
-    display: flex;
-    flex-direction: row;
-    gap: var(--space-xs);
-    width: 100%;
-    justify-content: flex-end;
-    align-items: center;
     flex-wrap: wrap;
-    margin-bottom: var(--space-xs);
+    gap: var(--space-sm);
+    justify-content: center;
+    border-top: 1px solid var(--border-light);
 }
 
-.stackedButtonGroup {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 4px;
-    min-width: 0;
-    flex: none;
-    width: auto;
-    max-width: none;
-    box-sizing: border-box;
-}
-
-.stackedButtonGroup label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: 500;
-    line-height: 1.1;
-    margin-bottom: 0;
-    margin-right: 2px;
-    white-space: nowrap;
-}
-
-.stackedButtonGroup select {
-    /* More specific selector for the select in stacked controls */
-    padding: 1px 6px;
-    font-size: var(--font-size-xs);
-    min-height: 22px;
-    height: 24px;
-    max-width: 100px;
-}
-
-.overviewGridCustom {
+.budgetTwoColumn {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-md);
+    gap: var(--space-lg, 32px);
     width: 100%;
-    max-width: none;
-    margin: 0;
-    height: 100%;
-    align-items: stretch;
-    justify-content: center;
-    overflow: auto;
-    margin-bottom: var(--space-sm);
+    align-items: flex-start;
 }
 
-.overviewTitle {
-    text-align: center;
-    font-size: var(--font-size-md);
-    color: var(--text-secondary)
-}
-
-
-/* Small app specific adjustments */
-.smallAppTabsContainer {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-    overflow-y: auto;
-}
-
-.smallAppTabButtons {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
-    flex-wrap: wrap;
-    padding: var(--space-xs) 0;
-}
-
-/* Summary section specific styles */
-.summaryBothGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-    /* Larger gap between monthly/annual columns */
-    width: 100%;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: var(--space-sm) 0;
-    /* Add some vertical padding */
-}
-
-.summaryBothGrid.centered {
-    justify-content: center;
-    grid-template-columns: 1fr !important;
-}
-
-.summaryBothCol {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    /* Gap between individual summary blocks */
-}
-
-.summarySectionNoBorder {
+.tabHeader {
+    background: none;
     border: none;
-    /* New class to remove border for specific summary sections */
-    box-shadow: none;
-    /* Remove shadow too if border is removed */
-    background-color: transparent;
-    /* Keep background transparent if no border/shadow */
-}
-
-.summaryRow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    font-size: var(--font-size-base);
-    gap: var(--space-xs);
-    /* Reduced gap, text will wrap if needed */
-    padding: var(--space-xxs) var(--space-sm);
-    /* Horizontal padding for better appearance */
-    min-height: 26px;
-    color: var(--text-primary);
-    /* Ensure consistent text color */
-}
-
-.summaryRow strong {
-    color: var(--color-primary);
-    /* Make values stand out */
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
     font-weight: 600;
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: color 0.15s, border-bottom 0.15s;
+    padding: var(--space-xs) var(--space-md);
 }
 
-.negative {
-    color: var(--color-danger) !important;
-    /* Keep important for strong visual cue */
-    font-weight: bold;
+.activeTab,
+.tabHeader.active {
+    color: var(--color-primary);
+    border-bottom: 2.5px solid var(--color-primary);
+    background: none;
 }

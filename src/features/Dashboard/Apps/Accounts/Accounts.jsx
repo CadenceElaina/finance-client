@@ -1,9 +1,11 @@
+// Accounts.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
 import OverviewTab from './OverviewTab';
 import AssetsTab from './AssetsTab';
 import LiabilitiesTab from './LiabilitiesTab';
 import InvestmentsTab from './Investments/InvestmentsTab';
+import DropdownTabs from '../../../../components/ui/Tabs/DropdownTabs';
 import styles from './accounts.module.css';
 
 // Helper: detect small app mode (like Budget)
@@ -37,22 +39,40 @@ const Accounts = () => {
 
     const smallApp = isSmallApp(containerSize);
 
+    // State for active inner tab (for investments)
+    const [activeInvestmentsTab, setActiveInvestmentsTab] = useState('holdings');
+    const [activeTabId, setActiveTabId] = useState('overview'); // This state now correctly controls FlexibleTabs
+
+    const investmentsInnerTabs = [
+        { id: 'holdings', label: 'Holdings', component: () => <InvestmentsTab tab="holdings" smallApp={smallApp} /> },
+        { id: 'allocation', label: 'Allocation', component: () => <InvestmentsTab tab="allocation" smallApp={smallApp} /> },
+        { id: 'performance', label: 'Performance', component: () => <InvestmentsTab tab="performance" smallApp={smallApp} /> },
+        { id: 'reports', label: 'Reports', component: () => <InvestmentsTab tab="reports" smallApp={smallApp} /> }
+    ];
+
     const tabs = [
         { id: 'overview', label: 'Overview', component: () => <OverviewTab /> },
         { id: 'assets', label: 'Assets', component: () => <AssetsTab /> },
         { id: 'liabilities', label: 'Liabilities', component: () => <LiabilitiesTab /> },
         {
             id: 'investments',
-            label: 'Investments',
-            component: undefined, // handled by innerTabs
-            innerTabs: [
-                { id: 'holdings', label: 'Holdings', component: () => <InvestmentsTab tab="holdings" smallApp={smallApp} /> },
-                { id: 'allocation', label: 'Allocation', component: () => <InvestmentsTab tab="allocation" smallApp={smallApp} /> },
-                { id: 'performance', label: 'Performance', component: () => <InvestmentsTab tab="performance" smallApp={smallApp} /> },
-                { id: 'reports', label: 'Reports', component: () => <InvestmentsTab tab="reports" smallApp={smallApp} /> }
-            ],
-            // If not small, show Holdings+Reports together in InvestmentsTab
-            component: !smallApp ? () => <InvestmentsTab tab="all" /> : undefined
+            label: 'Investments', // This label is for FlexibleTabs internal use if not customHeader, but also conceptually
+            customHeader: ({ isActive, setActive }) => (
+                <DropdownTabs
+                    tabs={investmentsInnerTabs}
+                    activeTabId={activeInvestmentsTab}
+                    onTabChange={tabId => {
+                        setActiveInvestmentsTab(tabId);
+                        setActive(); // Call the `setActive` prop from FlexibleTabs to set main tab active
+                    }}
+                    label="Investments"
+                    isActive={isActive} // This now correctly reflects the active state from Accounts
+                // No inline prop for classic dropdown
+                />
+            ),
+            component: () =>
+                // Render the component of the currently active *inner* investments tab
+                investmentsInnerTabs.find(t => t.id === activeInvestmentsTab)?.component()
         }
     ];
 
@@ -60,7 +80,9 @@ const Accounts = () => {
         <div ref={containerRef} className={styles.accountsAppContainer}>
             <FlexibleTabs
                 tabs={tabs}
-                initialTabId="overview"
+                // initialTabId is no longer needed here if FlexibleTabs is controlled
+                activeTabId={activeTabId} // Pass the controlled state
+                onTabChange={setActiveTabId} // Pass the setter function
                 smallApp={smallApp}
                 className={styles.accountsTabs}
                 contentClassName={styles.accountsTabContent}

@@ -1,34 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
-import ExpensesSection from './ExpensesSection'; // Keep this import
+import ExpensesSection from './ExpensesSection';
 import BudgetControlPanel from './BudgetControlPanel';
 import styles from './budget.module.css';
 import { isSmallApp } from '../../../../utils/isSmallApp';
-import Button from '../../../../components/ui/Button/Button';
 import Section from '../../../../components/ui/Section/Section';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
-
-// New component for small app internal tab buttons
-const SmallAppTabButtons = ({ activeInternalTab, setActiveInternalTab }) => (
-    <div className={styles.smallAppTabButtons}>
-        <Button
-            tab
-            active={activeInternalTab === 'summary'}
-            onClick={() => setActiveInternalTab('summary')}
-        >
-            Overview
-        </Button>
-        <Button
-            tab
-            active={activeInternalTab === 'expenses'}
-            onClick={() => setActiveInternalTab('expenses')}
-        >
-            Expenses
-        </Button>
-    </div>
-);
-
 
 const PERIOD_OPTIONS = [
     { id: 'monthly', label: 'Monthly' },
@@ -42,28 +20,22 @@ const TAX_OPTIONS = [
     { id: 'both', label: 'Both' },
 ];
 
-const Overview = () => {
+const Overview = ({ smallTab }) => {
     const { budget, isLoading, error, userSignedIn } = useBudget();
     const [period, setPeriod] = useState('both');
     const [tax, setTax] = useState('both');
+    const budgetOverviewRef = useRef(null);
 
     // State for observing container size
     const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-    const budgetOverviewRef = useRef(null);
-
-    // State for internal tabs when app is small
-    const [activeInternalTab, setActiveInternalTab] = useState('summary'); // 'summary' or 'expenses'
 
     useEffect(() => {
         if (!budgetOverviewRef.current) return;
-
-        // Helper to set initial size immediately
         const setInitialSize = () => {
             const rect = budgetOverviewRef.current.getBoundingClientRect();
             setContainerSize({ width: rect.width, height: rect.height });
         };
         setInitialSize();
-
         const resizeObserver = new window.ResizeObserver(entries => {
             for (let entry of entries) {
                 if (entry.target === budgetOverviewRef.current) {
@@ -72,15 +44,10 @@ const Overview = () => {
                 }
             }
         });
-
         resizeObserver.observe(budgetOverviewRef.current);
-
-        return () => {
-            resizeObserver.disconnect();
-        };
+        return () => resizeObserver.disconnect();
     }, []);
 
-    // Determine if we should use small app mode
     const smallApp = isSmallApp(containerSize);
 
     if (isLoading) return <div className={styles.budgetContentWrapper} ref={budgetOverviewRef}>Loading budget overview...</div>;
@@ -109,12 +76,11 @@ const Overview = () => {
 
     // --- Controls for period/tax ---
     const Controls = (
-        <div className={styles.stackedControls}>
-            <div className={styles.stackedButtonGroup}>
-                <label htmlFor="period-select" >Period</label>
+        <div style={{ display: 'flex', gap: 8 }}>
+            <div>
+                <label htmlFor="period-select" style={{ marginRight: 4 }}>Period</label>
                 <select
                     id="period-select"
-                    // className={styles.select} REMOVED: now handled by general select styles
                     value={period}
                     onChange={e => setPeriod(e.target.value)}
                 >
@@ -123,11 +89,10 @@ const Overview = () => {
                     ))}
                 </select>
             </div>
-            <div className={styles.stackedButtonGroup}>
-                <label htmlFor="tax-select" >Tax</label>
+            <div>
+                <label htmlFor="tax-select" style={{ marginRight: 4 }}>Tax</label>
                 <select
                     id="tax-select"
-                    // className={styles.select} REMOVED: now handled by general select styles
                     value={tax}
                     onChange={e => setTax(e.target.value)}
                 >
@@ -155,21 +120,21 @@ const Overview = () => {
 
         // Helper to render a section for a given period/tax
         const renderSummarySection = (periodLabel, income, expenses, discretionary, taxLabel) => (
-            <div className={`${styles.summarySection} ${styles.summarySectionNoBorder}`}> {/* Use new class */}
-                <div className={styles.overviewTitle} >
+            <div>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>
                     {periodLabel} {taxLabel ? `(${taxLabel})` : ''}
                 </div>
-                <div className={styles.summaryRow}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                     <span>Income:</span>
                     <strong>{format(income)}</strong>
                 </div>
-                <div className={styles.summaryRow}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
                     <span>Expenses:</span>
                     <strong>{format(expenses)}</strong>
                 </div>
-                <div className={styles.summaryRow}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Discretionary:</span>
-                    <strong className={discretionary < 0 ? styles.negative : ''}>{format(discretionary)}</strong>
+                    <strong style={{ color: discretionary < 0 ? 'var(--color-danger)' : undefined }}>{format(discretionary)}</strong>
                 </div>
             </div>
         );
@@ -178,18 +143,21 @@ const Overview = () => {
             <Section
                 header={
                     <SectionHeader
-                        left={smallApp ? <SmallAppTabButtons activeInternalTab={activeInternalTab} setActiveInternalTab={setActiveInternalTab} /> : null}
                         title="Summary"
-                        right={(!smallApp || activeInternalTab === 'summary') ? Controls : null}
+                        right={Controls}
                     />
                 }
             >
-                <div
-                    className={`${styles.summaryBothGrid}${singleColumn ? ' ' + styles.centered : ''}`}
-                >
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: singleColumn ? '1fr' : '1fr 1fr',
+                    gap: 24,
+                    maxWidth: 700,
+                    margin: '0 auto'
+                }}>
                     {/* Left: Monthly */}
                     {showMonthly && (
-                        <div className={styles.summaryBothCol}>
+                        <div>
                             {showAfter &&
                                 renderSummarySection(
                                     'Monthly',
@@ -210,7 +178,7 @@ const Overview = () => {
                     )}
                     {/* Right: Annual */}
                     {showAnnual && (
-                        <div className={styles.summaryBothCol}>
+                        <div>
                             {showAfter &&
                                 renderSummarySection(
                                     'Annual',
@@ -240,31 +208,27 @@ const Overview = () => {
             <Section
                 header={
                     <SectionHeader
-                        left={smallApp ? <SmallAppTabButtons activeInternalTab={activeInternalTab} setActiveInternalTab={setActiveInternalTab} /> : null}
                         title="Monthly Expenses"
                         right={null}
                     />
                 }
-                className={styles.expensesSectionCustom} // Apply custom expenses section styling to the Section component itself
             >
                 <ExpensesSection
                     expenses={budget.monthlyExpenses}
                     smallApp={smallApp}
-                    activeInternalTab={activeInternalTab}
-                    setActiveInternalTab={setActiveInternalTab}
                 />
             </Section>
         );
     };
 
+    // --- Render logic ---
     return (
-        <div className={`${styles.budgetContentWrapper} ${smallApp ? 'smallApp' : ''}`} ref={budgetOverviewRef}>
-            {smallApp ? (
-                <div className={styles.smallAppTabsContainer}>
-                    {activeInternalTab === 'summary' && <SummarySectionContent />}
-                    {activeInternalTab === 'expenses' && <ExpensesSectionWrapper />}
-                </div>
-            ) : (
+        <div className={styles.budgetContentWrapper} ref={budgetOverviewRef}>
+            {/* Small app: show only the selected tab */}
+            {smallApp && smallTab === 'expenses' && <ExpensesSectionWrapper />}
+            {smallApp && smallTab === 'summary' && <SummarySectionContent />}
+            {/* Not small app: always show both side by side */}
+            {!smallApp && (
                 <TwoColumnLayout
                     left={<SummarySectionContent />}
                     right={<ExpensesSectionWrapper />}

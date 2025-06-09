@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ArrowUp, ArrowDown, X } from 'lucide-react';
 import styles from './Table.module.css';
-
 // Helper to format date as short readable string (e.g., "Jan 15, 2023")
 const formatDate = (dateStr) => {
     if (!dateStr) return '-';

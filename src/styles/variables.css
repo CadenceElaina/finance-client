@@ -1,55 +1,65 @@
 :root {
+    /* Breakpoints */
     --breakpoint-small-app: 1112px;
     --breakpoint-small-app-height: 351px;
 
+    /* --- Core Transitions & Easing --- */
     --transition-speed-fast: 0.15s;
     --transition-speed-normal: 0.25s;
+    /* Used for general UI transitions */
     --transition-speed-slow: 0.4s;
     --transition-ease: ease-in-out;
-    /* Consider more specific hover effects than just brightness */
-    --button-hover-filter: brightness(1.1);
-    /* if you want to keep brightness */
-    --button-hover-transform: translateY(-1px);
+    /* Default easing for general transitions */
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
-    --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
+    /* --- Tab Specific Animations --- */
+    /* For tabs sliding out (e.g., when a new inner tab is clicked) */
+    --tab-slide-duration: 0.25s;
+    --tab-slide-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Smooth acceleration/deceleration */
 
-    /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --shadow-elevated: 0 6px 20px rgba(0, 0, 0, 0.2);
+    /* For tabs "falling back" or converging into place */
+    --tab-converge-duration: 0.4s;
+    /* Slightly longer for a more noticeable "fall" */
+    --tab-converge-ease: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    /* Strong "springy" bounce */
+    /* Alternative for --tab-converge-ease if the above is too aggressive: cubic-bezier(0.175, 0.885, 0.32, 1.275) */
 
-    /* Hover Effects */
-    --hover-brightness: brightness(1.1);
+    /* --- Dropdown Specific Animations --- */
+    --dropdown-slide-duration: 0.22s;
+    --dropdown-slide-ease: cubic-bezier(0.4, 0, 0.2, 1);
+    /* Standard material design ease */
 
-    /* Colors (Dark Theme Defaults) */
+    /* --- Colors (Dark Theme Defaults) --- */
     --color-primary: #00B1C7;
     --color-primary-light: #00A3B8;
     --color-primary-dark: #005F6B;
     --color-secondary: #FFB09C;
     --color-secondary-light: #FFB09C;
+    /* This could be a slightly lighter shade if desired */
     --color-success: #4CAF50;
     --color-warning: #FF9800;
     --color-danger: #EF5350;
 
-    /* Neutral Colors */
+    /* Neutral/UI Colors */
     --background-light: #11131a;
-    /* much darker background */
+    /* Much darker background */
     --surface-light: #181a22;
-    /* darker surface */
+    /* Darker surface for main content areas */
     --surface-dark: #101117;
-    /* even darker for contrast */
+    /* Even darker for contrast, like cards or elevated sections */
     --border-light: #23243a;
-    /* subtle dark border */
+    /* Subtle dark border */
+    --white: #fff;
+    /* Explicit white color variable */
 
+    /* Text Colors */
     --text-primary: #F3F6FA;
     --text-secondary: #8A8FA3;
     --text-tertiary: #5A5F73;
     --text-light: #FFFFFF;
+    /* Redundant if --white is used for general white text */
 
-    /* Typography */
+    /* --- Typography --- */
     --font-family-base: 'Inter', 'Open Sans', 'Roboto', sans-serif;
     --font-size-xxs: 0.75rem;
     --font-size-xs: 0.875rem;
@@ -63,7 +73,7 @@
     --font-size-h2: 2rem;
     --font-size-h3: 1.75rem;
 
-    /* Space */
+    /* --- Spacing --- */
     --space-xxs: 2px;
     --space-xs: 4px;
     --space-sm: 8px;
@@ -71,7 +81,7 @@
     --space-lg: 24px;
     --space-xl: 32px;
 
-    /* Section Styles */
+    /* --- Section Styles --- */
     --section-padding: 8px;
     --section-padding-compact: 4px;
     --section-font-size-compact: 0.75rem;
@@ -80,27 +90,38 @@
     --section-header-font-size: 1.1rem;
     --section-header-font-size-compact: 1.08rem;
 
-    /* Border Radii */
+    /* --- Border Radii --- */
     --border-radius-sm: 4px;
     --border-radius-md: 8px;
     --border-radius-lg: 12px;
     --border-radius-circle: 50%;
 
-    /* Transitions */
-    --transition-speed-fast: 0.15s;
-    --transition-speed-normal: 0.3s;
-    --transition-ease: ease-in-out;
+    /* --- Gradients --- */
+    --gradient-primary: linear-gradient(135deg, #00B1C7 0%, #00FFD1 100%);
+    --gradient-secondary: linear-gradient(135deg, #FFB09C 0%, #FFD1A1 100%);
 
-    /* Focus & Button Styles */
-    --focus-ring: 0 0 0 3px var(--color-primary);
+    /* --- Shadows --- */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-elevated: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+    /* --- Hover Effects --- */
+    --hover-brightness: brightness(1.1);
+    /* General brightness for hover */
+    --button-hover-transform: translateY(-1px);
+    /* Example transform for buttons */
     --button-hover-bg: var(--gradient-primary);
+    /* Example background for button hover */
     --button-active-bg: var(--color-primary-dark);
+    /* Example background for button active state */
 
-    /* App Orb Styles */
+    /* --- Focus Ring --- */
+    --focus-ring: 0 0 0 3px var(--color-primary);
+
+    /* --- App Orb Styles (Specific Components) --- */
     --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
+    /* Assuming --border-active is defined elsewhere, or use a color directly */
     --app-orb-menu-bg: var(--surface-light);
     --app-orb-menu-shadow: var(--shadow-lg);
-
-    --white: #fff;
-
 }
