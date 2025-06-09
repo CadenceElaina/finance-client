@@ -1,0 +1,348 @@
+/* src/pages/Accounts/accounts.module.css */
+
+.overviewTab {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Updated Snapshot Compact Styles for Prominence and Centering */
+.snapshotCompact {
+    background: var(--surface-light);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-sm) var(--space-md);
+    max-width: 700px;
+    margin: 0 auto var(--space-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Styles for the title *within* the Section component's header */
+.snapshotCompact .sectionHeader {
+    width: 100%;
+    text-align: center;
+    margin-bottom: var(--space-xs);
+    padding-bottom: 0;
+}
+
+.snapshotCompact .sectionHeader h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0.5px;
+}
+
+.snapshotRow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: var(--space-xs) 0;
+}
+
+.snapshotRow>div .value {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+}
+
+.snapshotLabel {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+/* --- Compact Chart Section --- */
+.chartSectionCompact {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xs) var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.chartSectionCompact .sectionHeader {
+    width: 100%;
+    text-align: left;
+    margin-bottom: var(--space-xs);
+    padding: 0;
+}
+
+.chartSectionCompact .sectionHeader h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+}
+
+.chartContainerCompact {
+    width: 100%;
+    height: 90px;
+    /* Smaller chart height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.noChartData {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-xs);
+    font-size: var(--font-size-xs);
+}
+
+/* Chart label style and hover effect */
+.chartLabel {
+    fill: var(--white);
+    font-size: var(--font-size-xs);
+    pointer-events: auto;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    transition: fill 0.15s;
+}
+
+.chartLabel:hover {
+    fill: var(--color-primary);
+}
+
+/* --- Accounts Table Section --- */
+.accountsHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: var(--space-xs);
+}
+
+.accountsHeaderTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    text-align: left;
+}
+
+.tableSectionCompact {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xxs) var(--space-xxs);
+    width: 100%;
+    min-width: 0;
+}
+
+.tableSectionCompact .sectionHeader {
+    width: 100%;
+    text-align: left;
+    margin-bottom: var(--space-xxs);
+    padding: 0;
+}
+
+.tableSectionCompact .sectionHeader h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+}
+
+.filterRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: 0;
+    justify-content: flex-end;
+}
+
+.filterLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.filterSelect {
+    min-width: 110px;
+    font-size: var(--font-size-xs);
+    padding: var(--space-xxs) var(--space-xs);
+    height: 28px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--background-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 18px;
+    padding-right: 26px;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.compactTable {
+    font-size: var(--font-size-xs);
+}
+
+.compactTable th,
+.compactTable td {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-xs);
+    line-height: 1.2;
+}
+
+/* Full-width snapshot row above charts/table */
+.snapshotRowFull {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--space-md);
+    width: 100%;
+    margin: 0 auto;
+    background: var(--surface-light);
+    box-shadow: var(--shadow-md);
+    max-width: 900px;
+}
+
+.snapshotItem {
+    flex: 1 1 120px;
+    min-width: 110px;
+    max-width: 180px;
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xs) var(--space-sm);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xxs);
+}
+
+.chartsTableRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-md);
+    width: 100%;
+    align-items: flex-start;
+}
+
+.chartsColumn {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.tableColumn {
+    flex: 2 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+/* Color classes for snapshot and table values */
+.positive {
+    color: var(--status-success) !important;
+    font-weight: bold;
+}
+
+.negative {
+    color: var(--status-danger) !important;
+    font-weight: bold;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 1100px) {
+    .chartsTableGrid {
+        grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+
+    .chartsColumn,
+    .tableColumn {
+        width: 100%;
+    }
+
+    .snapshotCompact {
+        max-width: 100%;
+        padding: var(--space-sm);
+    }
+
+    .snapshotRow {
+        flex-direction: column;
+        align-items: center;
+        padding: var(--space-xs) 0;
+    }
+
+    .snapshotRow>div {
+        max-width: 100%;
+        padding: var(--space-xs) var(--space-sm);
+    }
+
+    .chartSectionCompact,
+    .tableSectionCompact {
+        padding: var(--space-xs);
+    }
+}
+
+@media (max-width: 768px) {
+    .snapshotCompact {
+        padding: var(--space-xs);
+    }
+
+    .snapshotCompact .sectionHeader h3 {
+        font-size: var(--font-size-base);
+    }
+
+    .snapshotRow>div {
+        padding: var(--space-xs);
+    }
+
+    .snapshotRow>div .value {
+        font-size: var(--font-size-base);
+    }
+
+    .chartSectionCompact,
+    .tableSectionCompact {
+        padding: var(--space-xxs);
+    }
+
+    .chartSectionCompact .sectionHeader h3,
+    .tableSectionCompact .sectionHeader h3 {
+        font-size: var(--font-size-xs);
+    }
+}
+
+.chartHeader {
+    width: 100%;
+    text-align: left;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    margin-top: 0;
+    letter-spacing: 0.01em;
+    padding-left: 2px;
+}

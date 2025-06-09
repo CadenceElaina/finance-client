@@ -24,14 +24,16 @@ export const DEFAULT_DEMO_BUDGET = {
 };
 export const DEMO_ACCOUNTS = [
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e0", // Example static ID
+        id: "6664e4a7d7b3a9e8f1c2d3e0",
         name: "Long Term Growth ETFs",
         accountProvider: "Example Brokerage",
-        value: 25184.20, // Calculated total value based on shares and cash
-        cashBalance: 1260.00, // Approximately 5% of ~25k total
+        value: 25184.20,
+        cashBalance: 1260.00,
         currency: "USD",
         canInvest: true,
-        type: "taxable",
+        category: "Investments", // Changed from 'type: "taxable"'
+        subType: "Brokerage",   // Added for more detail
+        taxStatus: "Taxable",   // Added for tax implications
         hasSecurities: true,
         securities: [
             {
@@ -93,14 +95,16 @@ export const DEMO_ACCOUNTS = [
         ]
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e1", // Example static ID
+        id: "6664e4a7d7b3a9e8f1c2d3e1",
         name: "Diversified Stock Portfolio",
         accountProvider: "Online Brokerage",
         value: 9989.45,
         cashBalance: 500.00,
         currency: "USD",
         canInvest: true,
-        type: "taxable",
+        category: "Investments", // Changed from 'type: "taxable"'
+        subType: "Brokerage",   // Added
+        taxStatus: "Taxable",   // Added
         hasSecurities: true,
         securities: [
             {
@@ -210,114 +214,121 @@ export const DEMO_ACCOUNTS = [
         ]
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e2", // New example static ID for Roth IRA
+        id: "6664e4a7d7b3a9e8f1c2d3e2",
         name: "Roth IRA Account",
         accountProvider: "Fidelity",
-        value: 7000.00, // Approximately $7,000
-        cashBalance: 0.00, // Fully invested in FDGRX
+        value: 7000.00,
+        cashBalance: 0.00,
         currency: "USD",
         canInvest: true,
-        type: "ira",
-        retirementType: "ira_roth",
-        taxTreatment: "after-tax",
+        category: "Investments", // Changed from 'type: "ira"'
+        subType: "Retirement (IRA)", // Added for more detail
+        taxStatus: "Tax-Exempt", // Changed from 'taxTreatment'
         hasSecurities: true,
         securities: [
             {
                 name: "Fidelity Growth Company Fund",
                 ticker: "FDGRX",
-                quantity: 350, // Approximately 7000 / current price of ~$20
-                value: 7000.00, // Quantity * current price (assuming $20 for demo)
-                purchasePrice: 18.50 // Average purchase price
+                quantity: 350,
+                value: 7000.00,
+                purchasePrice: 18.50
             }
         ]
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e3", // New ID for 401k
+        id: "6664e4a7d7b3a9e8f1c2d3e3",
         name: "401k Retirement Plan",
         accountProvider: "Employer 401k Provider",
         value: 55000.00,
         cashBalance: 0.00,
         currency: "USD",
         canInvest: true,
-        type: "defined_contribution",
-        retirementType: "401k",
-        taxTreatment: "pre-tax",
+        category: "Investments", // Changed from 'type: "defined_contribution"'
+        subType: "Retirement (401k)", // Added for more detail
+        taxStatus: "Tax-Deferred", // Changed from 'taxTreatment'
         hasSecurities: true,
         securities: [
             {
                 name: "Target Date Fund 2060",
-                ticker: "TDF2060", // Generic ticker for a Target Date Fund
-                quantity: 1375, // 55000 / $40 (assuming $40/share for TDF)
-                value: 55000.00, // 1375 * 40
-                purchasePrice: 38.00 // Example average purchase price
+                ticker: "TDF2060",
+                quantity: 1375,
+                value: 55000.00,
+                purchasePrice: 38.00
             }
         ]
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e4", // New ID for Checking Account
+        id: "6664e4a7d7b3a9e8f1c2d3e4",
         name: "Checking Account",
         accountProvider: "Bank of America",
         value: 1500.00,
         cashBalance: 1500.00,
         currency: "USD",
-        canInvest: false, // Cannot directly invest from checking
-        type: "cash",
+        canInvest: false,
+        category: "Cash", // Changed from 'type: "cash"'
+        subType: "Checking", // Added for more detail
+        taxStatus: "Taxable", // Generally, interest on cash is taxable
         hasSecurities: false,
-        securities: [] // No securities in a checking account
+        securities: []
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e5", // New ID for Savings Account
+        id: "6664e4a7d7b3a9e8f1c2d3e5",
         name: "Ally Savings Account",
         accountProvider: "Ally Bank",
         value: 10000.00,
         cashBalance: 10000.00,
         currency: "USD",
-        canInvest: false, // Cannot directly invest from savings
-        type: "cash",
+        canInvest: false,
+        category: "Cash", // Changed from 'type: "cash"'
+        subType: "Savings", // Added for more detail
+        taxStatus: "Taxable", // Generally, interest on cash is taxable
         hasSecurities: false,
-        securities: [] // No securities in a savings account
+        securities: []
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e6", // New ID for Credit Card
+        id: "6664e4a7d7b3a9e8f1c2d3e6",
         name: "American Express Card",
         accountProvider: "American Express",
-        value: -250.00, // Negative value represents outstanding balance
-        cashBalance: 0.00, // N/A for credit card
+        value: -250.00,
+        cashBalance: 0.00,
         currency: "USD",
         canInvest: false,
-        type: "debt",
-        interestRate: 22.99, // Example APR
-        monthlyPayment: 50.00, // Example minimum payment
-        // Note: Total credit limit ($2k) is not directly in schema, but could be a custom field if needed.
+        category: "Debt", // Changed from 'type: "debt"'
+        subType: "Credit Card", // Added for more detail
+        taxStatus: "N/A", // Not applicable for debt
+        interestRate: 22.99,
+        monthlyPayment: 50.00,
         hasSecurities: false,
         securities: []
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e7", // New ID for Student Loan
+        id: "6664e4a7d7b3a9e8f1c2d3e7",
         name: "Federal Student Loan",
-        accountProvider: "Student Loan Servicer", // Example provider
-        value: -15000.00, // Negative value represents outstanding balance
-        cashBalance: 0.00, // N/A for loan
+        accountProvider: "Student Loan Servicer",
+        value: -15000.00,
+        cashBalance: 0.00,
         currency: "USD",
         canInvest: false,
-        type: "debt",
-        interestRate: 5.50, // Example interest rate
-        monthlyPayment: 150.00, // Example monthly payment
+        category: "Debt", // Changed from 'type: "debt"'
+        subType: "Student Loan", // Added for more detail
+        taxStatus: "N/A", // Not applicable for debt
+        interestRate: 5.50,
+        monthlyPayment: 150.00,
         hasSecurities: false,
         securities: []
     },
     {
-        id: "6664e4a7d7b3a9e8f1c2d3e8", // New ID for HSA
+        id: "6664e4a7d7b3a9e8f1c2d3e8",
         name: "Health Savings Account",
         accountProvider: "Optum Bank",
         value: 2000.00,
-        cashBalance: 2000.00, // Assuming it's all in cash for this demo
+        cashBalance: 2000.00,
         currency: "USD",
         canInvest: true, // HSAs can often invest beyond cash
-        type: "hsa",
-        retirementType: "hsa", // Matches enum for HSA type
-        taxTreatment: "pre-tax", // Contributions are often pre-tax
-        hasSecurities: false, // Assuming no investments for this demo
-        securities: []
+        category: "Investments", // Classified as investment due to investment potential, or could be 'Cash' if only cash
+        subType: "Health Savings Account (HSA)", // Added for more detail
+        taxStatus: "Tax-Advantaged", // Changed from 'taxTreatment'
+        hasSecurities: false, // Set to false for this demo, but could be true if investing
+        securities: [] // No securities for this demo, but could hold them
     }
 ];

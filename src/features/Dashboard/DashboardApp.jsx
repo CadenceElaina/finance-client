@@ -2,7 +2,7 @@ import React from 'react';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
-import Accounts from "./Apps/Accounts"
+import Accounts from "./Apps/Accounts/Accounts"
 import Assistant from './Apps/Assistant'
 import Budget from './Apps/Budget/Budget'
 import Debt from './Apps/Debt'
