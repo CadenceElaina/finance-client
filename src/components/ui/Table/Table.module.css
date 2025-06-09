@@ -105,3 +105,90 @@
     color: var(--color-primary);
     text-align: center;
 }
+
+/* ... existing styles ... */
+
+.table th {
+    background: var(--surface-dark);
+    color: var(--text-light);
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-bottom: 1px solid var(--border-light);
+    text-align: left;
+    /* Ensure alignment */
+    padding: var(--space-xs) var(--space-sm);
+    /* Consistent padding */
+    white-space: nowrap;
+    /* Prevent headers from wrapping too much */
+}
+
+/* Style for the filter input rows */
+.table thead tr:nth-child(2) th {
+    padding: var(--space-xxs) var(--space-xs);
+    /* Smaller padding for filter row */
+    background: var(--background-light);
+    /* Slightly different background for filter row */
+    border-bottom: 1px solid var(--border-light);
+    height: auto;
+    /* Allow height to adjust to input */
+}
+
+/* Specific styling for filter inputs inside table headers */
+.table input[type="text"] {
+    width: 100%;
+    padding: var(--space-xxs) var(--space-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--surface-light);
+    /* Use surface-light for inputs */
+    color: var(--text-primary);
+    font-size: var(--font-size-xs);
+    /* Slightly smaller font for filters */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    max-width: none;
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+}
+
+.table input[type="text"]::placeholder {
+    color: var(--text-secondary);
+    /* Placeholder color */
+    opacity: 0.7;
+}
+
+.table input[type="text"]:focus {
+    outline: none;
+    box-shadow: var(--focus-ring);
+    border-color: var(--color-primary);
+}
+
+/* --- No Results Message --- */
+.noResults {
+    text-align: center;
+    padding: var(--space-lg);
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+    background: var(--surface-light);
+    border-bottom-left-radius: var(--border-radius-md);
+    border-bottom-right-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    border-top: none;
+}
+
+/* Inherit font-size from table for input/select in small app mode */
+.smallApp .table input[type="text"],
+.smallApp .table select {
+    font-size: inherit;
+    /* This will make it consistent with table cell text */
+    padding: 2px 4px;
+    /* Adjust padding if needed */
+    height: unset;
+    /* Remove fixed height if not necessary */
+}
+
+/* Ensure icons are aligned vertically */
+.table th span {
+    vertical-align: middle;
+}

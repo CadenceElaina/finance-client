@@ -14,37 +14,38 @@ const IncomeSection = () => {
     };
 
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
+        const { name, value, type, checked } = e.target; // Destructure `checked` for checkboxes
         updateIncome({ [name]: type === 'number' ? parseFloat(value) || 0 : (type === 'checkbox' ? checked : value) });
     };
 
     return (
         <Section header={<SectionHeader title="Income Details" />}>
-            {/* Centered radio group at the top */}
-            <div className={formStyles.radioRowTop}>
-                <label className={formStyles.radioRowLabel}>Income Type:</label>
-                <div className={formStyles.radioRowGroup}>
-                    <label>
-                        <input
-                            type="radio"
-                            name="incomeType"
-                            value="hourly"
-                            checked={income.type === 'hourly'}
-                            onChange={handleIncomeTypeChange}
-                        /> Hourly
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="incomeType"
-                            value="salary"
-                            checked={income.type === 'salary'}
-                            onChange={handleIncomeTypeChange}
-                        /> Salary
-                    </label>
-                </div>
-            </div>
             <FormLayout>
+                {/* Centered radio group at the top, now within the FormLayout grid */}
+                <div className={formStyles.radioRowTop}> {/* This div now acts as a grid item */}
+                    <label className={formStyles.radioRowLabel}>Income Type:</label>
+                    <div className={formStyles.radioRowGroup}>
+                        <label>
+                            <input
+                                type="radio"
+                                name="incomeType"
+                                value="hourly"
+                                checked={income.type === 'hourly'}
+                                onChange={handleIncomeTypeChange}
+                            /> Hourly
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                name="incomeType"
+                                value="salary"
+                                checked={income.type === 'salary'}
+                                onChange={handleIncomeTypeChange}
+                            /> Salary
+                        </label>
+                    </div>
+                </div>
+
                 {income.type === 'salary' && (
                     <>
                         <div className={formStyles.formGroup}>
@@ -59,16 +60,16 @@ const IncomeSection = () => {
                                 min="0"
                             />
                         </div>
+                        {/* Assuming this is a calculated field, it should be read-only */}
                         <div className={formStyles.formGroup}>
-                            <label htmlFor="monthlyAfterTax">Monthly Net Income (After-tax):</label>
+                            <label htmlFor="monthlyAfterTaxCalculated">Calculated Monthly After-tax:</label>
                             <input
-                                type="number"
-                                id="monthlyAfterTax"
-                                name="monthlyAfterTax"
-                                value={income.monthlyAfterTax || ''}
-                                onChange={handleChange}
-                                placeholder="e.g. 3000"
-                                min="0"
+                                type="text" /* Changed to text since it's displaying a formatted number */
+                                id="monthlyAfterTaxCalculated"
+                                name="monthlyAfterTaxCalculated" /* Give it a unique name */
+                                value={`$${(budget.averageIncomeAfterTaxMonthly || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                                readOnly
+                                disabled
                             />
                         </div>
                     </>
@@ -99,20 +100,25 @@ const IncomeSection = () => {
                                 min="0"
                             />
                         </div>
-                        <div className={formStyles.formGroup}>
-                            <label htmlFor="monthlyAfterTax">Monthly Net Income (After-tax):</label>
-                            <input
-                                type="number"
-                                id="monthlyAfterTax"
-                                name="monthlyAfterTax"
-                                value={income.monthlyAfterTax || ''}
-                                onChange={handleChange}
-                                placeholder="e.g. 3000"
-                                min="0"
-                            />
-                        </div>
                     </>
                 )}
+                {/* This field should only show if salary or hourly calculation is NOT used, or if it's the fallback manual input.
+                    If it's always manual, consider the logic for `budget.averageIncomeAfterTaxMonthly` and `income.monthlyAfterTax`.
+                    For now, assuming it's a general manual override/input. */}
+                <div className={formStyles.formGroup}>
+                    <label htmlFor="monthlyAfterTaxManual">Manual Monthly Net Income (After-tax):</label>
+                    <input
+                        type="number"
+                        id="monthlyAfterTaxManual" /* Renamed ID to avoid conflict/clarify */
+                        name="monthlyAfterTax" /* Keep original name if it maps to the same state */
+                        value={income.monthlyAfterTax || ''}
+                        onChange={handleChange}
+                        placeholder="e.g. 3000"
+                        min="0"
+                        required
+                    />
+                </div>
+
                 <div className={formStyles.formGroup}>
                     <label htmlFor="bonusAfterTax">Annual Bonus (After-tax):</label>
                     <input

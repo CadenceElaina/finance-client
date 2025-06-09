@@ -1,69 +1,142 @@
+/* src/components/ui/Form/FormLayout.module.css */
+
 .formGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    /* 3 columns */
-    gap: var(--space-lg);
-    padding: var(--space-lg) var(--space-md);
-    max-width: 900px;
-    /* wider for 3 columns */
-    margin: 0 auto;
+    /* On wider screens, we'll maintain two columns. */
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    /* Keep this for overall grid structure */
+    gap: var(--space-md);
+    /* Consistent gap between grid items */
+    padding: var(--space-sm) var(--space-sm);
+    /* Padding around the grid */
+
+    /* Consistent max-width for the overall form */
+    margin: var(--space-lg) auto;
+    /* Top/bottom margin, centered horizontally */
     box-sizing: border-box;
-    justify-items: center;
-    align-items: start;
     background: var(--surface-light);
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
 }
 
-/* Default styling for form groups */
+/* Default styling for form groups (label-input pairs) */
 .formGroup {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
+    flex-direction: row;
+    /* Labels and inputs in a row */
+    align-items: center;
+    /* Vertically align label and input */
+    gap: var(--space-md);
+    /* Consistent gap between label and input */
     width: 100%;
-    max-width: 260px;
-    margin: 0 auto;
+    /* Take full width of its grid cell */
 }
 
 .formGroup label {
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
-    margin-bottom: var(--space-xxs);
-    text-align: center;
-    /* Space between label and input */
+    margin-bottom: 0;
+    text-align: right;
+    /* Right-align label to push it closer to the input */
+    min-width: 140px;
+    /* Adjusted min-width for labels */
+    max-width: 180px;
+    /* Adjusted max-width for labels */
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
-/* Radio group specific styling (can also be a general form style) */
-.radioGroup {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-md);
-    margin-bottom: var(--space-xs);
-    /* Add some space below the radio group */
+.formGroup input,
+.formGroup select {
+    width: 220px;
+    /* Fixed width for inputs */
+    box-sizing: border-box;
+    text-align: left;
+    /* Default text alignment */
 }
+
+/* Specific styling for the calculated read-only input */
+.formGroup input[type="text"][readOnly],
+.formGroup input[type="number"][readOnly] {
+    text-align: right;
+    /* Right-align for currency/calculated numbers */
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+}
+
+
+/* Input and Select General Styling (moved outside .formGroup for general application) */
+input,
+select {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-sm);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
+    background: var(--background-light);
+    color: var(--text-primary);
+    box-sizing: border-box;
+}
+
+/* Read-only / disabled input styling (general) */
+input[type="number"]:read-only,
+input[type="text"]:read-only,
+select:read-only,
+input[type="number"]:disabled,
+input[type="text"]:disabled,
+select:disabled {
+    background: var(--surface-dark);
+    color: var(--text-tertiary);
+    border-color: var(--border-dark);
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+
+/* --- Radio Group Styles for Income Type Selection --- */
 
 .radioRowTop {
     display: flex;
-    flex-direction: column;
+    /* Changed to flexbox */
+    flex-direction: row;
+    /* Arranges label and radio group horizontally */
     align-items: center;
+    /* Vertically center items */
     justify-content: center;
-    margin-bottom: var(--space-lg);
+    /* Horizontally center the whole block */
+    gap: var(--space-lg);
+    /* Space between 'Income Type:' label and the radio buttons */
+    margin-bottom: var(--space-md);
+    /* Space below this entire radio section */
+    grid-column: 1 / -1;
+    /* Ensure it spans all columns of the formGrid */
+    padding-top: var(--space-sm);
     width: 100%;
+    /* Ensure it takes full width to allow proper centering */
 }
 
 .radioRowLabel {
     font-size: var(--font-size-base);
     color: var(--text-secondary);
-    margin-bottom: var(--space-xs);
-    text-align: center;
+    margin-bottom: 0;
+    /* No bottom margin, as it's row-flexed */
+    text-align: right;
+    /* Align label text to the right for proximity to radios */
+    font-weight: var(--font-weight-medium);
+    flex-shrink: 0;
+    /* Prevent label from shrinking */
 }
 
 .radioRowGroup {
     display: flex;
     flex-direction: row;
+    /* Ensure radio options are in a row */
     gap: var(--space-lg);
+    /* Space between "Hourly" and "Salary" options */
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Align radios to the start within their group */
+    flex-wrap: wrap;
+    /* Allow wrapping for small screens */
 }
 
 .radioRowGroup label {
@@ -73,38 +146,10 @@
     font-size: var(--font-size-base);
     color: var(--text-secondary);
     margin: 0;
+    cursor: pointer;
 }
 
-/* Read-only / disabled input styling (can be general input styles) */
-input[type="number"]:read-only,
-input[type="text"]:read-only,
-select:read-only,
-input[type="number"]:disabled,
-input[type="text"]:disabled,
-select:disabled {
-    background: var(--surface-dark);
-    /* Slightly darker background to indicate read-only/disabled */
-    color: var(--text-tertiary);
-    /* Muted text color */
-    border-color: var(--border-dark);
-    cursor: not-allowed;
-    opacity: 0.8;
-    /* Subtle opacity change */
-}
-
-input,
-select {
-    width: 100%;
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-size-base);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    background: var(--background-light);
-    color: var(--text-primary);
-    box-sizing: border-box;
-    text-align: center;
-}
-
+/* Media Queries for responsiveness */
 @media (max-width: 900px) {
     .formGrid {
         grid-template-columns: 1fr 1fr;
@@ -112,10 +157,70 @@ select {
     }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
     .formGrid {
         grid-template-columns: 1fr;
         max-width: 98vw;
         padding: var(--space-md);
+    }
+
+    /* Stack labels and inputs vertically on smaller screens */
+    .formGroup {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-xxs);
+    }
+
+    .formGroup label {
+        text-align: left;
+        width: 100%;
+        min-width: unset;
+        max-width: unset;
+    }
+
+    .formGroup input,
+    .formGroup select {
+        width: 100%;
+        max-width: unset;
+    }
+
+    /* Adjust radioRowTop for single column layout on smaller screens */
+    .radioRowTop {
+        flex-direction: column;
+        /* Stack label and radio options */
+        gap: var(--space-sm);
+        /* Adjust gap when stacked */
+    }
+
+    .radioRowLabel {
+        text-align: center;
+        /* Center label when stacked */
+    }
+
+    .radioRowGroup {
+        justify-content: center;
+        /* Center the radio options when stacked */
+    }
+}
+
+/* Further reduce space for very small screens if needed */
+@media (max-width: 480px) {
+    .formGrid {
+        gap: var(--space-sm);
+        /* Reduce overall grid gap */
+    }
+
+    .formGroup {
+        gap: var(--space-xxs);
+        /* Smaller gap for stacked form groups */
+    }
+
+    .radioRowTop {
+        gap: var(--space-sm);
+    }
+
+    .radioRowGroup {
+        gap: var(--space-sm);
+        /* Smaller gap between radio options */
     }
 }

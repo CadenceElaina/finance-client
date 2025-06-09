@@ -7,36 +7,9 @@ import {
     saveBudgetDataToLocal,
     clearBudgetDataFromLocal,
 } from "../utils/localStorageUtils";
+import { LOCAL_PERSISTENCE_PREF_KEY, DEFAULT_DEMO_BUDGET } from "../utils/constants";
 
 const BudgetContext = createContext();
-//
-// Define a default/demo budget structure
-const DEFAULT_DEMO_BUDGET = {
-    income: {
-        type: "salary", // 'salary' or 'hourly'
-        // For salary users:
-        monthlyAfterTax: 4100, // Net monthly income (after tax)
-        annualPreTax: 75000,   // Gross annual salary (pre-tax)
-        // For hourly users, you would use hourlyRate and expectedAnnualHours instead
-        hourlyRate: null,
-        expectedAnnualHours: null,
-        // These are always after-tax:
-        bonusAfterTax: 5000,
-        additionalIncomeAfterTax: 0,
-    },
-    monthlyExpenses: [
-        { id: "exp-1", name: "Rent/Mortgage", cost: 1200, category: "required" },
-        { id: "exp-2", name: "Groceries", cost: 400, category: "flexible" },
-        { id: "exp-3", name: "Utilities", cost: 150, category: "required" },
-        { id: "exp-4", name: "Internet", cost: 70, category: "required" },
-        { id: "exp-5", name: "Transportation", cost: 100, category: "flexible" },
-        { id: "exp-6", name: "Dining Out", cost: 200, category: "non-essential" },
-        { id: "exp-7", name: "Entertainment", cost: 100, category: "non-essential" },
-    ],
-};
-
-// Key for local storage persistence preference
-const LOCAL_PERSISTENCE_PREF_KEY = 'budgetPersistencePreference';
 
 export const BudgetProvider = ({ children }) => {
     const { user, token } = useAuth();

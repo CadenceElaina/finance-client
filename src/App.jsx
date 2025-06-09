@@ -1,5 +1,7 @@
-
 import './App.css'
+import './styles/variables.css';
+import './styles/themes.css';
+import './styles/global.css';
 import HomePage from './pages/HomePage';
 import SignupPage from './pages/SignupPage';
 import DemoPage from './pages/DemoPage';
