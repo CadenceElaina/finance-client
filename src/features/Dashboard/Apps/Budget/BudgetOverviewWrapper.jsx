@@ -52,12 +52,19 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
     return (
         <div className={styles.budgetContentWrapper}>
             {smallApp ? (
-                // Only show the selected inner tab
-                activeInnerTabId === 'expenses'
-                    ? <ExpensesSection {...expensesProps} />
-                    : <SummarySection {...summaryProps} />
+                // Small app: show both if "showAll" or no inner tab, else just one section
+                (!activeInnerTabId || activeInnerTabId === 'showAll') ? (
+                    <>
+                        <SummarySection {...summaryProps} />
+                        <ExpensesSection {...expensesProps} />
+                    </>
+                ) : activeInnerTabId === 'expenses' ? (
+                    <ExpensesSection {...expensesProps} />
+                ) : (
+                    <SummarySection {...summaryProps} />
+                )
             ) : (
-                // Show both in two columns
+                // Large app: always show both, side by side
                 <TwoColumnLayout
                     left={<SummarySection {...summaryProps} />}
                     right={<ExpensesSection {...expensesProps} />}

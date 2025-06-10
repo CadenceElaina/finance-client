@@ -47,7 +47,9 @@ const Budget = () => {
         {
             id: 'budget',
             label: 'Budget Overview',
+            // Add a "showAll" inner tab for small app mode
             innerTabs: [
+                { id: 'showAll', label: 'Overview', component: () => null },
                 { id: 'summary', label: 'Summary', component: () => null },
                 { id: 'expenses', label: 'Expenses', component: () => null }
             ],

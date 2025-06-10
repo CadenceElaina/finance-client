@@ -4,7 +4,8 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text } from 
 import Section from '../../../../components/ui/Section/Section';
 import Table from '../../../../components/ui/Table/Table';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
-import styles from './accounts.module.css';
+import accountsStyles from './accounts.module.css'; // This is the correct import for account-specific styles
+import tableStyles from '../../../../components/ui/Table/Table.module.css'; // This is for general table styles
 import { DEMO_ACCOUNTS } from '../../../../utils/constants';
 
 // Modern theme-aware color palette for charts
@@ -74,23 +75,26 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                 fill="var(--text-primary)"
                 textAnchor={textAnchor}
                 dominantBaseline="central"
-                className={styles.chartLabelText}
+                className={accountsStyles.chartLabelText} // FIX: Changed from styles to accountsStyles
             >
                 {`${name} (${(percent * 100).toFixed(0)}%)`}
             </Text>
         );
     };
 
+    // The accountsHeader structure.
+    // It's a header for the accounts table, and its layout should be handled by SectionHeader
+    // The filter row itself uses tableStyles.filterRow
     const accountsHeader = (
-        <div className={styles.accountsHeaderRow}>
-            <h3 className={styles.accountsHeaderTitle}>Your Accounts</h3>
-            <div className={styles.filterRow}>
-                <label htmlFor="accountCategoryFilter" className={styles.filterLabel}>Show:</label>
+        <div className={tableStyles.filterRow}> {/* This div acts as the container for title and filter */}
+            <h3 className={tableStyles.tableHeaderTitle}>Your Accounts</h3>
+            <div className={tableStyles.filterRow}> {/* This is the actual filter controls wrapper */}
+                <label htmlFor="accountCategoryFilter" className={tableStyles.filterLabel}>Show:</label>
                 <select
                     id="accountCategoryFilter"
                     value={accountCategoryFilter}
                     onChange={e => setAccountCategoryFilter(e.target.value)}
-                    className={styles.filterSelect}
+                    className={tableStyles.filterSelect}
                 >
                     <option value="all">All Accounts</option>
                     <option value="Cash">Cash Accounts</option>
@@ -103,28 +107,28 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
 
     // Snapshot row (always above)
     const SnapshotRow = (
-        <div className={styles.snapshotRowFull}>
-            <div className={styles.snapshotItem}>
-                <span className={styles.snapshotLabel}>Net Worth</span>
-                <span className={`${styles.positive} ${styles.value}`}>
+        <div className={accountsStyles.snapshotRowFull}> {/* FIX: Changed from styles to accountsStyles */}
+            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={accountsStyles.snapshotLabel}>Net Worth</span> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
                     ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={styles.snapshotItem}>
-                <span className={styles.snapshotLabel}>Cash</span>
-                <span className={`${styles.positive} ${styles.value}`}>
+            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={accountsStyles.snapshotLabel}>Cash</span> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
                     ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={styles.snapshotItem}>
-                <span className={styles.snapshotLabel}>Assets</span>
-                <span className={`${styles.positive} ${styles.value}`}>
+            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={accountsStyles.snapshotLabel}>Assets</span> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
                     ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={styles.snapshotItem}>
-                <span className={styles.snapshotLabel}>Liabilities</span>
-                <span className={`${styles.negative} ${styles.value}`}>
+            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={accountsStyles.snapshotLabel}>Liabilities</span> {/* FIX: Changed from styles to accountsStyles */}
+                <span className={`${accountsStyles.negative} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
                     {Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
@@ -134,9 +138,9 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
     // Charts column (left)
     const ChartsColumnContent = (
         <>
-            <Section className={`${styles.chartSectionCompact} ${smallApp ? styles.sectionCompactOverride : ''}`}>
-                <div className={styles.chartHeader}>Assets Breakdown</div>
-                <div className={styles.chartContainerCompact}>
+            <Section className={`${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={accountsStyles.chartHeader}>Assets Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {assetsPieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={smallApp ? 140 : 160}> {/* Adjust height for small app */}
                             <PieChart>
@@ -173,13 +177,13 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className={styles.noChartData}>No assets to display.</div>
+                        <div className={accountsStyles.noChartData}>No assets to display.</div> // FIX: Changed from styles to accountsStyles
                     )}
                 </div>
             </Section>
-            <Section className={`${styles.chartSectionCompact} ${smallApp ? styles.sectionCompactOverride : ''}`}>
-                <div className={styles.chartHeader}>Liabilities Breakdown</div>
-                <div className={styles.chartContainerCompact}>
+            <Section className={`${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={accountsStyles.chartHeader}>Liabilities Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {liabilitiesPieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={smallApp ? 140 : 160}> {/* Adjust height for small app */}
                             <PieChart>
@@ -216,7 +220,7 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className={styles.noChartData}>No liabilities to display.</div>
+                        <div className={accountsStyles.noChartData}>No liabilities to display.</div> // FIX: Changed from styles to accountsStyles
                     )}
                 </div>
             </Section>
@@ -226,9 +230,9 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
     // Table column (right)
     const TableColumnContent = (
         <>
-            <Section header={accountsHeader} className={`${styles.tableSectionCompact} ${smallApp ? styles.sectionCompactOverride : ''}`}>
+            <Section header={accountsHeader} className={`${tableStyles.tableSection} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}>
                 <Table
-                    className={styles.compactTable}
+                    className={tableStyles.compactTable}
                     columns={[
                         { key: 'name', label: 'Account' },
                         { key: 'accountProvider', label: 'Institution' },
@@ -236,7 +240,7 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                         { key: 'subType', label: 'Type' },
                         {
                             key: 'value', label: 'Value', render: val =>
-                                <span className={val >= 0 ? styles.positive : styles.negative}>
+                                <span className={val >= 0 ? accountsStyles.positive : accountsStyles.negative}> {/* FIX: Changed from styles to accountsStyles */}
                                     ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </span>
                         },
@@ -250,12 +254,12 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
     );
 
     return (
-        <div className={styles.overviewTab}>
+        <div className={accountsStyles.overviewTab}>
             {SnapshotRow}
             <TwoColumnLayout
-                left={<div className={styles.chartsColumn}>{ChartsColumnContent}</div>}
-                right={<div className={styles.tableColumn}>{TableColumnContent}</div>}
-                smallApp={false} // really should rethink approach to TwoColumnLayout and smallApp usage - our BudgetOverview shows only one section (summary or expenses) in smallApp mode whereas Accounts OverviewTab should show all the content in smallApp mode or largeApp
+                left={<div className={accountsStyles.chartsColumn}>{ChartsColumnContent}</div>}
+                right={<div className={accountsStyles.tableColumn}>{TableColumnContent}</div>}
+                smallApp={smallApp}
             />
         </div>
     );

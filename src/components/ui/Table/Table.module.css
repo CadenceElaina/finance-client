@@ -1,20 +1,20 @@
-/* ... (existing Table.module.css styles) ... */
+/* src/components/ui/Table/Table.module.css */
 
 .tableContainer {
     width: 100%;
     overflow-x: auto;
+    /* Allows horizontal scrolling for large tables on small screens */
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
     min-width: 500px;
-    /* Default min-width for larger screens */
+    /* Default min-width for larger screens. Adjust as needed. */
     margin: 0 auto;
     font-size: var(--font-size-md);
 }
 
-/* Scoped table elements */
 .table th,
 .table td {
     border: none;
@@ -24,6 +24,7 @@
     border-bottom: 1px solid var(--border-light);
     vertical-align: middle;
     font-size: inherit;
+    /* Inherit from .table or .compactTable */
 }
 
 .table th {
@@ -37,6 +38,7 @@
     text-align: left;
     padding: var(--space-xs) var(--space-sm);
     white-space: nowrap;
+    /* Prevents header text from wrapping */
 }
 
 .table tr:nth-child(even) {
@@ -49,7 +51,9 @@
 
 .table tr {
     fill: var(--white);
+    /* Not typically used for HTML table rows, check context */
     font-size: var(--font-size-xs);
+    /* Sets default row font size */
     pointer-events: auto;
     font-weight: 400;
     text-shadow: none;
@@ -57,6 +61,7 @@
     transition: background 0.15s;
 }
 
+/* Input/Select elements within table cells for editing */
 .tableInput,
 .tableSelect {
     width: 100%;
@@ -68,8 +73,10 @@
     font-size: var(--font-size-sm);
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
+    /* Ensures consistent height */
     box-sizing: border-box;
     max-width: none;
+    /* Remove this if you want fixed width: max-width: 150px; */
 }
 
 .tableInput:focus,
@@ -79,12 +86,75 @@
     border-color: var(--color-primary);
 }
 
-/* ... (existing Table.module.css styles) ... */
+/* Buttons within table cells */
+.removeButton,
+.addButton {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-xs);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+    /* Prevents button text from wrapping */
+}
+
+.removeButton {
+    background-color: var(--status-danger);
+    color: var(--text-light);
+    border: 1px solid var(--status-danger);
+}
+
+.removeButton:hover {
+    background-color: var(--status-danger-dark);
+}
+
+.addButton {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    border: 1px solid var(--color-primary);
+}
+
+.addButton:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* Styles for a Section containing a table (e.g., AccountsTable, ExpensesTable) */
+.tableSection {
+    background-color: var(--surface-light);
+    /* Changed from --surface-dark to match Account's Section */
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    max-width: none;
+    /* align-items: stretch; Removed, depends on parent flex container */
+    /* text-align: center; Removed, apply to specific elements if needed */
+    border: 1px solid var(--border-light);
+    /* Added border to match Accounts Section */
+    padding: var(--space-sm);
+    font-size: var(--font-size-md);
+    margin-bottom: 0;
+    /* Managed by parent layout, avoid external margins on Section */
+    box-sizing: border-box;
+    /* Crucial for consistent sizing */
+    display: flex;
+    /* Sections are typically flex containers */
+    flex-direction: column;
+}
+
+/* Compact table variant for smallApp or dense layouts (applies to .table directly) */
+.compactTable {
+    font-size: var(--font-size-xs);
+}
+
+.compactTable th,
+.compactTable td {
+    padding: var(--space-xxs) var(--space-xs);
+    font-size: var(--font-size-xxs);
+}
 
 /* --- SMALL APP MODE OVERRIDES for Table Component itself --- */
 .smallApp {
-    /* This applies when the Table component receives smallApp={true} */
-    /* No need for min-width on the container if the table inside handles it */
+    /* This class is applied to the .tableContainer when Table receives smallApp={true} */
 }
 
 .smallApp .table {
@@ -99,5 +169,89 @@
     padding: var(--space-xxs) var(--space-xs);
     /* Reduce cell padding in small mode */
     font-size: var(--font-size-xxs);
-    /* Even smaller font for table headers/cells */
+}
+
+.smallApp .tableInput,
+.smallApp .tableSelect,
+.smallApp .removeButton,
+.smallApp .addButton {
+    font-size: var(--font-size-xxs);
+    /* Smaller fonts for inputs/buttons in small table */
+    padding: var(--space-xxs) var(--space-xxs);
+    /* Tighter padding for inputs/buttons */
+    height: auto;
+    /* Let content dictate height in small mode */
+}
+
+
+/* --- Filter Row Styles (Moved from accounts.module.css) --- */
+/* These styles are for the filter mechanism, which is used in Accounts and now Expenses.
+   We put them here because the <Table> component is often accompanied by such filters. */
+.filterRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: 0;
+    /* Remove if SectionHeader adds internal margin */
+    justify-content: flex-end;
+    /* Aligns filters to the right */
+    flex-wrap: wrap;
+    /* Allow filters to wrap on very small screens */
+}
+
+.filterLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    /* Prevent label from wrapping */
+}
+
+.filterSelect {
+    min-width: 110px;
+    font-size: var(--font-size-xs);
+    padding: var(--space-xxs) var(--space-xs);
+    height: 28px;
+    /* Standard height for select inputs */
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--background-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    /* Removes default browser select arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 18px;
+    padding-right: 26px;
+    /* Space for custom arrow */
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+/* --- Table Header Title (used in SectionHeader) --- */
+/* This is a more generic title for sections that might contain tables.
+   Can be used with SectionHeader's `title` prop. */
+.tableHeaderTitle {
+    /* Renamed from accountsHeaderTitle to be generic */
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    text-align: left;
+    /* Aligned left for standard section headers */
+    /* Accounts had text-align: center; for accountsHeaderTitle, this makes it left for generic */
+}
+
+.noResults {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: var(--space-md);
+    font-size: var(--font-size-sm);
 }

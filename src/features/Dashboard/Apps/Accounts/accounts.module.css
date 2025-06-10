@@ -1,3 +1,5 @@
+/* src/features/Dashboard/Apps/Accounts/accounts.module.css */
+
 /* Base (default/large app) styles */
 .overviewTab {
     display: flex;
@@ -42,7 +44,8 @@
 }
 
 .value {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-sm);
+    /* This should match the value in Table.module.css if it's general */
     font-weight: 700;
 }
 
@@ -62,64 +65,10 @@
     font-size: var(--font-size-xs);
 }
 
-/* --- Accounts Table Section --- */
-.accountsHeaderRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    margin-bottom: var(--space-xs);
-}
-
-.accountsHeaderTitle {
-    font-size: var(--font-size-lg);
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-    flex: 1;
-    text-align: left;
-}
-
-.filterRow {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    margin-bottom: 0;
-    justify-content: flex-end;
-}
-
-.filterLabel {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.filterSelect {
-    min-width: 110px;
-    font-size: var(--font-size-xs);
-    padding: var(--space-xxs) var(--space-xs);
-    height: 28px;
-    border-radius: var(--border-radius-sm);
-    border: 1px solid var(--border-light);
-    background: var(--background-light);
-    color: var(--text-primary);
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 18px;
-    padding-right: 26px;
-}
-
-.filterSelect:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: var(--focus-ring);
-}
-
+/* --- Accounts Specific Chart/Table Column Layouts (not component styles) --- */
+/* These define the layout of the columns *within* the TwoColumnLayout */
 .chartHeader {
-
+    width: 100%;
     text-align: left;
     font-size: var(--font-size-xs);
     font-weight: 600;
@@ -162,9 +111,7 @@
     font-weight: bold;
 }
 
-/* --- SMALL APP MODE OVERRIDES --- */
-/* These styles apply when the parent .overviewTab has the .overviewTabSmall class */
-
+/* --- SMALL APP MODE OVERRIDES for Accounts layout --- */
 .overviewTabSmall {
     gap: var(--space-xs);
     /* Reduce overall gap within OverviewTab when small */
@@ -193,13 +140,11 @@
 .overviewTabSmall .snapshotLabel {
     font-size: var(--font-size-xxs);
     /* Smallest text for labels */
-    /* white-space: nowrap; /* Uncomment if labels wrapping is an issue */
 }
 
 .overviewTabSmall .value {
-    font-size: var(--font-size-md);
-    /* Keep value relatively readable, or make smaller */
-    /* If you want smaller values too: font-size: var(--font-size-sm); */
+    font-size: var(--font-size-sm);
+    /* Keep value relatively readable */
 }
 
 .overviewTabSmall .chartsColumn {
@@ -213,6 +158,7 @@
 }
 
 /* Override for Section components specifically when inside OverviewTabSmall */
+/* This is a general utility class applied to Section */
 .sectionCompactOverride {
     padding: var(--space-xxs) !important;
     /* Force minimal padding for sections */

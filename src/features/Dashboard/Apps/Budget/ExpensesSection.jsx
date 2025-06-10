@@ -1,12 +1,11 @@
 // src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
-import styles from './budget.module.css';
-import Button from '../../../../components/ui/Button/Button';
 import Table from '../../../../components/ui/Table/Table';
 import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import Section from '../../../../components/ui/Section/Section';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
+import styles from './budget.module.css';
 
 const ExpensesSection = ({
     expenses,
@@ -14,6 +13,7 @@ const ExpensesSection = ({
 }) => {
     const { addExpense, updateExpense, removeExpense } = useBudget();
     const [newExpense, setNewExpense] = useState({ name: '', cost: '', category: 'required' });
+    const [categoryFilter, setCategoryFilter] = useState('all');
 
     const handleNewExpenseChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -35,7 +35,11 @@ const ExpensesSection = ({
         updateExpense(id, { [field]: updatedValue });
     };
 
-    const expenseCategories = ["required", "flexible", "non-essential"];
+    const expenseCategories = [
+        { id: 'required', label: 'Required' },
+        { id: 'flexible', label: 'Flexible' },
+        { id: 'non-essential', label: 'Non-essential' }
+    ];
 
     const columns = [
         { key: 'name', label: 'Name' },
@@ -43,6 +47,11 @@ const ExpensesSection = ({
         { key: 'category', label: 'Category' },
         { key: 'action', label: 'Action' }
     ];
+
+    // Filter expenses by category
+    const filteredExpenses = categoryFilter === 'all'
+        ? expenses
+        : expenses.filter(exp => exp.category === categoryFilter);
 
     const renderRow = (exp, idx) => (
         <tr key={exp.id}>
@@ -69,17 +78,17 @@ const ExpensesSection = ({
                     className={tableStyles.tableSelect}
                 >
                     {expenseCategories.map(cat => (
-                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                        <option key={cat.id} value={cat.id}>{cat.label}</option>
                     ))}
                 </select>
             </td>
             <td>
-                <Button
-                    variant="danger"
+                <button
+                    className={tableStyles.removeButton}
                     onClick={() => removeExpense(exp.id)}
                 >
                     Remove
-                </Button>
+                </button>
             </td>
         </tr>
     );
@@ -115,36 +124,62 @@ const ExpensesSection = ({
                     className={tableStyles.tableSelect}
                 >
                     {expenseCategories.map(cat => (
-                        <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                        <option key={cat.id} value={cat.id}>{cat.label}</option>
                     ))}
                 </select>
             </td>
             <td>
-                <Button
-                    variant="primary"
+                <button
+                    className={tableStyles.addButton} // Use tableStyles.addButton
                     onClick={handleAddExpense}
                 >
                     Add
-                </Button>
+                </button>
             </td>
         </tr>
     );
 
+    // Filter row (like Accounts)
+    const filterRow = (
+        <div className={tableStyles.filterRow}> {/* Use tableStyles.filterRow */}
+            <label htmlFor="expenseCategoryFilter" className={tableStyles.filterLabel}> {/* Use tableStyles.filterLabel */}
+                Show:
+            </label>
+            <select
+                id="expenseCategoryFilter"
+                value={categoryFilter}
+                onChange={e => setCategoryFilter(e.target.value)}
+                className={tableStyles.filterSelect} // Use tableStyles.filterSelect
+            >
+                <option value="all">All Expenses</option>
+                {expenseCategories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                ))}
+            </select>
+        </div>
+    );
+
     return (
-        <Section className={styles.expensesTableSection} header={
-            <SectionHeader
-                title="Monthly Expenses"
-                right={null}
-            />
-        }>
-            <Table
-                columns={columns}
-                data={expenses}
-                renderRow={renderRow}
-                className={`${tableStyles.budgetTable} ${tableStyles.compactTable}`}
-                smallApp={smallApp} // Passed to Table for its internal responsiveness
-                extraRow={renderNewExpenseRow}
-            />
+        <Section
+            className={tableStyles.tableSection} // Use tableStyles.tableSection here
+            header={
+                <SectionHeader
+                    title="Monthly Expenses"
+                    titleClassName={tableStyles.tableHeaderTitle} // Pass titleClassName to SectionHeader
+                    right={filterRow}
+                />
+            }
+        >
+            <div className={tableStyles.tableContainer}>
+                <Table
+                    columns={columns}
+                    data={filteredExpenses}
+                    renderRow={renderRow}
+                    className={tableStyles.compactTable}
+                    smallApp={smallApp}
+                    extraRow={renderNewExpenseRow}
+                />
+            </div>
         </Section>
     );
 };

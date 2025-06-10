@@ -1,8 +1,5 @@
 /* src/features/Dashboard/Apps/Budget/budget.module.css */
 
-/* Import other style modules */
-@import './styles/_sections.module.css';
-
 .budgetAppContainer {
     width: 100%;
     height: 100%;
