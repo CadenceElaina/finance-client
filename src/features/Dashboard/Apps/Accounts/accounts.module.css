@@ -1,23 +1,47 @@
-/* src/pages/Accounts/accounts.module.css */
-
+/* Base (default/large app) styles */
 .overviewTab {
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
+    /* Default gap between snapshot and two-column layout */
     width: 100%;
     box-sizing: border-box;
 }
 
-.snapshotRow {
+.snapshotRowFull {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: var(--space-xs) 0;
+    margin: 0 auto;
+    background: var(--surface-light);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xxs);
+    /* Initial padding */
+    gap: var(--space-sm);
+    /* Initial gap between snapshot items */
+    flex-wrap: wrap;
 }
 
-.snapshotRow>div .value {
+.snapshotItem {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xxs);
+    flex: 1 1 120px;
+    /* Default preferred basis */
+    min-width: 100px;
+    max-width: 180px;
+}
+
+.value {
     font-size: var(--font-size-lg);
     font-weight: 700;
 }
@@ -94,37 +118,8 @@
     box-shadow: var(--focus-ring);
 }
 
-/* Full-width snapshot row above charts/table */
-.snapshotRowFull {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: stretch;
-    width: 100%;
-    margin: 0 auto;
-    background: var(--surface-light);
-    box-shadow: var(--shadow-md);
-}
-
-.snapshotItem {
-    flex: 1 1 120px;
-    min-width: 110px;
-    max-width: 180px;
-    background: var(--surface-light);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-xs) var(--space-sm);
-    margin: 0 var(--space-xs);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: var(--space-xxs);
-}
-
 .chartHeader {
-    width: 100%;
+
     text-align: left;
     font-size: var(--font-size-xs);
     font-weight: 600;
@@ -135,19 +130,12 @@
     padding-left: 2px;
 }
 
-.chartsTableRow {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    align-items: flex-start;
-}
-
 .chartsColumn {
     flex: 1 1 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-xs);
 }
 
 .tableColumn {
@@ -158,7 +146,12 @@
     gap: var(--space-md);
 }
 
-/* Color classes for snapshot and table values */
+.chartLabelText {
+    font-size: var(--font-size-xxs);
+    fill: var(--text-primary);
+    font-weight: 500;
+}
+
 .positive {
     color: var(--status-success) !important;
     font-weight: bold;
@@ -167,4 +160,65 @@
 .negative {
     color: var(--status-danger) !important;
     font-weight: bold;
+}
+
+/* --- SMALL APP MODE OVERRIDES --- */
+/* These styles apply when the parent .overviewTab has the .overviewTabSmall class */
+
+.overviewTabSmall {
+    gap: var(--space-xs);
+    /* Reduce overall gap within OverviewTab when small */
+    padding: var(--space-xxs);
+    /* Add slight padding to the overall tab */
+}
+
+.overviewTabSmall .snapshotRowFull {
+    padding: var(--space-xxs);
+    /* Even tighter padding for the snapshot container */
+    gap: var(--space-xs);
+    /* Smaller gap between snapshot items */
+}
+
+.overviewTabSmall .snapshotItem {
+    flex: 1 1 70px;
+    /* More aggressive smaller basis for snapshot items */
+    min-width: 60px;
+    /* Allow items to shrink even more before wrapping */
+    padding: var(--space-xxs) var(--space-xxs);
+    /* Minimal internal padding */
+    gap: var(--space-xxs);
+    /* Smaller internal gap */
+}
+
+.overviewTabSmall .snapshotLabel {
+    font-size: var(--font-size-xxs);
+    /* Smallest text for labels */
+    /* white-space: nowrap; /* Uncomment if labels wrapping is an issue */
+}
+
+.overviewTabSmall .value {
+    font-size: var(--font-size-md);
+    /* Keep value relatively readable, or make smaller */
+    /* If you want smaller values too: font-size: var(--font-size-sm); */
+}
+
+.overviewTabSmall .chartsColumn {
+    gap: var(--space-xxs);
+    /* Even smaller gap between charts sections */
+}
+
+.overviewTabSmall .tableColumn {
+    gap: var(--space-xxs);
+    /* Even smaller gap within table column */
+}
+
+/* Override for Section components specifically when inside OverviewTabSmall */
+.sectionCompactOverride {
+    padding: var(--space-xxs) !important;
+    /* Force minimal padding for sections */
+}
+
+.overviewTabSmall .chartHeader {
+    font-size: var(--font-size-xxs);
+    /* Smaller header for charts */
 }

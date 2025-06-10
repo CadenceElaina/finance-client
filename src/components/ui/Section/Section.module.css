@@ -1,86 +1,62 @@
-/* src/components/ui/Section/Section.module.css */
+/* src/components/ui/Section/section.module.css */
 
+/* Base Section styles (if they exist) */
 .section {
-    background: var(--surface-light);
+    background-color: var(--surface-light);
+    border: 1px solid var(--border-light);
     border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-md);
-    padding: 0 var(--section-padding);
-    /* This padding might be an issue if we want internal padding per section */
-    /*     margin-bottom: var(--space-md); */
-    width: 100%;
-    box-sizing: border-box;
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
+    height: 100%;
+    /* Ensures sections fill available height in column */
+    box-sizing: border-box;
 }
 
 .sectionHeader {
-    /* This is a wrapper for the actual header content (title or SectionHeader component) */
-    font-size: var(--section-header-font-size);
+    font-size: var(--font-size-md);
     font-weight: 600;
-    /*    margin-bottom: var(--space-sm); */
-    text-align: left;
     color: var(--text-primary);
-    padding-left: var(--space-xs);
-    /* This padding is on the sectionHeader div, not the content */
-}
-
-/* These styles are used by SectionHeader.jsx, which is good. */
-.sectionHeaderRow {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
     margin-bottom: var(--space-xs);
-    padding: 0 var(--space-xs);
-}
-
-.sectionHeaderLeft,
-.sectionHeaderRight {
-    flex: 1 1 0;
-    display: flex;
-    align-items: center;
-    min-width: 0;
-}
-
-.sectionHeaderLeft {
-    justify-content: flex-start;
-}
-
-.sectionHeaderRight {
-    justify-content: flex-end;
-}
-
-.sectionHeaderTitle {
-    flex: 1 1 0;
-    text-align: center;
-    margin: 0;
-    font-size: var(--section-header-font-size);
-    font-weight: 600;
-    color: var(--text-secondary);
-    min-width: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    /* Optional: a subtle separator */
+    padding-bottom: var(--space-xxs);
 }
 
 .sectionContent {
-    width: 100%;
-    padding: 0;
-    /* This means internal padding must be handled by the children directly */
+    flex-grow: 1;
+    /* Allows content to take up available space */
+    /* overflow: auto; /* If content can overflow, add scroll here */
 }
 
+/* --- TwoColumnLayout specific styles --- */
+
 .twoColumn {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-md);
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-sm);
     width: 100%;
+    box-sizing: border-box;
+    align-items: flex-start;
+    /* Align columns to the top */
 }
 
 .oneColumn {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: var(--space-xs);
     width: 100%;
+    box-sizing: border-box;
 }
 
 .column {
-    width: 100%;
+    flex: 1 1 0;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
 }
+
+/* Media query or conditional smallApp prop for TwoColumnLayout will handle switching */
+/* However, we are now handling this via the smallApp prop directly in JS and applying oneColumn class */

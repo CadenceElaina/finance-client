@@ -1,198 +1,266 @@
-// src/features/Dashboard/Apps/Budget/BudgetOverviewContent.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { useBudget } from '../../../../contexts/BudgetContext';
-import ExpensesSection from './ExpensesSection';
-import BudgetControlPanel from './BudgetControlPanel';
-import styles from './budget.module.css';
+import React, { useState, useMemo } from 'react';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text } from 'recharts';
 import Section from '../../../../components/ui/Section/Section';
+import Table from '../../../../components/ui/Table/Table';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
-import SectionHeader from '../../../../components/ui/Section/SectionHeader';
+import styles from './accounts.module.css';
+import { DEMO_ACCOUNTS } from '../../../../utils/constants';
 
-
-const PERIOD_OPTIONS = [
-    { id: 'monthly', label: 'Monthly' },
-    { id: 'annual', label: 'Annual' },
-    { id: 'both', label: 'Both' },
+// Modern theme-aware color palette for charts
+const CHART_COLORS = [
+    'var(--color-primary)',
+    'var(--color-secondary)',
+    '#7AA2F7', // Tokyo Night blue
+    '#BB9AF7', // Tokyo Night purple
+    '#00FFD1', // Accent teal
+    '#FF8C69', // Accent coral
+    '#FFD700', // Gold
+    '#EF5350', // Red
 ];
 
-const TAX_OPTIONS = [
-    { id: 'after', label: 'After-tax' },
-    { id: 'pre', label: 'Pre-tax' },
-    { id: 'both', label: 'Both' },
-];
+// Utility: Net worth calculation
+const getNetWorth = (accounts) =>
+    accounts.reduce((sum, acc) => sum + (typeof acc.value === 'number' ? acc.value : 0), 0);
 
-// Extract SummaryContent to its own component (if it's not already)
-// and pass all necessary props to it.
-// This helps keep BudgetOverviewContent cleaner.
-const SummaryContent = ({
-    period, setPeriod, tax, setTax,
-    monthlyIncomeAT, annualIncomeAT, monthlyIncomePT, annualIncomePT,
-    monthlyExpenses, annualExpenses,
-    monthlyDiscretionaryAT, annualDiscretionaryAT,
-    monthlyDiscretionaryPT, annualDiscretionaryPT
-}) => {
-    const format = (val) =>
-        `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
+    console.log('OverviewTab rendered with smallApp:', smallApp);
+    const [accountCategoryFilter, setAccountCategoryFilter] = useState('all');
 
-    const showAfter = tax === 'after' || tax === 'both';
-    const showPre = tax === 'pre' || tax === 'both';
+    // Categorize accounts using the 'category' field
+    const cashAccounts = accounts.filter(acc => acc.category === 'Cash');
+    const investmentAccounts = accounts.filter(acc => acc.category === 'Investments');
+    const debtAccounts = accounts.filter(acc => acc.category === 'Debt');
 
-    const showMonthly = period === 'monthly' || period === 'both';
-    const showAnnual = period === 'annual' || period === 'both';
+    // Filtered Accounts for the Table (based on the dropdown)
+    const filteredAccountsForTable = useMemo(() => {
+        if (accountCategoryFilter === 'all') return accounts;
+        if (accountCategoryFilter === 'Cash') return cashAccounts;
+        if (accountCategoryFilter === 'Investments') return investmentAccounts;
+        if (accountCategoryFilter === 'Debt') return debtAccounts;
+        return accounts;
+    }, [accounts, accountCategoryFilter, cashAccounts, investmentAccounts, debtAccounts]);
 
-    // Determine if only one column should be shown within the summary section itself
-    const singleColumnSummary = (showMonthly && !showAnnual) || (!showMonthly && showAnnual);
+    // Net Worth & Totals for Snapshot and Pie Charts
+    const netWorth = getNetWorth(accounts);
+    const totalCash = cashAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
+    const totalInvestments = investmentAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
+    const totalDebt = debtAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
+    const totalAssets = totalCash + totalInvestments;
 
-    // Helper to render a section for a given period/tax
-    const renderSummarySection = (periodLabel, income, expenses, discretionary, taxLabel) => (
-        <div>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                {periodLabel} {taxLabel ? `(${taxLabel})` : ''}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                <span>Income:</span>
-                <strong>{format(income)}</strong>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                <span>Expenses:</span>
-                <strong>{format(expenses)}</strong>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span>Discretionary:</span>
-                <strong style={{ color: discretionary < 0 ? 'var(--color-danger)' : undefined }}>{format(discretionary)}</strong>
+    // Data for Assets Pie Chart (aggregated by top-level categories)
+    const assetsPieData = [
+        { name: 'Cash', value: totalCash },
+        { name: 'Investments', value: totalInvestments },
+    ].filter(d => d.value > 0);
+
+    // Data for Liabilities Pie Chart (each liability account gets a slice, using absolute values)
+    const liabilitiesPieData = debtAccounts
+        .map(acc => ({
+            name: acc.name,
+            value: Math.abs(acc.value || 0),
+        }))
+        .filter(d => d.value > 0);
+
+    // Custom Label for Pie Charts
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
+        const RADIAN = Math.PI / 180;
+        const radius = outerRadius + 15; // Increased distance from pie
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+        const textAnchor = x > cx ? 'start' : 'end';
+        const finalX = x + (x > cx ? 5 : -5); // Small offset to prevent overlap with slice edge
+        const finalY = y;
+
+        return (
+            <Text
+                x={finalX}
+                y={finalY}
+                fill="var(--text-primary)"
+                textAnchor={textAnchor}
+                dominantBaseline="central"
+                className={styles.chartLabelText}
+            >
+                {`${name} (${(percent * 100).toFixed(0)}%)`}
+            </Text>
+        );
+    };
+
+    // --- Section header for "Your Accounts" with select menu on the right ---
+    const accountsHeader = (
+        <div className={styles.accountsHeaderRow}>
+            <h3 className={styles.accountsHeaderTitle}>Your Accounts</h3>
+            <div className={styles.filterRow}>
+                <label htmlFor="accountCategoryFilter" className={styles.filterLabel}>Show:</label>
+                <select
+                    id="accountCategoryFilter"
+                    value={accountCategoryFilter}
+                    onChange={e => setAccountCategoryFilter(e.target.value)}
+                    className={styles.filterSelect}
+                >
+                    <option value="all">All Accounts</option>
+                    <option value="Cash">Cash Accounts</option>
+                    <option value="Investments">Investment Accounts</option>
+                    <option value="Debt">Liability Accounts</option>
+                </select>
             </div>
         </div>
     );
 
-    const Controls = (
-        <div style={{ display: 'flex', gap: 8 }}>
-            <div>
-                <label htmlFor="period-select" style={{ marginRight: 4 }}>Period</label>
-                <select
-                    id="period-select"
-                    value={period}
-                    onChange={e => setPeriod(e.target.value)}
-                >
-                    {PERIOD_OPTIONS.map(opt => (
-                        <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                </select>
-            </div>
-            <div>
-                <label htmlFor="tax-select" style={{ marginRight: 4 }}>Tax</label>
-                <select
-                    id="tax-select"
-                    value={tax}
-                    onChange={e => setTax(e.target.value)}
-                >
-                    {TAX_OPTIONS.map(opt => (
-                        <option key={opt.id} value={opt.id}>{opt.label}</option>
-                    ))}
-                </select>
-            </div>
+    // Encapsulate chart content for reusability in conditional rendering
+    const ChartsColumnContent = (
+        <div className={styles.chartsColumn}>
+            <Section className={styles.chartSectionCompact}>
+                <div className={styles.chartHeader}>Assets Breakdown</div>
+                <div className={styles.chartContainerCompact}>
+                    {assetsPieData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={160}> {/* Consistent height, let Recharts scale */}
+                            <PieChart>
+                                <Pie
+                                    data={assetsPieData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={65} // Increased outerRadius for labels
+                                    labelLine={false}
+                                    label={renderCustomizedLabel}
+                                >
+                                    {assetsPieData.map((entry, idx) => (
+                                        <Cell
+                                            key={`cell-${idx}`}
+                                            fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                    contentStyle={{
+                                        background: 'var(--surface-light)',
+                                        border: '1px solid var(--border-light)',
+                                        color: 'var(--text-primary)',
+                                        borderRadius: 8,
+                                        fontSize: '0.8rem'
+                                    }}
+                                />
+                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className={styles.noChartData}>No assets to display.</div>
+                    )}
+                </div>
+            </Section>
+            <Section className={styles.chartSectionCompact}>
+                <div className={styles.chartHeader}>Liabilities Breakdown</div>
+                <div className={styles.chartContainerCompact}>
+                    {liabilitiesPieData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={160}> {/* Consistent height, let Recharts scale */}
+                            <PieChart>
+                                <Pie
+                                    data={liabilitiesPieData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={65} // Increased outerRadius for labels
+                                    labelLine={false}
+                                    label={renderCustomizedLabel}
+                                >
+                                    {liabilitiesPieData.map((entry, idx) => (
+                                        <Cell
+                                            key={`cell-liab-${idx}`}
+                                            fill={CHART_COLORS[(idx + 2) % CHART_COLORS.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                    contentStyle={{
+                                        background: 'var(--surface-light)',
+                                        border: '1px solid var(--border-light)',
+                                        color: 'var(--text-primary)',
+                                        borderRadius: 8,
+                                        fontSize: '0.8rem'
+                                    }}
+                                />
+                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className={styles.noChartData}>No liabilities to display.</div>
+                    )}
+                </div>
+            </Section>
         </div>
     );
+
+    // Encapsulate table content for reusability in conditional rendering
+    const TableColumnContent = (
+        <div className={styles.tableColumn}>
+            <Section header={accountsHeader} className={styles.tableSectionCompact}>
+                <Table
+                    className={styles.compactTable}
+                    columns={[
+                        { key: 'name', label: 'Account' },
+                        { key: 'accountProvider', label: 'Institution' },
+                        { key: 'category', label: 'Category' },
+                        { key: 'subType', label: 'Type' },
+                        {
+                            key: 'value', label: 'Value', render: val =>
+                                <span className={val >= 0 ? styles.positive : styles.negative}>
+                                    ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </span>
+                        },
+                        { key: 'taxStatus', label: 'Tax Status' }
+                    ]}
+                    data={filteredAccountsForTable}
+                />
+            </Section>
+        </div>
+    );
+
 
     return (
-        <Section
-            header={
-                <SectionHeader
-                    title="Summary"
-                    right={Controls}
-                />
-            }
-        >
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: singleColumnSummary ? '1fr' : '1fr 1fr', // Use the internal singleColumnSummary
-                gap: 24,
-                maxWidth: 700,
-                margin: '0 auto'
-            }}>
-                {showMonthly && (
-                    <div>
-                        {showAfter && renderSummarySection('Monthly', monthlyIncomeAT, monthlyExpenses, monthlyDiscretionaryAT, 'After-tax')}
-                        {showPre && renderSummarySection('Monthly', monthlyIncomePT, monthlyExpenses, monthlyDiscretionaryPT, 'Pre-tax')}
-                    </div>
-                )}
-                {showAnnual && (
-                    <div>
-                        {showAfter && renderSummarySection('Annual', annualIncomeAT, annualExpenses, annualDiscretionaryAT, 'After-tax')}
-                        {showPre && renderSummarySection('Annual', annualIncomePT, annualExpenses, annualDiscretionaryPT, 'Pre-tax')}
-                    </div>
-                )}
+        <div className={styles.overviewTab}>
+            {/* --- Snapshot Section (full width, above charts/table row) --- */}
+            <div className={`${styles.snapshotRowFull} ${smallApp ? styles.snapshotRowFullSmall : ''}`}>
+                <div className={styles.snapshotItem}>
+                    <span className={styles.snapshotLabel}>Net Worth</span>
+                    <span className={`${styles.positive} value`}>
+                        ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                </div>
+                <div className={styles.snapshotItem}>
+                    <span className={styles.snapshotLabel}>Cash</span>
+                    <span className={`${styles.positive} value`}>
+                        ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                </div>
+                <div className={styles.snapshotItem}>
+                    <span className={styles.snapshotLabel}>Assets</span>
+                    <span className={`${styles.positive} value`}>
+                        ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                </div>
+                <div className={styles.snapshotItem}>
+                    <span className={styles.snapshotLabel}>Liabilities</span>
+                    <span className={`${styles.negative} value`}>
+                        {Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </span>
+                </div>
             </div>
-        </Section>
+
+            {/* --- Charts & Table Row - Always use TwoColumnLayout, letting it handle its own responsiveness --- */}
+            <TwoColumnLayout
+                left={ChartsColumnContent}
+                right={TableColumnContent}
+                // Removed smallApp prop here, or explicitly set to false.
+                // This ensures TwoColumnLayout uses its internal logic for 1 or 2 columns.
+                smallApp={false} // This explicitly tells TwoColumnLayout to attempt 2 columns first
+            />
+        </div>
     );
 };
 
-
-// This is the main component for the Budget Overview content area
-const BudgetOverviewContent = ({ smallApp, activeInnerTabId }) => {
-    const { budget, isLoading, error, userSignedIn } = useBudget();
-    const [period, setPeriod] = useState('both');
-    const [tax, setTax] = useState('both');
-    const overviewContentRef = useRef(null);
-
-    // No need for local resize observer here, smallApp comes from parent.
-
-    if (isLoading) return <div className={styles.budgetContentWrapper} ref={overviewContentRef}>Loading budget overview...</div>;
-    if (error) return <div className={`${styles.budgetContentWrapper} ${styles.error}`} ref={overviewContentRef}>{error}</div>;
-    if (!budget) return <div className={styles.budgetContentWrapper} ref={overviewContentRef}>No budget data available.</div>;
-
-    // Move all calculated values that depend on 'budget' INSIDE the component
-    // after `useBudget()` has provided the `budget` object.
-    const monthlyIncomeAT = budget.monthlyAfterTax || 0;
-    const annualIncomeAT = (monthlyIncomeAT * 12) + (budget.income.bonusAfterTax || 0) + (budget.income.additionalIncomeAfterTax || 0);
-
-    const monthlyIncomePT = budget.income.type === 'salary'
-        ? (budget.income.annualPreTax || 0) / 12
-        : ((budget.income.hourlyRate || 0) * (budget.income.expectedAnnualHours || 0) / 12);
-
-    const annualIncomePT = budget.income.type === 'salary'
-        ? (budget.income.annualPreTax || 0)
-        : ((budget.income.hourlyRate || 0) * (budget.income.expectedAnnualHours || 0));
-
-    const monthlyExpenses = budget.totalMonthlyExpenses || 0;
-    const annualExpenses = monthlyExpenses * 12;
-
-    const monthlyDiscretionaryAT = monthlyIncomeAT - monthlyExpenses;
-    const annualDiscretionaryAT = annualIncomeAT - annualExpenses; // Corrected annual calc
-    const monthlyDiscretionaryPT = monthlyIncomePT - monthlyExpenses;
-    const annualDiscretionaryPT = annualIncomePT - annualExpenses; // Corrected annual calc
-
-
-    // Props to pass to SummaryContent
-    const summaryProps = {
-        period, setPeriod, tax, setTax,
-        monthlyIncomeAT, annualIncomeAT, monthlyIncomePT, annualIncomePT,
-        monthlyExpenses, annualExpenses,
-        monthlyDiscretionaryAT, annualDiscretionaryAT,
-        monthlyDiscretionaryPT, annualDiscretionaryPT
-    };
-
-    // Props to pass to ExpensesSection
-    const expensesProps = {
-        expenses: budget.monthlyExpenses,
-        smallApp: smallApp, // Pass smallApp down if ExpensesSection needs it
-    };
-
-    return (
-        <div className={styles.budgetContentWrapper} ref={overviewContentRef}>
-            {smallApp ? (
-                // In small app mode, display only the actively selected inner tab content
-                activeInnerTabId === 'expenses' ? <ExpensesSection {...expensesProps} /> : <SummaryContent {...summaryProps} />
-            ) : (
-                // Not in small app mode, display both side-by-side
-                <TwoColumnLayout
-                    left={<SummaryContent {...summaryProps} />}
-                    right={<ExpensesSection {...expensesProps} />}
-                    smallApp={false}
-                />
-            )}
-            <BudgetControlPanel userSignedIn={userSignedIn} />
-        </div>
-    );
-};
-
-export default BudgetOverviewContent;
+export default OverviewTab;

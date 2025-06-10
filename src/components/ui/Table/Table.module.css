@@ -1,4 +1,4 @@
-/* src/components/ui/Table/Table.module.css */
+/* ... (existing Table.module.css styles) ... */
 
 .tableContainer {
     width: 100%;
@@ -9,6 +9,7 @@
     width: 100%;
     border-collapse: collapse;
     min-width: 500px;
+    /* Default min-width for larger screens */
     margin: 0 auto;
     font-size: var(--font-size-md);
 }
@@ -27,7 +28,6 @@
 
 .table th {
     background: var(--surface-dark);
-    /* Consistent header background */
     color: var(--text-light);
     font-weight: bold;
     position: sticky;
@@ -41,31 +41,22 @@
 
 .table tr:nth-child(even) {
     background: var(--table-row-even-bg, var(--surface-light));
-    /* Fallback for --table-row-even-bg */
 }
 
 .table tr:hover {
     background: var(--table-row-hover-bg, rgba(var(--color-primary-rgb), 0.1));
-    /* Fallback with primary color opacity */
 }
 
 .table tr {
     fill: var(--white);
-    /* This might be for SVG icons, not text color */
     font-size: var(--font-size-xs);
-    /* Use font-size-xs for table body text */
     pointer-events: auto;
     font-weight: 400;
-    /* Regular weight for table body text */
     text-shadow: none;
-    /* Remove text shadow for cleaner look */
     cursor: default;
-    /* Change cursor to default for rows unless they are clickable */
     transition: background 0.15s;
-    /* Smooth transition for hover */
 }
 
-/* Input/Select within table cells */
 .tableInput,
 .tableSelect {
     width: 100%;
@@ -73,10 +64,8 @@
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
-    /* Use background-light for inputs */
     color: var(--text-primary);
     font-size: var(--font-size-sm);
-    /* Use standard font size */
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
     box-sizing: border-box;
@@ -90,43 +79,25 @@
     border-color: var(--color-primary);
 }
 
-/* --- Compact styles for general compact table (applied by component) --- */
-/* These styles will apply when 'compactTable' class is present */
-.compactTable {
-    font-size: var(--font-size-sm);
-    min-width: unset;
+/* ... (existing Table.module.css styles) ... */
+
+/* --- SMALL APP MODE OVERRIDES for Table Component itself --- */
+.smallApp {
+    /* This applies when the Table component receives smallApp={true} */
+    /* No need for min-width on the container if the table inside handles it */
 }
 
-/* These nested selectors ensure compact styles override defaults */
-.compactTable th,
-.compactTable td {
-    padding: var(--space-xxs) var(--space-xs);
-    font-size: var(--font-size-sm);
-}
-
-.compactTable .tableInput,
-.compactTable .tableSelect {
+.smallApp .table {
+    min-width: 380px;
+    /* Adjust this value based on how small you want it to get before horizontal scroll */
     font-size: var(--font-size-xs);
-    padding: 2px 4px;
-    height: 22px;
+    /* Make table text smaller */
 }
 
-/* Inherit font-size from table for input/select in compact mode */
-.compactTable .tableInput,
-.compactTable .tableSelect {
-    font-size: inherit;
-    padding: 2px 4px;
-    height: unset;
-}
-
-/* Ensure icons are aligned vertically */
-.table th span {
-    vertical-align: middle;
-}
-
-/* Budget specific table style */
-.budgetTable {
-    composes: table;
-    /* This makes it inherit all .table styles */
-    /* No additional rules here. If budgetTable needs *unique* styles not in .table or .compactTable, add them here. */
+.smallApp .table th,
+.smallApp .table td {
+    padding: var(--space-xxs) var(--space-xs);
+    /* Reduce cell padding in small mode */
+    font-size: var(--font-size-xxs);
+    /* Even smaller font for table headers/cells */
 }
