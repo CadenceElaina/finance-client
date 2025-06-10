@@ -1,3 +1,5 @@
+/* src/components/ui/Table/Table.module.css */
+
 .tableContainer {
     width: 100%;
     overflow-x: auto;
@@ -15,58 +17,70 @@
 .table th,
 .table td {
     border: none;
-    /* Reset default table borders */
     padding: var(--space-xs) var(--space-sm);
     text-align: left;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
-    /* Apply bottom border */
     vertical-align: middle;
     font-size: inherit;
-    /* Inherit font size from .table or parent */
 }
 
 .table th {
     background: var(--surface-dark);
+    /* Consistent header background */
     color: var(--text-light);
     font-weight: bold;
     position: sticky;
-    /* Sticky header for scrolling tables */
     top: 0;
     z-index: 1;
-    /* Ensure header stays above content */
     border-bottom: 1px solid var(--border-light);
-    /* Consistent border */
+    text-align: left;
+    padding: var(--space-xs) var(--space-sm);
+    white-space: nowrap;
 }
 
 .table tr:nth-child(even) {
-    background: var(--table-row-even-bg);
-    /* Use new theme-aware variable */
+    background: var(--table-row-even-bg, var(--surface-light));
+    /* Fallback for --table-row-even-bg */
 }
 
 .table tr:hover {
-    background: var(--table-row-hover-bg);
-    /* Use new theme-aware variable */
+    background: var(--table-row-hover-bg, rgba(var(--color-primary-rgb), 0.1));
+    /* Fallback with primary color opacity */
 }
 
-/* Input/Select within table cells (Unified with general input styles) */
+.table tr {
+    fill: var(--white);
+    /* This might be for SVG icons, not text color */
+    font-size: var(--font-size-xs);
+    /* Use font-size-xs for table body text */
+    pointer-events: auto;
+    font-weight: 400;
+    /* Regular weight for table body text */
+    text-shadow: none;
+    /* Remove text shadow for cleaner look */
+    cursor: default;
+    /* Change cursor to default for rows unless they are clickable */
+    transition: background 0.15s;
+    /* Smooth transition for hover */
+}
+
+/* Input/Select within table cells */
 .tableInput,
 .tableSelect {
     width: 100%;
     padding: var(--space-xxs) var(--space-xs);
-    /* Smaller padding for compact table cells */
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
+    /* Use background-light for inputs */
     color: var(--text-primary);
     font-size: var(--font-size-sm);
     /* Use standard font size */
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
-    /* Calc height for consistency */
     box-sizing: border-box;
     max-width: none;
-    /* Override any max-width from general input styles */
 }
 
 .tableInput:focus,
@@ -76,119 +90,43 @@
     border-color: var(--color-primary);
 }
 
-/* --- Compact styles for small app --- */
-.smallApp .table {
+/* --- Compact styles for general compact table (applied by component) --- */
+/* These styles will apply when 'compactTable' class is present */
+.compactTable {
     font-size: var(--font-size-sm);
     min-width: unset;
-    /* Allow table to shrink more in small app mode */
 }
 
-.smallApp .table th,
-.smallApp .table td {
+/* These nested selectors ensure compact styles override defaults */
+.compactTable th,
+.compactTable td {
     padding: var(--space-xxs) var(--space-xs);
     font-size: var(--font-size-sm);
 }
 
-.smallApp .tableInput,
-.smallApp .tableSelect {
+.compactTable .tableInput,
+.compactTable .tableSelect {
     font-size: var(--font-size-xs);
-    /* Smaller font for inputs in small app mode */
     padding: 2px 4px;
     height: 22px;
 }
 
-.tableHeaderTitle {
-    /* This style seems to be for internal use in Table.jsx or similar. */
-    font-size: 1.08rem;
-    /* Consider using a variable */
-    font-weight: 600;
-    color: var(--color-primary);
-    text-align: center;
-}
-
-/* ... existing styles ... */
-
-.table th {
-    background: var(--surface-dark);
-    color: var(--text-light);
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    border-bottom: 1px solid var(--border-light);
-    text-align: left;
-    /* Ensure alignment */
-    padding: var(--space-xs) var(--space-sm);
-    /* Consistent padding */
-    white-space: nowrap;
-    /* Prevent headers from wrapping too much */
-}
-
-/* Style for the filter input rows */
-.table thead tr:nth-child(2) th {
-    padding: var(--space-xxs) var(--space-xs);
-    /* Smaller padding for filter row */
-    background: var(--background-light);
-    /* Slightly different background for filter row */
-    border-bottom: 1px solid var(--border-light);
-    height: auto;
-    /* Allow height to adjust to input */
-}
-
-/* Specific styling for filter inputs inside table headers */
-.table input[type="text"] {
-    width: 100%;
-    padding: var(--space-xxs) var(--space-xs);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    background-color: var(--surface-light);
-    /* Use surface-light for inputs */
-    color: var(--text-primary);
-    font-size: var(--font-size-xs);
-    /* Slightly smaller font for filters */
-    box-sizing: border-box;
-    /* Include padding and border in the element's total width and height */
-    max-width: none;
-    transition: all var(--transition-speed-fast) var(--transition-ease);
-}
-
-.table input[type="text"]::placeholder {
-    color: var(--text-secondary);
-    /* Placeholder color */
-    opacity: 0.7;
-}
-
-.table input[type="text"]:focus {
-    outline: none;
-    box-shadow: var(--focus-ring);
-    border-color: var(--color-primary);
-}
-
-/* --- No Results Message --- */
-.noResults {
-    text-align: center;
-    padding: var(--space-lg);
-    color: var(--text-secondary);
-    font-size: var(--font-size-md);
-    background: var(--surface-light);
-    border-bottom-left-radius: var(--border-radius-md);
-    border-bottom-right-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    border-top: none;
-}
-
-/* Inherit font-size from table for input/select in small app mode */
-.smallApp .table input[type="text"],
-.smallApp .table select {
+/* Inherit font-size from table for input/select in compact mode */
+.compactTable .tableInput,
+.compactTable .tableSelect {
     font-size: inherit;
-    /* This will make it consistent with table cell text */
     padding: 2px 4px;
-    /* Adjust padding if needed */
     height: unset;
-    /* Remove fixed height if not necessary */
 }
 
 /* Ensure icons are aligned vertically */
 .table th span {
     vertical-align: middle;
+}
+
+/* Budget specific table style */
+.budgetTable {
+    composes: table;
+    /* This makes it inherit all .table styles */
+    /* No additional rules here. If budgetTable needs *unique* styles not in .table or .compactTable, add them here. */
 }

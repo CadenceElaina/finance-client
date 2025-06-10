@@ -1,39 +1,16 @@
+// src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
 import styles from './budget.module.css';
 import Button from '../../../../components/ui/Button/Button';
 import Table from '../../../../components/ui/Table/Table';
-import tableStyles from '../../../../components/ui/Table/Table.module.css'; // Good to keep this for specific table elements
+import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import Section from '../../../../components/ui/Section/Section';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
-
-// New component for small app internal tab buttons (duplicated here for visibility, but ideally imported)
-// For demonstration purposes, assuming it's available.
-const SmallAppTabButtons = ({ activeInternalTab, setActiveInternalTab }) => (
-    <div className={styles.smallAppTabButtons}>
-        <Button
-            tab
-            active={activeInternalTab === 'summary'}
-            onClick={() => setActiveInternalTab('summary')}
-        >
-            Overview
-        </Button>
-        <Button
-            tab
-            active={activeInternalTab === 'expenses'}
-            onClick={() => setActiveInternalTab('expenses')}
-        >
-            Expenses
-        </Button>
-    </div>
-);
-
 
 const ExpensesSection = ({
     expenses,
     smallApp,
-    activeInternalTab,
-    setActiveInternalTab
 }) => {
     const { addExpense, updateExpense, removeExpense } = useBudget();
     const [newExpense, setNewExpense] = useState({ name: '', cost: '', category: 'required' });
@@ -154,14 +131,21 @@ const ExpensesSection = ({
     );
 
     return (
-        <Table
-            columns={columns}
-            data={expenses}
-            renderRow={renderRow}
-            className={styles.expenseTable} // This class will now correctly apply styles from Table.module.css
-            smallApp={smallApp}
-            extraRow={renderNewExpenseRow}
-        />
+        <Section className={styles.expensesTableSection} header={
+            <SectionHeader
+                title="Monthly Expenses"
+                right={null}
+            />
+        }>
+            <Table
+                columns={columns}
+                data={expenses}
+                renderRow={renderRow}
+                className={`${tableStyles.budgetTable} ${tableStyles.compactTable}`}
+                smallApp={smallApp} // Passed to Table for its internal responsiveness
+                extraRow={renderNewExpenseRow}
+            />
+        </Section>
     );
 };
 

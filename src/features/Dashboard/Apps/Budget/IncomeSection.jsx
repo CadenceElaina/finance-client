@@ -21,8 +21,7 @@ const IncomeSection = () => {
     return (
         <Section header={<SectionHeader title="Income Details" />}>
             <FormLayout>
-                {/* Centered radio group at the top, now within the FormLayout grid */}
-                <div className={formStyles.radioRowTop}> {/* This div now acts as a grid item */}
+                <div className={formStyles.radioRowTop}>
                     <label className={formStyles.radioRowLabel}>Income Type:</label>
                     <div className={formStyles.radioRowGroup}>
                         <label>
@@ -60,13 +59,12 @@ const IncomeSection = () => {
                                 min="0"
                             />
                         </div>
-                        {/* Assuming this is a calculated field, it should be read-only */}
                         <div className={formStyles.formGroup}>
                             <label htmlFor="monthlyAfterTaxCalculated">Calculated Monthly After-tax:</label>
                             <input
-                                type="text" /* Changed to text since it's displaying a formatted number */
+                                type="text"
                                 id="monthlyAfterTaxCalculated"
-                                name="monthlyAfterTaxCalculated" /* Give it a unique name */
+                                name="monthlyAfterTaxCalculated"
                                 value={`$${(budget.averageIncomeAfterTaxMonthly || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                                 readOnly
                                 disabled
@@ -109,8 +107,8 @@ const IncomeSection = () => {
                     <label htmlFor="monthlyAfterTaxManual">Manual Monthly Net Income (After-tax):</label>
                     <input
                         type="number"
-                        id="monthlyAfterTaxManual" /* Renamed ID to avoid conflict/clarify */
-                        name="monthlyAfterTax" /* Keep original name if it maps to the same state */
+                        id="monthlyAfterTaxManual"
+                        name="monthlyAfterTax"
                         value={income.monthlyAfterTax || ''}
                         onChange={handleChange}
                         placeholder="e.g. 3000"

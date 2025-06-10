@@ -1,3 +1,4 @@
+// src/components/ui/Table/Table.jsx
 import React, { useState, useMemo } from 'react';
 import { ArrowUp, ArrowDown, X } from 'lucide-react';
 import styles from './Table.module.css';

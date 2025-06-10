@@ -116,3 +116,41 @@
     color: var(--text-secondary);
     min-width: 0;
 }
+
+/* src/features/Dashboard/Apps/Budget/styles/_sections.module.css */
+
+/* ... existing summarySection, summarySectionCustom, expensesSectionCustom, etc. ... */
+
+/* New style for the Expenses Table Section to mimic Accounts app's tableSectionCompact */
+.expensesTableSection {
+    background-color: var(--surface-dark);
+    /* Accounts app uses surface-dark for table background */
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    /* Consistent shadow */
+    width: 100%;
+    max-width: none;
+    align-items: stretch;
+    text-align: center;
+    border: none;
+    padding: var(--space-sm);
+    /* Consistent padding */
+    font-size: var(--font-size-md);
+}
+
+/* Ensure the SectionHeader inside this section is also styled consistently */
+.expensesTableSection .sectionHeader {
+    padding-bottom: var(--space-xs);
+    /* Add some space below the header in the section */
+    padding-top: var(--space-xxs);
+    margin-bottom: 0;
+    /* Remove default margin-bottom from sectionHeader */
+}
+
+/* Ensure the table itself doesn't have too much top padding from the section content wrapper */
+.expensesTableSection .sectionContent {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* ... existing styles ... */

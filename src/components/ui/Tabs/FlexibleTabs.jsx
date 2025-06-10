@@ -1,6 +1,7 @@
-// FlexibleTabs.jsx
+// src/components/ui/Tabs/FlexibleTabs.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Tabs.module.css';
+import DropdownTabs from './DropdownTabs'; // Import DropdownTabs here
 
 const FlexibleTabs = ({
     tabs,
@@ -11,9 +12,28 @@ const FlexibleTabs = ({
     smallApp = false,
 }) => {
     const activeTab = tabs.find(tab => tab.id === activeTabId);
-    const [activeInnerTabId, setActiveInnerTabId] = useState(
+
+    // Initialize activeInnerTabId from the first inner tab of the active main tab
+    const [activeInnerTabId, setActiveInnerTabId] = useState(() =>
         activeTab?.innerTabs?.[0]?.id || null
     );
+
+    // Update activeInnerTabId when activeTabId or activeTab.innerTabs changes
+    useEffect(() => {
+        if (activeTab?.innerTabs && activeTab.innerTabs.length > 0) {
+            const defaultInnerTabId = activeTab.innerTabs[0].id;
+            // Only update if the current activeInnerTabId is not in the new innerTabs list,
+            // or if the main tab just changed and it should default.
+            if (!activeTab.innerTabs.some(t => t.id === activeInnerTabId) ||
+                (activeTab.id !== tabs.find(t => t.innerTabs?.some(it => it.id === activeInnerTabId))?.id) // Check if the activeInnerTabId belongs to a different main tab
+            ) {
+                setActiveInnerTabId(defaultInnerTabId);
+            }
+        } else {
+            setActiveInnerTabId(null);
+        }
+    }, [activeTabId, activeTab?.innerTabs, tabs]); // Add 'tabs' to dependencies for comprehensive check
+
     const [innerTabAnimationStates, setInnerTabAnimationStates] = useState({});
     const animationTimeouts = useRef([]);
 
@@ -22,28 +42,7 @@ const FlexibleTabs = ({
             animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
             animationTimeouts.current = [];
         };
-    }, [activeTabId, activeTab?.innerTabs]);
-
-    // Effect to initialize inner tab states when the main tab changes or inner tabs data changes
-    useEffect(() => {
-        if (activeTab?.innerTabs && activeTab.innerTabs.length > 0) {
-            const initialStates = {};
-            activeTab.innerTabs.forEach(tab => {
-                // Initialize all tabs in their default, visible state
-                initialStates[tab.id] = styles.innerTabDefault;
-            });
-            setInnerTabAnimationStates(initialStates);
-
-            const defaultInnerTabId = activeTab.innerTabs[0].id;
-            if (!activeTab.innerTabs.some(t => t.id === activeInnerTabId)) {
-                setActiveInnerTabId(defaultInnerTabId);
-            }
-        } else {
-            setInnerTabAnimationStates({});
-            setActiveInnerTabId(null);
-        }
-    }, [activeTabId, activeTab?.innerTabs]);
-
+    }, [activeTabId, activeTab?.innerTabs]); // No change here, keeps animation cleanup
 
     const handleInnerTabClick = (clickedTabId) => {
         if (clickedTabId === activeInnerTabId) return;
@@ -51,9 +50,9 @@ const FlexibleTabs = ({
         animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
         animationTimeouts.current = [];
 
-        const slideOutDelay = 50; // Delay between each tab starting its slide-out animation
+        const slideOutDelay = 50;
         const slideOutTransitionDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tab-slide-duration')) * 1000 || 250;
-        const convergeTransitionDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tab-converge-duration')) * 1000 || 400;
+        // const convergeTransitionDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tab-converge-duration')) * 1000 || 400; // Not directly used in phase logic below
 
         // Phase 1: Animate non-clicked tabs sliding out one by one
         activeTab.innerTabs.forEach((tab, index) => {
@@ -66,7 +65,6 @@ const FlexibleTabs = ({
                 }, index * slideOutDelay);
                 animationTimeouts.current.push(timeoutId);
             } else {
-                // For the clicked tab, ensure it remains in its active-like state
                 setInnerTabAnimationStates(prevStates => ({
                     ...prevStates,
                     [tab.id]: styles.innerTabActiveConverge
@@ -74,97 +72,78 @@ const FlexibleTabs = ({
             }
         });
 
-        // Calculate total time for all tabs to finish sliding out
         const totalSlideOutPhaseDuration = (activeTab.innerTabs.length - 1) * slideOutDelay + slideOutTransitionDuration;
 
-        // Phase 2: After tabs have slid out, prepare for the "converge/fall in" effect for all tabs
+        // Phase 2: After tabs have slid out, prepare for the "converge/fall in" effect
         const prepareConvergeTimeoutId = setTimeout(() => {
-            // Instantaneously move all non-active tabs to their invisible 'prepare' state
-            // The active tab should maintain its active state.
             const prepareStates = {};
             activeTab.innerTabs.forEach(tab => {
                 if (tab.id !== clickedTabId) {
                     prepareStates[tab.id] = styles.innerTabPrepareConverge;
                 } else {
-                    prepareStates[tab.id] = styles.innerTabActiveConverge; // Already set, but explicit
+                    prepareStates[tab.id] = styles.innerTabActiveConverge;
                 }
             });
             setInnerTabAnimationStates(prepareStates);
 
-            // Phase 3: A tiny delay to allow browser to register the 'prepare' state, then trigger convergence
+            // Phase 3: Trigger convergence and set new active tab
             const triggerConvergeTimeoutId = setTimeout(() => {
-                setActiveInnerTabId(clickedTabId); // Set the new active inner tab
+                setActiveInnerTabId(clickedTabId);
 
                 const finalStates = {};
                 activeTab.innerTabs.forEach(tab => {
-                    if (tab.id !== clickedTabId) {
-                        // For non-active tabs, remove the 'prepare' class.
-                        // Their default state is `innerTabDefault`, so they will animate back to that.
-                        finalStates[tab.id] = styles.innerTabDefault;
-                    } else {
-                        finalStates[tab.id] = styles.innerTabActiveConverge; // Ensure it stays active
-                    }
+                    finalStates[tab.id] = styles.innerTabDefault; // All revert to default
                 });
+                // The newly active tab will also inherit active styles via its className
                 setInnerTabAnimationStates(finalStates);
-            }, 10); // Very short delay
+            }, 10);
             animationTimeouts.current.push(triggerConvergeTimeoutId);
 
-        }, totalSlideOutPhaseDuration + 50); // Add a small buffer after slide-out to start converge preparation
+        }, totalSlideOutPhaseDuration + 50);
         animationTimeouts.current.push(prepareConvergeTimeoutId);
     };
 
     return (
         <div className={`${styles.tabsContainer} ${className}`}>
             <div className={styles.tabHeaders} role="tablist" aria-label="Main tabs">
-                {tabs.map(tab =>
-                    tab.customHeader ? (
+                {tabs.map(tab => {
+                    const hasInnerTabs = tab.innerTabs && tab.innerTabs.length > 0;
+                    const isDropdown = smallApp && hasInnerTabs; // Decide if it should be a dropdown
+
+                    return (
                         <React.Fragment key={tab.id}>
-                            {tab.customHeader({
-                                isActive: activeTabId === tab.id,
-                                setActive: () => onTabChange(tab.id),
-                            })}
+                            {isDropdown ? (
+                                <DropdownTabs
+                                    tabs={tab.innerTabs} // Pass the inner tabs to DropdownTabs
+                                    activeTabId={activeInnerTabId} // Active inner tab
+                                    onTabChange={id => {
+                                        setActiveInnerTabId(id); // Set the internal inner tab state
+                                        onTabChange(tab.id); // Also set the main tab active
+                                    }}
+                                    label={tab.label} // Use main tab's label for dropdown button
+                                    isActive={activeTabId === tab.id} // Is the main tab active?
+                                    inline={true} // Usually inline for this use case
+                                />
+                            ) : (
+                                <button
+                                    className={`${styles.tabHeader} ${activeTabId === tab.id ? styles.active : ''}`}
+                                    onClick={() => onTabChange(tab.id)}
+                                    aria-current={activeTabId === tab.id ? 'true' : undefined}
+                                    type="button"
+                                >
+                                    {tab.label}
+                                </button>
+                            )}
                         </React.Fragment>
-                    ) : (
-                        <button
-                            key={tab.id}
-                            className={`${styles.tabHeader} ${activeTabId === tab.id ? styles.active : ''}`}
-                            onClick={() => onTabChange(tab.id)}
-                            aria-current={activeTabId === tab.id ? 'true' : undefined}
-                            type="button"
-                        >
-                            {tab.label}
-                        </button>
-                    )
-                )}
+                    );
+                })}
             </div>
             <div className={`${styles.tabContent} ${contentClassName}`}>
-                {smallApp && activeTab?.innerTabs && (
-                    <div className={styles.innerTabs} role="tablist" aria-label="Inner tabs">
-                        {activeTab.innerTabs.map(innerTab => (
-                            <button
-                                key={innerTab.id}
-                                role="tab"
-                                aria-selected={activeInnerTabId === innerTab.id}
-                                aria-controls={`tabpanel-${innerTab.id}`}
-                                id={`tab-${innerTab.id}`}
-                                tabIndex={activeInnerTabId === innerTab.id ? 0 : -1}
-                                className={`
-                                    ${styles.menuItem}
-                                    ${styles.innerTab}
-                                    ${activeInnerTabId === innerTab.id ? styles.active : ''}
-                                    ${innerTabAnimationStates[innerTab.id] || ''}
-                                `}
-                                onClick={() => handleInnerTabClick(innerTab.id)}
-                                type="button"
-                            >
-                                {innerTab.label}
-                            </button>
-                        ))}
-                    </div>
-                )}
-                {smallApp && activeTab?.innerTabs
-                    ? activeTab.innerTabs.find(t => t.id === activeInnerTabId)?.component?.()
-                    : activeTab?.component?.()}
+                {/* Render the component of the active main tab, passing relevant props */}
+                {activeTab?.component && activeTab.component({
+                    smallApp: smallApp,
+                    activeInnerTabId: activeInnerTabId // Pass the active inner tab ID down
+                })}
             </div>
         </div>
     );

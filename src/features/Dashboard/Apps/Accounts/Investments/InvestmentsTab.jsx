@@ -1,37 +1,34 @@
+// src/features/Dashboard/Apps/Accounts/Investments/InvestmentsTab.jsx
 import React from 'react';
 import HoldingsTab from './HoldingsTab';
 import AllocationTab from './AllocationTab';
 import PerformanceTab from './PerformanceTab';
 
-const InvestmentsTab = ({ tab = 'all', smallApp = false }) => {
-    // If smallApp, only show one tab at a time
-    if (smallApp) {
-        if (tab === 'holdings') return <HoldingsTab />;
-        if (tab === 'allocation') return <AllocationTab />;
-        if (tab === 'performance') return <PerformanceTab />;
-        if (tab === 'reports') {
-            return (
-                <>
-                    <AllocationTab />
-                    <PerformanceTab />
-                </>
-            );
-        }
+// This component is now responsible for rendering the content of a single 'inner tab'.
+// The 'smallApp' prop is no longer needed here, as the parent (InvestmentsWrapper)
+// handles whether to render one or multiple of these based on app size.
+const InvestmentsTab = ({ tab }) => {
+    if (tab === 'holdings') {
         return <HoldingsTab />;
     }
-
-    // Large app: show Holdings table and Reports (charts) side by side
-    return (
-        <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start', width: '100%' }}>
-            <div style={{ flex: 2, minWidth: 0 }}>
-                <HoldingsTab />
-            </div>
-            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 24 }}>
+    if (tab === 'allocation') {
+        return <AllocationTab />;
+    }
+    if (tab === 'performance') {
+        return <PerformanceTab />;
+    }
+    if (tab === 'reports') {
+        // As per the user's previous logic, 'reports' combines allocation and performance.
+        // This is a reasonable interpretation of an 'inner tab' that is itself a combination.
+        return (
+            <>
                 <AllocationTab />
                 <PerformanceTab />
-            </div>
-        </div>
-    );
+            </>
+        );
+    }
+    // Default to holdings if tab is not recognized (or null/undefined)
+    return <HoldingsTab />;
 };
 
 export default InvestmentsTab;

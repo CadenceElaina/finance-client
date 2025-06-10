@@ -1,3 +1,4 @@
+// src/utils/isSmallApp.js
 export const SMALL_APP_WIDTH_BREAKPOINT = 1112;
 export const SMALL_APP_HEIGHT_BREAKPOINT = 351;
 

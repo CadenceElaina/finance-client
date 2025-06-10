@@ -1,7 +1,9 @@
+// src/features/Dashboard/Apps/Accounts/OverviewTab.jsx
 import React, { useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Section from '../../../../components/ui/Section/Section';
 import Table from '../../../../components/ui/Table/Table';
+import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout'; // NEW IMPORT
 import styles from './accounts.module.css';
 import { DEMO_ACCOUNTS } from '../../../../utils/constants';
 
@@ -21,7 +23,8 @@ const CHART_COLORS = [
 const getNetWorth = (accounts) =>
     accounts.reduce((sum, acc) => sum + (typeof acc.value === 'number' ? acc.value : 0), 0);
 
-const OverviewTab = ({ accounts = DEMO_ACCOUNTS }) => {
+const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => { // ADD smallApp prop
+    console.log('OverviewTab rendered with smallApp:', smallApp);
     const [accountCategoryFilter, setAccountCategoryFilter] = useState('all');
 
     // Categorize accounts using the 'category' field
@@ -80,6 +83,122 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS }) => {
         </div>
     );
 
+    // Encapsulate chart content for reusability in conditional rendering
+    const ChartsColumnContent = (
+        <div className={styles.chartsColumn}>
+            <Section className={styles.chartSectionCompact}>
+                <div className={styles.chartHeader}>Assets Breakdown</div>
+                <div className={styles.chartContainerCompact}>
+                    {assetsPieData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={120}>
+                            <PieChart>
+                                <Pie
+                                    data={assetsPieData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={44}
+                                    label={({ name, percent }) => (
+                                        <span className={styles.chartLabel}>{`${name} (${(percent * 100).toFixed(0)}%)`}</span>
+                                    )}
+                                >
+                                    {assetsPieData.map((entry, idx) => (
+                                        <Cell
+                                            key={`cell-${idx}`}
+                                            fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                    contentStyle={{
+                                        background: 'var(--surface-light)',
+                                        border: '1px solid var(--border-light)',
+                                        color: 'var(--text-primary)',
+                                        borderRadius: 8,
+                                        fontSize: '1rem'
+                                    }}
+                                />
+                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className={styles.noChartData}>No assets to display.</div>
+                    )}
+                </div>
+            </Section>
+            <Section className={styles.chartSectionCompact}>
+                <div className={styles.chartHeader}>Liabilities Breakdown</div>
+                <div className={styles.chartContainerCompact}>
+                    {liabilitiesPieData.length > 0 ? (
+                        <ResponsiveContainer width="100%" height={120}>
+                            <PieChart>
+                                <Pie
+                                    data={liabilitiesPieData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={44}
+                                    label={({ name, percent }) => (
+                                        <span className={styles.chartLabel}>{`${name} (${(percent * 100).toFixed(0)}%)`}</span>
+                                    )}
+                                >
+                                    {liabilitiesPieData.map((entry, idx) => (
+                                        <Cell
+                                            key={`cell-liab-${idx}`}
+                                            fill={CHART_COLORS[(idx + 2) % CHART_COLORS.length]}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip
+                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                    contentStyle={{
+                                        background: 'var(--surface-light)',
+                                        border: '1px solid var(--border-light)',
+                                        color: 'var(--text-primary)',
+                                        borderRadius: 8,
+                                        fontSize: '1rem'
+                                    }}
+                                />
+                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    ) : (
+                        <div className={styles.noChartData}>No liabilities to display.</div>
+                    )}
+                </div>
+            </Section>
+        </div>
+    );
+
+    // Encapsulate table content for reusability in conditional rendering
+    const TableColumnContent = (
+        <div className={styles.tableColumn}>
+            <Section header={accountsHeader} className={styles.tableSectionCompact}>
+                <Table
+                    className={styles.compactTable}
+                    columns={[
+                        { key: 'name', label: 'Account' },
+                        { key: 'accountProvider', label: 'Institution' },
+                        { key: 'category', label: 'Category' },
+                        { key: 'subType', label: 'Type' },
+                        {
+                            key: 'value', label: 'Value', render: val =>
+                                <span className={val >= 0 ? styles.positive : styles.negative}>
+                                    ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                </span>
+                        },
+                        { key: 'taxStatus', label: 'Tax Status' }
+                    ]}
+                    data={filteredAccountsForTable}
+                />
+            </Section>
+        </div>
+    );
+
+
     return (
         <div className={styles.overviewTab}>
             {/* --- Snapshot Section (full width, above charts/table row) --- */}
@@ -110,118 +229,21 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS }) => {
                 </div>
             </div>
 
-            {/* --- Charts & Table Row --- */}
-            <div className={styles.chartsTableRow}>
-                {/* --- Charts Column --- */}
-                <div className={styles.chartsColumn}>
-                    <Section className={styles.chartSectionCompact}>
-                        <div className={styles.chartHeader}>Assets Breakdown</div>
-                        <div className={styles.chartContainerCompact}>
-                            {assetsPieData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={120}>
-                                    <PieChart>
-                                        <Pie
-                                            data={assetsPieData}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={44}
-                                            label={({ name, percent }) => (
-                                                <span className={styles.chartLabel}>{`${name} (${(percent * 100).toFixed(0)}%)`}</span>
-                                            )}
-                                        >
-                                            {assetsPieData.map((entry, idx) => (
-                                                <Cell
-                                                    key={`cell-${idx}`}
-                                                    fill={CHART_COLORS[idx % CHART_COLORS.length]}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                                            contentStyle={{
-                                                background: 'var(--surface-light)',
-                                                border: '1px solid var(--border-light)',
-                                                color: 'var(--text-primary)',
-                                                borderRadius: 8,
-                                                fontSize: '1rem'
-                                            }}
-                                        />
-                                        <Legend align="center" verticalAlign="bottom" layout="horizontal" />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <div className={styles.noChartData}>No assets to display.</div>
-                            )}
-                        </div>
-                    </Section>
-                    <Section className={styles.chartSectionCompact}>
-                        <div className={styles.chartHeader}>Liabilities Breakdown</div>
-                        <div className={styles.chartContainerCompact}>
-                            {liabilitiesPieData.length > 0 ? (
-                                <ResponsiveContainer width="100%" height={120}>
-                                    <PieChart>
-                                        <Pie
-                                            data={liabilitiesPieData}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            cx="50%"
-                                            cy="50%"
-                                            outerRadius={44}
-                                            label={({ name, percent }) => (
-                                                <span className={styles.chartLabel}>{`${name} (${(percent * 100).toFixed(0)}%)`}</span>
-                                            )}
-                                        >
-                                            {liabilitiesPieData.map((entry, idx) => (
-                                                <Cell
-                                                    key={`cell-liab-${idx}`}
-                                                    fill={CHART_COLORS[(idx + 2) % CHART_COLORS.length]}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip
-                                            formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                                            contentStyle={{
-                                                background: 'var(--surface-light)',
-                                                border: '1px solid var(--border-light)',
-                                                color: 'var(--text-primary)',
-                                                borderRadius: 8,
-                                                fontSize: '1rem'
-                                            }}
-                                        />
-                                        <Legend align="center" verticalAlign="bottom" layout="horizontal" />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            ) : (
-                                <div className={styles.noChartData}>No liabilities to display.</div>
-                            )}
-                        </div>
-                    </Section>
+            {/* --- Charts & Table Row - Conditional rendering based on smallApp --- */}
+            {smallApp ? (
+                // In small app mode, stack charts and table vertically
+                <div className={styles.chartsTableStacked}>
+                    {ChartsColumnContent}
+                    {TableColumnContent}
                 </div>
-                {/* --- Table Column --- */}
-                <div className={styles.tableColumn}>
-                    <Section header={accountsHeader} className={styles.tableSectionCompact}>
-                        <Table
-                            className={styles.compactTable}
-                            columns={[
-                                { key: 'name', label: 'Account' },
-                                { key: 'accountProvider', label: 'Institution' },
-                                { key: 'category', label: 'Category' },
-                                { key: 'subType', label: 'Type' },
-                                {
-                                    key: 'value', label: 'Value', render: val =>
-                                        <span className={val >= 0 ? styles.positive : styles.negative}>
-                                            ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </span>
-                                },
-                                { key: 'taxStatus', label: 'Tax Status' }
-                            ]}
-                            data={filteredAccountsForTable}
-                        />
-                    </Section>
-                </div>
-            </div>
+            ) : (
+                // Not in small app mode, use TwoColumnLayout
+                <TwoColumnLayout
+                    left={ChartsColumnContent}
+                    right={TableColumnContent}
+                    smallApp={false} // This smallApp prop for TwoColumnLayout is about its internal layout
+                />
+            )}
         </div>
     );
 };
