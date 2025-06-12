@@ -1,11 +1,12 @@
 // src/features/Dashboard/Apps/Budget/BudgetOverviewWrapper.jsx
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
-import SummarySection from './SummarySection'; // Correctly imports SummarySection
-import ExpensesSection from './ExpensesSection';
+import SummaryTab from './SummaryTab';
+import ExpensesTab from './ExpensesTab';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
 import BudgetControlPanel from './BudgetControlPanel';
-import styles from './budget.module.css';
+import budgetStyles from './budget.module.css'; // FIX: Changed 'styles' to 'budgetStyles' here
+import sectionStyles from '../../../../components/ui/Section/Section.module.css'; // Import the new styles for TwoColumnLayout
 
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
     console.log('BudgetOverviewWrapper rendered with smallApp:', smallApp, 'activeInnerTabId:', activeInnerTabId);
@@ -13,9 +14,9 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
     const [period, setPeriod] = useState('both');
     const [tax, setTax] = useState('both');
 
-    if (isLoading) return <div className={styles.budgetContentWrapper}>Loading budget overview...</div>;
-    if (error) return <div className={`${styles.budgetContentWrapper} ${styles.error}`}>{error}</div>;
-    if (!budget) return <div className={styles.budgetContentWrapper}>No budget data available.</div>;
+    if (isLoading) return <div className={budgetStyles.budgetContentWrapper}>Loading budget overview...</div>;
+    if (error) return <div className={`${budgetStyles.budgetContentWrapper} ${budgetStyles.error}`}>{error}</div>;
+    if (!budget) return <div className={budgetStyles.budgetContentWrapper}>No budget data available.</div>;
 
     const monthlyIncomeAT = budget.monthlyAfterTax || 0;
     const annualIncomeAT = (monthlyIncomeAT * 12) + (budget.income.bonusAfterTax || 0) + (budget.income.additionalIncomeAfterTax || 0);
@@ -46,29 +47,28 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
 
     const expensesProps = {
         expenses: budget.monthlyExpenses,
-        smallApp: smallApp,
+        smallApp: smallApp, // Pass smallApp prop to ExpensesSection if it needs internal adjustments
     };
 
     return (
-        <div className={styles.budgetContentWrapper}>
-            {smallApp ? (
-                // Small app: show both if "showAll" or no inner tab, else just one section
+        <div className={budgetStyles.budgetContentWrapper}> {/* FIX: Changed from styles to budgetStyles */}
+               {smallApp ? (
                 (!activeInnerTabId || activeInnerTabId === 'showAll') ? (
                     <>
-                        <SummarySection {...summaryProps} />
-                        <ExpensesSection {...expensesProps} />
+                        <SummaryTab {...summaryProps} smallApp={smallApp} />
+                        <ExpensesTab {...expensesProps} smallApp={smallApp} />
                     </>
                 ) : activeInnerTabId === 'expenses' ? (
-                    <ExpensesSection {...expensesProps} />
+                    <ExpensesTab {...expensesProps} smallApp={smallApp} />
                 ) : (
-                    <SummarySection {...summaryProps} />
+                    <SummaryTab {...summaryProps} smallApp={smallApp} />
                 )
             ) : (
-                // Large app: always show both, side by side
                 <TwoColumnLayout
-                    left={<SummarySection {...summaryProps} />}
-                    right={<ExpensesSection {...expensesProps} />}
-                    smallApp={false}
+                    className={sectionStyles.columns45_55} // Apply the new class here
+                    left={<SummaryTab {...summaryProps} smallApp={smallApp} />}
+                    right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}
+                    smallApp={smallApp}
                 />
             )}
             <BudgetControlPanel userSignedIn={userSignedIn} />

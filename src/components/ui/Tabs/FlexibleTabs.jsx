@@ -1,4 +1,3 @@
-// src/components/ui/Tabs/FlexibleTabs.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './Tabs.module.css';
 import DropdownTabs from './DropdownTabs'; // Import DropdownTabs here
@@ -13,26 +12,38 @@ const FlexibleTabs = ({
 }) => {
     const activeTab = tabs.find(tab => tab.id === activeTabId);
 
-    // Initialize activeInnerTabId from the first inner tab of the active main tab
-    const [activeInnerTabId, setActiveInnerTabId] = useState(() =>
-        activeTab?.innerTabs?.[0]?.id || null
-    );
+    // Initialize activeInnerTabId.
+    // If smallApp mode and the active tab has innerTabs, default to 'showAll'.
+    // Otherwise, default to the first inner tab or null.
+    const [activeInnerTabId, setActiveInnerTabId] = useState(() => {
+        if (smallApp && activeTab?.innerTabs && activeTab.innerTabs.length > 0) {
+            return 'showAll';
+        }
+        return activeTab?.innerTabs?.[0]?.id || null;
+    });
 
-    // Update activeInnerTabId when activeTabId or activeTab.innerTabs changes
+    // Update activeInnerTabId when activeTabId or activeTab.innerTabs changes.
+    // Logic needs to ensure 'showAll' is the default in smallApp mode.
     useEffect(() => {
         if (activeTab?.innerTabs && activeTab.innerTabs.length > 0) {
-            const defaultInnerTabId = activeTab.innerTabs[0].id;
-            // Only update if the current activeInnerTabId is not in the new innerTabs list,
-            // or if the main tab just changed and it should default.
-            if (!activeTab.innerTabs.some(t => t.id === activeInnerTabId) ||
-                (activeTab.id !== tabs.find(t => t.innerTabs?.some(it => it.id === activeInnerTabId))?.id) // Check if the activeInnerTabId belongs to a different main tab
+            const hasShowAll = activeTab.innerTabs.some(t => t.id === 'showAll');
+            const defaultInnerTabId = (smallApp && hasShowAll) ? 'showAll' : activeTab.innerTabs[0].id;
+
+            // Check if the current activeInnerTabId is valid for the new main tab,
+            // or if it should be reset to the default for smallApp.
+            const isCurrentInnerTabValid = activeTab.innerTabs.some(t => t.id === activeInnerTabId);
+
+            if (!isCurrentInnerTabValid ||
+                (smallApp && activeInnerTabId !== 'showAll' && !hasShowAll) || // If in smallApp and not 'showAll' and 'showAll' isn't available
+                (activeTab.id !== tabs.find(t => t.innerTabs?.some(it => it.id === activeInnerTabId))?.id) // If main tab changed AND activeInnerTabId belonged to a different main tab
             ) {
                 setActiveInnerTabId(defaultInnerTabId);
             }
         } else {
             setActiveInnerTabId(null);
         }
-    }, [activeTabId, activeTab?.innerTabs, tabs]); // Add 'tabs' to dependencies for comprehensive check
+    }, [activeTabId, activeTab?.innerTabs, tabs, smallApp]);
+
 
     const [innerTabAnimationStates, setInnerTabAnimationStates] = useState({});
     const animationTimeouts = useRef([]);
@@ -42,19 +53,33 @@ const FlexibleTabs = ({
             animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
             animationTimeouts.current = [];
         };
-    }, [activeTabId, activeTab?.innerTabs]); // No change here, keeps animation cleanup
+    }, [activeTabId, activeTab?.innerTabs]);
 
     const handleInnerTabClick = (clickedTabId) => {
-        if (clickedTabId === activeInnerTabId) return;
+        if (clickedTabId === activeInnerTabId) return; // Allow re-clicking to reset to 'showAll' if it's the parent tab. This needs adjustment for dropdowns.
 
         animationTimeouts.current.forEach(timeoutId => clearTimeout(timeoutId));
         animationTimeouts.current = [];
 
         const slideOutDelay = 50;
         const slideOutTransitionDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tab-slide-duration')) * 1000 || 250;
-        // const convergeTransitionDuration = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--tab-converge-duration')) * 1000 || 400; // Not directly used in phase logic below
+
+        // Ensure activeTab.innerTabs is valid before proceeding
+        if (!activeTab || !activeTab.innerTabs || activeTab.innerTabs.length === 0) {
+            setActiveInnerTabId(clickedTabId); // Fallback if no inner tabs
+            return;
+        }
 
         // Phase 1: Animate non-clicked tabs sliding out one by one
+        // If clicking 'showAll', we don't animate existing tabs sliding out, we just set the state.
+        if (clickedTabId === 'showAll' || activeInnerTabId === 'showAll') {
+            // If going to or from 'showAll', no specific slide-out animation for individual inner tabs
+            setActiveInnerTabId(clickedTabId);
+            setInnerTabAnimationStates({}); // Reset any animation states
+            return;
+        }
+
+
         activeTab.innerTabs.forEach((tab, index) => {
             if (tab.id !== clickedTabId) {
                 const timeoutId = setTimeout(() => {
@@ -108,26 +133,47 @@ const FlexibleTabs = ({
             <div className={styles.tabHeaders} role="tablist" aria-label="Main tabs">
                 {tabs.map(tab => {
                     const hasInnerTabs = tab.innerTabs && tab.innerTabs.length > 0;
-                    const isDropdown = smallApp && hasInnerTabs; // Decide if it should be a dropdown
+                    const isDropdown = smallApp && hasInnerTabs;
 
                     return (
                         <React.Fragment key={tab.id}>
                             {isDropdown ? (
                                 <DropdownTabs
-                                    tabs={tab.innerTabs} // Pass the inner tabs to DropdownTabs
-                                    activeTabId={activeInnerTabId} // Active inner tab
+                                    tabs={tab.innerTabs}
+                                    activeTabId={activeInnerTabId} // Pass current active inner tab
                                     onTabChange={id => {
-                                        setActiveInnerTabId(id); // Set the internal inner tab state
-                                        onTabChange(tab.id); // Also set the main tab active
+                                        // When an inner tab is selected from the dropdown
+                                        setActiveInnerTabId(id);
+                                        onTabChange(tab.id); // Ensure main tab is also active
                                     }}
-                                    label={tab.label} // Use main tab's label for dropdown button
-                                    isActive={activeTabId === tab.id} // Is the main tab active?
-                                    inline={true} // Usually inline for this use case
+                                    label={tab.label}
+                                    isActive={activeTabId === tab.id}
+                                    inline={true}
+                                    // Add a prop to indicate if it's the 'showAll' state for styling if needed
+                                    isShowingAll={activeInnerTabId === 'showAll'}
+                                    // When the dropdown button is clicked, set activeInnerTabId to 'showAll'
+                                    onDropdownButtonClick={() => {
+                                        if (activeTabId === tab.id && activeInnerTabId !== 'showAll') {
+                                            setActiveInnerTabId('showAll');
+                                        }
+                                        onTabChange(tab.id); // Ensure parent tab is active
+                                    }}
                                 />
                             ) : (
                                 <button
                                     className={`${styles.tabHeader} ${activeTabId === tab.id ? styles.active : ''}`}
-                                    onClick={() => onTabChange(tab.id)}
+                                    onClick={() => {
+                                        onTabChange(tab.id);
+                                        // If this main tab has inner tabs and we are in smallApp,
+                                        // and this is the currently active main tab,
+                                        // clicking it again should default to 'showAll'.
+                                        if (smallApp && hasInnerTabs && activeTabId === tab.id) {
+                                            setActiveInnerTabId('showAll');
+                                        } else if (smallApp && hasInnerTabs) {
+                                            // If switching to this main tab, also set to 'showAll'
+                                            setActiveInnerTabId('showAll');
+                                        }
+                                    }}
                                     aria-current={activeTabId === tab.id ? 'true' : undefined}
                                     type="button"
                                 >
@@ -139,10 +185,9 @@ const FlexibleTabs = ({
                 })}
             </div>
             <div className={`${styles.tabContent} ${contentClassName}`}>
-                {/* Render the component of the active main tab, passing relevant props */}
                 {activeTab?.component && activeTab.component({
                     smallApp: smallApp,
-                    activeInnerTabId: activeInnerTabId // Pass the active inner tab ID down
+                    activeInnerTabId: activeInnerTabId // Pass the actual activeInnerTabId
                 })}
             </div>
         </div>

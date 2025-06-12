@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import Section from '../../../../components/ui/Section/Section';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
+import styles from './budget.module.css';
+import sectionStyles from '../../../../components/ui/Section/Section.module.css'; // Import the shared styles
 
 const PERIOD_OPTIONS = [
     { id: 'monthly', label: 'Monthly' },
@@ -15,7 +17,7 @@ const TAX_OPTIONS = [
     { id: 'both', label: 'Both' },
 ];
 
-const SummarySection = ({
+const SummaryTab = ({
     period, setPeriod, tax, setTax,
     monthlyIncomeAT, annualIncomeAT, monthlyIncomePT, annualIncomePT,
     monthlyExpenses, annualExpenses,
@@ -34,33 +36,41 @@ const SummarySection = ({
     const singleColumnSummary = (showMonthly && !showAnnual) || (!showMonthly && showAnnual);
 
     const renderSummarySection = (periodLabel, income, expenses, discretionary, taxLabel) => (
-        <div>
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+        <div className={styles.summarySection}>
+            <div className={styles.summaryPeriodTax}>
                 {periodLabel} {taxLabel ? `(${taxLabel})` : ''}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+            <div className={styles.summaryRow}>
                 <span>Income:</span>
                 <strong>{format(income)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+            <div className={styles.summaryRow}>
                 <span>Expenses:</span>
                 <strong>{format(expenses)}</strong>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className={styles.summaryRow}>
                 <span>Discretionary:</span>
-                <strong style={{ color: discretionary < 0 ? 'var(--color-danger)' : undefined }}>{format(discretionary)}</strong>
+                <strong style={{ color: discretionary < 0 ? 'var(--color-danger)' : undefined }}>
+                    {format(discretionary)}
+                </strong>
             </div>
         </div>
     );
 
     const Controls = (
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div className={sectionStyles.filterRow}>
             <div>
-                <label htmlFor="period-select" style={{ marginRight: 4 }}>Period</label>
+                <label
+                    htmlFor="period-select"
+                    className={sectionStyles.filterLabel}
+                >
+                    Period
+                </label>
                 <select
                     id="period-select"
                     value={period}
                     onChange={e => setPeriod(e.target.value)}
+                    className={sectionStyles.filterSelect}
                 >
                     {PERIOD_OPTIONS.map(opt => (
                         <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -68,11 +78,17 @@ const SummarySection = ({
                 </select>
             </div>
             <div>
-                <label htmlFor="tax-select" style={{ marginRight: 4 }}>Tax</label>
+                <label
+                    htmlFor="tax-select"
+                    className={sectionStyles.filterLabel}
+                >
+                    Tax
+                </label>
                 <select
                     id="tax-select"
                     value={tax}
                     onChange={e => setTax(e.target.value)}
+                    className={sectionStyles.filterSelect}
                 >
                     {TAX_OPTIONS.map(opt => (
                         <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -94,8 +110,6 @@ const SummarySection = ({
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: singleColumnSummary ? '1fr' : '1fr 1fr',
-                gap: 24,
-                maxWidth: 700,
                 margin: '0 auto'
             }}>
                 {showMonthly && (
@@ -115,4 +129,4 @@ const SummarySection = ({
     );
 };
 
-export default SummarySection;
+export default SummaryTab;

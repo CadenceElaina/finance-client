@@ -1,12 +1,10 @@
-// src/features/Dashboard/Apps/Accounts/Accounts.jsx (Illustrative changes)
-// Assuming this structure from previous discussions
 import React, { useRef, useState, useEffect } from 'react';
 import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
 import OverviewTab from './OverviewTab';
 import AssetsTab from './AssetsTab';
 import LiabilitiesTab from './LiabilitiesTab';
-import InvestmentsWrapper from './InvestmentsWrapper';
-import styles from './accounts.module.css';
+import InvestmentsWrapper from './InvestmentsWrapper'; 
+import accountsStyles from './accounts.module.css';
 import { isSmallApp } from '../../../../utils/isSmallApp';
 
 const Accounts = () => {
@@ -32,7 +30,6 @@ const Accounts = () => {
         return () => resizeObserver.disconnect();
     }, []);
 
-    // Call isSmallApp with only the containerSize object
     const smallApp = isSmallApp(containerSize);
 
     const [activeTabId, setActiveTabId] = useState('overview');
@@ -49,6 +46,7 @@ const Accounts = () => {
             id: 'investments',
             label: 'Investments',
             innerTabs: [
+                { id: 'showAll', label: 'All', component: () => null }, // Added 'showAll' inner tab
                 { id: 'holdings', label: 'Holdings', component: () => null },
                 { id: 'allocation', label: 'Allocation', component: () => null },
                 { id: 'performance', label: 'Performance', component: () => null },
@@ -64,14 +62,14 @@ const Accounts = () => {
     ];
 
     return (
-        <div ref={containerRef} className={styles.accountsAppContainer}>
+        <div ref={containerRef} className={accountsStyles.accountsAppContainer}> {/* FIX: Changed from styles to accountsStyles */}
             <FlexibleTabs
                 tabs={tabs}
                 activeTabId={activeTabId}
                 onTabChange={setActiveTabId}
-                smallApp={smallApp} // Pass the calculated smallApp
-                className={styles.accountsTabs}
-                contentClassName={styles.accountsTabContent}
+                smallApp={smallApp}
+                className={accountsStyles.accountsTabs}
+                contentClassName={accountsStyles.accountsTabContent}
             />
         </div>
     );

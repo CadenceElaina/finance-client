@@ -9,10 +9,10 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
-    /* Default min-width for larger screens. Adjust as needed. */
+    /* min-width: 500px; */ /* Remove or reduce this */
+    min-width: 0;
     margin: 0 auto;
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-table-compact);
 }
 
 .table th,
@@ -52,7 +52,6 @@
 .table tr {
     fill: var(--white);
     /* Not typically used for HTML table rows, check context */
-    font-size: var(--font-size-xs);
     /* Sets default row font size */
     pointer-events: auto;
     font-weight: 400;
@@ -70,9 +69,9 @@
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
     color: var(--text-primary);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xxs);
     transition: all var(--transition-speed-fast) var(--transition-ease);
-    height: calc(var(--font-size-sm) + (var(--space-xxs) * 2) + 2px);
+    height: calc(var(--font-size-xxs) + (var(--space-xxs) * 2) + 2px);
     /* Ensures consistent height */
     box-sizing: border-box;
     max-width: none;
@@ -90,7 +89,7 @@
 .removeButton,
 .addButton {
     padding: var(--space-xxs) var(--space-xs);
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-xxs);
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -121,35 +120,26 @@
 /* Styles for a Section containing a table (e.g., AccountsTable, ExpensesTable) */
 .tableSection {
     background-color: var(--surface-light);
-    /* Changed from --surface-dark to match Account's Section */
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     width: 100%;
     max-width: none;
-    /* align-items: stretch; Removed, depends on parent flex container */
-    /* text-align: center; Removed, apply to specific elements if needed */
     border: 1px solid var(--border-light);
-    /* Added border to match Accounts Section */
-    padding: var(--space-sm);
-    font-size: var(--font-size-md);
+    padding: 0;
     margin-bottom: 0;
-    /* Managed by parent layout, avoid external margins on Section */
     box-sizing: border-box;
-    /* Crucial for consistent sizing */
     display: flex;
-    /* Sections are typically flex containers */
     flex-direction: column;
 }
 
 /* Compact table variant for smallApp or dense layouts (applies to .table directly) */
 .compactTable {
-    font-size: var(--font-size-xs);
+/*     font-size: var(--font-size-xxs); */
 }
 
 .compactTable th,
 .compactTable td {
     padding: var(--space-xxs) var(--space-xs);
-    font-size: var(--font-size-xxs);
 }
 
 /* --- SMALL APP MODE OVERRIDES for Table Component itself --- */
@@ -160,7 +150,6 @@
 .smallApp .table {
     min-width: 380px;
     /* Adjust this value based on how small you want it to get before horizontal scroll */
-    font-size: var(--font-size-xs);
     /* Make table text smaller */
 }
 
@@ -168,14 +157,12 @@
 .smallApp .table td {
     padding: var(--space-xxs) var(--space-xs);
     /* Reduce cell padding in small mode */
-    font-size: var(--font-size-xxs);
 }
 
 .smallApp .tableInput,
 .smallApp .tableSelect,
 .smallApp .removeButton,
 .smallApp .addButton {
-    font-size: var(--font-size-xxs);
     /* Smaller fonts for inputs/buttons in small table */
     padding: var(--space-xxs) var(--space-xxs);
     /* Tighter padding for inputs/buttons */
@@ -200,7 +187,7 @@
 }
 
 .filterLabel {
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-xxs);
     color: var(--text-secondary);
     font-weight: 500;
     white-space: nowrap;
@@ -209,7 +196,7 @@
 
 .filterSelect {
     min-width: 110px;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-xxs);
     padding: var(--space-xxs) var(--space-xs);
     height: 28px;
     /* Standard height for select inputs */
@@ -239,7 +226,7 @@
    Can be used with SectionHeader's `title` prop. */
 .tableHeaderTitle {
     /* Renamed from accountsHeaderTitle to be generic */
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;

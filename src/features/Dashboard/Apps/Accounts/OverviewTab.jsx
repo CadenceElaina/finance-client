@@ -7,6 +7,7 @@ import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
 import accountsStyles from './accounts.module.css'; // This is the correct import for account-specific styles
 import tableStyles from '../../../../components/ui/Table/Table.module.css'; // This is for general table styles
 import { DEMO_ACCOUNTS } from '../../../../utils/constants';
+import sectionStyles from '../../../../components/ui/Section/Section.module.css';
 
 // Modern theme-aware color palette for charts
 const CHART_COLORS = [
@@ -57,30 +58,54 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
             value: Math.abs(acc.value || 0),
         }))
         .filter(d => d.value > 0);
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + (smallApp ? 6 : 10);
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
-        const RADIAN = Math.PI / 180;
-        const radius = outerRadius + 15;
-        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const textAnchor = x > cx ? 'start' : 'end';
+    const finalX = x + (x > cx ? 5 : -5);
+    const finalY = y;
 
-        const textAnchor = x > cx ? 'start' : 'end';
-        const finalX = x + (x > cx ? 5 : -5);
-        const finalY = y;
+    // Compose label and split into words
+    const labelText = `${name} (${(percent * 100).toFixed(0)}%)`;
+    const words = labelText.split(' ');
 
-        return (
-            <Text
-                x={finalX}
-                y={finalY}
-                fill="var(--text-primary)"
-                textAnchor={textAnchor}
-                dominantBaseline="central"
-                className={accountsStyles.chartLabelText} // FIX: Changed from styles to accountsStyles
-            >
-                {`${name} (${(percent * 100).toFixed(0)}%)`}
-            </Text>
-        );
-    };
+    // Build lines with a max character count per line (e.g., 12)
+    const lines = [];
+    let currentLine = '';
+    words.forEach(word => {
+        if ((currentLine + ' ' + word).trim().length > 12) {
+            if (currentLine) lines.push(currentLine);
+            currentLine = word;
+        } else {
+            currentLine = currentLine ? currentLine + ' ' + word : word;
+        }
+    });
+    if (currentLine) lines.push(currentLine);
+
+    return (
+        <text
+            x={finalX}
+            y={finalY}
+            fill="var(--text-primary)"
+            textAnchor={textAnchor}
+            dominantBaseline="central"
+            className={accountsStyles.chartLabelText}
+        >
+            {lines.map((line, idx) => (
+                <tspan
+                    key={idx}
+                    x={finalX}
+                    dy={idx === 0 ? 0 : '1.1em'}
+                >
+                    {line}
+                </tspan>
+            ))}
+        </text>
+    );
+};
 
     // The accountsHeader structure.
     // It's a header for the accounts table, and its layout should be handled by SectionHeader
@@ -138,11 +163,11 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
     // Charts column (left)
     const ChartsColumnContent = (
         <>
-            <Section className={`${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
+            <Section className={`${accountsStyles.chartSectionCompact} ${accountsStyles.chartSectionNoBorder} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartHeader}>Assets Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {assetsPieData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={smallApp ? 140 : 160}> {/* Adjust height for small app */}
+                        <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}> {/* Adjust height for small app */}
                             <PieChart>
                                 <Pie
                                     data={assetsPieData}
@@ -150,7 +175,7 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                                     nameKey="name"
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={smallApp ? 55 : 65} // Smaller radius for small app
+                                    outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
                                     labelLine={false}
                                     label={renderCustomizedLabel}
                                 >
@@ -171,8 +196,11 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                                         fontSize: smallApp ? '0.7rem' : '0.8rem' // Smaller tooltip font
                                     }}
                                 />
-                                <Legend align="center" verticalAlign="bottom" layout="horizontal"
-                                    wrapperStyle={smallApp ? { fontSize: '0.7rem' } : {}} // Smaller legend font
+                                <Legend
+                                    align="center"
+                                    verticalAlign="bottom"
+                                    layout="vertical"
+                                    wrapperStyle={{ fontSize: smallApp ? '0.65rem' : '0.7rem' }} // Smaller legend font always
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -181,11 +209,11 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                     )}
                 </div>
             </Section>
-            <Section className={`${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
+            <Section className={`${accountsStyles.chartSectionCompact} ${accountsStyles.chartSectionNoBorder} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartHeader}>Liabilities Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {liabilitiesPieData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={smallApp ? 140 : 160}> {/* Adjust height for small app */}
+                        <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}> {/* Adjust height for small app */}
                             <PieChart>
                                 <Pie
                                     data={liabilitiesPieData}
@@ -193,7 +221,7 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                                     nameKey="name"
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={smallApp ? 55 : 65} // Smaller radius for small app
+                                    outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
                                     labelLine={false}
                                     label={renderCustomizedLabel}
                                 >
@@ -214,8 +242,11 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
                                         fontSize: smallApp ? '0.7rem' : '0.8rem'
                                     }}
                                 />
-                                <Legend align="center" verticalAlign="bottom" layout="horizontal"
-                                    wrapperStyle={smallApp ? { fontSize: '0.7rem' } : {}}
+                                <Legend
+                                    align="center"
+                                    verticalAlign="bottom"
+                                    layout="vertical"
+                                    wrapperStyle={{ fontSize: smallApp ? '0.65rem' : '0.7rem' }} // Smaller legend font always
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -257,8 +288,9 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
         <div className={accountsStyles.overviewTab}>
             {SnapshotRow}
             <TwoColumnLayout
-                left={<div className={accountsStyles.chartsColumn}>{ChartsColumnContent}</div>}
-                right={<div className={accountsStyles.tableColumn}>{TableColumnContent}</div>}
+                className={sectionStyles.columns66_34}
+                left={<div className={accountsStyles.tableColumn}>{TableColumnContent}</div>}
+                right={<div className={accountsStyles.chartsColumn}>{ChartsColumnContent}</div>}
                 smallApp={smallApp}
             />
         </div>

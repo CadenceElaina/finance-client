@@ -15,13 +15,17 @@
 }
 
 .sectionHeader {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: var(--space-xs);
     border-bottom: 1px solid var(--border-subtle);
     /* Optional: a subtle separator */
     padding-bottom: var(--space-xxs);
+}
+.sectionHeader h3{
+    margin: 0 auto;
+    padding: var(--space-xs);
 }
 
 .sectionContent {
@@ -39,23 +43,96 @@
     width: 100%;
     box-sizing: border-box;
     align-items: flex-start;
-    /* Align columns to the top */
-}
-
-.oneColumn {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-    width: 100%;
-    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .column {
-    flex: 1 1 0;
     min-width: 0;
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+    flex: 1 1 0;
+}
+
+.columns45_55 .column:first-child {
+    flex: 0 1 45%;
+    max-width: 45%;
+}
+.columns45_55 .column:last-child {
+    flex: 0 1 55%;
+    max-width: 55%;
+}
+
+.columns66_34 .column:first-child {
+    flex: 0 1 66%;
+    max-width: 66%;
+}
+.columns66_34 .column:last-child {
+    flex: 0 1 34%;
+    max-width: 34%;
+}
+
+.sectionHeaderRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    width: 100%;
+}
+.sectionHeaderTitle {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    flex: 1;
+    text-align: left;
+}
+.sectionHeaderRight {
+    font-size: var(--font-size-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+/* Filter Row styles */
+.filterRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: 0;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.filterLabel {
+    font-size: var(--font-size-xxs);
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.filterSelect {
+    min-width: 110px;
+    font-size: var(--font-size-xxs);
+    padding: var(--space-xxs) var(--space-xs);
+    height: 28px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--background-light);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 18px;
+    padding-right: 26px;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
 }
 
 /* Media query or conditional smallApp prop for TwoColumnLayout will handle switching */

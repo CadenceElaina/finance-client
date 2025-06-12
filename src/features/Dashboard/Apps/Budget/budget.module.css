@@ -18,30 +18,3 @@
     justify-content: center;
     border-top: 1px solid var(--border-light);
 }
-
-.budgetTwoColumn {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg, 32px);
-    width: 100%;
-    align-items: flex-start;
-}
-
-.tabHeader {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    cursor: pointer;
-    border-bottom: 2.5px solid transparent;
-    transition: color 0.15s, border-bottom 0.15s;
-    padding: var(--space-xs) var(--space-md);
-}
-
-.activeTab,
-.tabHeader.active {
-    color: var(--color-primary);
-    border-bottom: 2.5px solid var(--color-primary);
-    background: none;
-}

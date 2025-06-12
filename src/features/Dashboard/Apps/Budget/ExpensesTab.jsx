@@ -4,10 +4,8 @@ import { useBudget } from '../../../../contexts/BudgetContext';
 import Table from '../../../../components/ui/Table/Table';
 import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import Section from '../../../../components/ui/Section/Section';
-import SectionHeader from '../../../../components/ui/Section/SectionHeader';
-import styles from './budget.module.css';
 
-const ExpensesSection = ({
+const ExpensesTab = ({
     expenses,
     smallApp,
 }) => {
@@ -130,7 +128,7 @@ const ExpensesSection = ({
             </td>
             <td>
                 <button
-                    className={tableStyles.addButton} // Use tableStyles.addButton
+                    className={tableStyles.addButton}
                     onClick={handleAddExpense}
                 >
                     Add
@@ -139,36 +137,33 @@ const ExpensesSection = ({
         </tr>
     );
 
-    // Filter row (like Accounts)
-    const filterRow = (
-        <div className={tableStyles.filterRow}> {/* Use tableStyles.filterRow */}
-            <label htmlFor="expenseCategoryFilter" className={tableStyles.filterLabel}> {/* Use tableStyles.filterLabel */}
-                Show:
-            </label>
-            <select
-                id="expenseCategoryFilter"
-                value={categoryFilter}
-                onChange={e => setCategoryFilter(e.target.value)}
-                className={tableStyles.filterSelect} // Use tableStyles.filterSelect
-            >
-                <option value="all">All Expenses</option>
-                {expenseCategories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
-                ))}
-            </select>
+    // Header row: title left, filter right (same as accounts table)
+    const expensesHeader = (
+        <div className={tableStyles.filterRow}>
+            <h3 className={tableStyles.tableHeaderTitle}>Monthly Expenses</h3>
+            <div className={tableStyles.filterRow}>
+                <label htmlFor="expenseCategoryFilter" className={tableStyles.filterLabel}>
+                    Show:
+                </label>
+                <select
+                    id="expenseCategoryFilter"
+                    value={categoryFilter}
+                    onChange={e => setCategoryFilter(e.target.value)}
+                    className={tableStyles.filterSelect}
+                >
+                    <option value="all">All Expenses</option>
+                    {expenseCategories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                    ))}
+                </select>
+            </div>
         </div>
     );
 
     return (
         <Section
-            className={tableStyles.tableSection} // Use tableStyles.tableSection here
-            header={
-                <SectionHeader
-                    title="Monthly Expenses"
-                    titleClassName={tableStyles.tableHeaderTitle} // Pass titleClassName to SectionHeader
-                    right={filterRow}
-                />
-            }
+            className={tableStyles.tableSection}
+            header={expensesHeader}
         >
             <div className={tableStyles.tableContainer}>
                 <Table
@@ -184,4 +179,4 @@ const ExpensesSection = ({
     );
 };
 
-export default ExpensesSection;
+export default ExpensesTab;

@@ -1,14 +1,13 @@
-// src/features/Dashboard/Apps/Budget/Budget.jsx
 import React, { useRef, useState, useEffect } from 'react';
 import BudgetOverviewWrapper from './BudgetOverviewWrapper';
-import IncomeSection from './IncomeSection';
+import IncomeTab from './IncomeTab';
 import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
-import styles from './budget.module.css';
+import budgetStyles from './budget.module.css'; // Renamed to budgetStyles for consistency
 import { isSmallApp } from "../../../../utils/isSmallApp";
 
 const Budget = () => {
     const containerRef = useRef(null);
-    const [containerSize, setContainerSize] = useState({ width: 955, height: 442 }); // initial unnecessary>?
+    const [containerSize, setContainerSize] = useState({ width: 955, height: 442 });
 
     useEffect(() => {
         const updateSize = () => {
@@ -47,9 +46,8 @@ const Budget = () => {
         {
             id: 'budget',
             label: 'Budget Overview',
-            // Add a "showAll" inner tab for small app mode
             innerTabs: [
-                { id: 'showAll', label: 'Overview', component: () => null },
+                { id: 'showAll', label: 'All', component: () => null }, // Added 'showAll' inner tab
                 { id: 'summary', label: 'Summary', component: () => null },
                 { id: 'expenses', label: 'Expenses', component: () => null }
             ],
@@ -63,19 +61,19 @@ const Budget = () => {
         {
             id: 'income',
             label: 'Income',
-            component: () => <IncomeSection />
+            component: () => <IncomeTab />
         }
     ];
 
     return (
-        <div ref={containerRef} className={styles.budgetAppContainer}>
+        <div ref={containerRef} className={budgetStyles.budgetAppContainer}> {/* FIX: Changed from styles to budgetStyles */}
             <FlexibleTabs
                 tabs={tabs}
                 activeTabId={activeMainTabId}
                 onTabChange={setActiveMainTabId}
                 smallApp={smallApp}
-                className={styles.tabsRow}
-                contentClassName={styles.budgetTabContent}
+                className={budgetStyles.tabsRow}
+                contentClassName={budgetStyles.budgetTabContent}
             />
         </div>
     );

@@ -1,14 +1,6 @@
 /* src/features/Dashboard/Apps/Accounts/accounts.module.css */
 
 /* Base (default/large app) styles */
-.overviewTab {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    /* Default gap between snapshot and two-column layout */
-    width: 100%;
-    box-sizing: border-box;
-}
 
 .snapshotRowFull {
     display: flex;
@@ -24,6 +16,8 @@
     gap: var(--space-sm);
     /* Initial gap between snapshot items */
     flex-wrap: wrap;
+    box-sizing: border-box;
+    overflow-x: auto;
 }
 
 .snapshotItem {
@@ -43,62 +37,12 @@
     max-width: 180px;
 }
 
-.value {
-    font-size: var(--font-size-sm);
-    /* This should match the value in Table.module.css if it's general */
-    font-weight: 700;
-}
-
-.snapshotLabel {
-    display: block;
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin-bottom: 0;
-    font-weight: 500;
-    letter-spacing: 0.01em;
-}
 
 .noChartData {
     color: var(--text-secondary);
     text-align: center;
     padding: var(--space-xs);
     font-size: var(--font-size-xs);
-}
-
-/* --- Accounts Specific Chart/Table Column Layouts (not component styles) --- */
-/* These define the layout of the columns *within* the TwoColumnLayout */
-.chartHeader {
-    width: 100%;
-    text-align: left;
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 2px;
-    margin-top: 0;
-    letter-spacing: 0.01em;
-    padding-left: 2px;
-}
-
-.chartsColumn {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.tableColumn {
-    flex: 2 1 0;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-}
-
-.chartLabelText {
-    font-size: var(--font-size-xxs);
-    fill: var(--text-primary);
-    font-weight: 500;
 }
 
 .positive {
@@ -167,4 +111,41 @@
 .overviewTabSmall .chartHeader {
     font-size: var(--font-size-xxs);
     /* Smaller header for charts */
+}
+
+.tableColumn {
+
+}
+
+.chartsColumn {
+
+}
+/* Add to accounts.module.css */
+.chartSectionNoBorder {
+    border: none !important; /* Removes the border around the chart section */
+
+    padding: 0; /* Removes any internal padding within the chart section */
+}
+
+/* Ensure chart container still has some internal padding if Section's padding is removed */
+.chartContainerCompact {
+    /* Existing styles */
+    padding: var(--space-xxs); /* Adds a small internal padding to the chart container */
+    display: flex; /* Enables flexbox layout for centering its content */
+    justify-content: center; /* Horizontally centers the chart within its container */
+    align-items: center; /* Vertically centers the chart within its container */
+    height: 100%; /* Ensures the container takes up the full height available to it */
+}
+
+/* For improving chart label text readability if needed */
+.chartLabelText {
+    font-size: var(--font-size-xxs); /* Sets a very small font size for the chart labels */
+    fill: var(--text-primary); /* Sets the color of the text to the primary text color variable */
+    pointer-events: none; /* Makes the text non-interactive to mouse events, allowing clicks to pass through to the chart */
+}
+
+/* Adjustments for chartHeader if labels are too close */
+.chartHeader {
+    text-align: center; /* Centers the text of the chart header */
+    margin-bottom: var(--space-xxs); /* Reduces the bottom margin of the chart header, bringing it closer to the chart */
 }

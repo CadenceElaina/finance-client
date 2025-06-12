@@ -5,7 +5,7 @@ import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 import FormLayout from '../../../../components/ui/Form/FormLayout';
 import formStyles from '../../../../components/ui/Form/FormLayout.module.css';
 
-const IncomeSection = () => {
+const IncomeTab = () => {
     const { budget, updateIncome } = useBudget();
     const income = budget?.income || {};
 
@@ -146,4 +146,4 @@ const IncomeSection = () => {
     );
 };
 
-export default IncomeSection;
+export default IncomeTab;

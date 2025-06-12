@@ -10,7 +10,8 @@ const DropdownTabs = ({
     label = "More",
     isActive,
     className = '',
-    inline = false // If true, dropdown is inline (pushes tabs), else absolute (floats)
+    inline = false,
+    onDropdownButtonClick // New prop for handling button click
 }) => {
     const [open, setOpen] = useState(false);
     const [closing, setClosing] = useState(false);
@@ -43,6 +44,22 @@ const DropdownTabs = ({
         };
     }, []);
 
+    const handleButtonClick = () => {
+        // Toggle dropdown open state
+        setOpen(prev => !prev);
+        setClosing(false);
+        if (closeTimeout.current) {
+            clearTimeout(closeTimeout.current);
+            closeTimeout.current = null;
+        }
+
+        // Call the new prop for custom parent tab behavior
+        if (onDropdownButtonClick) {
+            onDropdownButtonClick();
+        }
+    };
+
+
     return (
         <div
             className={`${styles.sideDropdownTabs} ${className} ${inline ? styles.inlineDropdown : ''}`}
@@ -57,6 +74,7 @@ const DropdownTabs = ({
                 aria-current={isActive ? 'true' : undefined}
                 tabIndex={0}
                 type="button"
+                onClick={handleButtonClick} // Use the new handler
             >
                 {label}
                 <span className={styles.caret}>&#9654;</span>
