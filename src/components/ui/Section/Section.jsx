@@ -1,4 +1,4 @@
-// src/components/ui/Section/Section.jsx
+// src/components/ui/Section/Section.jsx s
 import React from 'react';
 import styles from './Section.module.css';
 
@@ -15,4 +15,4 @@ const Section = ({ title, header, children, className = '', ...props }) => (
     </section>
 );
 
-export default Section;
+export default Section; 

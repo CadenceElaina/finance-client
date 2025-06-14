@@ -3,13 +3,16 @@ import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
 import OverviewTab from './OverviewTab';
 import AssetsTab from './AssetsTab';
 import LiabilitiesTab from './LiabilitiesTab';
-import InvestmentsWrapper from './InvestmentsWrapper'; 
+import PortfoliosWrapper from './PortfoliosWrapper'; 
 import accountsStyles from './accounts.module.css';
 import { isSmallApp } from '../../../../utils/isSmallApp';
+import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 
 const Accounts = () => {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ width: 955, height: 442 });
+    const { data, updateAccount, addAccount, removeAccount } = useFinancialData();
+    const accounts = data.accounts; // Assuming 'data' contains 'accounts'
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -43,17 +46,17 @@ const Accounts = () => {
         { id: 'assets', label: 'Assets', component: () => <AssetsTab /> },
         { id: 'liabilities', label: 'Liabilities', component: () => <LiabilitiesTab /> },
         {
-            id: 'investments',
-            label: 'Investments',
+            id: 'portfolios', // Changed ID to 'portfolios'
+            label: 'Portfolios', // Changed label to 'Portfolios'
             innerTabs: [
-                { id: 'showAll', label: 'All', component: () => null }, // Added 'showAll' inner tab
-                { id: 'holdings', label: 'Holdings', component: () => null },
+                { id: 'showAll', label: 'All', component: () => null },
+                { id: 'holdings', label: 'Holdings', component: () => null }, // Changed label
                 { id: 'allocation', label: 'Allocation', component: () => null },
                 { id: 'performance', label: 'Performance', component: () => null },
                 { id: 'reports', label: 'Reports', component: () => null }
             ],
             component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
-                <InvestmentsWrapper
+                <PortfoliosWrapper
                     smallApp={flexTabsSmallApp}
                     activeInnerTabId={activeInnerTabId}
                 />
@@ -62,7 +65,7 @@ const Accounts = () => {
     ];
 
     return (
-        <div ref={containerRef} className={accountsStyles.accountsAppContainer}> {/* FIX: Changed from styles to accountsStyles */}
+        <div ref={containerRef} className={accountsStyles.accountsAppContainer}>
             <FlexibleTabs
                 tabs={tabs}
                 activeTabId={activeTabId}

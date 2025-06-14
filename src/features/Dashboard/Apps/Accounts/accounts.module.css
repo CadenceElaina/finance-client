@@ -1,43 +1,4 @@
 /* src/features/Dashboard/Apps/Accounts/accounts.module.css */
-
-/* Base (default/large app) styles */
-
-.snapshotRowFull {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin: 0 auto;
-    background: var(--surface-light);
-    box-shadow: var(--shadow-md);
-    padding: var(--space-xxs);
-    /* Initial padding */
-    gap: var(--space-sm);
-    /* Initial gap between snapshot items */
-    flex-wrap: wrap;
-    box-sizing: border-box;
-    overflow-x: auto;
-}
-
-.snapshotItem {
-    background: var(--surface-light);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-xs);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: var(--space-xxs);
-    flex: 1 1 120px;
-    /* Default preferred basis */
-    min-width: 100px;
-    max-width: 180px;
-}
-
-
 .noChartData {
     color: var(--text-secondary);
     text-align: center;
@@ -118,13 +79,13 @@
 }
 
 .chartsColumn {
-
+    gap: var(--space-xxs); /* Ensures a small gap between the two chart sections */
+    display: flex;
+    flex-direction: column;
 }
 /* Add to accounts.module.css */
 .chartSectionNoBorder {
-    border: none !important; /* Removes the border around the chart section */
 
-    padding: 0; /* Removes any internal padding within the chart section */
 }
 
 /* Ensure chart container still has some internal padding if Section's padding is removed */
@@ -135,13 +96,14 @@
     justify-content: center; /* Horizontally centers the chart within its container */
     align-items: center; /* Vertically centers the chart within its container */
     height: 100%; /* Ensures the container takes up the full height available to it */
+
 }
 
 /* For improving chart label text readability if needed */
 .chartLabelText {
-    font-size: var(--font-size-xxs); /* Sets a very small font size for the chart labels */
-    fill: var(--text-primary); /* Sets the color of the text to the primary text color variable */
-    pointer-events: none; /* Makes the text non-interactive to mouse events, allowing clicks to pass through to the chart */
+    font-size: var(--font-size-chart-label);
+    fill: var(--chart-label-text, var(--text-primary));
+    pointer-events: none;
 }
 
 /* Adjustments for chartHeader if labels are too close */

@@ -6,19 +6,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-xxs) var(--space-xs);
-    background: var(--surface-light);
+    padding: var(--space-xs) var(--space-lg);
+
+    background: var(--surface-dark);
     color: var(--text-primary);
     box-shadow: var(--shadow-md);
-    font-size: var(--font-size-sm);
-    min-height: 40px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: var(--font-size-base);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
 }
 
 .logoText {
-    font-size: var(--font-size-lg);
-    font-weight: bold;
+    font-size: var(--font-size-xl);
+    letter-spacing: 0.5px;
+    font-weight: 700;
     color: var(--color-primary);
     text-decoration: none;
     transition: color var(--transition-speed-fast) var(--transition-ease);
@@ -43,11 +45,21 @@
     padding: var(--space-xxs) var(--space-xs);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
-    transition: background 0.2s, color var(--transition-speed-fast) var(--transition-ease);
+    transition: background 0.18s, color 0.18s;
     background: transparent;
     border: none;
     cursor: pointer;
     line-height: 1.2;
+}
+
+.navLink:hover,
+.navLink:focus {
+    background: none;
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+    /* Remove previous background and color overrides */
 }
 
 .authSection {
@@ -83,7 +95,7 @@
     padding-right: 2rem;
     min-height: 28px;
     height: 28px;
-    background-color: var(--surface-light);
+    background-color: var(--surface-dark);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-md);

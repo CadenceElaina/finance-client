@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext.jsx';
 import { useAuth } from '../../../contexts/AuthContext.jsx';
-import styles from './Header.module.css';
+import styles from './Header.module.css'; 
 
 const Header = () => {
     const { theme, changeTheme } = useTheme();
@@ -14,12 +14,11 @@ const Header = () => {
 
     const themes = [
         { value: 'light', label: 'Light' },
-        { value: 'dark', label: 'Dark' },
+        { value: 'tokyo-night', label: 'Tokyo Night' },
         { value: 'ultra-dark', label: 'Ultra Dark' },
         { value: 'high-contrast-dark', label: 'High Contrast Dark' },
         { value: 'vibrant-green', label: 'Vibrant Green' },
-        { value: 'vibrant-orange', label: 'Vibrant Orange' },
-        { value: 'tokyo-night', label: 'Tokyo Night' }
+        { value: 'vibrant-orange', label: 'Vibrant Orange' }
     ];
 
     const handleThemeChange = (event) => {

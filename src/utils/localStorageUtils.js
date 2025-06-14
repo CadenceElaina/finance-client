@@ -38,3 +38,30 @@ export const clearBudgetDataFromLocal = () => {
         console.error("Error clearing budget from local storage:", error);
     }
 };
+
+// Generic helpers for any data type
+export const getLocalData = (key = 'financialData') => {
+    try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+    } catch (error) {
+        console.error("Error reading from local storage:", error);
+        return null;
+    }
+};
+
+export const saveLocalData = (data, key = 'financialData') => {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+        console.error("Error saving to local storage:", error);
+    }
+};
+
+export const clearLocalData = (key = 'financialData') => {
+    try {
+        localStorage.removeItem(key);
+    } catch (error) {
+        console.error("Error clearing local storage:", error);
+    }
+};

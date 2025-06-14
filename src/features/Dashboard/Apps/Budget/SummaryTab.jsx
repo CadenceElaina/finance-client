@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 import Section from '../../../../components/ui/Section/Section';
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 import styles from './budget.module.css';
-import sectionStyles from '../../../../components/ui/Section/Section.module.css'; // Import the shared styles
+import sectionStyles from '../../../../components/ui/Section/Section.module.css';
+import { useFinancialData } from '../../../../contexts/FinancialDataContext';
+import { getNetWorth, getTotalAssets, getTotalCash, getTotalLiabilities } from '../../../../utils/financialCalculations';
 
 const PERIOD_OPTIONS = [
     { id: 'monthly', label: 'Monthly' },
@@ -17,42 +19,63 @@ const TAX_OPTIONS = [
     { id: 'both', label: 'Both' },
 ];
 
-const SummaryTab = ({
-    period, setPeriod, tax, setTax,
-    monthlyIncomeAT, annualIncomeAT, monthlyIncomePT, annualIncomePT,
-    monthlyExpenses, annualExpenses,
-    monthlyDiscretionaryAT, annualDiscretionaryAT,
-    monthlyDiscretionaryPT, annualDiscretionaryPT
-}) => {
+const SummaryTab = () => {
+    const { data, updateBudget } = useFinancialData();
+    const accounts = data.accounts;
+    const budget = data.budget || { income: {}, monthlyExpenses: [] };
+
+    const [tax, setTax] = useState('after');
+    const [period, setPeriod] = useState('monthly');
+
+    // Calculate expenses
+    const monthlyExpenses = budget.monthlyExpenses?.reduce((sum, exp) => sum + (exp.cost || 0), 0);
+    const annualExpenses = monthlyExpenses * 12;
+
+    // Calculate incomes
+    const monthlyIncomeAT = budget.income?.monthlyAfterTax || 0;
+    const annualIncomeAT = (monthlyIncomeAT * 12) + (budget.income?.bonusAfterTax || 0) + (budget.income?.additionalIncomeAfterTax || 0);
+
+    const monthlyIncomePT = budget.income?.annualPreTax ? budget.income.annualPreTax / 12 : 0;
+    const annualIncomePT = budget.income?.annualPreTax || 0;
+
+    // Calculate discretionary
+    const monthlyDiscretionaryAT = monthlyIncomeAT - monthlyExpenses;
+    const annualDiscretionaryAT = annualIncomeAT - annualExpenses;
+    const monthlyDiscretionaryPT = monthlyIncomePT - monthlyExpenses;
+    const annualDiscretionaryPT = annualIncomePT - annualExpenses;
+
+    const netWorth = getNetWorth(accounts);
+    const totalCash = getTotalCash(accounts);
+    const totalAssets = getTotalAssets(accounts);
+    const totalDebt = getTotalLiabilities(accounts);
+
     const format = (val) =>
         `$${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
     const showAfter = tax === 'after' || tax === 'both';
     const showPre = tax === 'pre' || tax === 'both';
-
     const showMonthly = period === 'monthly' || period === 'both';
     const showAnnual = period === 'annual' || period === 'both';
 
-    const singleColumnSummary = (showMonthly && !showAnnual) || (!showMonthly && showAnnual);
-
-    const renderSummarySection = (periodLabel, income, expenses, discretionary, taxLabel) => (
-        <div className={styles.summarySection}>
-            <div className={styles.summaryPeriodTax}>
-                {periodLabel} {taxLabel ? `(${taxLabel})` : ''}
+    const renderSummaryCard = (periodLabel, income, expenses, discretionary, taxLabel) => (
+        <div className={styles.summaryCard}>
+            <div className={styles.summaryCardHeader}>
+                <span className={styles.summaryPeriod}>{periodLabel}</span>
+                {taxLabel && <span className={styles.summaryTax}>({taxLabel})</span>}
             </div>
-            <div className={styles.summaryRow}>
-                <span>Income:</span>
-                <strong>{format(income)}</strong>
+            <div className={styles.summaryCardRow}>
+                <span>Income</span>
+                <span className={styles.summaryIncome}>{format(income)}</span>
             </div>
-            <div className={styles.summaryRow}>
-                <span>Expenses:</span>
-                <strong>{format(expenses)}</strong>
+            <div className={styles.summaryCardRow}>
+                <span>Expenses</span>
+                <span className={styles.summaryExpenses}>{format(expenses)}</span>
             </div>
-            <div className={styles.summaryRow}>
-                <span>Discretionary:</span>
-                <strong style={{ color: discretionary < 0 ? 'var(--color-danger)' : undefined }}>
+            <div className={styles.summaryCardRow}>
+                <span>Discretionary</span>
+                <span className={discretionary < 0 ? styles.negative : styles.positive}>
                     {format(discretionary)}
-                </strong>
+                </span>
             </div>
         </div>
     );
@@ -60,12 +83,7 @@ const SummaryTab = ({
     const Controls = (
         <div className={sectionStyles.filterRow}>
             <div>
-                <label
-                    htmlFor="period-select"
-                    className={sectionStyles.filterLabel}
-                >
-                    Period
-                </label>
+                <label htmlFor="period-select" className={sectionStyles.filterLabel}>Period</label>
                 <select
                     id="period-select"
                     value={period}
@@ -78,12 +96,7 @@ const SummaryTab = ({
                 </select>
             </div>
             <div>
-                <label
-                    htmlFor="tax-select"
-                    className={sectionStyles.filterLabel}
-                >
-                    Tax
-                </label>
+                <label htmlFor="tax-select" className={sectionStyles.filterLabel}>Tax</label>
                 <select
                     id="tax-select"
                     value={tax}
@@ -99,33 +112,36 @@ const SummaryTab = ({
     );
 
     return (
-        <Section
-            header={
-                <SectionHeader
-                    title="Summary"
-                    right={Controls}
-                />
-            }
-        >
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: singleColumnSummary ? '1fr' : '1fr 1fr',
-                margin: '0 auto'
-            }}>
-                {showMonthly && (
-                    <div>
-                        {showAfter && renderSummarySection('Monthly', monthlyIncomeAT, monthlyExpenses, monthlyDiscretionaryAT, 'After-tax')}
-                        {showPre && renderSummarySection('Monthly', monthlyIncomePT, monthlyExpenses, monthlyDiscretionaryPT, 'Pre-tax')}
-                    </div>
-                )}
-                {showAnnual && (
-                    <div>
-                        {showAfter && renderSummarySection('Annual', annualIncomeAT, annualExpenses, annualDiscretionaryAT, 'After-tax')}
-                        {showPre && renderSummarySection('Annual', annualIncomePT, annualExpenses, annualDiscretionaryPT, 'Pre-tax')}
-                    </div>
-                )}
-            </div>
-        </Section>
+        <>
+            <Section
+                header={
+                    <SectionHeader
+                        title="Summary"
+                        right={Controls}
+                    />
+                }
+            >
+                <div
+                    className={styles.summaryGrid}
+                    style={{
+                        gridTemplateColumns: (showMonthly && showAnnual) ? '1fr 1fr' : '1fr'
+                    }}
+                >
+                    {showMonthly && (
+                        <div>
+                            {showAfter && renderSummaryCard('Monthly', monthlyIncomeAT, monthlyExpenses, monthlyDiscretionaryAT, 'After-tax')}
+                            {showPre && renderSummaryCard('Monthly', monthlyIncomePT, monthlyExpenses, monthlyDiscretionaryPT, 'Pre-tax')}
+                        </div>
+                    )}
+                    {showAnnual && (
+                        <div>
+                            {showAfter && renderSummaryCard('Annual', annualIncomeAT, annualExpenses, annualDiscretionaryAT, 'After-tax')}
+                            {showPre && renderSummaryCard('Annual', annualIncomePT, annualExpenses, annualDiscretionaryPT, 'Pre-tax')}
+                        </div>
+                    )}
+                </div>
+            </Section>
+        </>
     );
 };
 

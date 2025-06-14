@@ -9,16 +9,17 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    /* min-width: 500px; */ /* Remove or reduce this */
-    min-width: 0;
+    min-width: 500px;
     margin: 0 auto;
     font-size: var(--font-size-table-compact);
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
 }
 
 .table th,
 .table td {
     border: none;
-    padding: var(--space-xs) var(--space-sm);
+      padding: var(--space-xxs) var(--space-xs);
     text-align: left;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
@@ -29,7 +30,7 @@
 
 .table th {
     background: var(--surface-dark);
-    color: var(--text-light);
+    color: var(--text-primary);
     font-weight: bold;
     position: sticky;
     top: 0;
@@ -42,17 +43,15 @@
 }
 
 .table tr:nth-child(even) {
-    background: var(--table-row-even-bg, var(--surface-light));
+    background: var(--table-row-even-bg);
 }
 
 .table tr:hover {
-    background: var(--table-row-hover-bg, rgba(var(--color-primary-rgb), 0.1));
+    background: var(--table-row-hover-bg);
 }
 
 .table tr {
     fill: var(--white);
-    /* Not typically used for HTML table rows, check context */
-    /* Sets default row font size */
     pointer-events: auto;
     font-weight: 400;
     text-shadow: none;
@@ -75,7 +74,7 @@
     /* Ensures consistent height */
     box-sizing: border-box;
     max-width: none;
-    /* Remove this if you want fixed width: max-width: 150px; */
+
 }
 
 .tableInput:focus,
@@ -109,12 +108,12 @@
 
 .addButton {
     background-color: var(--color-primary);
-    color: var(--text-light);
+    color: var(--text-on-primary);
     border: 1px solid var(--color-primary);
 }
 
 .addButton:hover {
-    background-color: var(--color-primary-dark);
+    background-color: var(--color-primary-light);
 }
 
 /* Styles for a Section containing a table (e.g., AccountsTable, ExpensesTable) */
@@ -124,9 +123,7 @@
     box-shadow: var(--shadow-sm);
     width: 100%;
     max-width: none;
-    border: 1px solid var(--border-light);
-    padding: 0;
-    margin-bottom: 0;
+/*     border: 1px solid var(--border-light); */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -134,46 +131,37 @@
 
 /* Compact table variant for smallApp or dense layouts (applies to .table directly) */
 .compactTable {
-/*     font-size: var(--font-size-xxs); */
+
 }
 
 .compactTable th,
 .compactTable td {
-    padding: var(--space-xxs) var(--space-xs);
+
 }
 
-/* --- SMALL APP MODE OVERRIDES for Table Component itself --- */
+/* --- SMALL APP MODE OVERRIDES --- */
 .smallApp {
-    /* This class is applied to the .tableContainer when Table receives smallApp={true} */
+    
 }
 
 .smallApp .table {
-    min-width: 380px;
-    /* Adjust this value based on how small you want it to get before horizontal scroll */
-    /* Make table text smaller */
+   
 }
 
 .smallApp .table th,
 .smallApp .table td {
-    padding: var(--space-xxs) var(--space-xs);
-    /* Reduce cell padding in small mode */
+ 
 }
 
 .smallApp .tableInput,
 .smallApp .tableSelect,
 .smallApp .removeButton,
 .smallApp .addButton {
-    /* Smaller fonts for inputs/buttons in small table */
-    padding: var(--space-xxs) var(--space-xxs);
-    /* Tighter padding for inputs/buttons */
-    height: auto;
-    /* Let content dictate height in small mode */
+   
 }
 
-
 /* --- Filter Row Styles (Moved from accounts.module.css) --- */
-/* These styles are for the filter mechanism, which is used in Accounts and now Expenses.
-   We put them here because the <Table> component is often accompanied by such filters. */
+/* These styles are for the filter mechanism, which is used in Accounts and now Expenses.*/
 .filterRow {
     display: flex;
     align-items: center;
@@ -222,8 +210,6 @@
 }
 
 /* --- Table Header Title (used in SectionHeader) --- */
-/* This is a more generic title for sections that might contain tables.
-   Can be used with SectionHeader's `title` prop. */
 .tableHeaderTitle {
     /* Renamed from accountsHeaderTitle to be generic */
     font-size: var(--font-size-base);

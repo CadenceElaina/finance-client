@@ -4,10 +4,13 @@ import IncomeTab from './IncomeTab';
 import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
 import budgetStyles from './budget.module.css'; // Renamed to budgetStyles for consistency
 import { isSmallApp } from "../../../../utils/isSmallApp";
+import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 
 const Budget = () => {
     const containerRef = useRef(null);
     const [containerSize, setContainerSize] = useState({ width: 955, height: 442 });
+    const { data, updateIncome, addExpense, updateExpense, removeExpense } = useFinancialData();
+    const budget = data.budget;
 
     useEffect(() => {
         const updateSize = () => {

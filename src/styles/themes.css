@@ -1,19 +1,19 @@
 /* Light Mode */
 body[data-theme="light"] {
     /* Base Colors */
-    --background-light: #F8F9FA;
-    --surface-light: #FFFFFF;
-    --surface-dark: #E0E0E0;
-    --border-light: #E0E0E0;
+    --background-light: #F5F7FA;      /* Softer, less blue than #F8F9FA */
+    --surface-light: #FFFFFF;          /* Pure white for cards/sections */
+    --surface-dark: #F0F2F5;           /* Slightly darker for headers */
+    --border-light: #E3E8EF;           /* Lighter, modern border */
 
     /* Text Colors */
-    --text-primary: #212529;
-    --text-secondary: #6C757D;
-    --text-tertiary: #ADB5BD;
-    --text-light: #212529;
+    --text-primary: #23272F;           /* Deep gray, not pure black */
+    --text-secondary: #6B7280;         /* Muted gray */
+    --text-tertiary: #B0B7C3;
+    --text-light: #23272F;
     --text-on-primary: #FFFFFF;
     --text-on-secondary: #FFFFFF;
-    --text-disabled: #ADB5BD;
+    --text-disabled: #B0B7C3;
 
     /* Brand/Accent Colors */
     --color-primary: #007B8C;
@@ -24,7 +24,7 @@ body[data-theme="light"] {
     --color-secondary-dark: #CC7054;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #007B8C 0%, #00AEBF 100%);
+    --gradient-primary: linear-gradient(135deg, #00AEBF 0%, #007B8C 100%);
     --gradient-secondary: linear-gradient(135deg, #FF8C69 0%, #FFB09C 100%);
 
     /* Status Colors */
@@ -34,7 +34,7 @@ body[data-theme="light"] {
     --status-info: #17A2B8;
 
     /* Interactive States */
-    --focus-ring: 0 0 0 3px rgba(0, 123, 140, 0.5);
+    --focus-ring: 0 0 0 3px rgba(0, 123, 140, 0.18);
     --button-hover-bg: var(--color-primary-light);
     --button-active-bg: var(--color-primary-dark);
     --link-color: var(--color-primary);
@@ -50,14 +50,14 @@ body[data-theme="light"] {
     --app-launcher-button-border-color: var(--border-light);
     --app-launcher-button-hover-border-color: var(--color-primary);
 
-    --table-row-even-bg: rgba(0, 0, 0, 0.02);
-    --table-row-hover-bg: rgba(0, 0, 0, 0.05);
+    --table-row-even-bg: #F7FAFC;
+    --table-row-hover-bg: #F0F4F8;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.15);
-    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.12);
+    /* Shadows: subtle, layered for depth */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 24px rgba(0, 0, 0, 0.10);
+    --shadow-elevated: 0 6px 20px rgba(0, 0, 0, 0.12);
 
     --app-orb-shadow: var(--shadow-md);
     --app-orb-menu-bg: var(--surface-light);
@@ -65,77 +65,14 @@ body[data-theme="light"] {
 
     /* Glass Effect */
     --glass-background: rgba(0, 0, 0, 0.03);
-    --glass-border: rgba(0, 0, 0, 0.1);
-}
+    --glass-border: rgba(0, 0, 0, 0.08);
 
-/* Ultra Dark Mode */
-body[data-theme="ultra-dark"] {
-    /* Base Colors */
-    --background-light: #0D1117;
-    --surface-light: #161B22;
-    --surface-dark: #0D1117;
-    --border-light: #30363D;
-
-    /* Text Colors */
-    --text-primary: #C9D1D9;
-    --text-secondary: #8B949E;
-    --text-tertiary: #6E7681;
-    --text-light: #C9D1D9;
-    --text-on-primary: #FFFFFF;
-    --text-on-secondary: #FFFFFF;
-    --text-disabled: #444C56;
-
-    /* Brand/Accent Colors */
-    --color-primary: #4A90E2;
-    --color-primary-light: #6BA0ED;
-    --color-primary-dark: #2F6DB5;
-    --color-secondary: #FF6B6B;
-    --color-secondary-light: #FF8F8F;
-    --color-secondary-dark: #CC5555;
-
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #4A90E2 0%, #6BA0ED 100%);
-    --gradient-secondary: linear-gradient(135deg, #FF6B6B 0%, #FF8F8F 100%);
-
-    /* Status Colors */
-    --status-success: #2ECC71;
-    --status-warning: #F1C40F;
-    --status-danger: #E74C3C;
-    --status-info: #3498DB;
-
-    /* Interactive States */
-    --focus-ring: 0 0 0 3px rgba(74, 144, 226, 0.5);
-    --button-hover-bg: var(--color-primary-light);
-    --button-active-bg: var(--color-primary-dark);
-    --link-color: var(--color-primary-light);
-    --link-hover-color: var(--color-primary);
-    --link-active-color: var(--color-primary-dark);
-    --interactive-disabled-bg: #21262D;
-    --interactive-disabled-text: var(--text-tertiary);
-
-    /* Component Specific */
-    --dashboard-button-bg: #1F252E;
-    --dashboard-button-text: #E0E0E0;
-    --app-launcher-button-text: var(--text-primary);
-    --app-launcher-button-border-color: var(--border-light);
-    --app-launcher-button-hover-border-color: var(--color-primary);
-
-    --table-row-even-bg: rgba(255, 255, 255, 0.02);
-    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.35);
-
-    --app-orb-shadow: var(--shadow-md);
-    --app-orb-menu-bg: var(--surface-light);
-    --app-orb-menu-shadow: var(--shadow-lg);
-
-    /* Glass Effect */
-    --glass-background: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    /* Chart Colors */
+    --chart-label-text: #23272F;
+    --chart-bg: #FFFFFF;
+    --chart-grid: #E3E8EF;
+    --chart-tooltip-bg: #FFFFFF;
+    --chart-tooltip-text: #23272F;
 }
 
 /* High Contrast Dark Mode */
@@ -196,10 +133,10 @@ body[data-theme="high-contrast-dark"] {
     --app-launcher-button-hover-border-color: #FFFF00;
 
     /* Shadows */
-    --shadow-sm: 0 0 0 1px #808080;
-    --shadow-md: 0 0 0 2px #C0C0C0;
-    --shadow-lg: 0 0 0 3px #FFFFFF;
-    --shadow-elevated: 0 0 0 4px #FFFF00;
+    --shadow-sm: 0 0 0 1.5px #00FFFF, 0 1px 2px rgba(0,0,0,0.55);
+    --shadow-md: 0 0 0 2.5px #FFFF00, 0 4px 8px rgba(0,0,0,0.65);
+    --shadow-lg: 0 0 0 3.5px #FFFF00, 0 10px 20px rgba(0,0,0,0.75);
+    --shadow-elevated: 0 0 0 4.5px #FFFF00, 0 5px 15px rgba(0,0,0,0.75);
 
     --app-orb-shadow: 0 0 0 3px #FFFF00, 0 6px 20px rgba(255, 255, 0, 0.2);
     --app-orb-menu-bg: #1B1B1B;
@@ -208,24 +145,31 @@ body[data-theme="high-contrast-dark"] {
     /* Glass Effect */
     --glass-background: rgba(255, 255, 255, 0.02);
     --glass-border: rgba(255, 255, 255, 0.15);
+
+    /* Chart Colors */
+    --chart-label-text: #FFFF00;
+    --chart-bg: #000000;
+    --chart-grid: #FFFF00;
+    --chart-tooltip-bg: #000000;
+    --chart-tooltip-text: #FFFF00;
 }
 
 /* Vibrant Green Theme */
 body[data-theme="vibrant-green"] {
     /* Base Colors */
-    --background-light: #001A0F;
-    --surface-light: #0B3322;
-    --surface-dark: #001A0F;
+    --background-light: #E6FFF3;         /* Very light green for app background */
+    --surface-light: #F4FFF9;            /* Card/section background */
+    --surface-dark: #C6F7E2;             /* Header/section header */
     --border-light: #3A7F67;
 
     /* Text Colors */
-    --text-primary: #D1FFEC;
-    --text-secondary: #8BCDA7;
+    --text-primary: #0B3322;
+    --text-secondary: #3A7F67;
     --text-tertiary: #5E9B7A;
-    --text-light: #D1FFEC;
-    --text-on-primary: #000000;
-    --text-on-secondary: #000000;
-    --text-disabled: #2A5E42;
+    --text-light: #0B3322;
+    --text-on-primary: #FFFFFF;
+    --text-on-secondary: #0B3322;
+    --text-disabled: #A0D9C2;
 
     /* Brand/Accent Colors */
     --color-primary: #00E080;
@@ -248,54 +192,56 @@ body[data-theme="vibrant-green"] {
     /* Interactive States */
     --focus-ring: 0 0 0 3px #00E080;
     --button-hover-bg: linear-gradient(135deg, #00E080 0%, #33F09C 100%);
-    --button-active-bg: #00B36B;
-    --link-color: var(--color-primary-light);
+    --button-active-bg: #00B36L;
+    --link-color: var(--color-primary-dark);
     --link-hover-color: var(--color-primary);
     --link-active-color: var(--color-primary-dark);
-    --interactive-disabled-bg: #1B4A34;
+    --interactive-disabled-bg: #D1FFEC;
     --interactive-disabled-text: var(--text-tertiary);
 
-    --table-row-even-bg: rgba(255, 255, 255, 0.02);
-    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+    --table-row-even-bg: #E6FFF3;
+    --table-row-hover-bg: #C6F7E2;
 
-    /* Component Specific */
-    --dashboard-button-bg: #1A7A4A;
-    --dashboard-button-text: #F0F0F0;
-    --app-launcher-button-text: #FFFFFF;
-    --app-launcher-button-border-color: var(--border-light);
-    --app-launcher-button-hover-border-color: var(--color-primary);
+    --dashboard-button-bg: #C6F7E2;
+    --dashboard-button-text: #0B3322;
+    --app-launcher-button-text: #0B3322;
+    --app-launcher-button-border-color: #3A7F67;
+    --app-launcher-button-hover-border-color: #00E080;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 224, 128, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 224, 128, 0.2);
-    --shadow-lg: 0 10px 20px rgba(0, 224, 128, 0.3);
-    --shadow-elevated: 0 5px 15px rgba(0, 224, 128, 0.25);
+    --shadow-sm: 0 1px 2px rgba(0, 224, 128, 0.10), 0 1px 2px rgba(0,0,0,0.10);
+    --shadow-md: 0 4px 6px rgba(0, 224, 128, 0.13), 0 4px 8px rgba(0,0,0,0.13);
+    --shadow-lg: 0 10px 20px rgba(0, 224, 128, 0.18), 0 10px 20px rgba(0,0,0,0.15);
 
-    --app-orb-shadow: 0 0 0 3px #00E080, 0 6px 20px rgba(0, 224, 128, 0.2);
-    --app-orb-menu-bg: #0B3322;
-    --app-orb-menu-shadow: 0 10px 30px rgba(0, 224, 128, 0.15);
+    --app-orb-shadow: 0 0 0 3px #00E080, 0 6px 20px rgba(0, 224, 128, 0.12);
+    --app-orb-menu-bg: #F4FFF9;
+    --app-orb-menu-shadow: 0 10px 30px rgba(0, 224, 128, 0.10);
 
-    /* Glass Effect */
-    --glass-background: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-background: rgba(0, 224, 128, 0.04);
+    --glass-border: rgba(0, 224, 128, 0.10);
+
+    --chart-label-text: #0B3322;
+    --chart-bg: #F4FFF9;
+    --chart-grid: #A0D9C2;
+    --chart-tooltip-bg: #C6F7E2;
+    --chart-tooltip-text: #0B3322;
 }
 
 /* Vibrant Orange Theme */
 body[data-theme="vibrant-orange"] {
     /* Base Colors */
-    --background-light: #26160A;
-    --surface-light: #4A2B14;
-    --surface-dark: #26160A;
-    --border-light: #9B5D34;
+    --background-light: #FFF7ED;         /* Very light orange background */
+    --surface-light: #FFF3E0;            /* Card/section background */
+    --surface-dark: #FFD9B3;             /* Header/section header */
+    --border-light: #FFB880;
 
     /* Text Colors */
-    --text-primary: #FFF0E0;
-    --text-secondary: #FFB880;
+    --text-primary: #4A2B14;
+    --text-secondary: #9B5D34;
     --text-tertiary: #E09060;
-    --text-light: #FFF0E0;
-    --text-on-primary: #000000;
-    --text-on-secondary: #FFFFFF;
-    --text-disabled: #6B4D2F;
+    --text-light: #4A2B14;
+    --text-on-primary: #FFFFFF;
+    --text-on-secondary: #4A2B14;
+    --text-disabled: #E0B080;
 
     /* Brand/Accent Colors */
     --color-primary: #FFA500;
@@ -306,48 +252,50 @@ body[data-theme="vibrant-orange"] {
     --color-secondary-dark: #6F20B6;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
-    --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #7B1BE0 100%);
+    --gradient-primary: linear-gradient(135deg, #FFA500 0%, #FFB833 100%);
+    --gradient-secondary: linear-gradient(135deg, #8A2BE2 0%, #A050EA 100%);
 
     /* Status Colors */
-    --status-success: #7CFC00;
+    --status-success: #4CAF50;
     --status-warning: #FFD700;
-    --status-danger: #FF4500;
+    --status-danger: #FF4444;
     --status-info: #00BFFF;
 
     /* Interactive States */
     --focus-ring: 0 0 0 3px #FFA500;
-    --button-hover-bg: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);
+    --button-hover-bg: linear-gradient(135deg, #FFA500 0%, #FFB833 100%);
     --button-active-bg: #CC8400;
-    --link-color: var(--color-primary-light);
+    --link-color: var(--color-primary-dark);
     --link-hover-color: var(--color-primary);
     --link-active-color: var(--color-primary-dark);
-    --interactive-disabled-bg: #5C3A1E;
+    --interactive-disabled-bg: #FFE5B4;
     --interactive-disabled-text: var(--text-tertiary);
 
-    --table-row-even-bg: rgba(255, 255, 255, 0.02);
-    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
+    --table-row-even-bg: #FFF7ED;
+    --table-row-hover-bg: #FFD9B3;
 
-    /* Component Specific */
-    --dashboard-button-bg: var(--surface-dark);
-    --dashboard-button-text: var(--text-primary);
-    --app-launcher-button-text: var(--text-primary);
-    --app-launcher-button-border-color: var(--border-light);
-    --app-launcher-button-hover-border-color: var(--color-primary);
+    --dashboard-button-bg: #FFD9B3;
+    --dashboard-button-text: #4A2B14;
+    --app-launcher-button-text: #4A2B14;
+    --app-launcher-button-border-color: #FFB880;
+    --app-launcher-button-hover-border-color: #FFA500;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(255, 165, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(255, 165, 0, 0.2);
-    --shadow-lg: 0 10px 20px rgba(255, 165, 0, 0.3);
-    --shadow-elevated: 0 5px 15px rgba(255, 140, 0, 0.25);
+    --shadow-sm: 0 1px 2px rgba(255, 165, 0, 0.10), 0 1px 2px rgba(0,0,0,0.10);
+    --shadow-md: 0 4px 6px rgba(255, 165, 0, 0.13), 0 4px 8px rgba(0,0,0,0.13);
+    --shadow-lg: 0 10px 20px rgba(255, 165, 0, 0.18), 0 10px 20px rgba(0,0,0,0.15);
 
-    --app-orb-shadow: 0 0 0 3px #FFA500, 0 6px 20px rgba(255, 140, 0, 0.2);
-    --app-orb-menu-bg: #4A2B14;
-    --app-orb-menu-shadow: 0 10px 30px rgba(255, 140, 0, 0.15);
+    --app-orb-shadow: 0 0 0 3px #FFA500, 0 6px 20px rgba(255, 165, 0, 0.12);
+    --app-orb-menu-bg: #FFF3E0;
+    --app-orb-menu-shadow: 0 10px 30px rgba(255, 165, 0, 0.10);
 
-    /* Glass Effect */
-    --glass-background: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-background: rgba(255, 165, 0, 0.04);
+    --glass-border: rgba(255, 165, 0, 0.10);
+
+    --chart-label-text: #4A2B14;
+    --chart-bg: #FFF3E0;
+    --chart-grid: #FFB880;
+    --chart-tooltip-bg: #FFD9B3;
+    --chart-tooltip-text: #4A2B14;
 }
 
 /* Tokyo Night Theme */
@@ -417,10 +365,10 @@ body[data-theme="tokyo-night"] {
     --table-row-hover-bg: rgba(255, 255, 255, 0.05);
 
     /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 5px 15px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px rgba(122, 162, 247, 0.13), 0 1px 2px rgba(0,0,0,0.40);
+    --shadow-md: 0 4px 6px rgba(122, 162, 247, 0.18), 0 4px 8px rgba(0,0,0,0.50);
+    --shadow-lg: 0 10px 20px rgba(122, 162, 247, 0.22), 0 10px 20px rgba(0,0,0,0.60);
+    --shadow-elevated: 0 5px 15px rgba(122, 162, 247, 0.22), 0 5px 15px rgba(0,0,0,0.60);
 
     --app-orb-shadow: 0 0 0 3px var(--border-light), var(--shadow-elevated);
     --app-orb-menu-bg: var(--surface-light);
@@ -429,4 +377,11 @@ body[data-theme="tokyo-night"] {
     /* Glass Effect */
     --glass-background: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
+
+    /* Chart Colors */
+    --chart-label-text: #C0CAF5;
+    --chart-bg: #24283B;
+    --chart-grid: #414868;
+    --chart-tooltip-bg: #24283B;
+    --chart-tooltip-text: #C0CAF5;
 }

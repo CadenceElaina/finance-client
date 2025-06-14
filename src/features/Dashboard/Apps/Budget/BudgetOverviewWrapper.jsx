@@ -1,16 +1,20 @@
 // src/features/Dashboard/Apps/Budget/BudgetOverviewWrapper.jsx
 import React, { useState } from 'react';
 import { useBudget } from '../../../../contexts/BudgetContext';
+import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 import SummaryTab from './SummaryTab';
 import ExpensesTab from './ExpensesTab';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
 import BudgetControlPanel from './BudgetControlPanel';
-import budgetStyles from './budget.module.css'; // FIX: Changed 'styles' to 'budgetStyles' here
-import sectionStyles from '../../../../components/ui/Section/Section.module.css'; // Import the new styles for TwoColumnLayout
+import budgetStyles from './budget.module.css';
+import sectionStyles from '../../../../components/ui/Section/Section.module.css';
+import { getNetWorth, getTotalCash, getTotalAssets, getTotalLiabilities } from '../../../../utils/financialCalculations';
 
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
-    console.log('BudgetOverviewWrapper rendered with smallApp:', smallApp, 'activeInnerTabId:', activeInnerTabId);
+    //console.log('BudgetOverviewWrapper rendered with smallApp:', smallApp, 'activeInnerTabId:', activeInnerTabId);
     const { budget, isLoading, error, userSignedIn } = useBudget();
+    const { data } = useFinancialData();
+    const accounts = data.accounts;
     const [period, setPeriod] = useState('both');
     const [tax, setTax] = useState('both');
 
@@ -37,6 +41,11 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
     const monthlyDiscretionaryPT = monthlyIncomePT - monthlyExpenses;
     const annualDiscretionaryPT = annualIncomePT - annualExpenses;
 
+    const netWorth = getNetWorth(accounts);
+    const totalCash = getTotalCash(accounts);
+    const totalAssets = getTotalAssets(accounts);
+    const totalDebt = getTotalLiabilities(accounts);
+
     const summaryProps = {
         period, setPeriod, tax, setTax,
         monthlyIncomeAT, annualIncomeAT, monthlyIncomePT, annualIncomePT,
@@ -47,12 +56,45 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
 
     const expensesProps = {
         expenses: budget.monthlyExpenses,
-        smallApp: smallApp, // Pass smallApp prop to ExpensesSection if it needs internal adjustments
+        smallApp: smallApp,
     };
+    
+    // Snapshot row component
+    const SnapshotRow = (
+        <div className={budgetStyles.snapshotRowFull}>
+            <div className={budgetStyles.snapshotItem}>
+                <span className={budgetStyles.snapshotLabel}>Net Worth</span>
+                <span className={`${budgetStyles.positive} value`}>
+                    ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+            <div className={budgetStyles.snapshotItem}>
+                <span className={budgetStyles.snapshotLabel}>Cash</span>
+                <span className={`${budgetStyles.positive} value`}>
+                    ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+            <div className={budgetStyles.snapshotItem}>
+                <span className={budgetStyles.snapshotLabel}>Assets</span>
+                <span className={`${budgetStyles.positive} value`}>
+                    ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+            <div className={budgetStyles.snapshotItem}>
+                <span className={budgetStyles.snapshotLabel}>Liabilities</span>
+                <span className={`${budgetStyles.negative} value`}>
+                    ${Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+            </div>
+        </div>
+    );
 
     return (
-        <div className={budgetStyles.budgetContentWrapper}> {/* FIX: Changed from styles to budgetStyles */}
-               {smallApp ? (
+        <div className={budgetStyles.budgetContentWrapper}>
+            {/* Snapshot row is now placed above all content */}
+            {SnapshotRow}
+            
+            {smallApp ? (
                 (!activeInnerTabId || activeInnerTabId === 'showAll') ? (
                     <>
                         <SummaryTab {...summaryProps} smallApp={smallApp} />
@@ -65,7 +107,7 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
                 )
             ) : (
                 <TwoColumnLayout
-                    className={sectionStyles.columns45_55} // Apply the new class here
+                    className={sectionStyles.columns45_55}
                     left={<SummaryTab {...summaryProps} smallApp={smallApp} />}
                     right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}
                     smallApp={smallApp}

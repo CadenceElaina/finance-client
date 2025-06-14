@@ -1,6 +1,6 @@
 // src/features/Dashboard/Apps/Accounts/OverviewTab.jsx
 import React, { useState, useMemo } from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Section from '../../../../components/ui/Section/Section';
 import Table from '../../../../components/ui/Table/Table';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
@@ -8,6 +8,9 @@ import accountsStyles from './accounts.module.css'; // This is the correct impor
 import tableStyles from '../../../../components/ui/Table/Table.module.css'; // This is for general table styles
 import { DEMO_ACCOUNTS } from '../../../../utils/constants';
 import sectionStyles from '../../../../components/ui/Section/Section.module.css';
+import { useFinancialData } from '../../../../contexts/FinancialDataContext';
+import { renderPieLabel } from './utils/pieChartLabelUtil'
+import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
 // Modern theme-aware color palette for charts
 const CHART_COLORS = [
@@ -15,7 +18,7 @@ const CHART_COLORS = [
     'var(--color-secondary)',
     '#7AA2F7', // Tokyo Night blue
     '#BB9AF7', // Tokyo Night purple
-    '#00FFD1', // Accent teal
+    '#00FFD1', // Accent tealLet
     '#FF8C69', // Accent coral
     '#FFD700', // Gold
     '#EF5350', // Red
@@ -25,8 +28,9 @@ const CHART_COLORS = [
 const getNetWorth = (accounts) =>
     accounts.reduce((sum, acc) => sum + (typeof acc.value === 'number' ? acc.value : 0), 0);
 
-const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
-    console.log('OverviewTab rendered with smallApp:', smallApp);
+const OverviewTab = ({ smallApp }) => {
+    const { data: { accounts } } = useFinancialData();
+    //console.log('OverviewTab rendered with smallApp:', smallApp);
     const [accountCategoryFilter, setAccountCategoryFilter] = useState('all');
 
     const cashAccounts = accounts.filter(acc => acc.category === 'Cash');
@@ -58,106 +62,30 @@ const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
             value: Math.abs(acc.value || 0),
         }))
         .filter(d => d.value > 0);
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + (smallApp ? 6 : 10);
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-    const textAnchor = x > cx ? 'start' : 'end';
-    const finalX = x + (x > cx ? 5 : -5);
-    const finalY = y;
-
-    // Compose label and split into words
-    const labelText = `${name} (${(percent * 100).toFixed(0)}%)`;
-    const words = labelText.split(' ');
-
-    // Build lines with a max character count per line (e.g., 12)
-    const lines = [];
-    let currentLine = '';
-    words.forEach(word => {
-        if ((currentLine + ' ' + word).trim().length > 12) {
-            if (currentLine) lines.push(currentLine);
-            currentLine = word;
-        } else {
-            currentLine = currentLine ? currentLine + ' ' + word : word;
-        }
-    });
-    if (currentLine) lines.push(currentLine);
-
-    return (
-        <text
-            x={finalX}
-            y={finalY}
-            fill="var(--text-primary)"
-            textAnchor={textAnchor}
-            dominantBaseline="central"
-            className={accountsStyles.chartLabelText}
-        >
-            {lines.map((line, idx) => (
-                <tspan
-                    key={idx}
-                    x={finalX}
-                    dy={idx === 0 ? 0 : '1.1em'}
-                >
-                    {line}
-                </tspan>
-            ))}
-        </text>
-    );
-};
 
     // The accountsHeader structure.
     // It's a header for the accounts table, and its layout should be handled by SectionHeader
     // The filter row itself uses tableStyles.filterRow
     const accountsHeader = (
-        <div className={tableStyles.filterRow}> {/* This div acts as the container for title and filter */}
-            <h3 className={tableStyles.tableHeaderTitle}>Your Accounts</h3>
-            <div className={tableStyles.filterRow}> {/* This is the actual filter controls wrapper */}
-                <label htmlFor="accountCategoryFilter" className={tableStyles.filterLabel}>Show:</label>
-                <select
-                    id="accountCategoryFilter"
-                    value={accountCategoryFilter}
-                    onChange={e => setAccountCategoryFilter(e.target.value)}
-                    className={tableStyles.filterSelect}
-                >
-                    <option value="all">All Accounts</option>
-                    <option value="Cash">Cash Accounts</option>
-                    <option value="Investments">Investment Accounts</option>
-                    <option value="Debt">Liability Accounts</option>
-                </select>
-            </div>
-        </div>
-    );
-
-    // Snapshot row (always above)
-    const SnapshotRow = (
-        <div className={accountsStyles.snapshotRowFull}> {/* FIX: Changed from styles to accountsStyles */}
-            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={accountsStyles.snapshotLabel}>Net Worth</span> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
-                    ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-            </div>
-            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={accountsStyles.snapshotLabel}>Cash</span> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
-                    ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-            </div>
-            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={accountsStyles.snapshotLabel}>Assets</span> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={`${accountsStyles.positive} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
-                    ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-            </div>
-            <div className={accountsStyles.snapshotItem}> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={accountsStyles.snapshotLabel}>Liabilities</span> {/* FIX: Changed from styles to accountsStyles */}
-                <span className={`${accountsStyles.negative} ${accountsStyles.value}`}> {/* FIX: Changed from styles to accountsStyles */}
-                    {Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
-            </div>
-        </div>
+        <SectionHeader
+            title="Your Accounts"
+            right={
+                <div>
+                    <label htmlFor="accountCategoryFilter" className={tableStyles.filterLabel}>Show:</label>
+                    <select
+                        id="accountCategoryFilter"
+                        value={accountCategoryFilter}
+                        onChange={e => setAccountCategoryFilter(e.target.value)}
+                        className={tableStyles.select} // Use the unified select class
+                    >
+                        <option value="all">All Accounts</option>
+                        <option value="Cash">Cash Accounts</option>
+                        <option value="Investments">Investment Accounts</option>
+                        <option value="Debt">Liability Accounts</option>
+                    </select>
+                </div>
+            }
+        />
     );
 
     // Charts column (left)
@@ -177,7 +105,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
                                     cy="50%"
                                     outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
                                     labelLine={false}
-                                    label={renderCustomizedLabel}
+                                    label={props => renderPieLabel({ ...props, smallApp })} // FIX: Use renderPieLabel utility
                                 >
                                     {assetsPieData.map((entry, idx) => (
                                         <Cell
@@ -189,18 +117,21 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
                                 <Tooltip
                                     formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                     contentStyle={{
-                                        background: 'var(--surface-light)',
+                                        background: '#fff',
                                         border: '1px solid var(--border-light)',
-                                        color: 'var(--text-primary)',
+                                        color: 'var(--chart-tooltip-text)',
                                         borderRadius: 8,
-                                        fontSize: smallApp ? '0.7rem' : '0.8rem' // Smaller tooltip font
+                                        fontSize: '0.7rem'
                                     }}
                                 />
                                 <Legend
                                     align="center"
                                     verticalAlign="bottom"
-                                    layout="vertical"
-                                    wrapperStyle={{ fontSize: smallApp ? '0.65rem' : '0.7rem' }} // Smaller legend font always
+                                    layout="horizontal"
+                                    wrapperStyle={{
+                                        color: 'var(--chart-label-text)',
+                                        fontSize: smallApp ? '0.65rem' : '0.7rem'
+                                    }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -223,7 +154,7 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
                                     cy="50%"
                                     outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
                                     labelLine={false}
-                                    label={renderCustomizedLabel}
+                                    label={props => renderPieLabel({ ...props, smallApp })} // FIX: Use renderPieLabel utility
                                 >
                                     {liabilitiesPieData.map((entry, idx) => (
                                         <Cell
@@ -235,18 +166,21 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
                                 <Tooltip
                                     formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                     contentStyle={{
-                                        background: 'var(--surface-light)',
+                                        background: '#fff',
                                         border: '1px solid var(--border-light)',
-                                        color: 'var(--text-primary)',
+                                        color: 'var(--chart-tooltip-text)',
                                         borderRadius: 8,
-                                        fontSize: smallApp ? '0.7rem' : '0.8rem'
+                                        fontSize: '0.7rem'
                                     }}
                                 />
                                 <Legend
                                     align="center"
                                     verticalAlign="bottom"
-                                    layout="vertical"
-                                    wrapperStyle={{ fontSize: smallApp ? '0.65rem' : '0.7rem' }} // Smaller legend font always
+                                    layout="horizontal"
+                                    wrapperStyle={{
+                                        color: 'var(--chart-label-text)',
+                                        fontSize: smallApp ? '0.65rem' : '0.7rem'
+                                    }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -286,9 +220,8 @@ const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, per
 
     return (
         <div className={accountsStyles.overviewTab}>
-            {SnapshotRow}
             <TwoColumnLayout
-                className={sectionStyles.columns66_34}
+                className={sectionStyles.columns70_30 }
                 left={<div className={accountsStyles.tableColumn}>{TableColumnContent}</div>}
                 right={<div className={accountsStyles.chartsColumn}>{ChartsColumnContent}</div>}
                 smallApp={smallApp}

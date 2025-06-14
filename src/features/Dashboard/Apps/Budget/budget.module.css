@@ -18,3 +18,179 @@
     justify-content: center;
     border-top: 1px solid var(--border-light);
 }
+
+.summaryGrid {
+    display: grid;
+    gap: var(--space-xxs);
+    margin: 0 auto;
+    width: 100%;
+    
+}
+
+.summaryCard {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    padding: var(--space-xxs) var(--space-xs);
+    margin-bottom: var(--space-xs);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+
+}
+
+.summaryCardHeader {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-xs);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.summaryPeriod {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+.summaryTax {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.summaryCardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xxs);
+    padding: var(--space-xxs) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.summaryCardRow:last-child {
+    border-bottom: none;
+}
+
+.summaryIncome {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.summaryExpenses {
+    color: var(--status-warning);
+    font-weight: 600;
+}
+
+.positive {
+    color: var(--status-success);
+    font-weight: 600;
+}
+
+.negative {
+    color: var(--status-danger);
+    font-weight: 600;
+}
+
+
+.snapshotRowFull {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+    margin: 0 auto;
+
+    box-shadow: var(--shadow-md);
+    padding: var(--space-xxs);
+    border-radius: var(--border-radius-md);
+    gap: var(--space-sm);
+    /* Initial gap between snapshot items */
+    flex-wrap: wrap;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+.snapshotItem {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xxs);
+    flex: 1 1 120px;
+    /* Default preferred basis */
+    min-width: 100px;
+    max-width: 180px;
+}
+
+
+.noChartData {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-xs);
+    font-size: var(--font-size-xs);
+}
+
+.positive {
+    color: var(--status-success) !important;
+    font-weight: bold;
+}
+
+.negative {
+    color: var(--status-danger) !important;
+    font-weight: bold;
+}
+
+/* --- SMALL APP MODE OVERRIDES for Accounts layout --- */
+.overviewTabSmall {
+    gap: var(--space-xs);
+    /* Reduce overall gap within OverviewTab when small */
+    padding: var(--space-xxs);
+    /* Add slight padding to the overall tab */
+}
+
+.overviewTabSmall .snapshotRowFull {
+    padding: var(--space-xxs);
+    /* Even tighter padding for the snapshot container */
+    gap: var(--space-xs);
+    /* Smaller gap between snapshot items */
+}
+
+.overviewTabSmall .snapshotItem {
+    flex: 1 1 70px;
+    /* More aggressive smaller basis for snapshot items */
+    min-width: 60px;
+    /* Allow items to shrink even more before wrapping */
+    padding: var(--space-xxs) var(--space-xxs);
+    /* Minimal internal padding */
+    gap: var(--space-xxs);
+    /* Smaller internal gap */
+}
+
+.overviewTabSmall .snapshotLabel {
+    font-size: var(--font-size-xxs);
+    /* Smallest text for labels */
+}
+
+.overviewTabSmall .value {
+    font-size: var(--font-size-sm);
+    /* Keep value relatively readable */
+}
+
+.overviewTabSmall .chartsColumn {
+    gap: var(--space-xxs);
+    /* Even smaller gap between charts sections */
+}
+
+.overviewTabSmall .tableColumn {
+    gap: var(--space-xxs);
+    /* Even smaller gap within table column */
+}
