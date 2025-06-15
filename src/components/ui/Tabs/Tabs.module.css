@@ -95,3 +95,23 @@
     z-index: 1;
     /* Below the active tab */
 }
+
+/* Small App Mode */
+.smallApp .tabHeader {
+    font-size: var(--font-size-xs);
+    padding: 0 var(--space-xxs);
+    min-width: 60px;
+}
+.smallApp .tabHeaders {
+    gap: var(--space-xxs);
+}
+
+/* Large App Mode */
+.largeApp .tabHeader {
+    font-size: var(--font-size-base);
+    padding: 0 var(--space-sm);
+    min-width: 120px;
+}
+.largeApp .tabHeaders {
+    gap: var(--space-sm);
+}

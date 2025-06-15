@@ -60,8 +60,7 @@
 }
 
 /* Input/Select elements within table cells for editing */
-.tableInput,
-.tableSelect {
+.tableInput {
     width: 100%;
     padding: var(--space-xxs) var(--space-xs);
     border: 1px solid var(--border-light);
@@ -74,7 +73,32 @@
     /* Ensures consistent height */
     box-sizing: border-box;
     max-width: none;
+}
 
+.tableSelect {
+    /* Manually applying baseSelect styles due to build issue with composes from external file */
+    min-width: 110px; /* Base from baseSelect */
+    font-size: var(--font-size-xxs); /* Base from baseSelect */
+    height: 28px; /* Base from baseSelect */
+    border-radius: var(--border-radius-sm); /* Base from baseSelect */
+    border: 1px solid var(--border-light); /* Base from baseSelect */
+    background: var(--background-light); /* Base from baseSelect */
+    color: var(--text-primary); /* Base from baseSelect */
+    cursor: pointer; /* Base from baseSelect */
+    appearance: none; /* Base from baseSelect */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Base from baseSelect */
+    background-repeat: no-repeat; /* Base from baseSelect */
+    transition: all var(--transition-speed-fast) var(--transition-ease); /* Base from baseSelect */
+    box-sizing: border-box; /* Base from baseSelect */
+
+    /* Specific overrides for tableSelect */
+    width: 100%; /* Ensure it takes full width in table cell */
+    height: calc(var(--font-size-xxs) + (var(--space-xxs) * 2) + 2px); /* Explicit height for consistency */
+    padding: var(--space-xxs) var(--space-xs); /* Explicit padding to match tableInput */
+    min-width: unset; /* Remove min-width from baseSelect to allow it to shrink */
+    background-position: right 4px center; /* Adjust arrow for tighter table space */
+    background-size: 16px; /* Smaller arrow for table */
+    padding-right: 20px; /* Space for custom arrow */
 }
 
 .tableInput:focus,
@@ -123,7 +147,7 @@
     box-shadow: var(--shadow-sm);
     width: 100%;
     max-width: none;
-/*     border: 1px solid var(--border-light); */
+/* border: 1px solid var(--border-light); */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -131,23 +155,23 @@
 
 /* --- SMALL APP MODE OVERRIDES --- */
 .smallApp {
-    
+
 }
 
 .smallApp .table {
-   
+
 }
 
 .smallApp .table th,
 .smallApp .table td {
- 
+
 }
 
 .smallApp .tableInput,
 .smallApp .tableSelect,
 .smallApp .removeButton,
 .smallApp .addButton {
-   
+
 }
 
 /* --- Filter Row Styles (Moved from accounts.module.css) --- */
@@ -172,6 +196,7 @@
     /* Prevent label from wrapping */
 }
 
+/* This .filterSelect is now redundant as it's defined in section.module.css, but keeping here as a fallback */
 .filterSelect {
     min-width: 110px;
     font-size: var(--font-size-xxs);
@@ -219,7 +244,14 @@
     font-size: var(--font-size-sm);
 }
 
+/* Align Right Class (New) */
+.alignRight {
+    text-align: right !important;
+}
+
 /* Always show pointer for enabled selects */
+/* These rules are now largely handled by section.module.css baseSelect */
+/* but explicitly keeping them here for table context is fine. */
 select,
 .filterSelect,
 .tableSelect {
@@ -245,11 +277,10 @@ select:disabled,
 :global(.largeApp) .tableSelect {
   font-size: var(--font-size-base);
   padding: var(--space-sm) var(--space-sm);
-}
-:global(.largeApp) .removeButton,
-:global(.largeApp) .addButton {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
+  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px); /* Adjust height */
+  background-position: right 12px center; /* Adjust arrow position */
+  background-size: 20px; /* Adjust arrow size */
+  padding-right: 32px; /* Adjust padding for arrow */
 }
 
 /* Button.module.css */

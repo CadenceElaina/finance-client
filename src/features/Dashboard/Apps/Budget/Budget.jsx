@@ -72,14 +72,25 @@ const Budget = () => {
     ];
 
     return (
-        <div ref={containerRef} className={budgetStyles.budgetAppContainer}> {/* FIX: Changed from styles to budgetStyles */}
+        <div
+            ref={containerRef}
+            className={`
+                ${budgetStyles.budgetAppContainer}
+                ${smallApp ? 'smallApp' : ''}
+                ${largeApp ? 'largeApp' : ''}
+            `}
+        >
             <FlexibleTabs
-             ref={containerRef}
                 tabs={tabs}
                 activeTabId={activeMainTabId}
                 onTabChange={setActiveMainTabId}
                 smallApp={smallApp}
-             className={`${budgetStyles.budgetAppContainer} ${largeApp ? 'largeApp' : ''}`}
+                largeApp={largeApp}
+                className={`
+                    ${budgetStyles.budgetAppContainer}
+                    ${smallApp ? 'smallApp' : ''}
+                    ${largeApp ? 'largeApp' : ''}
+                `}
                 contentClassName={budgetStyles.budgetTabContent}
             />
         </div>

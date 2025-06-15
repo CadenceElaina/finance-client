@@ -11,7 +11,6 @@
     color: var(--text-secondary);
     border: none;
     border-radius: 0;
-    padding: 0 16px;
     font-size: var(--font-size-sm);
     font-weight: 600;
     cursor: pointer;
@@ -78,7 +77,9 @@
     background: none;
     border: none;
     color: var(--text-secondary);
-    padding: 0 12px;
+    margin-left: 2px;
+    margin-top: -2px;
+    padding: var(--space-xxs) 12px;
     text-align: center;
     font-size: var(--font-size-sm);
     cursor: pointer;

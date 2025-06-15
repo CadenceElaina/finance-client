@@ -182,19 +182,48 @@
     gap: var(--space-xs);
 }
 
-/* Always show pointer for enabled selects */
-select,
-.filterSelect,
-.tableSelect {
+/* --- Base Select Style (New or Enhanced) --- */
+/* This will serve as a common base for all general select elements */
+.baseSelect,
+select:not(.budgetSelect) { /* Apply to all select elements unless they have .budgetSelect */
+    min-width: 110px; /* Consistent minimum width */
+    font-size: var(--font-size-xxs); /* Default small font size */
+    padding: var(--space-xxs) var(--space-xs);
+    height: 28px; /* Standard height for select inputs */
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--border-light);
+    background: var(--background-light);
+    color: var(--text-primary);
     cursor: pointer;
+    appearance: none; /* Removes default browser select arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 18px;
+    padding-right: 26px; /* Space for custom arrow */
+    transition: all var(--transition-speed-fast) var(--transition-ease);
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
-/* Only show not-allowed for disabled selects */
-select:disabled,
-.filterSelect:disabled,
-.tableSelect:disabled {
-    cursor: not-allowed;
+.baseSelect:focus,
+select:not(.budgetSelect):focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2); /* Subtle focus ring */
 }
+
+/* --- Filter Select (Leveraging Base Select) --- */
+.filterSelect {
+    composes: baseSelect; /* Use composes to inherit styles if using CSS Modules */
+}
+
+.filterLabel {
+    font-size: var(--font-size-xxs); /* Smaller font for labels next to selects */
+    color: var(--text-secondary);
+    margin-right: var(--space-xxs); /* Small space between label and select */
+    white-space: nowrap; /* Prevent label from wrapping */
+}
+
 
 :global(.largeApp) .section {
   font-size: var(--font-size-md);
@@ -208,30 +237,16 @@ select:disabled,
   padding: var(--space-sm);
 }
 
-/* Use variables for large app mode scaling */
-/* Table.module.css */
-:global(.largeApp) .table {
-  font-size: var(--font-size-md);
-}
-:global(.largeApp) .table th,
-:global(.largeApp) .table td {
-  padding: var(--space-sm) var(--space-sm);
-  font-size: var(--font-size-md);
-}
-:global(.largeApp) .tableInput,
-:global(.largeApp) .tableSelect {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
-}
-:global(.largeApp) .removeButton,
-:global(.largeApp) .addButton {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
-}
-
-/* Button.module.css */
-:global(.largeApp) .button {
-  font-size: var(--font-size-base);
-
-  padding: var(--space-sm) var(--space-sm);
+/* --- Large App Mode Scaling for Selects --- */
+/* Apply to the base select and specific select classes */
+:global(.largeApp) .baseSelect,
+:global(.largeApp) select:not(.budgetSelect),
+:global(.largeApp) .filterSelect { /* Exclude .tableSelect here, it's handled in its own module */
+  font-size: var(--font-size-base); /* Scale up font size */
+  padding: var(--space-sm) var(--space-sm); /* Increase padding */
+  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px); /* Adjust height */
+  min-width: 140px; /* Slightly wider for large app */
+  background-position: right 12px center; /* Adjust arrow position */
+  background-size: 20px; /* Adjust arrow size */
+  padding-right: 32px; /* Adjust padding for arrow */
 }

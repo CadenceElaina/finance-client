@@ -224,3 +224,22 @@
     gap: var(--space-xxs);
     padding: var(--space-xxs);
 }
+
+.summaryFilterControls {
+    display: flex;
+    flex-direction: column; /* Stack the select groups vertically */
+    gap: var(--space-xxs); /* Space between the two select pairs */
+    align-items: flex-end; /* Align the select groups to the right */
+}
+
+.summaryFilterControls > div {
+    display: flex; /* Make each div (label + select) a flex container */
+    align-items: center; /* Vertically align label and select */
+    gap: var(--space-xxs); /* Space between label and select within each row */
+}
+
+.budgetSelect {
+    /* Specific overrides or enhancements for budget selects if needed */
+    min-width: 100px; /* Give them a minimum width */
+    width: auto; /* Allow them to size based on content or min-width */
+}

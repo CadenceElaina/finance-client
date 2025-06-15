@@ -69,16 +69,25 @@ const Accounts = () => {
     return (
         <div
             ref={containerRef}
-            className={`${accountsStyles.accountsAppContainer} ${largeApp ? 'largeApp' : ''}`}
+            className={`
+                ${accountsStyles.accountsAppContainer}
+                ${smallApp ? 'smallApp' : ''}
+                ${largeApp ? 'largeApp' : ''}
+            `}
         >
             <FlexibleTabs
                 tabs={tabs}
                 activeTabId={activeTabId}
                 onTabChange={setActiveTabId}
                 smallApp={smallApp}
-                className={accountsStyles.accountsTabs}
+                largeApp={largeApp}
+                className={`
+                    ${accountsStyles.accountsTabs}
+                    ${smallApp ? 'smallApp' : ''}
+                    ${largeApp ? 'largeApp' : ''}
+                `}
                 contentClassName={accountsStyles.accountsTabContent}
-                alwaysShowInnerTabsAsRow={true} // Pass the new prop here
+                alwaysShowInnerTabsAsRow={true}
             />
         </div>
     );

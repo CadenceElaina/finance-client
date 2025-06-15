@@ -81,27 +81,27 @@ const SummaryTab = () => {
     );
 
     const Controls = (
-        <div className={sectionStyles.filterRow}>
-            <div>
-                <label htmlFor="period-select" className={sectionStyles.filterLabel}>Period</label>
+        <div className={styles.summaryFilterControls}> {/* NEW CLASS */}
+            <div> {/* This div wraps label and select for Period */}
+                <label htmlFor="period-select" className={sectionStyles.filterLabel}>Period:</label>
                 <select
                     id="period-select"
                     value={period}
                     onChange={e => setPeriod(e.target.value)}
-                    className={sectionStyles.filterSelect}
+                    className={`${sectionStyles.filterSelect} ${styles.budgetSelect}`}
                 >
                     {PERIOD_OPTIONS.map(opt => (
                         <option key={opt.id} value={opt.id}>{opt.label}</option>
                     ))}
                 </select>
             </div>
-            <div>
-                <label htmlFor="tax-select" className={sectionStyles.filterLabel}>Tax</label>
+            <div> {/* This div wraps label and select for Tax */}
+                <label htmlFor="tax-select" className={sectionStyles.filterLabel}>Tax:</label>
                 <select
                     id="tax-select"
                     value={tax}
                     onChange={e => setTax(e.target.value)}
-                    className={sectionStyles.filterSelect}
+                    className={`${sectionStyles.filterSelect} ${styles.budgetSelect}`}
                 >
                     {TAX_OPTIONS.map(opt => (
                         <option key={opt.id} value={opt.id}>{opt.label}</option>
