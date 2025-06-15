@@ -14,9 +14,9 @@
 .controlPanel {
     display: flex;
     flex-wrap: wrap;
+    padding: var(--space-xs);
     gap: var(--space-sm);
     justify-content: center;
-    border-top: 1px solid var(--border-light);
 }
 
 .summaryGrid {
@@ -105,7 +105,7 @@
     margin: 0 auto;
 
     box-shadow: var(--shadow-md);
-    padding: var(--space-sm);
+    padding: var(--space-xs);
     border-radius: var(--border-radius-md);
     gap: var(--space-sm);
     /* Initial gap between snapshot items */

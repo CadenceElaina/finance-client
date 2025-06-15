@@ -22,6 +22,8 @@ export const DEFAULT_DEMO_BUDGET = {
         { id: "exp-7", name: "Entertainment", cost: 100, category: "non-essential" },
     ],
 };
+
+
 export const DEMO_ACCOUNTS = [
     {
         id: "6664e4a7d7b3a9e8f1c2d3e0",
@@ -31,10 +33,11 @@ export const DEMO_ACCOUNTS = [
         cashBalance: 1260.00,
         currency: "USD",
         canInvest: true,
-        category: "Investments", // Changed from 'type: "taxable"'
-        subType: "Brokerage",   // Added for more detail
-        taxStatus: "Taxable",   // Added for tax implications
+        category: "Investments",
+        subType: "Brokerage",
+        taxStatus: "Taxable",
         hasSecurities: true,
+        portfolioId: "long_term_growth",
         securities: [
             {
                 name: "Schwab U.S. Large-Cap Growth ETF",
@@ -102,10 +105,11 @@ export const DEMO_ACCOUNTS = [
         cashBalance: 500.00,
         currency: "USD",
         canInvest: true,
-        category: "Investments", // Changed from 'type: "taxable"'
-        subType: "Brokerage",   // Added
-        taxStatus: "Taxable",   // Added
+        category: "Investments",
+        subType: "Brokerage",
+        taxStatus: "Taxable",
         hasSecurities: true,
+        portfolioId: "diversified_stock",
         securities: [
             {
                 name: "Microsoft Corp",
@@ -221,10 +225,11 @@ export const DEMO_ACCOUNTS = [
         cashBalance: 0.00,
         currency: "USD",
         canInvest: true,
-        category: "Investments", // Changed from 'type: "ira"'
-        subType: "Retirement (IRA)", // Added for more detail
-        taxStatus: "Tax-Exempt", // Changed from 'taxTreatment'
+        category: "Investments",
+        subType: "Retirement (IRA)",
+        taxStatus: "Tax-Exempt",
         hasSecurities: true,
+        portfolioId: "roth_ira",
         securities: [
             {
                 name: "Fidelity Growth Company Fund",
@@ -243,10 +248,11 @@ export const DEMO_ACCOUNTS = [
         cashBalance: 0.00,
         currency: "USD",
         canInvest: true,
-        category: "Investments", // Changed from 'type: "defined_contribution"'
-        subType: "Retirement (401k)", // Added for more detail
-        taxStatus: "Tax-Deferred", // Changed from 'taxTreatment'
+        category: "Investments",
+        subType: "Retirement (401k)",
+        taxStatus: "Tax-Deferred",
         hasSecurities: true,
+        portfolioId: "401k",
         securities: [
             {
                 name: "Target Date Fund 2060",
@@ -324,11 +330,20 @@ export const DEMO_ACCOUNTS = [
         value: 2000.00,
         cashBalance: 2000.00,
         currency: "USD",
-        canInvest: true, // HSAs can often invest beyond cash
-        category: "Investments", // Classified as investment due to investment potential, or could be 'Cash' if only cash
-        subType: "Health Savings Account (HSA)", // Added for more detail
-        taxStatus: "Tax-Advantaged", // Changed from 'taxTreatment'
-        hasSecurities: false, // Set to false for this demo, but could be true if investing
-        securities: [] // No securities for this demo, but could hold them
+        canInvest: true,
+        category: "Investments",
+        subType: "Health Savings Account (HSA)",
+        taxStatus: "Tax-Advantaged",
+        hasSecurities: false,
+        portfolioId: "hsa",
+        securities: []
     }
+];
+
+export const DEMO_PORTFOLIOS = [
+    { id: 'long_term_growth', name: 'Long Term Growth ETFs' },
+    { id: 'diversified_stock', name: 'Diversified Stock Portfolio' },
+    { id: 'roth_ira', name: 'Roth IRA Account' },
+    { id: '401k', name: '401k Retirement Plan' },
+    { id: 'hsa', name: 'Health Savings Account' }
 ];

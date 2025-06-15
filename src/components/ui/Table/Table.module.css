@@ -62,7 +62,7 @@
 /* Input/Select elements within table cells for editing */
 .tableInput {
     width: 100%;
-    padding: var(--space-xxs) var(--space-xs);
+    padding: var(--space-xxs) var(--space-xxs);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-sm);
     background-color: var(--background-light);
@@ -93,12 +93,10 @@
 
     /* Specific overrides for tableSelect */
     width: 100%; /* Ensure it takes full width in table cell */
-    height: calc(var(--font-size-xxs) + (var(--space-xxs) * 2) + 2px); /* Explicit height for consistency */
-    padding: var(--space-xxs) var(--space-xs); /* Explicit padding to match tableInput */
+   
+    padding: var(--space-xxs) var(--space-xxs); /* Explicit padding to match tableInput */
     min-width: unset; /* Remove min-width from baseSelect to allow it to shrink */
-    background-position: right 4px center; /* Adjust arrow for tighter table space */
-    background-size: 16px; /* Smaller arrow for table */
-    padding-right: 20px; /* Space for custom arrow */
+   
 }
 
 .tableInput:focus,

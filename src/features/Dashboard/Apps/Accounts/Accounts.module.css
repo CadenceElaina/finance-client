@@ -72,24 +72,6 @@
     margin-bottom: var(--space-xxs);
 }
 
-@media (max-width: 1112px) {
-    .summaryGrid {
-        gap: var(--space-xxs);
-        font-size: var(--font-size-xs);
-    }
-    .summaryCard {
-        padding: var(--space-xxs) var(--space-xxs);
-        font-size: var(--font-size-xs);
-    }
-    .snapshotRowFull {
-        width: 98%;
-        gap: var(--space-xs);
-        padding: var(--space-xxs);
-    }
-    .snapshotItem {
-        min-width: 60px;
-        max-width: 120px;
-        padding: var(--space-xxs);
-    }
-    /* ...add more overrides as needed... */
+.portfolioSelectMenu {
+ 
 }

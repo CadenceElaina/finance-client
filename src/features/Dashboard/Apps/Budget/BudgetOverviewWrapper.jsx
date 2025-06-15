@@ -98,22 +98,30 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
                 (!activeInnerTabId || activeInnerTabId === 'showAll') ? (
                     <>
                         <SummaryTab {...summaryProps} smallApp={smallApp} />
+                        <BudgetControlPanel userSignedIn={userSignedIn} /> {/* <-- Move here */}
                         <ExpensesTab {...expensesProps} smallApp={smallApp} />
                     </>
                 ) : activeInnerTabId === 'expenses' ? (
                     <ExpensesTab {...expensesProps} smallApp={smallApp} />
                 ) : (
-                    <SummaryTab {...summaryProps} smallApp={smallApp} />
+                    <>
+                        <SummaryTab {...summaryProps} smallApp={smallApp} />
+                        <BudgetControlPanel userSignedIn={userSignedIn} /> {/* <-- Move here */}
+                    </>
                 )
             ) : (
                 <TwoColumnLayout
                     className={sectionStyles.columns45_55}
-                    left={<SummaryTab {...summaryProps} smallApp={smallApp} />}
+                    left={
+                        <>
+                            <SummaryTab {...summaryProps} smallApp={smallApp} />
+                            <BudgetControlPanel userSignedIn={userSignedIn} /> {/* <-- Move here */}
+                        </>
+                    }
                     right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}
                     smallApp={smallApp}
                 />
             )}
-            <BudgetControlPanel userSignedIn={userSignedIn} />
         </div>
     );
 };

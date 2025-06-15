@@ -1,86 +1,133 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Section from '../../../../../components/ui/Section/Section';
+import sectionStyles from '../../../../../components/ui/Section/Section.module.css';
 import accountsStyles from '../Accounts.module.css';
-import { DEMO_ACCOUNTS } from '../../../../../utils/constants';
-import { renderPieLabel } from '../utils/pieChartLabelUtil';  
-// Modern theme-aware color palette for charts (copied from OverviewTab for consistency)
+import { useFinancialData } from '../../../../../contexts/FinancialDataContext';
+
 const CHART_COLORS = [
-    'var(--color-primary)',
-    'var(--color-secondary)',
-    '#7AA2F7', // Tokyo Night blue
-    '#BB9AF7', // Tokyo Night purple
-    '#00FFD1', // Accent teal
-    '#FF8C69', // Accent coral
-    '#FFD700', // Gold
-    '#EF5350', // Red
+    'var(--color-primary)', '#7AA2F7', 'var(--color-secondary)', '#BB9AF7',
+    '#00FFD1', '#FF8C69', '#FFD700', '#EF5350',
+    '#4CAF50', '#FF9800', '#9C27B0', '#2196F3'
 ];
 
-const getAllocationData = () => {
-    // Aggregate by subType (asset class)
-    const map = {};
-    DEMO_ACCOUNTS.forEach(acc => {
-        if (acc.category === 'Investments') {
-            const key = acc.subType || 'Other';
-            map[key] = (map[key] || 0) + (acc.value || 0);
-        }
-    });
-    // Filter out entries with zero value to prevent displaying empty slices
-    return Object.entries(map).map(([name, value]) => ({ name, value })).filter(d => d.value > 0);
-};
+const AllocationTab = ({ smallApp, portfolioId, portfolioName }) => {
+    const { data } = useFinancialData();
+    const allAccounts = data.accounts || [];
 
-const AllocationTab = ({ smallApp }) => {
-    const data = getAllocationData();
-    
+    const { pieData, totalValue } = useMemo(() => {
+        let relevantAccounts = [];
+        if (portfolioId === 'all') {
+            relevantAccounts = allAccounts.filter(acc => acc.category === 'Investments' && acc.hasSecurities);
+        } else {
+            relevantAccounts = allAccounts.filter(acc => acc.category === 'Investments' && acc.hasSecurities && acc.portfolioId === portfolioId);
+        }
+
+        const securitiesInPortfolio = [];
+        relevantAccounts.forEach(acc => {
+            if (Array.isArray(acc.securities)) {
+                securitiesInPortfolio.push(...acc.securities);
+            }
+        });
+
+        const currentTotalValue = securitiesInPortfolio.reduce((sum, sec) => sum + (sec.value || 0), 0);
+
+        // Aggregate securities by ticker/name if they appear multiple times
+        const aggregatedSecurities = securitiesInPortfolio.reduce((acc, curr) => {
+            const key = curr.ticker || curr.name;
+            if (!acc[key]) {
+                acc[key] = { name: key, value: 0 };
+            }
+            acc[key].value += (curr.value || 0);
+            return acc;
+        }, {});
+
+        const currentPieData = Object.values(aggregatedSecurities).filter(d => d.value > 0);
+
+        return { pieData: currentPieData, totalValue: currentTotalValue };
+    }, [allAccounts, portfolioId]);
+
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
+        if (percent < 0.03 || !totalValue) return null;
+
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+        const percentageDisplay = ((value / totalValue) * 100).toFixed(1);
+
+        return (
+            <text
+                x={x}
+                y={y}
+                fill="var(--chart-label-text)"
+                textAnchor={x > cx ? 'start' : 'end'}
+                dominantBaseline="central"
+                fontSize={smallApp ? "0.6rem" : "0.7rem"}
+            >
+                {`${name} (${percentageDisplay}%)`}
+            </text>
+        );
+    };
+
+    // Use the same style as SectionHeader titles for the chart header
+    const allocationTitle = (
+        <div className={sectionStyles.sectionHeaderTitle}>
+            {portfolioName ? `${portfolioName}'s Allocation` : "Portfolio Allocation"}
+        </div>
+    );
+
     return (
         <Section className={`${accountsStyles.chartSectionNoBorder} ${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}>
-            <div className={accountsStyles.chartHeader}>Allocation</div>
+            {allocationTitle}
             <div className={accountsStyles.chartContainerCompact}>
-                {data.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}>
+                {pieData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={smallApp ? 140 : 180}>
                         <PieChart>
                             <Pie
-                                data={data}
+                                data={pieData}
                                 dataKey="value"
                                 nameKey="name"
                                 cx="50%"
                                 cy="50%"
-                                // Outer radius consistent with OverviewTab
-                                outerRadius={smallApp ? 40 : 45}
+                                outerRadius={smallApp ? 50 : 65}
+                                innerRadius={smallApp ? 25 : 35}
                                 labelLine={false}
-                                label={props => renderPieLabel({ ...props, smallApp })}
+                                label={renderCustomizedLabel}
                             >
-                                {data.map((entry, idx) => (
-                                    <Cell key={entry.name} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                                {pieData.map((entry, idx) => (
+                                    <Cell key={`cell-${entry.name}-${idx}`} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
                                 ))}
                             </Pie>
                             <Tooltip
-                                // Formatter consistent with OverviewTab
-                                formatter={v => `$${v.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                                // Content style consistent with OverviewTab
+                                formatter={(value, name, props) => {
+                                    const percentage = totalValue ? ((value / totalValue) * 100).toFixed(2) : 0;
+                                    return [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })} (${percentage}%)`, name];
+                                }}
                                 contentStyle={{
-                                    background: '#fff',
+                                    background: 'var(--surface-light)',
                                     border: '1px solid var(--border-light)',
                                     color: 'var(--chart-tooltip-text)',
-                                    borderRadius: 8,
-                                    fontSize: '0.7rem'
+                                    borderRadius: 'var(--border-radius-md)',
+                                    fontSize: 'var(--font-size-xs)'
                                 }}
                             />
                             <Legend
                                 align="center"
                                 verticalAlign="bottom"
                                 layout="horizontal"
-                                // No wrapping, just show as-is
-                                formatter={value => value}
+                                iconSize={10}
                                 wrapperStyle={{
+                                    fontSize: smallApp ? "0.65rem" : "0.75rem",
                                     color: 'var(--chart-label-text)',
-                                    fontSize: smallApp ? '0.65rem' : '0.7rem'
+                                    paddingTop: smallApp ? '5px' : '10px',
+                                    lineHeight: '1.5'
                                 }}
                             />
                         </PieChart>
                     </ResponsiveContainer>
                 ) : (
-                    <div className={accountsStyles.noChartData}>No investment allocation data.</div>
+                    <div className={accountsStyles.noChartData}>No securities to display for this portfolio.</div>
                 )}
             </div>
         </Section>
