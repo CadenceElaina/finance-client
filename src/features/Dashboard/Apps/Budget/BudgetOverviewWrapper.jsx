@@ -61,28 +61,28 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
     
     // Snapshot row component
     const SnapshotRow = (
-        <div className={budgetStyles.snapshotRowFull}>
-            <div className={budgetStyles.snapshotItem}>
-                <span className={budgetStyles.snapshotLabel}>Net Worth</span>
-                <span className={`${budgetStyles.positive} value`}>
+        <div className={smallApp ? `${budgetStyles.snapshotRowFull} ${budgetStyles.snapshotRowFullSmall}` : budgetStyles.snapshotRowFull}>
+            <div className={smallApp ? `${budgetStyles.snapshotItem} ${budgetStyles.snapshotItemSmall}` : budgetStyles.snapshotItem}>
+                <span className={smallApp ? `${budgetStyles.snapshotLabel} ${budgetStyles.snapshotLabelSmall}` : budgetStyles.snapshotLabel}>Net Worth</span>
+                <span className={smallApp ? `${budgetStyles.positive} ${budgetStyles.valueSmall}` : budgetStyles.positive + " value"}>
                     ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={budgetStyles.snapshotItem}>
-                <span className={budgetStyles.snapshotLabel}>Cash</span>
-                <span className={`${budgetStyles.positive} value`}>
+            <div className={smallApp ? `${budgetStyles.snapshotItem} ${budgetStyles.snapshotItemSmall}` : budgetStyles.snapshotItem}>
+                <span className={smallApp ? `${budgetStyles.snapshotLabel} ${budgetStyles.snapshotLabelSmall}` : budgetStyles.snapshotLabel}>Cash</span>
+                <span className={smallApp ? `${budgetStyles.positive} ${budgetStyles.valueSmall}` : budgetStyles.positive + " value"}>
                     ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={budgetStyles.snapshotItem}>
-                <span className={budgetStyles.snapshotLabel}>Assets</span>
-                <span className={`${budgetStyles.positive} value`}>
+            <div className={smallApp ? `${budgetStyles.snapshotItem} ${budgetStyles.snapshotItemSmall}` : budgetStyles.snapshotItem}>
+                <span className={smallApp ? `${budgetStyles.snapshotLabel} ${budgetStyles.snapshotLabelSmall}` : budgetStyles.snapshotLabel}>Assets</span>
+                <span className={smallApp ? `${budgetStyles.positive} ${budgetStyles.valueSmall}` : budgetStyles.positive + " value"}>
                     ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>
-            <div className={budgetStyles.snapshotItem}>
-                <span className={budgetStyles.snapshotLabel}>Liabilities</span>
-                <span className={`${budgetStyles.negative} value`}>
+            <div className={smallApp ? `${budgetStyles.snapshotItem} ${budgetStyles.snapshotItemSmall}` : budgetStyles.snapshotItem}>
+                <span className={smallApp ? `${budgetStyles.snapshotLabel} ${budgetStyles.snapshotLabelSmall}` : budgetStyles.snapshotLabel}>Liabilities</span>
+                <span className={smallApp ? `${budgetStyles.negative} ${budgetStyles.valueSmall}` : budgetStyles.negative + " value"}>
                     ${Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </span>
             </div>

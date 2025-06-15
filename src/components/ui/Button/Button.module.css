@@ -19,14 +19,14 @@
 /* Primary (default) */
 .button.primary {
     background: var(--gradient-primary);
-    color: var(--text-light);
+    color: var(--text-on-primary); /* Changed to use text-on-primary for better contrast */
     border: none;
 }
 
 .button.primary:hover,
 .button.primary:focus {
     filter: brightness(1.08);
-    box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(0, 177, 199, 0.15);
+    box-shadow: 0 0 0 2px var(--color-primary), 0 2px 8px rgba(0, 177, 199, 0.15); /* Keep original shadow for now */
 }
 
 /* Secondary */
@@ -46,14 +46,14 @@
 /* Danger (Remove, Clear All, etc.) */
 .button.danger {
     background: var(--color-danger);
-    color: var(--text-light);
+    color: var(--text-on-primary); /* Use text-on-primary for consistency */
     border: 1px solid var(--color-danger);
 }
 
 .button.danger:hover,
 .button.danger:focus {
     background: var(--color-danger);
-    color: var(--text-light);
+    color: var(--text-on-primary);
     filter: brightness(1.15);
     box-shadow: 0 0 0 2px var(--color-danger), 0 2px 8px rgba(239, 83, 80, 0.2);
 }
@@ -61,14 +61,14 @@
 /* Warning */
 .button.warning {
     background: var(--color-warning);
-    color: var(--text-light);
+    color: var(--text-on-primary); /* Use text-on-primary for consistency */
     border: 1px solid var(--color-warning);
 }
 
 .button.warning:hover,
 .button.warning:focus {
     background: var(--color-warning);
-    color: var(--text-light);
+    color: var(--text-on-primary);
     filter: brightness(1.1);
     box-shadow: 0 0 0 2px var(--color-warning), 0 2px 8px rgba(255, 152, 0, 0.2);
 }
@@ -89,52 +89,64 @@
 .button.tab.active,
 .button.tab[aria-current="true"] {
     background: var(--color-primary);
-    color: var(--text-light);
+    color: var(--text-on-primary); /* Use text-on-primary for active tabs */
     border-color: var(--color-primary);
 }
 
 .button.tab:hover:not(.active):not([aria-current="true"]) {
-    background: var(--surface-light);
-    color: var(--text-primary);
+    background: var(--dashboard-button-bg); /* Use a consistent variable for hover */
+    color: var(--dashboard-button-text); /* Use a consistent variable for hover text */
+    /* Remove filter here if you want a cleaner color change */
 }
 
 /* Disabled */
 .button:disabled {
-    background-color: var(--surface-dark);
-    /* A neutral background for disabled state */
-    color: var(--text-tertiary);
-    /* Lighter text for disabled state */
+    background-color: var(--interactive-disabled-bg); /* Use theme variable */
+    color: var(--interactive-disabled-text); /* Use theme variable */
     cursor: not-allowed;
     opacity: 0.7;
     filter: none;
-    /* Remove any hover effects when disabled */
 }
 
-/* Responsive/compact for smallApp */
-@media (max-width: 1112px),
-(max-height: 552.6px) {
+/* Large App Specific Styles */
 
-    .button,
-    .button.secondary,
-    .button.tab {
-        font-size: var(--font-size-sm);
-        padding: var(--space-xxs) var(--space-xs);
-        min-width: unset;
-        height: 22px;
-    }
-
-    .button.danger {
-        font-size: var(--font-size-xs);
-        padding: 2px 8px;
-    }
+/* Use variables for large app mode scaling */
+/* Table.module.css */
+:global(.largeApp) .table {
+  font-size: var(--font-size-base);
+}
+:global(.largeApp) .table th,
+:global(.largeApp) .table td {
+  padding: var(--space-sm) var(--space-sm);
+  font-size: var(--font-size-base);
+}
+:global(.largeApp) .tableInput,
+:global(.largeApp) .tableSelect {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .removeButton,
+:global(.largeApp) .addButton {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
 }
 
-/* Make table action buttons more compact in small app mode */
-.smallApp .expenseTable td button,
-.smallApp .expenseTable td .button {
-    min-width: 40px !important;
-    max-width: 60px !important;
-    padding: 2px 4px !important;
-    font-size: var(--font-size-xs) !important;
-    height: 20px !important;
+/* Button.module.css */
+:global(.largeApp) .button {
+  font-size: var(--font-size-base);
+  min-width: 160px;
+  padding: var(--space-sm) var(--space-sm);
+}
+
+/* Section.module.css */
+:global(.largeApp) .section {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm);
+}
+:global(.largeApp) .sectionHeader {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .sectionContent {
+  padding: var(--space-sm);
 }

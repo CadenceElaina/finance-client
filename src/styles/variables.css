@@ -1,7 +1,6 @@
 :root {
-    /* Breakpoints */
-    --breakpoint-small-app: 1112px;
-    --breakpoint-small-app-height: 351px;
+   
+
 
     /* --- Core Transitions & Easing --- */
     --transition-speed-fast: 0.15s;

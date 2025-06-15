@@ -4,24 +4,24 @@ import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recha
 import Section from '../../../../components/ui/Section/Section';
 import Table from '../../../../components/ui/Table/Table';
 import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
-import accountsStyles from './accounts.module.css'; // This is the correct import for account-specific styles
-import tableStyles from '../../../../components/ui/Table/Table.module.css'; // This is for general table styles
+import accountsStyles from './Accounts.module.css';
+import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import { DEMO_ACCOUNTS } from '../../../../utils/constants';
 import sectionStyles from '../../../../components/ui/Section/Section.module.css';
 import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 import { renderPieLabel } from './utils/pieChartLabelUtil'
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
-// Modern theme-aware color palette for charts
+
 const CHART_COLORS = [
-    'var(--color-primary)',
-    'var(--color-secondary)',
-    '#7AA2F7', // Tokyo Night blue
-    '#BB9AF7', // Tokyo Night purple
-    '#00FFD1', // Accent tealLet
-    '#FF8C69', // Accent coral
-    '#FFD700', // Gold
-    '#EF5350', // Red
+    'var(--chart-color-1)',
+    'var(--chart-color-2)',
+    'var(--chart-color-3)',
+    'var(--chart-color-4)',
+    'var(--chart-color-5)',
+    'var(--chart-color-6)',
+    'var(--chart-color-7)',
+    'var(--chart-color-8)',
 ];
 
 // Utility: Net worth calculation
@@ -92,7 +92,7 @@ const OverviewTab = ({ smallApp }) => {
     const ChartsColumnContent = (
         <>
             <Section className={`${accountsStyles.chartSectionCompact} ${accountsStyles.chartSectionNoBorder} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
-                <div className={accountsStyles.chartHeader}>Assets Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={smallApp ? accountsStyles.chartHeaderSmall : accountsStyles.chartHeader}>Assets Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {assetsPieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}> {/* Adjust height for small app */}
@@ -141,7 +141,7 @@ const OverviewTab = ({ smallApp }) => {
                 </div>
             </Section>
             <Section className={`${accountsStyles.chartSectionCompact} ${accountsStyles.chartSectionNoBorder} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
-                <div className={accountsStyles.chartHeader}>Liabilities Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
+                <div className={smallApp ? accountsStyles.chartHeaderSmall : accountsStyles.chartHeader}>Liabilities Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
                 <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
                     {liabilitiesPieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}> {/* Adjust height for small app */}
@@ -219,11 +219,19 @@ const OverviewTab = ({ smallApp }) => {
     );
 
     return (
-        <div className={accountsStyles.overviewTab}>
+        <div>
             <TwoColumnLayout
                 className={sectionStyles.columns70_30 }
-                left={<div className={accountsStyles.tableColumn}>{TableColumnContent}</div>}
-                right={<div className={accountsStyles.chartsColumn}>{ChartsColumnContent}</div>}
+                left={
+                    <div className={smallApp ? accountsStyles.tableColumnSmall : accountsStyles.tableColumn}>
+                        {TableColumnContent}
+                    </div>
+                }
+                right={
+                    <div className={smallApp ? accountsStyles.chartsColumnSmall : accountsStyles.chartsColumn}>
+                        {ChartsColumnContent}
+                    </div>
+                }
                 smallApp={smallApp}
             />
         </div>

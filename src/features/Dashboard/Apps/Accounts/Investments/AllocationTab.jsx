@@ -1,7 +1,7 @@
 import React from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Section from '../../../../../components/ui/Section/Section';
-import accountsStyles from '../accounts.module.css';
+import accountsStyles from '../Accounts.module.css';
 import { DEMO_ACCOUNTS } from '../../../../../utils/constants';
 import { renderPieLabel } from '../utils/pieChartLabelUtil';  
 // Modern theme-aware color palette for charts (copied from OverviewTab for consistency)

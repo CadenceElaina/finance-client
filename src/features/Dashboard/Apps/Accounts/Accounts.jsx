@@ -4,8 +4,8 @@ import OverviewTab from './OverviewTab';
 import AssetsTab from './AssetsTab';
 import LiabilitiesTab from './LiabilitiesTab';
 import PortfoliosWrapper from './PortfoliosWrapper'; 
-import accountsStyles from './accounts.module.css';
-import { isSmallApp } from '../../../../utils/isSmallApp';
+import accountsStyles from './Accounts.module.css';
+import { getAppSize } from '../../../../utils/getAppSize';
 import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 
 const Accounts = () => {
@@ -33,7 +33,9 @@ const Accounts = () => {
         return () => resizeObserver.disconnect();
     }, []);
 
-    const smallApp = isSmallApp(containerSize);
+    const appSize = getAppSize(containerSize);
+    const smallApp = appSize === 'small';
+    const largeApp = appSize === 'large';
 
     const [activeTabId, setActiveTabId] = useState('overview');
 
@@ -46,11 +48,11 @@ const Accounts = () => {
         { id: 'assets', label: 'Assets', component: () => <AssetsTab /> },
         { id: 'liabilities', label: 'Liabilities', component: () => <LiabilitiesTab /> },
         {
-            id: 'portfolios', // Changed ID to 'portfolios'
-            label: 'Portfolios', // Changed label to 'Portfolios'
+            id: 'portfolios',
+            label: 'Portfolios',
             innerTabs: [
                 { id: 'showAll', label: 'All', component: () => null },
-                { id: 'holdings', label: 'Holdings', component: () => null }, // Changed label
+                { id: 'holdings', label: 'Holdings', component: () => null },
                 { id: 'allocation', label: 'Allocation', component: () => null },
                 { id: 'performance', label: 'Performance', component: () => null },
                 { id: 'reports', label: 'Reports', component: () => null }
@@ -65,7 +67,10 @@ const Accounts = () => {
     ];
 
     return (
-        <div ref={containerRef} className={accountsStyles.accountsAppContainer}>
+        <div
+            ref={containerRef}
+            className={`${accountsStyles.accountsAppContainer} ${largeApp ? 'largeApp' : ''}`}
+        >
             <FlexibleTabs
                 tabs={tabs}
                 activeTabId={activeTabId}
@@ -73,6 +78,7 @@ const Accounts = () => {
                 smallApp={smallApp}
                 className={accountsStyles.accountsTabs}
                 contentClassName={accountsStyles.accountsTabContent}
+                alwaysShowInnerTabsAsRow={true} // Pass the new prop here
             />
         </div>
     );

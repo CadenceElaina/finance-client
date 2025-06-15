@@ -129,16 +129,6 @@
     flex-direction: column;
 }
 
-/* Compact table variant for smallApp or dense layouts (applies to .table directly) */
-.compactTable {
-
-}
-
-.compactTable th,
-.compactTable td {
-
-}
-
 /* --- SMALL APP MODE OVERRIDES --- */
 .smallApp {
     
@@ -227,4 +217,57 @@
     color: var(--text-secondary);
     padding: var(--space-md);
     font-size: var(--font-size-sm);
+}
+
+/* Always show pointer for enabled selects */
+select,
+.filterSelect,
+.tableSelect {
+    cursor: pointer;
+}
+
+/* Only show not-allowed for disabled selects */
+select:disabled,
+.filterSelect:disabled,
+.tableSelect:disabled {
+    cursor: not-allowed;
+}
+
+:global(.largeApp) .table {
+  font-size: var(--font-size-base);
+}
+:global(.largeApp) .table th,
+:global(.largeApp) .table td {
+  padding: var(--space-sm) var(--space-sm);
+  font-size: var(--font-size-md);
+}
+:global(.largeApp) .tableInput,
+:global(.largeApp) .tableSelect {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .removeButton,
+:global(.largeApp) .addButton {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+}
+
+/* Button.module.css */
+:global(.largeApp) .button {
+  font-size: var(--font-size-base);
+  min-width: 160px;
+  padding: var(--space-sm) var(--space-sm);
+}
+
+/* Section.module.css */
+:global(.largeApp) .section {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm);
+}
+:global(.largeApp) .sectionHeader {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .sectionContent {
+  padding: var(--space-sm);
 }

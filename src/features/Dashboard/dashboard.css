@@ -166,3 +166,26 @@
 .react-resizable-handle-se {
     cursor: se-resize;
 }
+
+.app-window{
+       container-type: inline-size; /* Queries based on the inline (horizontal) size of the container */
+    container-name: app-panel;   /* A name for this container, useful if you have nested containers */
+}
+
+
+/* Example: Scale up padding when the app-panel is wider than 1000px */
+@container app-window (min-width: 1000px) {
+    .dashboardAppContainer {
+        padding: var(--space-lg); /* Larger padding for large app panels */
+    }
+}
+
+/* You can also use container queries to change styles of *children* within this container */
+/* Example: Increase font size of main content when app is large */
+/*
+@container app-panel (min-width: 1000px) {
+    .dashboardAppContainer > * {
+        font-size: calc(var(--font-size-base) * 1.1); // Example of scaling a child's font
+    }
+}
+*/

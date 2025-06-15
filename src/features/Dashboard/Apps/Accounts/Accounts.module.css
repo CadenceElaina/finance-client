@@ -1,0 +1,95 @@
+/* src/features/Dashboard/Apps/Accounts/accounts.module.css */
+.noChartData {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: var(--space-xs);
+    font-size: var(--font-size-xs);
+}
+
+.positive {
+    color: var(--status-success) !important;
+    font-weight: bold;
+}
+
+.negative {
+    color: var(--status-danger) !important;
+    font-weight: bold;
+}
+
+.tableColumnSmall {
+    gap: var(--space-xs);
+    padding: var(--space-xxs);
+}
+
+.tableColumnSmall .value {
+    font-size: var(--font-size-sm);
+}
+
+.tableColumnSmall .chartsColumnSmall {
+    gap: var(--space-xxs);
+}
+
+.tableColumnSmall .tableColumnSmall {
+    gap: var(--space-xxs);
+}
+
+.sectionCompactOverride {
+    padding: var(--space-xxs) !important;
+}
+
+.tableColumnSmall .chartHeaderSmall {
+    font-size: var(--font-size-xxs);
+}
+
+.tableColumn {
+}
+
+.chartsColumn {
+    gap: var(--space-xxs);
+    display: flex;
+    flex-direction: column;
+}
+
+.chartSectionNoBorder {
+}
+
+.chartContainerCompact {
+    padding: var(--space-xxs);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.chartLabelText {
+    font-size: var(--font-size-chart-label);
+    fill: var(--chart-label-text, var(--text-primary));
+    pointer-events: none;
+}
+
+.chartHeader {
+    text-align: center;
+    margin-bottom: var(--space-xxs);
+}
+
+@media (max-width: 1112px) {
+    .summaryGrid {
+        gap: var(--space-xxs);
+        font-size: var(--font-size-xs);
+    }
+    .summaryCard {
+        padding: var(--space-xxs) var(--space-xxs);
+        font-size: var(--font-size-xs);
+    }
+    .snapshotRowFull {
+        width: 98%;
+        gap: var(--space-xs);
+        padding: var(--space-xxs);
+    }
+    .snapshotItem {
+        min-width: 60px;
+        max-width: 120px;
+        padding: var(--space-xxs);
+    }
+    /* ...add more overrides as needed... */
+}

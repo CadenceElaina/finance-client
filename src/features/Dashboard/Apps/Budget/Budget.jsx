@@ -3,7 +3,7 @@ import BudgetOverviewWrapper from './BudgetOverviewWrapper';
 import IncomeTab from './IncomeTab';
 import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
 import budgetStyles from './budget.module.css'; // Renamed to budgetStyles for consistency
-import { isSmallApp } from "../../../../utils/isSmallApp";
+import { getAppSize } from "../../../../utils/getAppSize";
 import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 
 const Budget = () => {
@@ -42,7 +42,10 @@ const Budget = () => {
         };
     }, []);
 
-    const smallApp = isSmallApp(containerSize);
+    const appSize = getAppSize(containerSize);
+    const smallApp = appSize === 'small';
+    const largeApp = appSize === 'large';
+
     const [activeMainTabId, setActiveMainTabId] = useState('budget');
 
     const tabs = [
@@ -71,11 +74,12 @@ const Budget = () => {
     return (
         <div ref={containerRef} className={budgetStyles.budgetAppContainer}> {/* FIX: Changed from styles to budgetStyles */}
             <FlexibleTabs
+             ref={containerRef}
                 tabs={tabs}
                 activeTabId={activeMainTabId}
                 onTabChange={setActiveMainTabId}
                 smallApp={smallApp}
-                className={budgetStyles.tabsRow}
+             className={`${budgetStyles.budgetAppContainer} ${largeApp ? 'largeApp' : ''}`}
                 contentClassName={budgetStyles.budgetTabContent}
             />
         </div>

@@ -73,6 +73,14 @@ body[data-theme="light"] {
     --chart-grid: #E3E8EF;
     --chart-tooltip-bg: #FFFFFF;
     --chart-tooltip-text: #23272F;
+    --chart-color-1: #007B8C; /* Primary */
+    --chart-color-2: #00AEBF; /* Primary Light */
+    --chart-color-3: #FF8C69; /* Secondary */
+    --chart-color-4: #28A745; /* Success */
+    --chart-color-5: #17A2B8; /* Info */
+    --chart-color-6: #FFC107; /* Warning */
+    --chart-color-7: #6B7280; /* Muted Gray */
+    --chart-color-8: #B0B7C3; /* Lighter Gray */
 }
 
 /* High Contrast Dark Mode */
@@ -152,6 +160,14 @@ body[data-theme="high-contrast-dark"] {
     --chart-grid: #FFFF00;
     --chart-tooltip-bg: #000000;
     --chart-tooltip-text: #FFFF00;
+    --chart-color-1: #00FFFF; /* Primary Cyan */
+    --chart-color-2: #FFFF00; /* Secondary Yellow */
+    --chart-color-3: #00FF00; /* Success Green */
+    --chart-color-4: #FF0000; /* Danger Red */
+    --chart-color-5: #FF69B4; /* Hot Pink */
+    --chart-color-6: #B0E0E6; /* Powder Blue */
+    --chart-color-7: #DDA0DD; /* Plum */
+    --chart-color-8: #FFFFFF; /* White */
 }
 
 /* Vibrant Green Theme */
@@ -219,11 +235,20 @@ body[data-theme="vibrant-green"] {
     --glass-background: rgba(0, 224, 128, 0.04);
     --glass-border: rgba(0, 224, 128, 0.10);
 
+    /* Chart Colors */
     --chart-label-text: #0B3322;
     --chart-bg: #F4FFF9;
     --chart-grid: #A0D9C2;
     --chart-tooltip-bg: #C6F7E2;
     --chart-tooltip-text: #0B3322;
+    --chart-color-1: #00E080; /* Primary Green */
+    --chart-color-2: #33F09C; /* Primary Light Green */
+    --chart-color-3: #FF66CC; /* Secondary Pink */
+    --chart-color-4: #00B36B; /* Darker Primary Green */
+    --chart-color-5: #FFD700; /* Warning Yellow */
+    --chart-color-6: #00BFFF; /* Info Blue */
+    --chart-color-7: #3A7F67; /* Muted Green */
+    --chart-color-8: #5E9B7A; /* Lighter Muted Green */
 }
 
 /* Vibrant Orange Theme */
@@ -291,11 +316,20 @@ body[data-theme="vibrant-orange"] {
     --glass-background: rgba(255, 165, 0, 0.04);
     --glass-border: rgba(255, 165, 0, 0.10);
 
+    /* Chart Colors */
     --chart-label-text: #4A2B14;
     --chart-bg: #FFF3E0;
     --chart-grid: #FFB880;
     --chart-tooltip-bg: #FFD9B3;
     --chart-tooltip-text: #4A2B14;
+    --chart-color-1: #FFA500; /* Primary Orange */
+    --chart-color-2: #8A2BE2; /* Secondary Purple */
+    --chart-color-3: #FFB833; /* Primary Light Orange */
+    --chart-color-4: #6F20B6; /* Darker Secondary Purple */
+    --chart-color-5: #4CAF50; /* Success Green */
+    --chart-color-6: #FFD700; /* Warning Yellow */
+    --chart-color-7: #9B5D34; /* Muted Orange */
+    --chart-color-8: #E09060; /* Lighter Muted Orange */
 }
 
 /* Tokyo Night Theme */
@@ -384,4 +418,12 @@ body[data-theme="tokyo-night"] {
     --chart-grid: #414868;
     --chart-tooltip-bg: #24283B;
     --chart-tooltip-text: #C0CAF5;
+    --chart-color-1: #7AA2F7; /* Primary Blue */
+    --chart-color-2: #BB9AF7; /* Secondary Purple */
+    --chart-color-3: #9ECE6A; /* Success Green */
+    --chart-color-4: #E0AF68; /* Warning Orange */
+    --chart-color-5: #F7768E; /* Danger Red */
+    --chart-color-6: #7DCFFF; /* Info Light Blue */
+    --chart-color-7: #A9B1D6; /* Secondary Text */
+    --chart-color-8: #414868; /* Tertiary/Border */
 }

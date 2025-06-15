@@ -6,7 +6,6 @@ import styles from './budget.module.css';
 
 const BudgetControlPanel = ({ userSignedIn }) => {
     const { saveBudget, resetBudget, clearBudget, persistencePreference, setBudgetPersistencePreference, isLoading } = useBudget();
-
     return (
         <div className={styles.controlPanel}>
             <Button onClick={saveBudget} disabled={isLoading} variant="primary">

@@ -54,12 +54,12 @@
 
 .navLink:hover,
 .navLink:focus {
-    background: none;
-    color: var(--color-primary);
+    /* Use theme variables for consistency */
+    color: var(--link-hover-color, var(--color-primary)); /* Fallback for safety */
+    text-decoration-color: var(--link-hover-color, var(--color-primary)); /* Match underline color */
     text-decoration: underline;
     text-underline-offset: 3px;
     text-decoration-thickness: 2px;
-    /* Remove previous background and color overrides */
 }
 
 .authSection {

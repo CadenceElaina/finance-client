@@ -24,8 +24,8 @@ const SummaryTab = () => {
     const accounts = data.accounts;
     const budget = data.budget || { income: {}, monthlyExpenses: [] };
 
-    const [tax, setTax] = useState('after');
-    const [period, setPeriod] = useState('monthly');
+    const [tax, setTax] = useState('both');
+    const [period, setPeriod] = useState('both');
 
     // Calculate expenses
     const monthlyExpenses = budget.monthlyExpenses?.reduce((sum, exp) => sum + (exp.cost || 0), 0);

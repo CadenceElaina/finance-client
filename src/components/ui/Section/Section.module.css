@@ -174,3 +174,64 @@
     align-items: center;
     gap: var(--space-xs);
 }
+
+.filterColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-xs);
+}
+
+/* Always show pointer for enabled selects */
+select,
+.filterSelect,
+.tableSelect {
+    cursor: pointer;
+}
+
+/* Only show not-allowed for disabled selects */
+select:disabled,
+.filterSelect:disabled,
+.tableSelect:disabled {
+    cursor: not-allowed;
+}
+
+:global(.largeApp) .section {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm);
+}
+:global(.largeApp) .sectionHeader {
+  font-size: var(--font-size-md);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .sectionContent {
+  padding: var(--space-sm);
+}
+
+/* Use variables for large app mode scaling */
+/* Table.module.css */
+:global(.largeApp) .table {
+  font-size: var(--font-size-md);
+}
+:global(.largeApp) .table th,
+:global(.largeApp) .table td {
+  padding: var(--space-sm) var(--space-sm);
+  font-size: var(--font-size-md);
+}
+:global(.largeApp) .tableInput,
+:global(.largeApp) .tableSelect {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+}
+:global(.largeApp) .removeButton,
+:global(.largeApp) .addButton {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+}
+
+/* Button.module.css */
+:global(.largeApp) .button {
+  font-size: var(--font-size-base);
+
+  padding: var(--space-sm) var(--space-sm);
+}

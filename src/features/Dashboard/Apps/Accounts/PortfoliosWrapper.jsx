@@ -2,50 +2,47 @@ import React from 'react';
 import HoldingsTab from './Investments/HoldingsTab';
 import AllocationTab from './Investments/AllocationTab';
 import PerformanceTab from './Investments/PerformanceTab';
+import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
 import sectionStyles from '../../../../components/ui/Section/Section.module.css';
 
 const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
-    if (smallApp) {
-        // In small app mode, render tabs based on activeInnerTabId or all if 'showAll'
-        if (!activeInnerTabId || activeInnerTabId === 'showAll') {
-            return (
-                <>
-                    <AllocationTab smallApp={smallApp} />
-                    <PerformanceTab smallApp={smallApp} />
-                    <HoldingsTab smallApp={smallApp} />
-                </>
-            );
-        }
-        switch (activeInnerTabId) {
-            case 'holdings': return <HoldingsTab smallApp={smallApp} />;
-            case 'allocation': return <AllocationTab smallApp={smallApp} />;
-            case 'performance': return <PerformanceTab smallApp={smallApp} />;
-            case 'reports': return (
-                <>
-                    <AllocationTab smallApp={smallApp} />
-                    <PerformanceTab smallApp={smallApp} />
-                </>
-            );
-            default: return null;
-        }
-    } else {
-        // In large app mode, show charts side by side above the table
+    if (!activeInnerTabId || activeInnerTabId === 'showAll') {
+        // Row: Allocation and Performance, then Holdings table below
         return (
-            <div className={sectionStyles.twoColumn} style={{ flexDirection: 'column', gap: 'var(--space-xs)' }}>
-                <div style={{ display: 'flex', gap: 'var(--space-xs)', width: '100%' }}>
-                    <div style={{ flex: '1 1 0', minWidth: 0 }}>
-                        <AllocationTab smallApp={false} />
+            <div>
+                <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
+                    <div style={{ flex: 1 }}>
+                        <AllocationTab smallApp={smallApp} />
                     </div>
-                    <div style={{ flex: '1 1 0', minWidth: 0 }}>
-                        <PerformanceTab smallApp={false} />
+                    <div style={{ flex: 1 }}>
+                        <PerformanceTab smallApp={smallApp} />
                     </div>
                 </div>
-                <div style={{ width: '100%', marginTop: 'var(--space-xs)' }}>
-                    <HoldingsTab smallApp={false} />
-                </div>
+                <HoldingsTab smallApp={smallApp} />
             </div>
         );
     }
+    if (activeInnerTabId === 'holdings') {
+        return <HoldingsTab smallApp={smallApp} />;
+    }
+    if (activeInnerTabId === 'allocation') {
+        return <AllocationTab smallApp={smallApp} />;
+    }
+    if (activeInnerTabId === 'performance') {
+        return <PerformanceTab smallApp={smallApp} />;
+    }
+    if (activeInnerTabId === 'reports') {
+        // Two columns: Allocation left, Performance right
+        return (
+            <TwoColumnLayout
+                className={sectionStyles.columns50_50}
+                left={<AllocationTab smallApp={smallApp} />}
+                right={<PerformanceTab smallApp={smallApp} />}
+                smallApp={smallApp}
+            />
+        );
+    }
+    return null;
 };
 
 export default PortfoliosWrapper;

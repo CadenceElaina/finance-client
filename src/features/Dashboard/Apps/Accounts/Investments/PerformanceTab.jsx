@@ -2,7 +2,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Section from '../../../../../components/ui/Section/Section';
 import sectionStyles from '../../../../../components/ui/Section/Section.module.css';
-import accountsStyles from '../accounts.module.css';
+import accountsStyles from '../Accounts.module.css';
 import { DEMO_ACCOUNTS } from '../../../../../utils/constants';
 
 // Simulate portfolio value over time (using purchase dates and current value)

@@ -1,265 +1,337 @@
-import React, { useState, useMemo } from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, Text } from 'recharts';
-import Section from '../../../../components/ui/Section/Section';
-import Table from '../../../../components/ui/Table/Table';
-import TwoColumnLayout from '../../../../components/ui/Section/TwoColumnLayout';
-import styles from './accounts.module.css';
-import { DEMO_ACCOUNTS } from '../../../../utils/constants';
+// client/src/features/Accounts/OverviewTab/OverviewTab.jsx
+import React, { useMemo } from 'react';
+import Section from '../../../components/ui/Section/Section';
+import SectionHeader from '../../../components/ui/Section/SectionHeader';
+import TwoColumnLayout from '../../../components/ui/TwoColumnLayout/TwoColumnLayout';
+import Button from '../../../components/ui/Button/Button';
+import { useFinancialData } from '../../../contexts/FinancialDataContext';
+import {
+    getNetWorth, // Import from financialCalculations
+    getTotalCash,
+    getTotalAssets,
+    getTotalLiabilities
+} from '../../../utils/financialCalculations'; // Correct import path
+import styles from './OverviewTab.module.css';
+import sectionStyles from '../../../components/ui/Section/Section.module.css'; // For general section styles
+import tableStyles from '../../../components/ui/Table/Table.module.css'; // Assuming you have this or will create it
 
-// Modern theme-aware color palette for charts
+// Pie Chart Imports (assuming these are what you're using for charts)
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+
+// No longer defining getNetWorth here, it's imported.
+
+// Use CSS variables for chart colors
 const CHART_COLORS = [
-    'var(--color-primary)',
-    'var(--color-secondary)',
-    '#7AA2F7', // Tokyo Night blue
-    '#BB9AF7', // Tokyo Night purple
-    '#00FFD1', // Accent teal
-    '#FF8C69', // Accent coral
-    '#FFD700', // Gold
-    '#EF5350', // Red
+    'var(--chart-color-1)',
+    'var(--chart-color-2)',
+    'var(--chart-color-3)',
+    'var(--chart-color-4)',
+    'var(--chart-color-5)',
+    'var(--chart-color-6)',
+    'var(--chart-color-7)',
+    'var(--chart-color-8)',
 ];
 
-// Utility: Net worth calculation
-const getNetWorth = (accounts) =>
-    accounts.reduce((sum, acc) => sum + (typeof acc.value === 'number' ? acc.value : 0), 0);
+// Recharts Custom Label (adjusting font size using CSS variable)
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name, value }) => {
+    // Only show label if slice is large enough
+    if (percent < 0.05) return null; // Hide labels for very small slices
 
-const OverviewTab = ({ accounts = DEMO_ACCOUNTS, smallApp }) => {
-    console.log('OverviewTab rendered with smallApp:', smallApp);
-    const [accountCategoryFilter, setAccountCategoryFilter] = useState('all');
-
-    // Categorize accounts using the 'category' field
-    const cashAccounts = accounts.filter(acc => acc.category === 'Cash');
-    const investmentAccounts = accounts.filter(acc => acc.category === 'Investments');
-    const debtAccounts = accounts.filter(acc => acc.category === 'Debt');
-
-    // Filtered Accounts for the Table (based on the dropdown)
-    const filteredAccountsForTable = useMemo(() => {
-        if (accountCategoryFilter === 'all') return accounts;
-        if (accountCategoryFilter === 'Cash') return cashAccounts;
-        if (accountCategoryFilter === 'Investments') return investmentAccounts;
-        if (accountCategoryFilter === 'Debt') return debtAccounts;
-        return accounts;
-    }, [accounts, accountCategoryFilter, cashAccounts, investmentAccounts, debtAccounts]);
-
-    // Net Worth & Totals for Snapshot and Pie Charts
-    const netWorth = getNetWorth(accounts);
-    const totalCash = cashAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
-    const totalInvestments = investmentAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
-    const totalDebt = debtAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
-    const totalAssets = totalCash + totalInvestments;
-
-    // Data for Assets Pie Chart (aggregated by top-level categories)
-    const assetsPieData = [
-        { name: 'Cash', value: totalCash },
-        { name: 'Investments', value: totalInvestments },
-    ].filter(d => d.value > 0);
-
-    // Data for Liabilities Pie Chart (each liability account gets a slice, using absolute values)
-    const liabilitiesPieData = debtAccounts
-        .map(acc => ({
-            name: acc.name,
-            value: Math.abs(acc.value || 0),
-        }))
-        .filter(d => d.value > 0);
-
-    // Custom Label for Pie Charts
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
-        const RADIAN = Math.PI / 180;
-        const radius = outerRadius + 15; // Increased distance from pie
-        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-        const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-        const textAnchor = x > cx ? 'start' : 'end';
-        const finalX = x + (x > cx ? 5 : -5); // Small offset to prevent overlap with slice edge
-        const finalY = y;
-
-        return (
-            <Text
-                x={finalX}
-                y={finalY}
-                fill="var(--text-primary)"
-                textAnchor={textAnchor}
-                dominantBaseline="central"
-                className={styles.chartLabelText}
-            >
-                {`${name} (${(percent * 100).toFixed(0)}%)`}
-            </Text>
-        );
-    };
-
-    // --- Section header for "Your Accounts" with select menu on the right ---
-    const accountsHeader = (
-        <div className={styles.accountsHeaderRow}>
-            <h3 className={styles.accountsHeaderTitle}>Your Accounts</h3>
-            <div className={styles.filterRow}>
-                <label htmlFor="accountCategoryFilter" className={styles.filterLabel}>Show:</label>
-                <select
-                    id="accountCategoryFilter"
-                    value={accountCategoryFilter}
-                    onChange={e => setAccountCategoryFilter(e.target.value)}
-                    className={styles.filterSelect}
-                >
-                    <option value="all">All Accounts</option>
-                    <option value="Cash">Cash Accounts</option>
-                    <option value="Investments">Investment Accounts</option>
-                    <option value="Debt">Liability Accounts</option>
-                </select>
-            </div>
-        </div>
-    );
-
-    // Encapsulate chart content for reusability in conditional rendering
-    const ChartsColumnContent = (
-        <div className={styles.chartsColumn}>
-            <Section className={styles.chartSectionCompact}>
-                <div className={styles.chartHeader}>Assets Breakdown</div>
-                <div className={styles.chartContainerCompact}>
-                    {assetsPieData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={160}> {/* Consistent height, let Recharts scale */}
-                            <PieChart>
-                                <Pie
-                                    data={assetsPieData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={65} // Increased outerRadius for labels
-                                    labelLine={false}
-                                    label={renderCustomizedLabel}
-                                >
-                                    {assetsPieData.map((entry, idx) => (
-                                        <Cell
-                                            key={`cell-${idx}`}
-                                            fill={CHART_COLORS[idx % CHART_COLORS.length]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                                    contentStyle={{
-                                        background: 'var(--surface-light)',
-                                        border: '1px solid var(--border-light)',
-                                        color: 'var(--text-primary)',
-                                        borderRadius: 8,
-                                        fontSize: '0.8rem'
-                                    }}
-                                />
-                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className={styles.noChartData}>No assets to display.</div>
-                    )}
-                </div>
-            </Section>
-            <Section className={styles.chartSectionCompact}>
-                <div className={styles.chartHeader}>Liabilities Breakdown</div>
-                <div className={styles.chartContainerCompact}>
-                    {liabilitiesPieData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={160}> {/* Consistent height, let Recharts scale */}
-                            <PieChart>
-                                <Pie
-                                    data={liabilitiesPieData}
-                                    dataKey="value"
-                                    nameKey="name"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={65} // Increased outerRadius for labels
-                                    labelLine={false}
-                                    label={renderCustomizedLabel}
-                                >
-                                    {liabilitiesPieData.map((entry, idx) => (
-                                        <Cell
-                                            key={`cell-liab-${idx}`}
-                                            fill={CHART_COLORS[(idx + 2) % CHART_COLORS.length]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-                                    contentStyle={{
-                                        background: 'var(--surface-light)',
-                                        border: '1px solid var(--border-light)',
-                                        color: 'var(--text-primary)',
-                                        borderRadius: 8,
-                                        fontSize: '0.8rem'
-                                    }}
-                                />
-                                <Legend align="center" verticalAlign="bottom" layout="horizontal" />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    ) : (
-                        <div className={styles.noChartData}>No liabilities to display.</div>
-                    )}
-                </div>
-            </Section>
-        </div>
-    );
-
-    // Encapsulate table content for reusability in conditional rendering
-    const TableColumnContent = (
-        <div className={styles.tableColumn}>
-            <Section header={accountsHeader} className={styles.tableSectionCompact}>
-                <Table
-                    className={styles.compactTable}
-                    columns={[
-                        { key: 'name', label: 'Account' },
-                        { key: 'accountProvider', label: 'Institution' },
-                        { key: 'category', label: 'Category' },
-                        { key: 'subType', label: 'Type' },
-                        {
-                            key: 'value', label: 'Value', render: val =>
-                                <span className={val >= 0 ? styles.positive : styles.negative}>
-                                    ${Math.abs(val).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                </span>
-                        },
-                        { key: 'taxStatus', label: 'Tax Status' }
-                    ]}
-                    data={filteredAccountsForTable}
-                />
-            </Section>
-        </div>
-    );
-
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     return (
-        <div className={styles.overviewTab}>
-            {/* --- Snapshot Section (full width, above charts/table row) --- */}
-            <div className={`${styles.snapshotRowFull} ${smallApp ? styles.snapshotRowFullSmall : ''}`}>
-                <div className={styles.snapshotItem}>
-                    <span className={styles.snapshotLabel}>Net Worth</span>
-                    <span className={`${styles.positive} value`}>
-                        ${netWorth.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+        <text x={x} y={y} fill="var(--chart-label-text)" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" className={sectionStyles.chartLabelText}>
+            {`${name} (${(percent * 100).toFixed(0)}%)`}
+        </text>
+    );
+};
+
+const OverviewTab = ({ smallApp }) => {
+    const { data: financialData } = useFinancialData();
+    const accounts = financialData.accounts;
+
+    // Memoize calculations for performance
+    const calculatedFinancials = useMemo(() => {
+        const netWorth = getNetWorth(accounts);
+        const totalCash = getTotalCash(accounts);
+        const totalAssets = getTotalAssets(accounts);
+        const totalLiabilities = getTotalLiabilities(accounts);
+
+        // Prepare data for Asset Allocation Chart
+        const assetAllocationData = accounts
+            .filter(acc => acc.category !== 'Debt' && acc.value > 0) // Only assets with positive value
+            .reduce((acc, current) => {
+                const existing = acc.find(item => item.name === current.category);
+                if (existing) {
+                    existing.value += current.value;
+                } else {
+                    acc.push({ name: current.category, value: current.value });
+                }
+                return acc;
+            }, []);
+
+        // Prepare data for Liability Breakdown Chart
+        const liabilityBreakdownData = accounts
+            .filter(acc => acc.category === 'Debt' && acc.value > 0) // Only liabilities with positive value
+            .reduce((acc, current) => {
+                // For liabilities, maybe group by type of debt or just show account name
+                // For simplicity, let's group by a generic 'Debt' category or specific debt types if available
+                const categoryName = current.name || 'Other Debt'; // Use account name for more detail
+                const existing = acc.find(item => item.name === categoryName);
+                if (existing) {
+                    existing.value += current.value;
+                } else {
+                    acc.push({ name: categoryName, value: current.value });
+                }
+                return acc;
+            }, []);
+
+
+        return {
+            netWorth,
+            totalCash,
+            totalAssets,
+            totalLiabilities,
+            assetAllocationData,
+            liabilityBreakdownData,
+        };
+    }, [accounts]);
+
+
+    const {
+        netWorth,
+        totalCash,
+        totalAssets,
+        totalLiabilities,
+        assetAllocationData,
+        liabilityBreakdownData,
+    } = calculatedFinancials;
+
+    console.log('OverviewTab rendered with smallApp:', smallApp); // Keep for now, remove later
+
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value);
+    };
+
+    const SummarySection = (
+        <Section title="Financial Snapshot">
+            <div className={styles.summaryGrid}>
+                <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Net Worth</span>
+                    <span className={styles.summaryValue}>{formatCurrency(netWorth)}</span>
                 </div>
-                <div className={styles.snapshotItem}>
-                    <span className={styles.snapshotLabel}>Cash</span>
-                    <span className={`${styles.positive} value`}>
-                        ${totalCash.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+                <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Total Cash</span>
+                    <span className={styles.summaryValue}>{formatCurrency(totalCash)}</span>
                 </div>
-                <div className={styles.snapshotItem}>
-                    <span className={styles.snapshotLabel}>Assets</span>
-                    <span className={`${styles.positive} value`}>
-                        ${totalAssets.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+                <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Total Assets</span>
+                    <span className={styles.summaryValue}>{formatCurrency(totalAssets)}</span>
                 </div>
-                <div className={styles.snapshotItem}>
-                    <span className={styles.snapshotLabel}>Liabilities</span>
-                    <span className={`${styles.negative} value`}>
-                        {Math.abs(totalDebt).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </span>
+                <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Total Liabilities</span>
+                    <span className={styles.summaryValue}>{formatCurrency(totalLiabilities)}</span>
                 </div>
             </div>
+        </Section>
+    );
 
-            {/* --- Charts & Table Row - Always use TwoColumnLayout, letting it handle its own responsiveness --- */}
-            <TwoColumnLayout
-                left={ChartsColumnContent}
-                right={TableColumnContent}
-                // Removed smallApp prop here, or explicitly set to false.
-                // This ensures TwoColumnLayout uses its internal logic for 1 or 2 columns.
-                smallApp={false} // This explicitly tells TwoColumnLayout to attempt 2 columns first
-            />
-        </div>
+    const YourAccountsSection = (
+        <Section
+            header={
+                <SectionHeader
+                    title="Your Accounts"
+                    right={<Button variant="secondary">Add Account</Button>}
+                />
+            }
+            className={smallApp ? sectionStyles.compactSection : ''}
+        >
+            <div className={`${styles.tableContainer} ${smallApp ? styles.smallAppTable : ''}`}>
+                {accounts.length > 0 ? (
+                    <table className={tableStyles.table}> {/* Using tableStyles.table here */}
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th className={tableStyles.alignRight}>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {accounts.map(acc => (
+                                <tr key={acc.id}>
+                                    <td>{acc.name}</td>
+                                    <td>{acc.category}</td>
+                                    <td className={tableStyles.alignRight}>{formatCurrency(acc.value)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className={sectionStyles.noChartData}>No accounts added yet.</p>
+                )}
+            </div>
+        </Section>
+    );
+
+
+    const InvestmentsSection = (
+        <Section
+            header={
+                <SectionHeader
+                    title="Investments"
+                    right={<Button variant="secondary">View Details</Button>}
+                />
+            }
+            className={smallApp ? sectionStyles.compactSection : ''}
+        >
+            <div className={`${styles.tableContainer} ${smallApp ? styles.smallAppTable : ''}`}>
+                {accounts.filter(acc => acc.category === 'Investments').length > 0 ? (
+                    <table className={tableStyles.table}>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th className={tableStyles.alignRight}>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {accounts.filter(acc => acc.category === 'Investments').map(inv => (
+                                <tr key={inv.id}>
+                                    <td>{inv.name}</td>
+                                    <td>{inv.type || 'N/A'}</td>
+                                    <td className={tableStyles.alignRight}>{formatCurrency(inv.value)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <p className={sectionStyles.noChartData}>No investments added yet.</p>
+                )}
+            </div>
+        </Section>
+    );
+
+    const AssetAllocationChart = (
+        <Section className={sectionStyles.chartSectionNoBorder}>
+            <h4 className={sectionStyles.chartHeader}>Asset Allocation</h4>
+            <div className={sectionStyles.chartContainerCompact}>
+                {assetAllocationData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={assetAllocationData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={renderCustomizedLabel}
+                                outerRadius={smallApp ? 50 : 65} // Smaller radius for smallApp
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {assetAllocationData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--chart-tooltip-bg)',
+                                    border: '1px solid var(--chart-grid)',
+                                    borderRadius: 'var(--border-radius-sm)',
+                                    padding: 'var(--space-xxs)',
+                                }}
+                                itemStyle={{ color: 'var(--chart-tooltip-text)' }}
+                                formatter={(value, name) => [formatCurrency(value), name]}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <p className={sectionStyles.noChartData}>No asset data to display.</p>
+                )}
+            </div>
+        </Section>
+    );
+
+    const LiabilityBreakdownChart = (
+        <Section className={sectionStyles.chartSectionNoBorder}>
+            <h4 className={sectionStyles.chartHeader}>Liability Breakdown</h4>
+            <div className={sectionStyles.chartContainerCompact}>
+                {liabilityBreakdownData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <Pie
+                                data={liabilityBreakdownData}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={renderCustomizedLabel}
+                                outerRadius={smallApp ? 50 : 65} // Smaller radius for smallApp
+                                fill="#8884d8"
+                                dataKey="value"
+                            >
+                                {liabilityBreakdownData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                ))}
+                            </Pie>
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: 'var(--chart-tooltip-bg)',
+                                    border: '1px solid var(--chart-grid)',
+                                    borderRadius: 'var(--border-radius-sm)',
+                                    padding: 'var(--space-xxs)',
+                                }}
+                                itemStyle={{ color: 'var(--chart-tooltip-text)' }}
+                                formatter={(value, name) => [formatCurrency(value), name]}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <p className={sectionStyles.noChartData}>No liability data to display.</p>
+                )}
+            </div>
+        </Section>
+    );
+
+    return (
+        <TwoColumnLayout
+       left={
+                <>
+                    <Section title="Summary">
+                        {/* Period and Tax selects are likely here */}
+                        <div className={styles.summaryFormGroup}> {/* Assuming a class like this */}
+                            <label htmlFor="period-select">Period</label>
+                            <select id="period-select" ...>...</select>
+                            <label htmlFor="tax-select">Tax</label>
+                            <select id="tax-select" ...>...</select>
+                        </div>
+                        {/* ... summary values ... */}
+                    </Section>
+                    <Section title="Monthly Expenses">
+                        {/* Monthly expenses table with buttons */}
+                        <table>
+                            {/* ... */}
+                            <td><Button>Remove</Button></td>
+                            {/* ... */}
+                        </table>
+                    </Section>
+                </>
+            }
+            right={
+                <>
+                    {AssetAllocationChart}
+                    {LiabilityBreakdownChart}
+                    {InvestmentsSection}
+                </>
+            }
+            smallApp={smallApp}
+        />
     );
 };
 

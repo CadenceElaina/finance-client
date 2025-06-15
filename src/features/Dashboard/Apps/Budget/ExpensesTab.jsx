@@ -4,6 +4,7 @@ import { useBudget } from '../../../../contexts/BudgetContext';
 import Table from '../../../../components/ui/Table/Table';
 import tableStyles from '../../../../components/ui/Table/Table.module.css';
 import Section from '../../../../components/ui/Section/Section';
+import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
 const ExpensesTab = ({
     expenses,
@@ -137,27 +138,29 @@ const ExpensesTab = ({
         </tr>
     );
 
-    // Header row: title left, filter right (same as accounts table)
+    // SectionHeader for consistent structure and style
     const expensesHeader = (
-        <div className={tableStyles.filterRow}>
-            <h3 className={tableStyles.tableHeaderTitle}>Monthly Expenses</h3>
-            <div className={tableStyles.filterRow}>
-                <label htmlFor="expenseCategoryFilter" className={tableStyles.filterLabel}>
-                    Show:
-                </label>
-                <select
-                    id="expenseCategoryFilter"
-                    value={categoryFilter}
-                    onChange={e => setCategoryFilter(e.target.value)}
-                    className={tableStyles.filterSelect}
-                >
-                    <option value="all">All Expenses</option>
-                    {expenseCategories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.label}</option>
-                    ))}
-                </select>
-            </div>
-        </div>
+        <SectionHeader
+            title="Monthly Expenses"
+            right={
+                <div className={tableStyles.filterRow}>
+                    <label htmlFor="expenseCategoryFilter" className={tableStyles.filterLabel}>
+                        Show:
+                    </label>
+                    <select
+                        id="expenseCategoryFilter"
+                        value={categoryFilter}
+                        onChange={e => setCategoryFilter(e.target.value)}
+                        className={tableStyles.filterSelect}
+                    >
+                        <option value="all">All Expenses</option>
+                        {expenseCategories.map(cat => (
+                            <option key={cat.id} value={cat.id}>{cat.label}</option>
+                        ))}
+                    </select>
+                </div>
+            }
+        />
     );
 
     return (
@@ -178,5 +181,6 @@ const ExpensesTab = ({
         </Section>
     );
 };
+
 
 export default ExpensesTab;
