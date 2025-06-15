@@ -86,6 +86,12 @@
     --section-header-font-size: 1.1rem;
     --section-header-font-size-compact: 1.08rem;
 
+        --chart-label-text: #F3F6FA; /* Light text for dark backgrounds */
+    --chart-bg: var(--surface-light);
+    --chart-grid: var(--border-light);
+    --chart-tooltip-bg: var(--surface-dark);
+    --chart-tooltip-text: var(--text-primary);
+
     /* --- Border Radii --- */
     --border-radius-sm: 4px;
     --border-radius-md: 8px;

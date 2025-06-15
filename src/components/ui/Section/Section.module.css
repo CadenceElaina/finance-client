@@ -1,11 +1,12 @@
 /* src/components/ui/Section/section.module.css */
 
 .section {
+    
     background-color: var(--surface-light);
     box-shadow: var(--shadow-sm);
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-light);
-    display: flex; /* Make section a flex container */
+    display: flex; 
     flex-direction: column; /* Stack header and content */
     height: 100%; /* Important for TwoColumnLayout children */
 }
@@ -35,7 +36,7 @@
 .sectionContent {
     flex-grow: 1;
     overflow: auto; /* Allow content to scroll if it overflows */
-    padding: var(--space-xs); /* Default padding for section content */
+    padding: var(--space-xs);
 }
 
 /* --- TwoColumnLayout specific styles --- */
@@ -104,13 +105,6 @@
 /* --- Common Chart-related Styles (Moved from accounts.module.css) --- */
 /* These styles are general for charts and should be here. */
 
-.chartSectionNoBorder {
-    border: none !important; /* To remove default section border for charts */
-    box-shadow: none !important; /* To remove default section shadow for charts */
-    padding: 0 !important; /* To remove section internal padding */
-    background-color: transparent !important; /* Ensure background is transparent */
-    height: unset !important; /* Allow height to be determined by content */
-}
 
 .chartHeader {
     text-align: center;
@@ -120,14 +114,6 @@
     color: var(--text-primary);
 }
 
-.chartContainerCompact {
-    padding: var(--space-xxs);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%; /* Takes full height in a flex column */
-    flex-grow: 1; /* Allows chart container to grow */
-}
 
 .noChartData {
     color: var(--text-secondary);

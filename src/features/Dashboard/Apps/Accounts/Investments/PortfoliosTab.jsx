@@ -16,16 +16,6 @@ const PortfoliosTab = ({ tab }) => {
     if (tab === 'performance') {
         return <PerformanceTab />;
     }
-    if (tab === 'reports') {
-        // As per the user's previous logic, 'reports' combines allocation and performance.
-        // This is a reasonable interpretation of an 'inner tab' that is itself a combination.
-        return (
-            <>
-                <AllocationTab />
-                <PerformanceTab />
-            </>
-        );
-    }
     // Default to holdings if tab is not recognized (or null/undefined)
     return <HoldingsTab />;
 };
@@ -46,7 +36,6 @@ const tabs = [
             { id: 'holdings', label: 'Investments', component: () => null }, // changed label
             { id: 'allocation', label: 'Allocation', component: () => null },
             { id: 'performance', label: 'Performance', component: () => null },
-            { id: 'reports', label: 'Reports', component: () => null }
         ],
         component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
             <InvestmentsWrapper

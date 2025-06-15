@@ -18,8 +18,7 @@
 
 .table th,
 .table td {
-    border: none;
-      padding: var(--space-xxs) var(--space-xs);
+    padding: var(--space-xxs) var(--space-xs);
     text-align: left;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
@@ -85,15 +84,9 @@
     background: var(--background-light); /* Base from baseSelect */
     color: var(--text-primary); /* Base from baseSelect */
     cursor: pointer; /* Base from baseSelect */
-    appearance: none; /* Base from baseSelect */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Base from baseSelect */
-    background-repeat: no-repeat; /* Base from baseSelect */
     transition: all var(--transition-speed-fast) var(--transition-ease); /* Base from baseSelect */
     box-sizing: border-box; /* Base from baseSelect */
-
-    /* Specific overrides for tableSelect */
-    width: 100%; /* Ensure it takes full width in table cell */
-   
+    width: 100%; 
     padding: var(--space-xxs) var(--space-xxs); /* Explicit padding to match tableInput */
     min-width: unset; /* Remove min-width from baseSelect to allow it to shrink */
    

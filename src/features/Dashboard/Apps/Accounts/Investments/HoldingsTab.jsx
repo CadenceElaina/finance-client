@@ -53,11 +53,7 @@ const HoldingsTab = ({
     ];
 
     const columns = useMemo(() => {
-        let cols = [...baseColumns];
-        if (portfolioId === 'all') {
-            cols.splice(1, 0, { key: 'portfolioName', label: 'Portfolio' });
-        }
-        return cols;
+        return [...baseColumns];
     }, [portfolioId]);
 
     // Portfolio select menu for table header

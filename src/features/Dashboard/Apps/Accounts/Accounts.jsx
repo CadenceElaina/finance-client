@@ -55,7 +55,6 @@ const Accounts = () => {
                 { id: 'holdings', label: 'Holdings', component: () => null },
                 { id: 'allocation', label: 'Allocation', component: () => null },
                 { id: 'performance', label: 'Performance', component: () => null },
-                { id: 'reports', label: 'Reports', component: () => null }
             ],
             component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
                 <PortfoliosWrapper

@@ -12,7 +12,6 @@ import { useFinancialData } from '../../../../contexts/FinancialDataContext';
 import { renderPieLabel } from './utils/pieChartLabelUtil'
 import SectionHeader from '../../../../components/ui/Section/SectionHeader';
 
-
 const CHART_COLORS = [
     'var(--chart-color-1)',
     'var(--chart-color-2)',
@@ -91,9 +90,9 @@ const OverviewTab = ({ smallApp }) => {
     // Charts column (left)
     const ChartsColumnContent = (
         <>
-            <Section className={`${accountsStyles.chartSectionCompact} ${accountsStyles.chartSectionNoBorder} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}> {/* FIX: Changed from styles to accountsStyles */}
-                <div className={smallApp ? accountsStyles.chartHeaderSmall : accountsStyles.chartHeader}>Assets Breakdown</div> {/* FIX: Changed from styles to accountsStyles */}
-                <div className={accountsStyles.chartContainerCompact}> {/* FIX: Changed from styles to accountsStyles */}
+            <Section className={` ${accountsStyles.chartSection} ${smallApp ? accountsStyles.sectionSmall : ''}`}> 
+                <div className={smallApp ? accountsStyles.chartHeaderSmall : accountsStyles.chartHeader}>Assets Breakdown</div> 
+                <div className={accountsStyles.chartContainerCompact}> 
                     {assetsPieData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}> {/* Adjust height for small app */}
                             <PieChart>
@@ -115,13 +114,17 @@ const OverviewTab = ({ smallApp }) => {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                                  formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                     contentStyle={{
-                                        background: '#fff',
+                                        background: 'var(--chart-tooltip-bg)',      // Theme background
                                         border: '1px solid var(--border-light)',
-                                        color: 'var(--chart-tooltip-text)',
-                                        borderRadius: 8,
-                                        fontSize: '0.7rem'
+                                        color: 'var(--chart-tooltip-text)',         // Theme text color
+                                        borderRadius: 'var(--border-radius-md)',
+                                        fontSize: 'var(--font-size-xs)'
+                                    }}
+                                    itemStyle={{
+                                        color: 'var(--chart-tooltip-text)',         // Theme text color for items
+                                        fontSize: 'var(--font-size-xs)'
                                     }}
                                 />
                                 <Legend
@@ -166,12 +169,16 @@ const OverviewTab = ({ smallApp }) => {
                                 <Tooltip
                                     formatter={value => `$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                                     contentStyle={{
-                                        background: '#fff',
+                                         background: 'var(--chart-tooltip-bg)',
                                         border: '1px solid var(--border-light)',
                                         color: 'var(--chart-tooltip-text)',
-                                        borderRadius: 8,
-                                        fontSize: '0.7rem'
+                                           borderRadius: 'var(--border-radius-md)',
+                                 fontSize: 'var(--font-size-xs)'
                                     }}
+                                    itemStyle={{
+        color: 'var(--chart-tooltip-text)',         // Theme text color for items
+        fontSize: 'var(--font-size-xs)'
+    }}
                                 />
                                 <Legend
                                     align="center"

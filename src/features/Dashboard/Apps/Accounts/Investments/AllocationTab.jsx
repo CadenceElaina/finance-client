@@ -5,12 +5,6 @@ import sectionStyles from '../../../../../components/ui/Section/Section.module.c
 import accountsStyles from '../Accounts.module.css';
 import { useFinancialData } from '../../../../../contexts/FinancialDataContext';
 
-const CHART_COLORS = [
-    'var(--color-primary)', '#7AA2F7', 'var(--color-secondary)', '#BB9AF7',
-    '#00FFD1', '#FF8C69', '#FFD700', '#EF5350',
-    '#4CAF50', '#FF9800', '#9C27B0', '#2196F3'
-];
-
 const AllocationTab = ({ smallApp, portfolioId, portfolioName }) => {
     const { data } = useFinancialData();
     const allAccounts = data.accounts || [];
@@ -47,42 +41,61 @@ const AllocationTab = ({ smallApp, portfolioId, portfolioName }) => {
         return { pieData: currentPieData, totalValue: currentTotalValue };
     }, [allAccounts, portfolioId]);
 
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name, value }) => {
-        if (percent < 0.03 || !totalValue) return null;
+    // Custom label for the pie chart with radial lines
+    const renderCustomizedLabel = ({ cx, cy, midAngle, outerRadius, percent, name, value, index }) => {
+
 
         const RADIAN = Math.PI / 180;
-        const radius = innerRadius + (outerRadius - innerRadius) * 0.6;
+        const radius = outerRadius * 1.1; // Position labels slightly outside the pie
         const x = cx + radius * Math.cos(-midAngle * RADIAN);
         const y = cy + radius * Math.sin(-midAngle * RADIAN);
         const percentageDisplay = ((value / totalValue) * 100).toFixed(1);
 
+        // Calculate line coordinates for radial line
+        const sin = Math.sin(-RADIAN * midAngle);
+        const cos = Math.cos(-RADIAN * midAngle);
+        const sx = cx + outerRadius * cos;
+        const sy = cy + outerRadius * sin;
+        const mx = cx + (outerRadius + (smallApp ? 10 : 20)) * cos;
+        const my = cy + (outerRadius + (smallApp ? 10 : 20)) * sin;
+        const ex = mx + (cos >= 0 ? 1 : -1) * (smallApp ? 12 : 20);
+        const ey = my;
+        const textAnchor = cos >= 0 ? 'start' : 'end';
+
         return (
-            <text
-                x={x}
-                y={y}
-                fill="var(--chart-label-text)"
-                textAnchor={x > cx ? 'start' : 'end'}
-                dominantBaseline="central"
-                fontSize={smallApp ? "0.6rem" : "0.7rem"}
-            >
-                {`${name} (${percentageDisplay}%)`}
-            </text>
+            <g>
+                <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="var(--border-light)" fill="none" />
+                <circle cx={ex} cy={ey} r={2} fill="var(--border-light)" stroke="none" />
+                <text
+                    x={ex + (cos >= 0 ? 1 : -1) * 6}
+                    y={ey}
+                    textAnchor={textAnchor}
+                    dominantBaseline="middle"
+                    fill="var(--chart-label-text)" // Use theme variable for text color
+                    fontSize={smallApp ? "0.6rem" : "0.7rem"}
+                >
+                    {`${name} (${percentageDisplay}%)`}
+                </text>
+            </g>
         );
     };
 
     // Use the same style as SectionHeader titles for the chart header
     const allocationTitle = (
-        <div className={sectionStyles.sectionHeaderTitle}>
+        <div
+            className={sectionStyles.sectionHeaderTitle}
+            style={{ textAlign: 'center', width: '100%' }}
+        >
             {portfolioName ? `${portfolioName}'s Allocation` : "Portfolio Allocation"}
         </div>
     );
 
     return (
-        <Section className={`${accountsStyles.chartSectionNoBorder} ${accountsStyles.chartSectionCompact} ${smallApp ? accountsStyles.sectionCompactOverride : ''}`}>
+        <Section className={`${accountsStyles.chartSection} ${smallApp ? accountsStyles.sectionSmall : ''}`}>
             {allocationTitle}
-            <div className={accountsStyles.chartContainerCompact}>
+            <div className={accountsStyles.chartContainer}>
                 {pieData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={smallApp ? 140 : 180}>
+                    <ResponsiveContainer width="100%" height={smallApp ? 180 : 265}>
                         <PieChart>
                             <Pie
                                 data={pieData}
@@ -90,13 +103,12 @@ const AllocationTab = ({ smallApp, portfolioId, portfolioName }) => {
                                 nameKey="name"
                                 cx="50%"
                                 cy="50%"
-                                outerRadius={smallApp ? 50 : 65}
-                                innerRadius={smallApp ? 25 : 35}
-                                labelLine={false}
-                                label={renderCustomizedLabel}
+                                outerRadius={smallApp ? 50 : 95}
+                                innerRadius={smallApp ? 25 : 50}
+                                // Remove label and labelLine to hide slice labels
                             >
                                 {pieData.map((entry, idx) => (
-                                    <Cell key={`cell-${entry.name}-${idx}`} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                                    <Cell key={`cell-${entry.name}-${idx}`} fill={`var(--chart-color-${(idx % 8) + 1})`} />
                                 ))}
                             </Pie>
                             <Tooltip
@@ -105,10 +117,14 @@ const AllocationTab = ({ smallApp, portfolioId, portfolioName }) => {
                                     return [`$${value.toLocaleString(undefined, { minimumFractionDigits: 2 })} (${percentage}%)`, name];
                                 }}
                                 contentStyle={{
-                                    background: 'var(--surface-light)',
+                                    background: 'var(--chart-tooltip-bg)',      // Use theme variable for background
                                     border: '1px solid var(--border-light)',
-                                    color: 'var(--chart-tooltip-text)',
+                                    color: 'var(--chart-tooltip-text)',         // Use theme variable for text
                                     borderRadius: 'var(--border-radius-md)',
+                                    fontSize: 'var(--font-size-xs)'
+                                }}
+                                itemStyle={{
+                                    color: 'var(--chart-tooltip-text)',         // Ensure text inside tooltip uses theme variable
                                     fontSize: 'var(--font-size-xs)'
                                 }}
                             />

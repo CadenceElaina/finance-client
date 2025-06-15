@@ -49,8 +49,12 @@
     display: flex;
     flex-direction: column;
 }
-
-.chartSectionNoBorder {
+.chartContinaer{
+       padding: var(--space-xxs);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .chartContainerCompact {
@@ -74,4 +78,12 @@
 
 .portfolioSelectMenu {
  
+}
+
+.fullHeightSection {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
 }

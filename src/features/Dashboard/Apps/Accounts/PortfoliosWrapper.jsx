@@ -44,7 +44,7 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
             {/* portfolioSelect removed from here */}
             {(!activeInnerTabId || activeInnerTabId === 'showAll') && (
                 <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                    <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)'}}>
+                    <div style={{ display: 'flex', gap: 'var(--space-sm)', marginBottom: 'var(--space-sm)' }}>
                         <div style={{ flex: 1 }}>
                             <AllocationTab {...tabProps} />
                         </div>
@@ -58,16 +58,8 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
                 </div>
             )}
             {activeInnerTabId === 'holdings' && <HoldingsTab {...tabProps} />}
-            {activeInnerTabId === 'allocation' && <AllocationTab {...tabProps} />}
-            {activeInnerTabId === 'performance' && <PerformanceTab {...tabProps} />}
-            {activeInnerTabId === 'reports' && (
-                <TwoColumnLayout
-                    className={sectionStyles.columns50_50}
-                    left={<AllocationTab {...tabProps} />}
-                    right={<PerformanceTab {...tabProps} />}
-                    smallApp={smallApp}
-                />
-            )}
+            {activeInnerTabId === 'allocation' && <AllocationTab {...tabProps} fullHeight={true} />}
+            {activeInnerTabId === 'performance' && <PerformanceTab {...tabProps} fullHeight={true} />}
         </div>
     );
 };

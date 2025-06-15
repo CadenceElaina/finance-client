@@ -155,11 +155,12 @@ body[data-theme="high-contrast-dark"] {
     --glass-border: rgba(255, 255, 255, 0.15);
 
     /* Chart Colors */
-    --chart-label-text: #FFFF00;
+     --chart-label-text: #FFFF00; /* Bright yellow for max contrast */
     --chart-bg: #000000;
-    --chart-grid: #FFFF00;
+    --chart-grid: #FFFF00; /* Bright yellow grid */
     --chart-tooltip-bg: #000000;
     --chart-tooltip-text: #FFFF00;
+
     --chart-color-1: #00FFFF; /* Primary Cyan */
     --chart-color-2: #FFFF00; /* Secondary Yellow */
     --chart-color-3: #00FF00; /* Success Green */
@@ -413,11 +414,12 @@ body[data-theme="tokyo-night"] {
     --glass-border: rgba(255, 255, 255, 0.1);
 
     /* Chart Colors */
-    --chart-label-text: #C0CAF5;
+  --chart-label-text: #C0CAF5; /* Light text for dark background */
     --chart-bg: #24283B;
     --chart-grid: #414868;
     --chart-tooltip-bg: #24283B;
     --chart-tooltip-text: #C0CAF5;
+
     --chart-color-1: #7AA2F7; /* Primary Blue */
     --chart-color-2: #BB9AF7; /* Secondary Purple */
     --chart-color-3: #9ECE6A; /* Success Green */
