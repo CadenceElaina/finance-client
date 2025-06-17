@@ -1,4 +1,5 @@
 /* src/features/Dashboard/Apps/Accounts/accounts.module.css */
+
 .noChartData {
     color: var(--text-secondary);
     text-align: center;
@@ -50,15 +51,16 @@
     flex-direction: column;
 }
 .chartContinaer{
-       padding: var(--space-xxs);
+    padding: var(--space-xxs);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
 }
 
+.chartContainer,
 .chartContainerCompact {
-    padding: var(--space-xxs);
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -77,7 +79,19 @@
 }
 
 .portfolioSelectMenu {
- 
+}
+
+.portfolioSelectMenuRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  justify-content: flex-end;
+}
+
+.portfolioSelectLabel {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .fullHeightSection {
@@ -86,4 +100,80 @@
     display: flex;
     flex-direction: column;
     justify-content: stretch;
+}
+
+.portfoliosContentContainer {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    padding: var(--space-xs);
+    gap: var(--space-md);
+    overflow: auto;
+    min-height: 0; /* Important for proper flexbox behavior */
+}
+
+:global(.smallApp) .portfoliosContentContainer {
+    padding: var(--space-xxs);
+    gap: var(--space-sm);
+}
+
+:global(.largeApp) .portfoliosContentContainer {
+    padding: var(--space-sm);
+    gap: var(--space-lg);
+}
+
+.portfoliosChartsRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-sm);
+    width: 100%;
+}
+
+:global(.smallApp) .portfoliosChartsRow {
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+:global(.largeApp) .portfoliosChartsRow {
+    gap: var(--space-md);
+}
+
+.portfoliosChartsRow > div {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.appContentBase {
+    padding: var(--space-xs);
+    font-size: var(--font-size-base);
+}
+
+.appContentSmall {
+    padding: var(--space-xxs);
+    font-size: var(--font-size-xs);
+}
+
+.appContentLarge {
+    padding: var(--space-sm);
+    font-size: var(--font-size-md);
+}
+.chartContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 0; /* Important for a flex child to allow proper growth */
+    overflow: hidden;
+}
+.chartContainerCompact {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }

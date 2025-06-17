@@ -1,7 +1,6 @@
 /* src/components/ui/Section/section.module.css */
 
 .section {
-    
     background-color: var(--surface-light);
     box-shadow: var(--shadow-sm);
     border-radius: var(--border-radius-md);
@@ -35,8 +34,11 @@
 
 .sectionContent {
     flex-grow: 1;
-    overflow: auto; /* Allow content to scroll if it overflows */
-    padding: var(--space-xs);
+    overflow: auto;
+    padding-left: var(--space-xs);
+    padding-right: var(--space-xs);
+    padding-top: var(--space-xs);
+    padding-bottom: var(--space-xs);
 }
 
 /* --- TwoColumnLayout specific styles --- */
@@ -46,7 +48,7 @@
     flex-direction: row;
     gap: var(--space-xxs);
     width: 100%;
-    padding: var(--space-xxs);
+    padding: var(--space-xs);
     box-sizing: border-box;
     align-items: flex-start;
     overflow-x: hidden;
@@ -76,8 +78,8 @@
 }
 
 .columns45_55 .column:first-child {
-    flex: 0 1 45%;
-    max-width: 45%;
+    flex: 0 1 44%;
+    max-width: 44%;
 }
 .columns45_55 .column:last-child {
     flex: 0 1 55%;
@@ -85,17 +87,17 @@
 }
 
 .columns66_34 .column:first-child {
-    flex: 0 1 66%;
-    max-width: 66%;
+    flex: 0 1 65%;
+    max-width: 65%;
 }
 .columns66_34 .column:last-child {
-    flex: 0 1 34%;
-    max-width: 34%;
+    flex: 0 1 33%;
+    max-width: 33%;
 }
 
 .columns70_30 .column:first-child {
-    flex: 0 1 70%;
-    max-width: 70%;
+    flex: 0 1 69%;
+    max-width: 69%;
 }
 .columns70_30 .column:last-child {
     flex: 0 1 30%;
@@ -168,8 +170,8 @@
     gap: var(--space-xs);
 }
 
-/* --- Base Select Style (New or Enhanced) --- */
-/* This will serve as a common base for all general select elements */
+/* --- Base Select Style --- */
+/* This will serve as a common base for all general select elements except budget select which has 2 selects */
 .baseSelect,
 select:not(.budgetSelect) { /* Apply to all select elements unless they have .budgetSelect */
     min-width: 110px; /* Consistent minimum width */
@@ -235,4 +237,14 @@ select:not(.budgetSelect):focus {
   background-position: right 12px center; /* Adjust arrow position */
   background-size: 20px; /* Adjust arrow size */
   padding-right: 32px; /* Adjust padding for arrow */
+}
+
+/* Accounts.module.css */
+.portfoliosChartsRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-sm);
+    width: 100%; /* was 99% */
+    margin: 0;   /* remove margin */
+    padding: 0;  /* remove padding */
 }

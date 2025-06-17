@@ -3,6 +3,7 @@
 .tableContainer {
     width: 100%;
     overflow-x: auto;
+
     /* Allows horizontal scrolling for large tables on small screens */
 }
 

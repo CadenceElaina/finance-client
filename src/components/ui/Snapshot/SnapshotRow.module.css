@@ -1,0 +1,65 @@
+/* SnapshotRow.module.css */
+
+.snapshotRow {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--space-sm);
+    box-sizing: border-box;
+    overflow-x: auto;
+    justify-content: center;
+}
+
+.snapshotItem {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-xxs);
+    min-width: 23%;
+    flex: 0 0 auto;
+}
+
+.snapshotLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.positive {
+    color: var(--status-success) !important;
+    font-weight: bold;
+}
+.negative {
+    color: var(--status-danger) !important;
+    font-weight: bold;
+}
+
+.value {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+.valueSmall {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.snapshotRowSmall {
+    padding: var(--space-xxs);
+    gap: var(--space-xs);
+}
+.snapshotItemSmall {
+    flex: 1 1 80px;
+    min-width: 70px;
+    padding: var(--space-xxs);
+    gap: var(--space-xxs);
+}
+.snapshotLabelSmall {
+    font-size: var(--font-size-xxs);
+}

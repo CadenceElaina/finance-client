@@ -24,7 +24,6 @@
     gap: var(--space-xxs);
     margin: 0 auto;
     width: 100%;
-    
 }
 
 .summaryCard {
@@ -37,7 +36,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-
 }
 
 .summaryCardHeader {
@@ -95,43 +93,6 @@
     font-weight: 600;
 }
 
-
-.snapshotRowFull {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    width: 60%;
-    margin: 0 auto;
-
-    box-shadow: var(--shadow-md);
-    padding: var(--space-xs);
-    border-radius: var(--border-radius-md);
-    gap: var(--space-sm);
-    /* Initial gap between snapshot items */
-    flex-wrap: wrap;
-    box-sizing: border-box;
-    overflow-x: auto;
-}
-
-.snapshotItem {
-    background: var(--surface-light);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-xs);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: var(--space-xxs);
-    flex: 1 1 120px;
-    /* Default preferred basis */
-    min-width: 100px;
-    max-width: 180px;
-}
-
-
 .noChartData {
     color: var(--text-secondary);
     text-align: center;
@@ -139,107 +100,54 @@
     font-size: var(--font-size-xs);
 }
 
-.positive {
-    color: var(--status-success) !important;
-    font-weight: bold;
-}
-
-.negative {
-    color: var(--status-danger) !important;
-    font-weight: bold;
-}
-
-/* --- SMALL APP MODE OVERRIDES for Accounts layout --- */
 .overviewTabSmall {
     gap: var(--space-xs);
-    /* Reduce overall gap within OverviewTab when small */
     padding: var(--space-xxs);
-    /* Add slight padding to the overall tab */
 }
 
 .overviewTabSmall .snapshotRowFull {
     padding: var(--space-xxs);
-    /* Even tighter padding for the snapshot container */
     gap: var(--space-xs);
-    /* Smaller gap between snapshot items */
 }
 
 .overviewTabSmall .snapshotItem {
     flex: 1 1 70px;
-    /* More aggressive smaller basis for snapshot items */
     min-width: 60px;
-    /* Allow items to shrink even more before wrapping */
     padding: var(--space-xxs) var(--space-xxs);
-    /* Minimal internal padding */
     gap: var(--space-xxs);
-    /* Smaller internal gap */
 }
 
 .overviewTabSmall .snapshotLabel {
     font-size: var(--font-size-xxs);
-    /* Smallest text for labels */
 }
 
 .overviewTabSmall .value {
     font-size: var(--font-size-sm);
-    /* Keep value relatively readable */
 }
 
 .overviewTabSmall .chartsColumn {
     gap: var(--space-xxs);
-    /* Even smaller gap between charts sections */
 }
 
 .overviewTabSmall .tableColumn {
     gap: var(--space-xxs);
-    /* Even smaller gap within table column */
-}
-
-.snapshotRowFullSmall {
-    padding: var(--space-xxs);
-    gap: var(--space-xs);
-    flex-wrap: wrap;
-}
-
-.snapshotItemSmall {
-    flex: 1 1 70px;
-    min-width: 60px;
-    padding: var(--space-xxs) var(--space-xxs);
-    gap: var(--space-xxs);
-}
-
-.snapshotLabelSmall {
-    font-size: var(--font-size-xxs);
-}
-
-.valueSmall {
-    font-size: var(--font-size-sm);
-}
-
-.chartsColumnSmall {
-    gap: var(--space-xxs);
-}
-
-.tableColumnSmall {
-    gap: var(--space-xxs);
-    padding: var(--space-xxs);
 }
 
 .summaryFilterControls {
     display: flex;
-    flex-direction: column; /* Stack the select groups vertically */
-    gap: var(--space-xxs); /* Space between the two select pairs */
-    align-items: flex-end; /* Align the select groups to the right */
+    flex-direction: column;
+    gap: var(--space-xxs);
+    align-items: flex-end;
 }
 
 .summaryFilterControls > div {
-    display: flex; /* Make each div (label + select) a flex container */
-    align-items: center; /* Vertically align label and select */
-    gap: var(--space-xxs); /* Space between label and select within each row */
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
 }
 
 .budgetSelect {
-    /* Specific overrides or enhancements for budget selects if needed */
-    min-width: 100px; /* Give them a minimum width */
-    width: auto; /* Allow them to size based on content or min-width */
+    min-width: 100px;
+    width: auto;
 }
+
