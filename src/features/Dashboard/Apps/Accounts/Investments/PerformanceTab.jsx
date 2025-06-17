@@ -146,7 +146,7 @@ const PerformanceTab = ({
       <div className={sectionStyles.chartHeader}></div>
       <div className={accountsStyles.chartContainer}>
         {performanceChartData.length > 1 ? (
-          <ResponsiveContainer width="100%" height={smallApp ? 180 : 265}>
+          <ResponsiveContainer width="100%" height={smallApp ? 180 : 327}>
             <LineChart data={performanceChartData}>
               <XAxis
                 dataKey="date"

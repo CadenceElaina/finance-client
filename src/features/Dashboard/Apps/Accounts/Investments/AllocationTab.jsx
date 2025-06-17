@@ -79,6 +79,76 @@ const AllocationTab = ({
     return `${name} (${percent}%)`;
   };
 
+  // Sort pieData by value descending (largest first)
+  const sortedPieData = [...pieData].sort((a, b) => b.value - a.value);
+
+  // Custom label renderer that spreads labels out and draws a line
+  const renderCustomLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    name,
+    value,
+    index,
+  }) => {
+    if (!totalValue) return null; // Always show, even for small percentages
+
+    const RADIAN = Math.PI / 180;
+    // Start at the outer edge of the pie
+    const lineStartRadius = outerRadius + 6;
+    const lineMidRadius = outerRadius + 28; // How far out the "elbow" is
+    const labelOffset = 18; // Horizontal offset for label from elbow
+
+    // Calculate the angle and direction
+    const angle = -midAngle;
+    const sin = Math.sin(angle * RADIAN);
+    const cos = Math.cos(angle * RADIAN);
+
+    // Start point (pie edge)
+    const sx = cx + lineStartRadius * cos;
+    const sy = cy + lineStartRadius * sin;
+
+    // Elbow point (straight out from pie)
+    const mx = cx + lineMidRadius * cos;
+    const my = cy + lineMidRadius * sin;
+
+    // End point (horizontal, left or right)
+    const ex = mx + (cos >= 0 ? labelOffset : -labelOffset);
+    const ey = my;
+
+    // Label position (a bit past the end of the line)
+    const lx = ex + (cos >= 0 ? 4 : -4);
+    const ly = ey;
+
+    const percentDisplay = ((value / totalValue) * 100).toFixed(1);
+
+    return (
+      <g>
+        {/* Draw the elbow line: pie edge -> elbow -> horizontal to label */}
+        <polyline
+          points={`${sx},${sy} ${mx},${my} ${ex},${ey}`}
+          stroke="var(--chart-label-text)"
+          strokeWidth={1}
+          fill="none"
+        />
+        <text
+          x={lx}
+          y={ly}
+          fill="var(--chart-label-text)"
+          textAnchor={cos >= 0 ? "start" : "end"}
+          dominantBaseline="central"
+          fontSize={smallApp ? "0.7rem" : "0.85rem"}
+          style={{ fontWeight: 500, pointerEvents: "none" }}
+        >
+          {`${name} (${percentDisplay}%)`}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <Section
       header={
@@ -92,27 +162,26 @@ const AllocationTab = ({
         />
       }
       className={accountsStyles.chartSection}
-      style={{ minHeight: 0, height: "100%" }}
     >
       <div
         className={accountsStyles.chartContainer}
-        style={{ height: smallApp ? 140 : 220 }}
+        style={{ height: smallApp ? 250 : 327 }}
       >
-        {pieData.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
+        {sortedPieData.length > 0 ? (
+          <ResponsiveContainer>
             <PieChart>
               <Pie
-                data={pieData}
+                data={sortedPieData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
                 outerRadius="80%"
                 innerRadius="45%"
-                label={renderLabel}
-                labelLine={false}
+                label={renderCustomLabel}
+                labelLine={true} // Enable label lines
               >
-                {pieData.map((entry, idx) => (
+                {sortedPieData.map((entry, idx) => (
                   <Cell
                     key={`cell-${entry.name}-${idx}`}
                     fill={`var(--chart-color-${(idx % 8) + 1})`}
