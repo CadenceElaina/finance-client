@@ -68,6 +68,7 @@
 .chartHeader {
     text-align: center;
     margin-bottom: var(--space-xxs);
+    font-weight: var(--font-weight-semibold);
 }
 
 .portfolioSelectMenu {
@@ -100,7 +101,7 @@
     height: 100%;
     box-sizing: border-box;
     padding: var(--space-xs);
-    gap: var(--space-md);
+    gap: var(--space-xs);
     overflow: auto;
     min-height: 0; /* Important for proper flexbox behavior */
 }

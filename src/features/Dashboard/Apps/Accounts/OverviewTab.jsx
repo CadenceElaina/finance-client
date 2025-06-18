@@ -110,15 +110,7 @@ const OverviewTab = ({ smallApp }) => {
           smallApp ? accountsStyles.sectionSmall : ""
         }`}
       >
-        <div
-          className={
-            smallApp
-              ? accountsStyles.chartHeaderSmall
-              : accountsStyles.chartHeader
-          }
-        >
-          Assets Breakdown
-        </div>
+        <div className={sectionStyles.sectionHeaderTitle}>Assets Breakdown</div>
         <div className={accountsStyles.chartContainerCompact}>
           {assetsPieData.length > 0 ? (
             <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}>
@@ -183,18 +175,7 @@ const OverviewTab = ({ smallApp }) => {
           accountsStyles.chartSectionNoBorder
         } ${smallApp ? accountsStyles.sectionCompactOverride : ""}`}
       >
-        {" "}
-        {/* FIX: Changed from styles to accountsStyles */}
-        <div
-          className={
-            smallApp
-              ? accountsStyles.chartHeaderSmall
-              : accountsStyles.chartHeader
-          }
-        >
-          Liabilities Breakdown
-        </div>{" "}
-        {/* FIX: Changed from styles to accountsStyles */}
+        <div className={sectionStyles.sectionHeaderTitle}>Liabilities Breakdown</div>
         <div className={accountsStyles.chartContainerCompact}>
           {" "}
           {/* FIX: Changed from styles to accountsStyles */}

@@ -19,7 +19,7 @@
 
 .table th,
 .table td {
-    padding: var(--space-xxs) var(--space-xs);
+    padding: var(--space-xxs);
     text-align: left;
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-light);
@@ -29,6 +29,7 @@
 }
 
 .table th {
+    padding: var(--space-xxs);
     background: var(--surface-dark);
     color: var(--text-primary);
     font-weight: bold;
@@ -36,8 +37,7 @@
     top: 0;
     z-index: 1;
     border-bottom: 1px solid var(--border-light);
-    text-align: left;
-    padding: var(--space-xs) var(--space-sm);
+    text-align: left; 
     white-space: nowrap;
     /* Prevents header text from wrapping */
 }
@@ -77,20 +77,12 @@
 
 .tableSelect {
     /* Manually applying baseSelect styles due to build issue with composes from external file */
-    min-width: 110px; /* Base from baseSelect */
-    font-size: var(--font-size-xxs); /* Base from baseSelect */
-    height: 28px; /* Base from baseSelect */
-    border-radius: var(--border-radius-sm); /* Base from baseSelect */
-    border: 1px solid var(--border-light); /* Base from baseSelect */
-    background: var(--background-light); /* Base from baseSelect */
-    color: var(--text-primary); /* Base from baseSelect */
-    cursor: pointer; /* Base from baseSelect */
-    transition: all var(--transition-speed-fast) var(--transition-ease); /* Base from baseSelect */
-    box-sizing: border-box; /* Base from baseSelect */
-    width: 100%; 
+    width: auto;
+ 
+    max-width: 100%;
+    box-sizing: border-box;
     padding: var(--space-xxs) var(--space-xxs); /* Explicit padding to match tableInput */
-    min-width: unset; /* Remove min-width from baseSelect to allow it to shrink */
-   
+    /* Remove min-width from baseSelect to allow it to shrink */
 }
 
 .tableInput:focus,
@@ -114,22 +106,40 @@
 
 .removeButton {
     background-color: var(--status-danger);
-    color: var(--text-light);
+    color: var(--text-on-danger, #fff);
     border: 1px solid var(--status-danger);
+    width: 100%; /* Make width consistent with addButton */
+    min-width: 90px; /* Ensures both buttons are at least this wide */
+    box-sizing: border-box;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
-.removeButton:hover {
-    background-color: var(--status-danger-dark);
+.removeButton:hover,
+.removeButton:focus {
+    background-color: var(--status-danger-dark, #ff869a);
+    color: var(--text-on-danger, #fff);
+    border-color: var(--status-danger-dark, #ff869a);
+    box-shadow: 0 0 0 2px rgba(255,83,112,0.25);
+    filter: brightness(1.08);
 }
 
 .addButton {
     background-color: var(--color-primary);
     color: var(--text-on-primary);
     border: 1px solid var(--color-primary);
+    width: 100%; /* Match removeButton */
+    min-width: 90px;
+    box-sizing: border-box;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
-.addButton:hover {
+.addButton:hover,
+.addButton:focus {
     background-color: var(--color-primary-light);
+    color: var(--text-on-primary);
+    border-color: var(--color-primary-light);
+    box-shadow: 0 0 0 2px rgba(0,177,199,0.18);
+    filter: brightness(1.08);
 }
 
 /* Styles for a Section containing a table (e.g., AccountsTable, ExpensesTable) */
@@ -250,12 +260,6 @@ select,
     cursor: pointer;
 }
 
-/* Only show not-allowed for disabled selects */
-select:disabled,
-.filterSelect:disabled,
-.tableSelect:disabled {
-    cursor: not-allowed;
-}
 
 :global(.largeApp) .table {
   font-size: var(--font-size-base);
@@ -293,4 +297,46 @@ select:disabled,
 }
 :global(.largeApp) .sectionContent {
   padding: var(--space-sm);
+}
+
+/* Make expense table inputs/selects fill the cell */
+.table td input[type="text"],
+.table td input[type="number"],
+.table td select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Remove extra margin/padding if needed */
+    margin: 0;
+}
+
+/* Category-specific select border and option backgrounds */
+.tableSelect.required {
+    border: 1.5px solid var(--status-danger);
+    background: var(--background-light);
+    color: var(--text-primary);
+}
+.tableSelect.flexible {
+    border: 1.5px solid var(--status-warning);
+    background: var(--background-light);
+    color: var(--text-primary);
+}
+.tableSelect.nonessential {
+    border: 1.5px solid var(--status-success);
+    background: var(--background-light);
+    color: var(--text-primary);
+}
+
+/* Option backgrounds for dropdown (browser support varies) */
+.tableSelect option.required {
+    background: var(--status-success);
+    color: var(--text-on-primary, #fff);
+}
+.tableSelect option.flexible {
+    background: var(--status-warning);
+    color: var(--text-primary);
+}
+.tableSelect option.nonessential {
+    background: var(--status-danger);
+    color: var(--text-on-primary, #fff);
 }

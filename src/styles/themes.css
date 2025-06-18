@@ -428,4 +428,7 @@ body[data-theme="tokyo-night"] {
     --chart-color-6: #7DCFFF; /* Info Light Blue */
     --chart-color-7: #A9B1D6; /* Secondary Text */
     --chart-color-8: #414868; /* Tertiary/Border */
+    --status-danger: #ff5370; /* Tokyo Night red */
+    --status-danger-dark: #ff869a; /* Slightly lighter for hover */
+    --text-on-danger: #fff;
 }

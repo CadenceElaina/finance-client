@@ -145,9 +145,3 @@
     align-items: center;
     gap: var(--space-xxs);
 }
-
-.budgetSelect {
-    min-width: 100px;
-    width: auto;
-}
-

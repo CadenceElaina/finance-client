@@ -8,4 +8,5 @@ body {
     color: var(--text-primary);
     transition: background-color var(--transition-speed-normal) var(--transition-ease),
         color var(--transition-speed-normal) var(--transition-ease);
-} 
+    font-family: var(--font-family-base), Arial, sans-serif;
+}

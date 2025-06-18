@@ -168,7 +168,7 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
           <HoldingsTab
             {...tabProps}
             holdingsHeaderTitle={holdingsHeaderTitle}
-            showPortfolioSelectMenu // Show select menu in holdings tab
+            showPortfolioSelectMenu
           />
         </>
       )}
