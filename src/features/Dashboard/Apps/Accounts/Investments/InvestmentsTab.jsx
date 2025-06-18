@@ -6,7 +6,7 @@ import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 import accountsStyles from "../Accounts.module.css";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 
-const HoldingsTab = ({
+const InvestmentsTab = ({
   portfolioId,
   smallApp,
   portfolios = [],
@@ -112,4 +112,4 @@ const HoldingsTab = ({
   );
 };
 
-export default HoldingsTab;
+export default InvestmentsTab;

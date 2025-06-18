@@ -7,7 +7,6 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--space-xs) var(--space-lg);
-
     background: var(--surface-dark);
     color: var(--text-primary);
     box-shadow: var(--shadow-md);
@@ -18,9 +17,9 @@
 }
 
 .logoText {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     letter-spacing: 0.5px;
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     color: var(--color-primary);
     text-decoration: none;
     transition: color var(--transition-speed-fast) var(--transition-ease);
@@ -41,7 +40,7 @@
 .navLink {
     color: var(--text-primary);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     padding: var(--space-xxs) var(--space-xs);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-sm);
@@ -54,7 +53,6 @@
 
 .navLink:hover,
 .navLink:focus {
-    /* Use theme variables for consistency */
     color: var(--link-hover-color, var(--color-primary)); /* Fallback for safety */
     text-decoration-color: var(--link-hover-color, var(--color-primary)); /* Match underline color */
     text-decoration: underline;
@@ -71,7 +69,7 @@
 
 .welcomeMessage {
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     margin-right: var(--space-xxs);
     white-space: nowrap;
     font-size: var(--font-size-sm);
@@ -116,4 +114,10 @@
 .themeSelect:hover {
     filter: var(--hover-brightness);
     border-color: var(--color-primary);
+}
+
+.leftSection {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }

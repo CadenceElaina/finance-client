@@ -1,14 +1,14 @@
 /* Light Mode */
 body[data-theme="light"] {
     /* Base Colors */
-    --background-light: #F5F7FA;      /* Softer, less blue than #F8F9FA */
-    --surface-light: #FFFFFF;          /* Pure white for cards/sections */
-    --surface-dark: #F0F2F5;           /* Slightly darker for headers */
-    --border-light: #E3E8EF;           /* Lighter, modern border */
+    --background-light: #F5F7FA; 
+    --surface-light: #FFFFFF;         
+    --surface-dark: #F0F2F5;   
+    --border-light: #E3E8EF;         
 
     /* Text Colors */
-    --text-primary: #23272F;           /* Deep gray, not pure black */
-    --text-secondary: #6B7280;         /* Muted gray */
+    --text-primary: #23272F;         
+    --text-secondary: #6B7280;     
     --text-tertiary: #B0B7C3;
     --text-light: #23272F;
     --text-on-primary: #FFFFFF;

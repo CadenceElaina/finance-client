@@ -1,4 +1,4 @@
-/* src/components/ui/Tabs/DropdownTabs.module.css */
+/* src/components/ui/Tabs/InnerTabs.module.css */
 .sideDropdownTabs {
     position: relative;
     display: inline-flex;
@@ -12,11 +12,9 @@
     border: none;
     border-radius: 0;
     font-size: var(--font-size-sm);
-    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 4px;
     transition: color 0.15s;
     z-index: 2;
     height: 100%;
@@ -58,6 +56,7 @@
     height: 100%;
     align-items: stretch;
     min-width: unset;
+    margin: 0 auto;
     padding: 0;
 }
 
@@ -77,9 +76,7 @@
     background: none;
     border: none;
     color: var(--text-secondary);
-    margin-left: 2px;
-    margin-top: -2px;
-    padding: var(--space-xxs) 12px;
+    margin: 0 0 0 4px;
     text-align: center;
     font-size: var(--font-size-sm);
     cursor: pointer;

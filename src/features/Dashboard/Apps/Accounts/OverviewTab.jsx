@@ -72,9 +72,6 @@ const OverviewTab = ({ smallApp }) => {
     }))
     .filter((d) => d.value > 0);
 
-  // The accountsHeader structure.
-  // It's a header for the accounts table, and its layout should be handled by SectionHeader
-  // The filter row itself uses tableStyles.filterRow
   const accountsHeader = (
     <SectionHeader
       title="Your Accounts"
@@ -90,7 +87,7 @@ const OverviewTab = ({ smallApp }) => {
             id="accountCategoryFilter"
             value={accountCategoryFilter}
             onChange={(e) => setAccountCategoryFilter(e.target.value)}
-            className={tableStyles.select} // Use the unified select class
+            className={tableStyles.select}
           >
             <option value="all">All Accounts</option>
             <option value="Cash">Cash Accounts</option>
@@ -102,7 +99,6 @@ const OverviewTab = ({ smallApp }) => {
     />
   );
 
-  // Charts column (left)
   const ChartsColumnContent = (
     <>
       <Section
@@ -111,7 +107,7 @@ const OverviewTab = ({ smallApp }) => {
         }`}
       >
         <div className={sectionStyles.sectionHeaderTitle}>Assets Breakdown</div>
-        <div className={accountsStyles.chartContainerCompact}>
+        <div className={accountsStyles.chartContainer}>
           {assetsPieData.length > 0 ? (
             <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}>
               {" "}
@@ -123,9 +119,9 @@ const OverviewTab = ({ smallApp }) => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
+                  outerRadius={smallApp ? 40 : 45}
                   labelLine={false}
-                  label={(props) => renderPieLabel({ ...props, smallApp })} // FIX: Use renderPieLabel utility
+                  label={(props) => renderPieLabel({ ...props, smallApp })}
                 >
                   {assetsPieData.map((entry, idx) => (
                     <Cell
@@ -141,14 +137,14 @@ const OverviewTab = ({ smallApp }) => {
                     })}`
                   }
                   contentStyle={{
-                    background: "var(--chart-tooltip-bg)", // Theme background
+                    background: "var(--chart-tooltip-bg)",
                     border: "1px solid var(--border-light)",
-                    color: "var(--chart-tooltip-text)", // Theme text color
+                    color: "var(--chart-tooltip-text)",
                     borderRadius: "var(--border-radius-md)",
                     fontSize: "var(--font-size-xs)",
                   }}
                   itemStyle={{
-                    color: "var(--chart-tooltip-text)", // Theme text color for items
+                    color: "var(--chart-tooltip-text)",
                     fontSize: "var(--font-size-xs)",
                   }}
                 />
@@ -158,7 +154,7 @@ const OverviewTab = ({ smallApp }) => {
                   layout="horizontal"
                   wrapperStyle={{
                     color: "var(--chart-label-text)",
-                    fontSize: smallApp ? "0.65rem" : "0.7rem",
+                    fontSize: smallApp ? "0.65rem" : "var(--font-size-xs)",
                   }}
                 />
               </PieChart>
@@ -166,7 +162,7 @@ const OverviewTab = ({ smallApp }) => {
           ) : (
             <div className={accountsStyles.noChartData}>
               No assets to display.
-            </div> // FIX: Changed from styles to accountsStyles
+            </div>
           )}
         </div>
       </Section>
@@ -175,14 +171,12 @@ const OverviewTab = ({ smallApp }) => {
           accountsStyles.chartSectionNoBorder
         } ${smallApp ? accountsStyles.sectionCompactOverride : ""}`}
       >
-        <div className={sectionStyles.sectionHeaderTitle}>Liabilities Breakdown</div>
+        <div className={sectionStyles.sectionHeaderTitle}>
+          Liabilities Breakdown
+        </div>
         <div className={accountsStyles.chartContainerCompact}>
-          {" "}
-          {/* FIX: Changed from styles to accountsStyles */}
           {liabilitiesPieData.length > 0 ? (
             <ResponsiveContainer width="100%" height={smallApp ? 120 : 140}>
-              {" "}
-              {/* Adjust height for small app */}
               <PieChart>
                 <Pie
                   data={liabilitiesPieData}
@@ -190,9 +184,9 @@ const OverviewTab = ({ smallApp }) => {
                   nameKey="name"
                   cx="50%"
                   cy="50%"
-                  outerRadius={smallApp ? 40 : 45} // Smaller radius for small app
+                  outerRadius={smallApp ? 40 : 45}
                   labelLine={false}
-                  label={(props) => renderPieLabel({ ...props, smallApp })} // FIX: Use renderPieLabel utility
+                  label={(props) => renderPieLabel({ ...props, smallApp })}
                 >
                   {liabilitiesPieData.map((entry, idx) => (
                     <Cell
@@ -215,7 +209,7 @@ const OverviewTab = ({ smallApp }) => {
                     fontSize: "var(--font-size-xs)",
                   }}
                   itemStyle={{
-                    color: "var(--chart-tooltip-text)", // Theme text color for items
+                    color: "var(--chart-tooltip-text)",
                     fontSize: "var(--font-size-xs)",
                   }}
                 />
@@ -225,7 +219,7 @@ const OverviewTab = ({ smallApp }) => {
                   layout="horizontal"
                   wrapperStyle={{
                     color: "var(--chart-label-text)",
-                    fontSize: smallApp ? "0.65rem" : "0.7rem",
+                    fontSize: smallApp ? "0.65rem" : "var(--font-size-xs)",
                   }}
                 />
               </PieChart>
@@ -233,24 +227,21 @@ const OverviewTab = ({ smallApp }) => {
           ) : (
             <div className={accountsStyles.noChartData}>
               No liabilities to display.
-            </div> // FIX: Changed from styles to accountsStyles
+            </div>
           )}
         </div>
       </Section>
     </>
   );
 
-  // Table column (right)
   const TableColumnContent = (
     <>
       <Section
         header={accountsHeader}
-        className={`${tableStyles.tableSection} ${
-          smallApp ? accountsStyles.sectionCompactOverride : ""
-        }`}
+        className={`${tableStyles.tableSection} ${smallApp ? "" : ""}`}
       >
         <Table
-          className={tableStyles.compactTable}
+          className={tableStyles.table}
           columns={[
             { key: "name", label: "Account" },
             { key: "accountProvider", label: "Institution" },
@@ -265,8 +256,7 @@ const OverviewTab = ({ smallApp }) => {
                     val >= 0 ? accountsStyles.positive : accountsStyles.negative
                   }
                 >
-                  {" "}
-                  {/* FIX: Changed from styles to accountsStyles */}$
+                  $
                   {Math.abs(val).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                   })}
@@ -276,7 +266,7 @@ const OverviewTab = ({ smallApp }) => {
             { key: "taxStatus", label: "Tax Status" },
           ]}
           data={filteredAccountsForTable}
-          smallApp={smallApp} // Pass smallApp directly to the Table component
+          smallApp={smallApp}
         />
       </Section>
     </>
@@ -287,24 +277,12 @@ const OverviewTab = ({ smallApp }) => {
       <TwoColumnLayout
         className={sectionStyles.columns70_30}
         left={
-          <div
-            className={
-              smallApp
-                ? accountsStyles.tableColumnSmall
-                : accountsStyles.tableColumn
-            }
-          >
+          <div className={smallApp ? "" : accountsStyles.tableColumn}>
             {TableColumnContent}
           </div>
         }
         right={
-          <div
-            className={
-              smallApp
-                ? accountsStyles.chartsColumnSmall
-                : accountsStyles.chartsColumn
-            }
-          >
+          <div className={smallApp ? "" : accountsStyles.chartsColumn}>
             {ChartsColumnContent}
           </div>
         }

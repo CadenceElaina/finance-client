@@ -31,34 +31,26 @@
     --color-primary-dark: #005F6B;
     --color-secondary: #FFB09C;
     --color-secondary-light: #FFB09C;
-    /* This could be a slightly lighter shade if desired */
     --color-success: #4CAF50;
     --color-warning: #FF9800;
     --color-danger: #EF5350;
 
     /* Neutral/UI Colors */
     --background-light: #11131a;
-    /* Much darker background */
     --surface-light: #181a22;
-    /* Darker surface for main content areas */
     --surface-dark: #101117;
-    /* Even darker for contrast, like cards or elevated sections */
     --border-light: #23243a;
-    /* Subtle dark border */
     --white: #fff;
-    /* Explicit white color variable */
 
     /* Text Colors */
     --text-primary: #F3F6FA;
     --text-secondary: #8A8FA3;
     --text-tertiary: #5A5F73;
     --text-light: #FFFFFF;
-    /* Redundant if --white is used for general white text */
 
     /* --- Typography --- */
     --font-family-base: 'Roboto', 'Inter', 'Open Sans', Arial, sans-serif;
-    --font-size-table-compact: 0.68rem;
-    --font-size-chart-label: 0.7rem;
+    --font-size-xxxs: 0.7rem;
     --font-size-xxs: 0.75rem;
     --font-size-xs: 0.875rem;
     --font-size-sm: 0.9375rem;
@@ -83,16 +75,7 @@
     --space-lg: 24px;
     --space-xl: 32px;
 
-    /* --- Section Styles --- */
-    --section-padding: 8px;
-    --section-padding-compact: 4px;
-    --section-font-size-compact: 0.75rem;
-    --section-font-size-sm: 0.875rem;
-    --section-font-size: 0.98rem;
-    --section-header-font-size: 1.1rem;
-    --section-header-font-size-compact: 1.08rem;
-
-        --chart-label-text: #F3F6FA; /* Light text for dark backgrounds */
+    --chart-label-text: #F3F6FA; /* Light text for dark backgrounds */
     --chart-bg: var(--surface-light);
     --chart-grid: var(--border-light);
     --chart-tooltip-bg: var(--surface-dark);
@@ -116,20 +99,15 @@
 
     /* --- Hover Effects --- */
     --hover-brightness: brightness(1.1);
-    /* General brightness for hover */
     --button-hover-transform: translateY(-1px);
-    /* Example transform for buttons */
     --button-hover-bg: var(--gradient-primary);
-    /* Example background for button hover */
     --button-active-bg: var(--color-primary-dark);
-    /* Example background for button active state */
 
     /* --- Focus Ring --- */
     --focus-ring: 0 0 0 3px var(--color-primary);
 
     /* --- App Orb Styles (Specific Components) --- */
     --app-orb-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
-    /* Assuming --border-active is defined elsewhere, or use a color directly */
     --app-orb-menu-bg: var(--surface-light);
     --app-orb-menu-shadow: var(--shadow-lg);
 }

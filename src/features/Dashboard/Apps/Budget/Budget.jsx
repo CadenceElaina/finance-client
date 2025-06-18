@@ -1,100 +1,104 @@
-import React, { useRef, useState, useEffect } from 'react';
-import BudgetOverviewWrapper from './BudgetOverviewWrapper';
-import IncomeTab from './IncomeTab';
-import FlexibleTabs from '../../../../components/ui/Tabs/FlexibleTabs';
-import budgetStyles from './budget.module.css'; // Renamed to budgetStyles for consistency
+import React, { useRef, useState, useEffect } from "react";
+import BudgetOverviewWrapper from "./BudgetOverviewWrapper";
+import IncomeTab from "./IncomeTab";
+import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
+import budgetStyles from "./budget.module.css"; // Renamed to budgetStyles for consistency
 import { getAppSize } from "../../../../utils/getAppSize";
-import { useFinancialData } from '../../../../contexts/FinancialDataContext';
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 
 const Budget = () => {
-    const containerRef = useRef(null);
-    const [containerSize, setContainerSize] = useState({ width: 955, height: 442 });
-    const { data, updateIncome, addExpense, updateExpense, removeExpense } = useFinancialData();
-    const budget = data.budget;
+  const containerRef = useRef(null);
+  const [containerSize, setContainerSize] = useState({
+    width: 0,
+    height: 0,
+  });
+  const { data, updateIncome, addExpense, updateExpense, removeExpense } =
+    useFinancialData();
+  const budget = data.budget;
 
-    useEffect(() => {
-        const updateSize = () => {
-            if (containerRef.current) {
-                const rect = containerRef.current.getBoundingClientRect();
-                setContainerSize({ width: rect.width, height: rect.height });
-            }
-        };
-        updateSize();
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerSize({ width: rect.width, height: rect.height });
+      }
+    };
+    updateSize();
 
-        let resizeObserver = null;
-        if (containerRef.current && window.ResizeObserver) {
-            resizeObserver = new window.ResizeObserver(entries => {
-                for (let entry of entries) {
-                    if (entry.target === containerRef.current) {
-                        const { width, height } = entry.contentRect;
-                        setContainerSize({ width, height });
-                    }
-                }
-            });
-            resizeObserver.observe(containerRef.current);
+    let resizeObserver = null;
+    if (containerRef.current && window.ResizeObserver) {
+      resizeObserver = new window.ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target === containerRef.current) {
+            const { width, height } = entry.contentRect;
+            setContainerSize({ width, height });
+          }
         }
+      });
+      resizeObserver.observe(containerRef.current);
+    }
 
-        window.addEventListener('resize', updateSize);
+    window.addEventListener("resize", updateSize);
 
-        return () => {
-            if (resizeObserver) resizeObserver.disconnect();
-            window.removeEventListener('resize', updateSize);
-        };
-    }, []);
+    return () => {
+      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener("resize", updateSize);
+    };
+  }, []);
 
-    const appSize = getAppSize(containerSize);
-    const smallApp = appSize === 'small';
-    const largeApp = appSize === 'large';
+  const appSize = getAppSize(containerSize);
+  const smallApp = appSize === "small";
+  const largeApp = appSize === "large";
 
-    const [activeMainTabId, setActiveMainTabId] = useState('budget');
+  const [activeMainTabId, setActiveMainTabId] = useState("budget");
 
-    const tabs = [
-        {
-            id: 'budget',
-            label: 'Budget Overview',
-            innerTabs: [
-                { id: 'showAll', label: 'All', component: () => null }, // Added 'showAll' inner tab
-                { id: 'summary', label: 'Summary', component: () => null },
-                { id: 'expenses', label: 'Expenses', component: () => null }
-            ],
-            component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
-                <BudgetOverviewWrapper
-                    smallApp={flexTabsSmallApp}
-                    activeInnerTabId={activeInnerTabId}
-                />
-            )
-        },
-        {
-            id: 'income',
-            label: 'Income',
-            component: () => <IncomeTab />
-        }
-    ];
+  const tabs = [
+    {
+      id: "budget",
+      label: "Budget Overview",
+      innerTabs: [
+        { id: "showAll", label: "All", component: () => null },
+        { id: "summary", label: "Summary", component: () => null },
+        { id: "expenses", label: "Expenses", component: () => null },
+      ],
+      component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
+        <BudgetOverviewWrapper
+          smallApp={flexTabsSmallApp}
+          activeInnerTabId={activeInnerTabId}
+        />
+      ),
+    },
+    {
+      id: "income",
+      label: "Income",
+      component: () => <IncomeTab />,
+    },
+  ];
 
-    return (
-        <div
-            ref={containerRef}
-            className={`
+  return (
+    <div
+      ref={containerRef}
+      className={`
                 ${budgetStyles.budgetAppContainer}
-                ${smallApp ? 'smallApp' : ''}
-                ${largeApp ? 'largeApp' : ''}
+                ${smallApp ? "smallApp" : ""}
+                ${largeApp ? "largeApp" : ""}
             `}
-        >
-            <FlexibleTabs
-                tabs={tabs}
-                activeTabId={activeMainTabId}
-                onTabChange={setActiveMainTabId}
-                smallApp={smallApp}
-                largeApp={largeApp}
-                className={`
+    >
+      <FlexibleTabs
+        tabs={tabs}
+        activeTabId={activeMainTabId}
+        onTabChange={setActiveMainTabId}
+        smallApp={smallApp}
+        largeApp={largeApp}
+        className={`
                     ${budgetStyles.budgetAppContainer}
-                    ${smallApp ? 'smallApp' : ''}
-                    ${largeApp ? 'largeApp' : ''}
+                    ${smallApp ? "smallApp" : ""}
+                    ${largeApp ? "largeApp" : ""}
                 `}
-                contentClassName={budgetStyles.budgetTabContent}
-            />
-        </div>
-    );
+        contentClassName={budgetStyles.budgetTabContent}
+      />
+    </div>
+  );
 };
 
 export default Budget;

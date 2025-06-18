@@ -1,34 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
-import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
-import '../styles/global.css';
-import '../features/Dashboard/dashboard.css'
-import '../features/Dashboard/AppMenu/apporblauncher.css';
-import { Responsive, WidthProvider } from 'react-grid-layout';
-import { demoUser } from '../data/demoData';
-import { useAuth } from '../contexts/AuthContext';
-import DashboardApp from '../features/Dashboard/DashboardApp';
-import GridItemWrapper from '../features/Dashboard/GridItemWrapper';
-import AppOrbLauncher from '../features/Dashboard/AppMenu/AppOrbLauncher';
+import React, { useState, useEffect, useRef } from "react";
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+import "../styles/global.css";
+import "../features/Dashboard/dashboard.css";
+import "../features/Dashboard/AppMenu/apporblauncher.css";
+import { Responsive, WidthProvider } from "react-grid-layout";
+import { useAuth } from "../contexts/AuthContext";
+import DashboardApp from "../features/Dashboard/DashboardApp";
+import GridItemWrapper from "../features/Dashboard/GridItemWrapper";
+import AppOrbLauncher from "../features/Dashboard/AppMenu/AppOrbLauncher";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const appsList = [
-  { id: 'accounts', name: 'My Accounts' },
-  { id: 'budget', name: 'Budget' },
-  { id: 'plan', name: 'Plan' },
-  { id: 'reports', name: 'Reports' },
-  { id: 'debt', name: 'Debt' },
-  { id: 'education', name: 'Education Center' },
-  { id: 'projections', name: 'Projections' },
-  { id: 'settings', name: 'Settings' },
+  { id: "accounts", name: "My Accounts" },
+  { id: "budget", name: "Budget" },
+  { id: "plan", name: "Plan" },
+  { id: "reports", name: "Reports" },
+  { id: "debt", name: "Debt" },
+  { id: "education", name: "Education Center" },
+  { id: "projections", name: "Projections" },
+  { id: "settings", name: "Settings" },
 ];
 
-const DashboardPage = ({ userData = demoUser }) => {
-  const DEFAULT_APP_WIDTH = 6;  // was 6
+const DashboardPage = ({ userData }) => {
+  const DEFAULT_APP_WIDTH = 6; // was 6
   const DEFAULT_APP_HEIGHT = 7.5; // was 8
-  const availableHandles = ['se'];
-  const initialAppIds = ['budget', 'accounts', 'plan', 'reports'];
+  const availableHandles = ["se"];
+  const initialAppIds = ["budget", "accounts", "plan", "reports"];
 
   const generateInitialLayout = (ids, cols, defaultWidth, defaultHeight) => {
     const layout = [];
@@ -46,7 +45,7 @@ const DashboardPage = ({ userData = demoUser }) => {
         h: defaultHeight,
         minW: 4,
         minH: 4,
-        resizeHandles: availableHandles
+        resizeHandles: availableHandles,
       });
     });
 
@@ -54,18 +53,25 @@ const DashboardPage = ({ userData = demoUser }) => {
   };
 
   const [layouts, setLayouts] = useState(() => ({
-    lg: generateInitialLayout(initialAppIds, 12, DEFAULT_APP_WIDTH, DEFAULT_APP_HEIGHT)
+    lg: generateInitialLayout(
+      initialAppIds,
+      12,
+      DEFAULT_APP_WIDTH,
+      DEFAULT_APP_HEIGHT
+    ),
   }));
   const [openAppIds, setOpenAppIds] = useState([...initialAppIds]);
   const [selectedAppId, setSelectedAppId] = useState(null);
   const appRefs = useRef({});
 
   const closeApp = (id) => {
-    setOpenAppIds(prevIds => prevIds.filter(appId => appId !== id));
-    setLayouts(prevLayouts => {
+    setOpenAppIds((prevIds) => prevIds.filter((appId) => appId !== id));
+    setLayouts((prevLayouts) => {
       const newLayouts = {};
       for (const breakpoint in prevLayouts) {
-        newLayouts[breakpoint] = prevLayouts[breakpoint].filter(item => item.i !== id);
+        newLayouts[breakpoint] = prevLayouts[breakpoint].filter(
+          (item) => item.i !== id
+        );
       }
       return newLayouts;
     });
@@ -73,9 +79,9 @@ const DashboardPage = ({ userData = demoUser }) => {
 
   const openApp = (id) => {
     if (!openAppIds.includes(id)) {
-      setOpenAppIds(prevIds => [...prevIds, id]);
+      setOpenAppIds((prevIds) => [...prevIds, id]);
 
-      setLayouts(prevLayouts => {
+      setLayouts((prevLayouts) => {
         const newLayouts = { ...prevLayouts };
 
         const newAppLayout = {
@@ -86,7 +92,7 @@ const DashboardPage = ({ userData = demoUser }) => {
           h: DEFAULT_APP_HEIGHT,
           minW: 2,
           minH: 2,
-          resizeHandles: availableHandles
+          resizeHandles: availableHandles,
         };
 
         if (newLayouts.lg) {
@@ -116,19 +122,23 @@ const DashboardPage = ({ userData = demoUser }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.shiftKey) {
-        if (e.code === 'Digit1') {
-          setOpenAppIds(appsList.map(app => app.id)); // Open all
+        if (e.code === "Digit1") {
+          setOpenAppIds(appsList.map((app) => app.id)); // Open all
         }
-        if (e.code === 'Digit2') {
+        if (e.code === "Digit2") {
           setOpenAppIds([]); // Close all
         }
-        if (e.code === 'Digit3' && selectedAppId) {
-          setLayouts(prev => {
+        if (e.code === "Digit3" && selectedAppId) {
+          setLayouts((prev) => {
             const newLayouts = { ...prev };
             for (const bp in newLayouts) {
               // Find the maximized app and others
-              const maximized = newLayouts[bp].find(item => item.i === selectedAppId);
-              const others = newLayouts[bp].filter(item => item.i !== selectedAppId);
+              const maximized = newLayouts[bp].find(
+                (item) => item.i === selectedAppId
+              );
+              const others = newLayouts[bp].filter(
+                (item) => item.i !== selectedAppId
+              );
 
               // Sort others by their current y/x order
               others.sort((a, b) => a.y - b.y || a.x - b.x);
@@ -139,7 +149,7 @@ const DashboardPage = ({ userData = demoUser }) => {
               // Reassign y for others starting from 1
               const newOthers = others.map((item, idx) => ({
                 ...item,
-                y: idx + 1
+                y: idx + 1,
               }));
 
               // Compose new layout: maximized first, then others
@@ -148,14 +158,14 @@ const DashboardPage = ({ userData = demoUser }) => {
             return newLayouts;
           });
         }
-        if (e.code === 'Digit4' && selectedAppId) {
+        if (e.code === "Digit4" && selectedAppId) {
           closeApp(selectedAppId);
         }
 
         // Cycle to next app
         const visualOrder = getVisualOrder(openAppIds, layouts);
 
-        if (e.code === 'ArrowRight' && visualOrder.length > 0) {
+        if (e.code === "ArrowRight" && visualOrder.length > 0) {
           e.preventDefault();
           if (!selectedAppId) {
             setSelectedAppId(visualOrder[0]);
@@ -165,40 +175,42 @@ const DashboardPage = ({ userData = demoUser }) => {
           }
         }
         // Cycle to previous app
-        if (e.code === 'ArrowLeft' && visualOrder.length > 0) {
+        if (e.code === "ArrowLeft" && visualOrder.length > 0) {
           e.preventDefault();
           if (!selectedAppId) {
             setSelectedAppId(visualOrder[visualOrder.length - 1]);
           } else {
             const idx = visualOrder.indexOf(selectedAppId);
-            setSelectedAppId(visualOrder[(idx - 1 + visualOrder.length) % visualOrder.length]);
+            setSelectedAppId(
+              visualOrder[(idx - 1 + visualOrder.length) % visualOrder.length]
+            );
           }
         }
         // Jump to first app
-        if (e.code === 'ArrowUp' && visualOrder.length > 0) {
+        if (e.code === "ArrowUp" && visualOrder.length > 0) {
           e.preventDefault();
           setSelectedAppId(visualOrder[0]);
         }
         // Jump to last app
-        if (e.code === 'ArrowDown' && visualOrder.length > 0) {
+        if (e.code === "ArrowDown" && visualOrder.length > 0) {
           e.preventDefault();
           setSelectedAppId(visualOrder[visualOrder.length - 1]);
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedAppId, openAppIds, layouts, closeApp, setOpenAppIds, setLayouts]);
 
   // Scroll to selected app when it changes
   useEffect(() => {
     // Find the selected app by its class
-    const selectedEl = document.querySelector('.app-window.selected');
+    const selectedEl = document.querySelector(".app-window.selected");
     if (selectedEl) {
       selectedEl.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center'
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
       });
     }
   }, [selectedAppId]);
@@ -207,15 +219,14 @@ const DashboardPage = ({ userData = demoUser }) => {
     const layout = layouts.lg || [];
     // Only include open apps, sort by y then x
     return layout
-      .filter(item => openAppIds.includes(item.i))
+      .filter((item) => openAppIds.includes(item.i))
       .sort((a, b) => a.y - b.y || a.x - b.x)
-      .map(item => item.i);
+      .map((item) => item.i);
   }
 
   return (
     <>
       <div className="dashboard-container">
-
         <ResponsiveGridLayout
           className="dashboard-grid"
           layouts={layouts}
@@ -228,15 +239,17 @@ const DashboardPage = ({ userData = demoUser }) => {
           onLayoutChange={onLayoutChange}
           draggableHandle=".app-header"
           draggableCancel=".no-drag"
-          resizeHandles={['se']}
+          resizeHandles={["se"]}
         >
-          {openAppIds.map(appId => {
+          {openAppIds.map((appId) => {
             const isSelected = selectedAppId === appId;
             return (
               <GridItemWrapper
                 key={appId}
                 onClick={() => setSelectedAppId(appId)}
-                ref={el => { appRefs.current[appId] = el; }}
+                ref={(el) => {
+                  appRefs.current[appId] = el;
+                }}
               >
                 <DashboardApp
                   appId={appId}
@@ -248,7 +261,6 @@ const DashboardPage = ({ userData = demoUser }) => {
             );
           })}
         </ResponsiveGridLayout>
-
       </div>
       <AppOrbLauncher
         appsList={appsList}

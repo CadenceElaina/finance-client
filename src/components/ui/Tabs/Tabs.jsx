@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styles from "./Tabs.module.css";
-import DropdownTabs from "./DropdownTabs";
+import InnerTabs from "./InnerTabs";
 
-const FlexibleTabs = ({
+const Tabs = ({
   tabs,
   activeTabId,
   onTabChange,
   className = "",
   contentClassName = "",
   smallApp = false,
-  alwaysShowInnerTabsAsRow = false, // If true, tabs with innerTabs always use DropdownTabs (inline)
+  alwaysShowInnerTabsAsRow = false,
 }) => {
   const activeTab = tabs.find((tab) => tab.id === activeTabId);
 
@@ -17,14 +17,13 @@ const FlexibleTabs = ({
     const currentMainTab = tabs.find((tab) => tab.id === activeTabId);
     if (currentMainTab?.innerTabs?.length > 0) {
       const innerTabs = currentMainTab.innerTabs;
-      // Determine if dropdown behavior should be used for the initial active main tab
-      const shouldUseDropdown =
+      const shouldUseInnerTabs =
         (alwaysShowInnerTabsAsRow || smallApp) &&
         currentMainTab.innerTabs?.length > 0;
-      if (shouldUseDropdown && innerTabs.some((t) => t.id === "showAll")) {
+      if (shouldUseInnerTabs && innerTabs.some((t) => t.id === "showAll")) {
         return "showAll";
       }
-      return innerTabs[0].id; // Default to first inner tab
+      return innerTabs[0].id;
     }
     return null;
   });
@@ -33,13 +32,12 @@ const FlexibleTabs = ({
     const newActiveMainTab = tabs.find((tab) => tab.id === activeTabId);
     if (newActiveMainTab?.innerTabs?.length > 0) {
       const innerTabs = newActiveMainTab.innerTabs;
-      // If current activeInnerTabId is not valid for the new main tab, set a default.
       if (!innerTabs.some((it) => it.id === activeInnerTabId)) {
-        const shouldUseDropdownForNewMainTab =
+        const shouldUseInnerTabsForNewMainTab =
           (alwaysShowInnerTabsAsRow || smallApp) &&
           newActiveMainTab.innerTabs?.length > 0;
         if (
-          shouldUseDropdownForNewMainTab &&
+          shouldUseInnerTabsForNewMainTab &&
           innerTabs.some((it) => it.id === "showAll")
         ) {
           setActiveInnerTabId("showAll");
@@ -48,7 +46,7 @@ const FlexibleTabs = ({
         }
       }
     } else {
-      setActiveInnerTabId(null); // New main tab has no inner tabs
+      setActiveInnerTabId(null);
     }
   }, [activeTabId, tabs, activeInnerTabId, smallApp, alwaysShowInnerTabsAsRow]);
 
@@ -57,14 +55,13 @@ const FlexibleTabs = ({
       <div className={styles.tabHeaders} role="tablist" aria-label="Main tabs">
         {tabs.map((tab) => {
           const hasInnerTabs = tab.innerTabs && tab.innerTabs.length > 0;
-          // Determine if this specific main tab should use the DropdownTabs component
-          const useDropdownForThisTab =
+          const useInnerTabsForThisTab =
             hasInnerTabs && (alwaysShowInnerTabsAsRow || smallApp);
 
           return (
             <React.Fragment key={tab.id}>
-              {useDropdownForThisTab ? (
-                <DropdownTabs
+              {useInnerTabsForThisTab ? (
+                <InnerTabs
                   tabs={tab.innerTabs}
                   activeTabId={
                     activeTabId === tab.id
@@ -74,35 +71,27 @@ const FlexibleTabs = ({
                       : tab.innerTabs[0].id
                   }
                   onTabChange={(innerId) => {
-                    // Called when an inner tab (menu item) is clicked
                     setActiveInnerTabId(innerId);
                     if (activeTabId !== tab.id) {
-                      // Ensure main tab is active
                       onTabChange(tab.id);
                     }
                   }}
                   label={tab.label}
                   isActive={activeTabId === tab.id}
-                  inline={true} // Renders inner tabs as a row
+                  inline={true}
                   isShowingAll={
                     activeTabId === tab.id && activeInnerTabId === "showAll"
                   }
-                  onDropdownButtonClick={() => {
-                    // Called when the main tab (acting as dropdown button) is clicked
+                  onInnerTabsButtonClick={() => {
                     if (activeTabId !== tab.id) {
-                      onTabChange(tab.id); // This will trigger useEffect to set a default inner tab
-                      // Then explicitly set to 'showAll' if that's the desired state on click
+                      onTabChange(tab.id);
                       if (tab.innerTabs.some((it) => it.id === "showAll")) {
                         setActiveInnerTabId("showAll");
                       } else {
                         setActiveInnerTabId(tab.innerTabs[0].id);
                       }
                     } else {
-                      // If already active, toggle or set to a default like 'showAll'
-                      // DropdownTabs handles its own open state. We ensure inner tab state.
                       if (tab.innerTabs.some((it) => it.id === "showAll")) {
-                        // If current inner is showAll, maybe cycle or pick first? Or let DropdownTabs handle open/close.
-                        // For now, ensure 'showAll' or first if dropdown button is clicked.
                         setActiveInnerTabId(
                           activeInnerTabId === "showAll" &&
                             tab.innerTabs.length > 1
@@ -136,13 +125,10 @@ const FlexibleTabs = ({
           );
         })}
       </div>
-
-      {/* The separate inner tabs row rendering is removed as DropdownTabs handles it when inline */}
-
       <div className={`${styles.tabContent} ${contentClassName}`}>
         {activeTab?.component &&
           activeTab.component({
-            smallApp: smallApp, // Pass original smallApp status for content
+            smallApp: smallApp,
             activeInnerTabId: activeInnerTabId,
           })}
       </div>
@@ -150,4 +136,4 @@ const FlexibleTabs = ({
   );
 };
 
-export default FlexibleTabs;
+export default Tabs;

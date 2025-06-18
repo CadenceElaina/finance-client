@@ -1,4 +1,3 @@
-/* Main Tabs */
 .tabsContainer {
     width: 100%;
 }
@@ -23,6 +22,7 @@
 .tabHeader.active,
 .tabHeader[aria-current="true"] {
     color: var(--color-primary);
+    border-bottom: 2.5px solid var(--color-primary);
     background: none;
 }
 
@@ -32,12 +32,9 @@
 }
 
 /* Inner Tabs Container */
-
 .innerTab {
     position: relative;
-    /* Ensure all properties are transitioned for a smooth fall */
     transition: transform var(--tab-slide-duration, 0.25s) var(--tab-slide-ease, cubic-bezier(0.25, 0.8, 0.25, 1)),
-        /* General smooth transition for transforms/opacity */
         opacity var(--tab-slide-duration, 0.25s) var(--tab-slide-ease, cubic-bezier(0.25, 0.8, 0.25, 1)),
         background 0.12s, color 0.12s, box-shadow 0.12s;
     transform-origin: center center;
@@ -45,35 +42,9 @@
     border: 1px solid var(--border-light);
 }
 
-/* Base states */
-/* This is the default, neutral state where tabs are visible and in their normal position */
 .innerTabDefault {
     transform: translateX(0) translateY(0) scale(1);
     opacity: 1;
     pointer-events: auto;
 }
 
-/* Inner Tab Animation Classes */
-
-
-
-
-/* Small App Mode */
-.smallApp .tabHeader {
-    font-size: var(--font-size-xs);
-    padding: 0 var(--space-xxs);
-    min-width: 60px;
-}
-.smallApp .tabHeaders {
-    gap: var(--space-xxs);
-}
-
-/* Large App Mode */
-.largeApp .tabHeader {
-    font-size: var(--font-size-base);
-    padding: 0 var(--space-sm);
-    min-width: 120px;
-}
-.largeApp .tabHeaders {
-    gap: var(--space-sm);
-}

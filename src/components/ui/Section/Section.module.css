@@ -6,30 +6,29 @@
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-light);
     display: flex; 
-    flex-direction: column; /* Stack header and content */
-    height: 100%; /* Important for TwoColumnLayout children */
+    flex-direction: column;
+    height: 100%;
 }
 
 .sectionHeader {
-    /* This style is for the div wrapping the header, not the h3 itself */
-    font-size: var(--font-size-base); /* Base font size, h3 inside will override */
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
     border-bottom: 1px solid var(--border-subtle);
     padding-bottom: var(--space-xxs);
-    padding-top: var(--space-xxs); /* Added top padding */
-    padding-left: var(--space-sm); /* Added left/right padding */
+    padding-top: var(--space-xxs);
+    padding-left: var(--space-sm);
     padding-right: var(--space-sm);
-    display: flex; /* Make sectionHeader a flex container */
-    align-items: center; /* Vertically align items in header */
-    justify-content: space-between; /* Space out title and right content */
-    gap: var(--space-sm); /* Gap between title and right content */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
 }
 
 .sectionHeader h3 {
-    margin: 0; /* Reset margin from browser default */
-    flex: 1; /* Allow h3 to take available space */
-    text-align: left; /* Default text alignment for section titles */
+    margin: 0;
+    flex: 1;
+    text-align: left;
 }
 
 .sectionContent {
@@ -42,7 +41,6 @@
 }
 
 /* --- TwoColumnLayout specific styles --- */
-
 .twoColumn {
     display: flex;
     flex-direction: row;
@@ -52,10 +50,10 @@
     box-sizing: border-box;
     align-items: flex-start;
     overflow-x: hidden;
-    height: 100%; /* Important for vertical distribution */
+    height: 100%;
 }
 
-.oneColumn { /* For smallApp mode, stack columns */
+.oneColumn {
     display: flex;
     flex-direction: column;
     gap: var(--space-xxs);
@@ -67,14 +65,13 @@
     height: 100%;
 }
 
-
 .column {
     min-width: 0;
     display: flex;
     flex-direction: column;
     flex: 1 1 0;
-    height: 100%; /* Columns should take full height in flex parent */
-    gap: var(--space-xxs); /* Gap between sections within a column */
+    height: 100%;
+    gap: var(--space-xxs);
 }
 
 .columns45_55 .column:first-child {
@@ -105,17 +102,13 @@
 }
 
 /* --- Common Chart-related Styles (Moved from accounts.module.css) --- */
-/* These styles are general for charts and should be here. */
-
-
 .chartHeader {
     text-align: center;
     margin-bottom: var(--space-xxs);
-    font-size: var(--font-size-base); /* Default size */
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
 }
-
 
 .noChartData {
     color: var(--text-secondary);
@@ -125,14 +118,14 @@
 }
 
 .chartLabelText {
-    font-size: var(--font-size-chart-label, var(--font-size-xxs)); /* Fallback for chart label text */
+    font-size: var(--font-size-chart-label, var(--font-size-xxs));
     fill: var(--chart-label-text, var(--text-primary));
     pointer-events: none;
 }
 
 /* --- Small App overrides for Charts --- */
 .smallApp .chartHeader {
-    font-size: var(--font-size-xxs); /* Smaller header for charts */
+    font-size: var(--font-size-xxs);
 }
 
 /* --- Section Header Row Specifics (from SectionHeader component) --- */
@@ -142,12 +135,10 @@
     justify-content: space-between;
     gap: var(--space-sm);
     width: 100%;
-    padding: var(--space-xs) var(--space-sm); /* Padding for the entire header row */
+    padding: var(--space-xs) var(--space-sm);
     border-bottom: 1px solid var(--border-subtle);
 }
-.sectionHeaderLeft {
-    /* Style for left side content in header */
-}
+.sectionHeaderLeft {}
 .sectionHeaderTitle {
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
@@ -171,48 +162,47 @@
 }
 
 /* --- Base Select Style --- */
-/* This will serve as a common base for all general select elements except budget select which has 2 selects */
 .baseSelect,
-select:not(.budgetSelect) { /* Apply to all select elements unless they have .budgetSelect */
-    min-width: 110px; /* Consistent minimum width */
-    font-size: var(--font-size-xxs); /* Default small font size */
+select:not(.budgetSelect) {
+    min-width: 110px;
+    font-size: var(--font-size-xxs);
     padding: var(--space-xxs) var(--space-xs);
-    height: 28px; /* Standard height for select inputs */
+    height: 28px;
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-light);
     background: var(--background-light);
     color: var(--text-primary);
     cursor: pointer;
-    appearance: none; /* Removes default browser select arrow */
+    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 18px;
-    padding-right: 26px; /* Space for custom arrow */
+    padding-right: 26px;
     transition: all var(--transition-speed-fast) var(--transition-ease);
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    box-sizing: border-box;
 }
 
 .baseSelect:focus,
 select:not(.budgetSelect):focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2); /* Subtle focus ring */
+    box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
 }
 
 /* --- Filter Select (Leveraging Base Select) --- */
 .filterSelect {
-    composes: baseSelect; /* Use composes to inherit styles if using CSS Modules */
+    composes: baseSelect;
 }
 
 .filterLabel {
-    font-size: var(--font-size-xxs); /* Smaller font for labels next to selects */
+    font-size: var(--font-size-xxs);
     color: var(--text-secondary);
-    margin-right: var(--space-xxs); /* Small space between label and select */
-    white-space: nowrap; /* Prevent label from wrapping */
+    margin-right: var(--space-xxs);
+    white-space: nowrap;
 }
 
-
+/* --- Large App Mode Scaling --- */
 :global(.largeApp) .section {
   font-size: var(--font-size-md);
   padding: var(--space-sm);
@@ -226,32 +216,14 @@ select:not(.budgetSelect):focus {
 }
 
 /* --- Large App Mode Scaling for Selects --- */
-/* Apply to the base select and specific select classes */
 :global(.largeApp) .baseSelect,
 :global(.largeApp) select:not(.budgetSelect),
-:global(.largeApp) .filterSelect { /* Exclude .tableSelect here, it's handled in its own module */
-  font-size: var(--font-size-base); /* Scale up font size */
-  padding: var(--space-sm) var(--space-sm); /* Increase padding */
-  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px); /* Adjust height */
-  min-width: 140px; /* Slightly wider for large app */
-  background-position: right 12px center; /* Adjust arrow position */
-  background-size: 20px; /* Adjust arrow size */
-  padding-right: 32px; /* Adjust padding for arrow */
+:global(.largeApp) .filterSelect {
+  font-size: var(--font-size-base);
+  padding: var(--space-sm) var(--space-sm);
+  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px);
+  min-width: 140px;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 32px;
 }
-
-/* Accounts.module.css */
-.portfoliosChartsRow {
-    display: flex;
-    flex-direction: row;
-    gap: var(--space-sm);
-    width: 100%; /* was 99% */
-    margin: 0;   /* remove margin */
-    padding: 0;  /* remove padding */
-}
-
-select,
-.filterSelect,
-.tableSelect {
-    cursor: pointer;
-}
-

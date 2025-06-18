@@ -3,16 +3,13 @@
 .tableContainer {
     width: 100%;
     overflow-x: auto;
-
-    /* Allows horizontal scrolling for large tables on small screens */
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 500px;
     margin: 0 auto;
-    font-size: var(--font-size-table-compact);
+    font-size: var(--font-size-sm);
     background: var(--surface-light);
     border: 1px solid var(--border-light);
 }
@@ -25,7 +22,6 @@
     border-bottom: 1px solid var(--border-light);
     vertical-align: middle;
     font-size: inherit;
-    /* Inherit from .table or .compactTable */
 }
 
 .table th {
@@ -39,7 +35,6 @@
     border-bottom: 1px solid var(--border-light);
     text-align: left; 
     white-space: nowrap;
-    /* Prevents header text from wrapping */
 }
 
 .table tr:nth-child(even) {
@@ -59,7 +54,6 @@
     transition: background 0.15s;
 }
 
-/* Input/Select elements within table cells for editing */
 .tableInput {
     width: 100%;
     padding: var(--space-xxs) var(--space-xxs);
@@ -70,19 +64,15 @@
     font-size: var(--font-size-xxs);
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-xxs) + (var(--space-xxs) * 2) + 2px);
-    /* Ensures consistent height */
     box-sizing: border-box;
     max-width: none;
 }
 
 .tableSelect {
-    /* Manually applying baseSelect styles due to build issue with composes from external file */
     width: auto;
- 
     max-width: 100%;
     box-sizing: border-box;
-    padding: var(--space-xxs) var(--space-xxs); /* Explicit padding to match tableInput */
-    /* Remove min-width from baseSelect to allow it to shrink */
+    padding: var(--space-xxs) var(--space-xxs);
 }
 
 .tableInput:focus,
@@ -92,7 +82,6 @@
     border-color: var(--color-primary);
 }
 
-/* Buttons within table cells */
 .removeButton,
 .addButton {
     padding: var(--space-xxs) var(--space-xs);
@@ -101,15 +90,14 @@
     cursor: pointer;
     transition: background-color 0.2s ease;
     white-space: nowrap;
-    /* Prevents button text from wrapping */
 }
 
 .removeButton {
     background-color: var(--status-danger);
     color: var(--text-on-danger, #fff);
     border: 1px solid var(--status-danger);
-    width: 100%; /* Make width consistent with addButton */
-    min-width: 90px; /* Ensures both buttons are at least this wide */
+    width: 100%;
+    min-width: 90px;
     box-sizing: border-box;
     transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
@@ -127,7 +115,7 @@
     background-color: var(--color-primary);
     color: var(--text-on-primary);
     border: 1px solid var(--color-primary);
-    width: 100%; /* Match removeButton */
+    width: 100%;
     min-width: 90px;
     box-sizing: border-box;
     transition: background 0.18s, color 0.18s, box-shadow 0.18s;
@@ -142,52 +130,25 @@
     filter: brightness(1.08);
 }
 
-/* Styles for a Section containing a table (e.g., AccountsTable, ExpensesTable) */
 .tableSection {
     background-color: var(--surface-light);
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
     width: 100%;
     max-width: none;
-/* border: 1px solid var(--border-light); */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
-/* --- SMALL APP MODE OVERRIDES --- */
-.smallApp {
-
-}
-
-.smallApp .table {
-
-}
-
-.smallApp .table th,
-.smallApp .table td {
-
-}
-
-.smallApp .tableInput,
-.smallApp .tableSelect,
-.smallApp .removeButton,
-.smallApp .addButton {
-
-}
-
 /* --- Filter Row Styles (Moved from accounts.module.css) --- */
-/* These styles are for the filter mechanism, which is used in Accounts and now Expenses.*/
 .filterRow {
     display: flex;
     align-items: center;
     gap: var(--space-xs);
     margin-bottom: 0;
-    /* Remove if SectionHeader adds internal margin */
     justify-content: flex-end;
-    /* Aligns filters to the right */
     flex-wrap: wrap;
-    /* Allow filters to wrap on very small screens */
 }
 
 .filterLabel {
@@ -195,29 +156,24 @@
     color: var(--text-secondary);
     font-weight: 500;
     white-space: nowrap;
-    /* Prevent label from wrapping */
 }
 
-/* This .filterSelect is now redundant as it's defined in section.module.css, but keeping here as a fallback */
 .filterSelect {
     min-width: 110px;
     font-size: var(--font-size-xxs);
     padding: var(--space-xxs) var(--space-xs);
     height: 28px;
-    /* Standard height for select inputs */
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-light);
     background: var(--background-light);
     color: var(--text-primary);
     cursor: pointer;
     appearance: none;
-    /* Removes default browser select arrow */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 18px;
     padding-right: 26px;
-    /* Space for custom arrow */
 }
 
 .filterSelect:focus {
@@ -228,15 +184,12 @@
 
 /* --- Table Header Title (used in SectionHeader) --- */
 .tableHeaderTitle {
-    /* Renamed from accountsHeaderTitle to be generic */
     font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text-primary);
     margin: 0;
     flex: 1;
     text-align: left;
-    /* Aligned left for standard section headers */
-    /* Accounts had text-align: center; for accountsHeaderTitle, this makes it left for generic */
 }
 
 .noResults {
@@ -246,21 +199,17 @@
     font-size: var(--font-size-sm);
 }
 
-/* Align Right Class (New) */
 .alignRight {
     text-align: right !important;
 }
 
-/* Always show pointer for enabled selects */
-/* These rules are now largely handled by section.module.css baseSelect */
-/* but explicitly keeping them here for table context is fine. */
 select,
 .filterSelect,
 .tableSelect {
     cursor: pointer;
 }
 
-
+/* Large App Mode Overrides */
 :global(.largeApp) .table {
   font-size: var(--font-size-base);
 }
@@ -273,40 +222,18 @@ select,
 :global(.largeApp) .tableSelect {
   font-size: var(--font-size-base);
   padding: var(--space-sm) var(--space-sm);
-  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px); /* Adjust height */
-  background-position: right 12px center; /* Adjust arrow position */
-  background-size: 20px; /* Adjust arrow size */
-  padding-right: 32px; /* Adjust padding for arrow */
+  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px);
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 32px;
 }
 
-/* Button.module.css */
-:global(.largeApp) .button {
-  font-size: var(--font-size-base);
-  min-width: 160px;
-  padding: var(--space-sm) var(--space-sm);
-}
-
-/* Section.module.css */
-:global(.largeApp) .section {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm);
-}
-:global(.largeApp) .sectionHeader {
-  font-size: var(--font-size-md);
-  padding: var(--space-sm) var(--space-sm);
-}
-:global(.largeApp) .sectionContent {
-  padding: var(--space-sm);
-}
-
-/* Make expense table inputs/selects fill the cell */
 .table td input[type="text"],
 .table td input[type="number"],
 .table td select {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
-    /* Remove extra margin/padding if needed */
     margin: 0;
 }
 
@@ -327,7 +254,6 @@ select,
     color: var(--text-primary);
 }
 
-/* Option backgrounds for dropdown (browser support varies) */
 .tableSelect option.required {
     background: var(--status-success);
     color: var(--text-on-primary, #fff);

@@ -89,49 +89,24 @@
 .button.tab.active,
 .button.tab[aria-current="true"] {
     background: var(--color-primary);
-    color: var(--text-on-primary); /* Use text-on-primary for active tabs */
+    color: var(--text-on-primary); 
     border-color: var(--color-primary);
 }
 
 .button.tab:hover:not(.active):not([aria-current="true"]) {
-    background: var(--dashboard-button-bg); /* Use a consistent variable for hover */
-    color: var(--dashboard-button-text); /* Use a consistent variable for hover text */
-    /* Remove filter here if you want a cleaner color change */
+    background: var(--dashboard-button-bg); 
+    color: var(--dashboard-button-text); 
 }
 
-/* Disabled */
 .button:disabled {
-    background-color: var(--interactive-disabled-bg); /* Use theme variable */
-    color: var(--interactive-disabled-text); /* Use theme variable */
+    background-color: var(--interactive-disabled-bg); 
+    color: var(--interactive-disabled-text); 
     cursor: not-allowed;
     opacity: 0.7;
     filter: none;
 }
 
 /* Large App Specific Styles */
-
-/* Use variables for large app mode scaling */
-/* Table.module.css */
-:global(.largeApp) .table {
-  font-size: var(--font-size-base);
-}
-:global(.largeApp) .table th,
-:global(.largeApp) .table td {
-  padding: var(--space-sm) var(--space-sm);
-  font-size: var(--font-size-base);
-}
-:global(.largeApp) .tableInput,
-:global(.largeApp) .tableSelect {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
-}
-:global(.largeApp) .removeButton,
-:global(.largeApp) .addButton {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
-}
-
-/* Button.module.css */
 :global(.largeApp) .button {
   font-size: var(--font-size-base);
   min-width: 160px;

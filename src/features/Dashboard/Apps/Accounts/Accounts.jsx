@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import FlexibleTabs from "../../../../components/ui/Tabs/FlexibleTabs";
+import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
 import OverviewTab from "./OverviewTab";
 import PortfoliosWrapper from "./PortfoliosWrapper";
 import accountsStyles from "./Accounts.module.css";
@@ -51,7 +51,7 @@ const Accounts = () => {
       id: "portfolios",
       label: "Portfolios",
       innerTabs: [
-        { id: "showAll", label: "Overview", component: () => null },
+        { id: "investments", label: "Investments", component: () => null }, // <-- was "showAll"/"Overview"
         { id: "allocation", label: "Allocation", component: () => null },
         { id: "performance", label: "Performance", component: () => null },
       ],

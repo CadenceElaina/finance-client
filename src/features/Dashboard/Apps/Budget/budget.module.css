@@ -100,39 +100,6 @@
     font-size: var(--font-size-xs);
 }
 
-.overviewTabSmall {
-    gap: var(--space-xs);
-    padding: var(--space-xxs);
-}
-
-.overviewTabSmall .snapshotRowFull {
-    padding: var(--space-xxs);
-    gap: var(--space-xs);
-}
-
-.overviewTabSmall .snapshotItem {
-    flex: 1 1 70px;
-    min-width: 60px;
-    padding: var(--space-xxs) var(--space-xxs);
-    gap: var(--space-xxs);
-}
-
-.overviewTabSmall .snapshotLabel {
-    font-size: var(--font-size-xxs);
-}
-
-.overviewTabSmall .value {
-    font-size: var(--font-size-sm);
-}
-
-.overviewTabSmall .chartsColumn {
-    gap: var(--space-xxs);
-}
-
-.overviewTabSmall .tableColumn {
-    gap: var(--space-xxs);
-}
-
 .summaryFilterControls {
     display: flex;
     flex-direction: column;

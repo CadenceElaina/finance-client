@@ -1,6 +1,6 @@
 // src/features/Dashboard/Apps/Accounts/PortfoliosWrapper.jsx
 import React, { useState } from "react";
-import HoldingsTab from "./Investments/HoldingsTab";
+import InvestmentsTab from "./Investments/InvestmentsTab";
 import AllocationTab from "./Investments/AllocationTab";
 import PerformanceTab from "./Investments/PerformanceTab";
 import accountsStyles from "./Accounts.module.css";
@@ -110,7 +110,6 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
   const gainLossPercent =
     totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
 
-  // Snapshot row using budget styles
   const snapshotItems = [
     {
       label: "Value",
@@ -142,7 +141,6 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
     },
   ];
 
-  // Common props for tabs
   const tabProps = {
     smallApp,
     portfolioId: selectedPortfolioId,
@@ -150,24 +148,23 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
     portfolios,
     setSelectedPortfolioId,
     selectedPortfolioId,
-    portfolioSelectMenu, // Pass the select menu to child tabs
+    portfolioSelectMenu,
   };
 
   // Table header for holdings
-  const holdingsHeaderTitle =
+  const investmentsHeaderTitle =
     selectedPortfolioId === "all"
       ? "All Investments"
       : `${selectedPortfolioName}'s Investments`;
 
   return (
     <div className={accountsStyles.portfoliosContentContainer}>
-      {/* Overview snapshot and holdings */}
-      {(!activeInnerTabId || activeInnerTabId === "showAll") && (
+      {(!activeInnerTabId || activeInnerTabId === "investments") && (
         <>
           <SnapshotRow items={snapshotItems} small={smallApp} />
-          <HoldingsTab
+          <InvestmentsTab
             {...tabProps}
-            holdingsHeaderTitle={holdingsHeaderTitle}
+            investmentsHeaderTitle={investmentsHeaderTitle}
             showPortfolioSelectMenu
           />
         </>
