@@ -15,7 +15,7 @@
     display: flex;
     flex-wrap: nowrap;
     padding: var(--space-xs);
-    gap: var(--space-sm);
+    gap: var(--space-xs);
     justify-content: center;
 }
 
@@ -111,4 +111,28 @@
     display: flex;
     align-items: center;
     gap: var(--space-xxs);
+}
+
+.budgetChartsTabContainer {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-xs);
+}
+
+.budgetChartsTabContainer.smallApp {
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.budgetChartsTabSection {
+  flex: 1;
+}
+
+.budgetChartsTabChart {
+  width: 100%;
+  height: 335px;
+}
+
+.budgetChartsTabChart.smallApp {
+  height: 300px;
 }

@@ -140,7 +140,7 @@ const AllocationTab = ({
           fill="var(--chart-label-text)"
           textAnchor={cos >= 0 ? "start" : "end"}
           dominantBaseline="central"
-          fontSize={smallApp ? "0.7rem" : "0.85rem"}
+          fontSize="var(--font-size-xxs)" // <-- Use your CSS variable here
           style={{ fontWeight: 500, pointerEvents: "none" }}
         >
           {`${name} (${percentDisplay}%)`}

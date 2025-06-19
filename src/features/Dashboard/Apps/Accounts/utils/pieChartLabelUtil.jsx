@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 /**
  * Splits a string into lines so that no line exceeds maxLineLength.
@@ -9,26 +9,26 @@ import React from 'react';
  */
 
 export function wrapChartLabelLines(text, maxLineLength = 12) {
-    const words = text.split(' ');
-    const lines = [];
-    let currentLine = '';
-    words.forEach(word => {
-        if ((currentLine + ' ' + word).trim().length > maxLineLength) {
-            if (currentLine) lines.push(currentLine.trim());
-            currentLine = word;
-        } else {
-            currentLine = currentLine ? currentLine + ' ' + word : word;
-        }
-    });
-    if (currentLine) lines.push(currentLine.trim());
-    return lines;
+  const words = text.split(" ");
+  const lines = [];
+  let currentLine = "";
+  words.forEach((word) => {
+    if ((currentLine + " " + word).trim().length > maxLineLength) {
+      if (currentLine) lines.push(currentLine.trim());
+      currentLine = word;
+    } else {
+      currentLine = currentLine ? currentLine + " " + word : word;
+    }
+  });
+  if (currentLine) lines.push(currentLine.trim());
+  return lines;
 }
 
 /**
  * For legends or non-SVG text, returns a string with '\n' for line breaks.
  */
 export function wrapChartLabel(text, maxLineLength = 12) {
-    return wrapChartLabelLines(text, maxLineLength).join('\n');
+  return wrapChartLabelLines(text, maxLineLength).join("\n");
 }
 
 /**
@@ -38,38 +38,50 @@ export function wrapChartLabel(text, maxLineLength = 12) {
  * @returns {JSX.Element[]}
  */
 export function renderLabelTspans(lines, x) {
-    return lines.map((line, i) => (
-        <tspan x={x} dy={i === 0 ? 0 : 14} key={i}>{line}</tspan>
-    ));
+  return lines.map((line, i) => (
+    <tspan x={x} dy={i === 0 ? 0 : 14} key={i}>
+      {line}
+    </tspan>
+  ));
 }
 
 /**
  * Returns a render function for recharts Pie label that wraps text and positions it.
  * Usage: label={renderPieLabel}
  */
-export function renderPieLabel({ cx, cy, midAngle, outerRadius, percent, name, smallApp }) {
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + (smallApp ? 6 : 10);
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const textAnchor = x > cx ? 'start' : 'end';
-    const finalX = x + (x > cx ? 5 : -5);
+export function renderPieLabel({
+  cx,
+  cy,
+  midAngle,
+  outerRadius,
+  percent,
+  name,
+  smallApp,
+}) {
+  const RADIAN = Math.PI / 180;
+  const radius = outerRadius + (smallApp ? 6 : 10);
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+  const textAnchor = x > cx ? "start" : "end";
+  const finalX = x + (x > cx ? 5 : -5);
 
-    const labelText = `${name} (${(percent * 100).toFixed(0)}%)`;
-    const lines = wrapChartLabelLines(labelText, 12);
+  const labelText = `${name} (${(percent * 100).toFixed(0)}%)`;
+  const lines = wrapChartLabelLines(labelText, 12);
 
-    return (
-        <text
-            x={finalX}
-            y={y - (lines.length - 1) * 8 / 2}
-            fill="var(--chart-label-text)"
-            textAnchor={textAnchor}
-            dominantBaseline="central"
-            fontSize="12"
-        >
-            {lines.map((line, i) => (
-                <tspan x={finalX} dy={i === 0 ? 0 : 14} key={i}>{line}</tspan>
-            ))}
-        </text>
-    );
+  return (
+    <text
+      x={finalX}
+      y={y - ((lines.length - 1) * 8) / 2}
+      fill="var(--chart-label-text)"
+      textAnchor={textAnchor}
+      dominantBaseline="central"
+      fontSize="var(--font-size-xxs)"
+    >
+      {lines.map((line, i) => (
+        <tspan x={finalX} dy={i === 0 ? 0 : 14} key={i}>
+          {line}
+        </tspan>
+      ))}
+    </text>
+  );
 }

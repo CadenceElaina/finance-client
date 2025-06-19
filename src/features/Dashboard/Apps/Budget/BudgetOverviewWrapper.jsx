@@ -1,5 +1,5 @@
 // src/features/Dashboard/Apps/Budget/BudgetOverviewWrapper.jsx
-import React, { useState } from "react";
+import React from "react";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import SummaryTab from "./SummaryTab";
 import ExpensesTab from "./ExpensesTab";
@@ -12,35 +12,18 @@ import {
   getTotalAssets,
   getTotalLiabilities,
 } from "../../../../utils/calculations/financialCalculations";
-import SnapshotRow from "../../../../components/ui/Snapshot/SnapshotRow";
 
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
   const { data, userSignedIn } = useFinancialData();
   const accounts = data.accounts;
-  const budget = data.budget;
-  const [period, setPeriod] = useState("both");
-  const [tax, setTax] = useState("both");
+  const budget = data.budget; // This will have the recalculated fields
 
+  // Use the calculated values from the budget object
   const monthlyIncomeAT = budget.monthlyAfterTax || 0;
-  const annualIncomeAT =
-    monthlyIncomeAT * 12 +
-    (budget.income.bonusAfterTax || 0) +
-    (budget.income.additionalIncomeAfterTax || 0);
-
-  const monthlyIncomePT =
-    budget.income.type === "salary"
-      ? (budget.income.annualPreTax || 0) / 12
-      : ((budget.income.hourlyRate || 0) *
-          (budget.income.expectedAnnualHours || 0)) /
-        12;
-
-  const annualIncomePT =
-    budget.income.type === "salary"
-      ? budget.income.annualPreTax || 0
-      : (budget.income.hourlyRate || 0) *
-        (budget.income.expectedAnnualHours || 0);
-
-  const monthlyExpenses = budget.totalMonthlyExpenses || 0;
+  const annualIncomeAT = budget.annualAfterTax || 0;
+  const monthlyIncomePT = budget.monthlyPreTax || 0;
+  const annualIncomePT = budget.annualPreTax || 0;
+  const monthlyExpenses = budget.totalMonthlyExpenses || 0; // This should update when expenses change
   const annualExpenses = monthlyExpenses * 12;
 
   const monthlyDiscretionaryAT = monthlyIncomeAT - monthlyExpenses;
@@ -53,23 +36,7 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
   const totalAssets = getTotalAssets(accounts);
   const totalDebt = getTotalLiabilities(accounts);
 
-  const summaryProps = {
-    period,
-    setPeriod,
-    tax,
-    setTax,
-    monthlyIncomeAT,
-    annualIncomeAT,
-    monthlyIncomePT,
-    annualIncomePT,
-    monthlyExpenses,
-    annualExpenses,
-    monthlyDiscretionaryAT,
-    annualDiscretionaryAT,
-    monthlyDiscretionaryPT,
-    annualDiscretionaryPT,
-  };
-
+  // Remove the summaryProps object and pass individual props
   const expensesProps = {
     expenses: budget.monthlyExpenses,
     smallApp: smallApp,
@@ -108,19 +75,17 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
 
   return (
     <div className={budgetStyles.budgetContentWrapper}>
-      <SnapshotRow items={snapshotItems} small={smallApp} />
-
       {smallApp ? (
         !activeInnerTabId || activeInnerTabId === "showAll" ? (
           <>
-            <SummaryTab {...summaryProps} smallApp={smallApp} />
+            <SummaryTab smallApp={smallApp} />
             <ExpensesTab {...expensesProps} smallApp={smallApp} />
           </>
         ) : activeInnerTabId === "expenses" ? (
           <ExpensesTab {...expensesProps} smallApp={smallApp} />
         ) : (
           <>
-            <SummaryTab {...summaryProps} smallApp={smallApp} />
+            <SummaryTab smallApp={smallApp} />
           </>
         )
       ) : (
@@ -128,7 +93,7 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
           className={sectionStyles.columns45_55}
           left={
             <>
-              <SummaryTab {...summaryProps} smallApp={smallApp} />
+              <SummaryTab smallApp={smallApp} />
             </>
           }
           right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}

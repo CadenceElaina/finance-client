@@ -5,6 +5,7 @@ import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
 import budgetStyles from "./budget.module.css"; // Renamed to budgetStyles for consistency
 import { getAppSize } from "../../../../utils/getAppSize";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
+import BudgetChartsTab from "./BudgetChartsTab";
 
 const Budget = () => {
   const containerRef = useRef(null);
@@ -55,7 +56,7 @@ const Budget = () => {
   const tabs = [
     {
       id: "budget",
-      label: "Budget Overview",
+      label: "Overview",
       innerTabs: [
         { id: "showAll", label: "All", component: () => null },
         { id: "summary", label: "Summary", component: () => null },
@@ -65,6 +66,16 @@ const Budget = () => {
         <BudgetOverviewWrapper
           smallApp={flexTabsSmallApp}
           activeInnerTabId={activeInnerTabId}
+        />
+      ),
+    },
+    {
+      id: "charts",
+      label: "Charts",
+      component: ({ smallApp: flexTabsSmallApp }) => (
+        <BudgetChartsTab
+          expenses={budget.monthlyExpenses}
+          smallApp={flexTabsSmallApp}
         />
       ),
     },

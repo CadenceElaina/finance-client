@@ -130,35 +130,50 @@
 
 /* --- Section Header Row Specifics (from SectionHeader component) --- */
 .sectionHeaderRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-sm);
-    width: 100%;
-    padding: var(--space-xs) var(--space-sm);
-    border-bottom: 1px solid var(--border-subtle);
-}
-.sectionHeaderLeft {}
-.sectionHeaderTitle {
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-semibold);
-    color: var(--text-primary);
-    margin: 0;
-    flex: 1;
-    text-align: left;
-}
-.sectionHeaderRight {
-    font-size: var(--font-size-xs);
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: var(--space-xs);
+  gap: var(--space-sm);
 }
 
-.filterColumn {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-xs);
+.sectionHeaderLeft {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sectionHeaderTitle {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sectionHeaderRight {
+  flex: 0 0 auto;
+}
+
+.editButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-xxs);
+  border-radius: var(--border-radius-sm);
+  transition: color var(--transition-speed-fast), background-color var(--transition-speed-fast);
+}
+
+.editButton:hover {
+  color: var(--color-primary);
+  background-color: var(--surface-light);
+}
+
+.editButton:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* --- Base Select Style --- */

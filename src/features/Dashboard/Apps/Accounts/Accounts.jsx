@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
-import OverviewTab from "./OverviewTab";
+import OverviewTab from "./Overview/OverviewTab";
 import PortfoliosWrapper from "./PortfoliosWrapper";
 import accountsStyles from "./Accounts.module.css";
 import { getAppSize } from "../../../../utils/getAppSize";

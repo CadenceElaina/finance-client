@@ -13,11 +13,10 @@ import SnapshotRow from "../../../../components/ui/Snapshot/SnapshotRow";
 const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
   const { data } = useFinancialData();
   const allAccounts = data.accounts || [];
-  const portfolios = (
-    data.portfolios && data.portfolios.length > 0
-      ? data.portfolios
-      : DEMO_PORTFOLIOS
-  ).filter((p) => {
+  const allPortfolios = data.portfolios || []; // Use actual portfolios from data
+
+  // Filter portfolios that have securities
+  const portfolios = allPortfolios.filter((p) => {
     const portfolioAccounts = allAccounts.filter(
       (acc) => acc.portfolioId === p.id && acc.category === "Investments"
     );

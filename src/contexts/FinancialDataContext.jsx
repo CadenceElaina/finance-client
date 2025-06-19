@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-import { DEMO_ACCOUNTS, DEFAULT_DEMO_BUDGET } from "../utils/constants";
+import {
+  DEMO_ACCOUNTS,
+  DEFAULT_DEMO_BUDGET,
+  DEMO_PORTFOLIOS,
+} from "../utils/constants";
 import { calculateBudgetFields } from "../utils/calculations/budgetCalculations";
 import {
   getLocalData,
@@ -20,6 +24,7 @@ export const FinancialDataProvider = ({ children }) => {
   const [data, setData] = useState({
     accounts: DEMO_ACCOUNTS,
     budget: DEFAULT_DEMO_BUDGET,
+    portfolios: DEMO_PORTFOLIOS, // Add portfolios to initial state
   });
 
   // Load data on mount or when user/persistence changes
@@ -35,10 +40,15 @@ export const FinancialDataProvider = ({ children }) => {
       }
       setData(
         loaded && loaded.budget
-          ? { ...loaded, budget: calculateBudgetFields(loaded.budget) }
+          ? {
+              ...loaded,
+              budget: calculateBudgetFields(loaded.budget),
+              portfolios: loaded.portfolios || DEMO_PORTFOLIOS, // Ensure portfolios exist
+            }
           : {
               accounts: DEMO_ACCOUNTS,
               budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
+              portfolios: DEMO_PORTFOLIOS, // Include portfolios in demo data
             }
       );
     }
@@ -49,11 +59,14 @@ export const FinancialDataProvider = ({ children }) => {
   const saveData = async (newData) => {
     const dataToSave = newData || data; // Use current data if none provided
     const calculatedBudget = calculateBudgetFields(dataToSave.budget);
-    setData({ ...dataToSave, budget: calculatedBudget });
+    const finalData = { ...dataToSave, budget: calculatedBudget };
+
+    setData(finalData); // Update state with calculated budget
+
     if (user && persistence === "server") {
       // TODO: save to server
     } else if (persistence === "local") {
-      saveLocalData({ ...dataToSave, budget: calculatedBudget });
+      saveLocalData(finalData);
     }
   };
 
@@ -152,13 +165,13 @@ export const FinancialDataProvider = ({ children }) => {
     setData((prev) => ({
       ...prev,
       accounts: DEMO_ACCOUNTS,
-      portfolios: [],
+      portfolios: DEMO_PORTFOLIOS, // Reset portfolios too
     }));
     if (persistence === "local") {
       saveLocalData({
         ...data,
         accounts: DEMO_ACCOUNTS,
-        portfolios: [],
+        portfolios: DEMO_PORTFOLIOS, // Save portfolios
       });
     }
   };

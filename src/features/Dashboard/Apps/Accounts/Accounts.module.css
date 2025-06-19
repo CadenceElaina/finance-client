@@ -8,13 +8,13 @@
 }
 
 .positive {
-    color: var(--status-success) !important;
-    font-weight: bold;
+    color: var(--status-success);
+    font-weight: 600;
 }
 
 .negative {
-    color: var(--status-danger) !important;
-    font-weight: bold;
+    color: var(--status-danger);
+    font-weight: 600;
 }
 
 .tableColumn {
@@ -96,4 +96,27 @@
 
 :global(.largeApp) .portfoliosChartsRow {
     gap: var(--space-md);
+}
+
+.breakdownChartsRow {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-xs);
+  width: 55%;
+  margin: 0 auto;
+  margin-bottom: var(--space-xs);
+  align-items: stretch;
+}
+
+.breakdownChartsRowSmall {
+  /* Remove or comment out this class to always keep row layout */
+  /* flex-direction: column; */
+  /* gap: 8px; */
+}
+
+.overviewContentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  height: 100%;
 }

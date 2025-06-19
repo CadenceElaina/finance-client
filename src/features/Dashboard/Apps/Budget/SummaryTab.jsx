@@ -191,13 +191,6 @@ const SummaryTab = () => {
           )}
         </div>
       </Section>
-      <ControlPanel
-        onSave={() => saveData()}
-        onReset={resetBudgetToDemo}
-        onClear={clearBudget}
-        saveLabel="Save Budget"
-        resetLabel="Reset to Demo"
-      />
     </>
   );
 };
