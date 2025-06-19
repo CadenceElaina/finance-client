@@ -26,10 +26,14 @@ import {
   getTotalInvestments,
 } from "../../../../utils/calculations/financialCalculations";
 import { CHART_COLORS } from "../../../../utils/chartColors";
+import ControlPanel from "../../../../components/ui/ControlPanel/ControlPanel";
 
 const OverviewTab = ({ smallApp }) => {
   const {
     data: { accounts },
+    saveData,
+    clearAccountsData,
+    resetAccountsToDemo,
   } = useFinancialData();
   //console.log('OverviewTab rendered with smallApp:', smallApp);
   const [accountCategoryFilter, setAccountCategoryFilter] = useState("all");
@@ -287,6 +291,13 @@ const OverviewTab = ({ smallApp }) => {
           </div>
         }
         smallApp={smallApp}
+      />
+      <ControlPanel
+        onSave={() => saveData()}
+        onReset={resetAccountsToDemo}
+        onClear={clearAccountsData}
+        saveLabel="Save Accounts"
+        resetLabel="Reset to Demo"
       />
     </div>
   );

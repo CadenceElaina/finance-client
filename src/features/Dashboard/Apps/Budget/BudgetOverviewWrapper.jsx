@@ -4,7 +4,6 @@ import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import SummaryTab from "./SummaryTab";
 import ExpensesTab from "./ExpensesTab";
 import TwoColumnLayout from "../../../../components/ui/Section/TwoColumnLayout";
-import BudgetControlPanel from "./BudgetControlPanel";
 import budgetStyles from "./budget.module.css";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
 import {
@@ -115,8 +114,6 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
         !activeInnerTabId || activeInnerTabId === "showAll" ? (
           <>
             <SummaryTab {...summaryProps} smallApp={smallApp} />
-            <BudgetControlPanel userSignedIn={userSignedIn} />{" "}
-            {/* <-- Move here */}
             <ExpensesTab {...expensesProps} smallApp={smallApp} />
           </>
         ) : activeInnerTabId === "expenses" ? (
@@ -124,8 +121,6 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
         ) : (
           <>
             <SummaryTab {...summaryProps} smallApp={smallApp} />
-            <BudgetControlPanel userSignedIn={userSignedIn} />{" "}
-            {/* <-- Move here */}
           </>
         )
       ) : (
@@ -134,8 +129,6 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
           left={
             <>
               <SummaryTab {...summaryProps} smallApp={smallApp} />
-              <BudgetControlPanel userSignedIn={userSignedIn} />{" "}
-              {/* <-- Move here */}
             </>
           }
           right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}

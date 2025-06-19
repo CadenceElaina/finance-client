@@ -1,0 +1,7 @@
+.controlPanel {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--space-sm);
+  justify-content: center;
+  margin: var(--space-xs) 0;
+}

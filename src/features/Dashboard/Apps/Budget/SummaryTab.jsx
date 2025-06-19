@@ -4,6 +4,7 @@ import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
 import styles from "./budget.module.css";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
+import ControlPanel from "../../../../components/ui/ControlPanel/ControlPanel";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import {
   getNetWorth,
@@ -25,7 +26,7 @@ const TAX_OPTIONS = [
 ];
 
 const SummaryTab = () => {
-  const { data } = useFinancialData();
+  const { data, saveData, clearBudget, resetBudgetToDemo } = useFinancialData();
   const accounts = data.accounts;
   const budget = data.budget || { income: {}, monthlyExpenses: [] };
 
@@ -190,6 +191,13 @@ const SummaryTab = () => {
           )}
         </div>
       </Section>
+      <ControlPanel
+        onSave={() => saveData()}
+        onReset={resetBudgetToDemo}
+        onClear={clearBudget}
+        saveLabel="Save Budget"
+        resetLabel="Reset to Demo"
+      />
     </>
   );
 };

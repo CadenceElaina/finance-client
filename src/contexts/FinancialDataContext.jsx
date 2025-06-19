@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
+import { DEMO_ACCOUNTS, DEFAULT_DEMO_BUDGET } from "../utils/constants";
+import { calculateBudgetFields } from "../utils/calculations/budgetCalculations";
 import {
   getLocalData,
   saveLocalData,
   clearLocalData,
 } from "../utils/localStorageUtils";
-import { DEMO_ACCOUNTS, DEFAULT_DEMO_BUDGET } from "../utils/constants";
-import { calculateBudgetFields } from "../utils/calculations/budgetCalculations";
 
 const FinancialDataContext = createContext();
 
@@ -135,13 +135,40 @@ export const FinancialDataProvider = ({ children }) => {
     clearLocalData();
   };
 
-  const resetToDemoData = () => {
-    const demoData = {
-      accounts: DEMO_ACCOUNTS,
+  const resetBudgetToDemo = () => {
+    setData((prev) => ({
+      ...prev,
       budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
-    };
-    setData(demoData);
-    saveData(demoData);
+    }));
+    if (persistence === "local") {
+      saveLocalData({
+        ...data,
+        budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
+      });
+    }
+  };
+
+  const resetAccountsToDemo = () => {
+    setData((prev) => ({
+      ...prev,
+      accounts: DEMO_ACCOUNTS,
+      portfolios: [],
+    }));
+    if (persistence === "local") {
+      saveLocalData({
+        ...data,
+        accounts: DEMO_ACCOUNTS,
+        portfolios: [],
+      });
+    }
+  };
+
+  const clearAccountsData = () => {
+    const updatedData = { ...data, accounts: [], portfolios: [] };
+    setData(updatedData);
+    if (persistence === "local") {
+      saveLocalData(updatedData);
+    }
   };
 
   return (
@@ -159,7 +186,9 @@ export const FinancialDataProvider = ({ children }) => {
         setPersistence,
         persistence,
         userSignedIn: !!user,
-        resetToDemoData,
+        resetBudgetToDemo,
+        resetAccountsToDemo,
+        clearAccountsData,
       }}
     >
       {children}
