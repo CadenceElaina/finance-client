@@ -1,19 +1,22 @@
 // src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
-import React, { useState } from "react";
-import { useBudget } from "../../../../contexts/BudgetContext";
+import React, { useState, useRef } from "react";
 import Table from "../../../../components/ui/Table/Table";
 import tableStyles from "../../../../components/ui/Table/Table.module.css";
 import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
+import { useFinancialData } from "../../../../contexts/FinancialDataContext"; // <-- ADD THIS
 
 const ExpensesTab = ({ expenses, smallApp }) => {
-  const { addExpense, updateExpense, removeExpense } = useBudget();
+  const { addExpense, updateExpense, removeExpense } = useFinancialData();
   const [newExpense, setNewExpense] = useState({
     name: "",
     cost: "",
     category: "required",
   });
   const [categoryFilter, setCategoryFilter] = useState("all");
+
+  // --- Add this ref ---
+  const newExpenseNameRef = useRef(null);
 
   const handleNewExpenseChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -31,7 +34,13 @@ const ExpensesTab = ({ expenses, smallApp }) => {
   const handleAddExpense = () => {
     if (newExpense.name.trim() && newExpense.cost !== "") {
       addExpense(newExpense);
-      setNewExpense({ name: "", cost: "", category: "required" }); // Reset form
+      setNewExpense({ name: "", cost: "", category: "required" });
+      // --- Focus the name input after adding ---
+      setTimeout(() => {
+        if (newExpenseNameRef.current) {
+          newExpenseNameRef.current.focus();
+        }
+      }, 0);
     }
   };
 
@@ -128,6 +137,7 @@ const ExpensesTab = ({ expenses, smallApp }) => {
           onChange={handleNewExpenseChange}
           placeholder="New Expense Name"
           className={tableStyles.tableInput}
+          ref={newExpenseNameRef} // <-- Attach ref here
         />
       </td>
       <td>

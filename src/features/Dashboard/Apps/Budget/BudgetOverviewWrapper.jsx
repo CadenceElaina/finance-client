@@ -1,6 +1,5 @@
 // src/features/Dashboard/Apps/Budget/BudgetOverviewWrapper.jsx
 import React, { useState } from "react";
-import { useBudget } from "../../../../contexts/BudgetContext";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import SummaryTab from "./SummaryTab";
 import ExpensesTab from "./ExpensesTab";
@@ -13,37 +12,15 @@ import {
   getTotalCash,
   getTotalAssets,
   getTotalLiabilities,
-} from "../../../../utils/financialCalculations";
+} from "../../../../utils/calculations/financialCalculations";
 import SnapshotRow from "../../../../components/ui/Snapshot/SnapshotRow";
 
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
-  //console.log('BudgetOverviewWrapper rendered with smallApp:', smallApp, 'activeInnerTabId:', activeInnerTabId);
-  const { budget, isLoading, error, userSignedIn } = useBudget();
-  const { data } = useFinancialData();
+  const { data, userSignedIn } = useFinancialData();
   const accounts = data.accounts;
+  const budget = data.budget;
   const [period, setPeriod] = useState("both");
   const [tax, setTax] = useState("both");
-
-  if (isLoading)
-    return (
-      <div className={budgetStyles.budgetContentWrapper}>
-        Loading budget overview...
-      </div>
-    );
-  if (error)
-    return (
-      <div
-        className={`${budgetStyles.budgetContentWrapper} ${budgetStyles.error}`}
-      >
-        {error}
-      </div>
-    );
-  if (!budget)
-    return (
-      <div className={budgetStyles.budgetContentWrapper}>
-        No budget data available.
-      </div>
-    );
 
   const monthlyIncomeAT = budget.monthlyAfterTax || 0;
   const annualIncomeAT =

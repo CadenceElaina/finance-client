@@ -9,8 +9,8 @@ import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 const Accounts = () => {
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({
-    width: 955,
-    height: 442,
+    width: 0,
+    height: 0,
   });
   const { data } = useFinancialData();
 
@@ -51,7 +51,7 @@ const Accounts = () => {
       id: "portfolios",
       label: "Portfolios",
       innerTabs: [
-        { id: "investments", label: "Investments", component: () => null }, // <-- was "showAll"/"Overview"
+        { id: "investments", label: "Investments", component: () => null },
         { id: "allocation", label: "Allocation", component: () => null },
         { id: "performance", label: "Performance", component: () => null },
       ],

@@ -13,7 +13,7 @@
 
 .controlPanel {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     padding: var(--space-xs);
     gap: var(--space-sm);
     justify-content: center;

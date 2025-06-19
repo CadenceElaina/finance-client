@@ -125,7 +125,7 @@ const OverviewTab = ({ smallApp }) => {
     liabilityBreakdownData,
   } = calculatedFinancials;
 
-  console.log("OverviewTab rendered with smallApp:", smallApp); // Keep for now, remove later
+  // console.log("OverviewTab rendered with smallApp:", smallApp); // Keep for now, remove later
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-US", {

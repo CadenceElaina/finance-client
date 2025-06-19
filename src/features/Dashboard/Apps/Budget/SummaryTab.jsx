@@ -10,7 +10,7 @@ import {
   getTotalAssets,
   getTotalCash,
   getTotalLiabilities,
-} from "../../../../utils/financialCalculations";
+} from "../../../../utils/calculations/financialCalculations";
 
 const PERIOD_OPTIONS = [
   { id: "monthly", label: "Monthly" },
@@ -25,33 +25,25 @@ const TAX_OPTIONS = [
 ];
 
 const SummaryTab = () => {
-  const { data, updateBudget } = useFinancialData();
+  const { data } = useFinancialData();
   const accounts = data.accounts;
   const budget = data.budget || { income: {}, monthlyExpenses: [] };
 
   const [tax, setTax] = useState("both");
   const [period, setPeriod] = useState("both");
 
-  // Calculate expenses
-  const monthlyExpenses = budget.monthlyExpenses?.reduce(
-    (sum, exp) => sum + (exp.cost || 0),
-    0
-  );
+  // Use calculated fields from budget
+  const monthlyExpenses = budget.totalMonthlyExpenses || 0;
   const annualExpenses = monthlyExpenses * 12;
 
-  // Calculate incomes
-  const monthlyIncomeAT = budget.income?.monthlyAfterTax || 0;
-  const annualIncomeAT =
-    monthlyIncomeAT * 12 +
-    (budget.income?.bonusAfterTax || 0) +
-    (budget.income?.additionalIncomeAfterTax || 0);
+  // Use calculated monthly/annual income (pre-tax and after-tax)
+  const monthlyIncomeAT = budget.monthlyAfterTax || 0;
+  const annualIncomeAT = budget.annualAfterTax || 0;
 
-  const monthlyIncomePT = budget.income?.annualPreTax
-    ? budget.income.annualPreTax / 12
-    : 0;
-  const annualIncomePT = budget.income?.annualPreTax || 0;
+  const monthlyIncomePT = budget.monthlyPreTax || 0;
+  const annualIncomePT = budget.annualPreTax || 0;
 
-  // Calculate discretionary
+  // Discretionary
   const monthlyDiscretionaryAT = monthlyIncomeAT - monthlyExpenses;
   const annualDiscretionaryAT = annualIncomeAT - annualExpenses;
   const monthlyDiscretionaryPT = monthlyIncomePT - monthlyExpenses;

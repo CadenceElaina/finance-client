@@ -24,7 +24,7 @@ import {
   getTotalAssets,
   getTotalLiabilities,
   getTotalInvestments,
-} from "../../../../utils/financialCalculations";
+} from "../../../../utils/calculations/financialCalculations";
 import { CHART_COLORS } from "../../../../utils/chartColors";
 
 const OverviewTab = ({ smallApp }) => {

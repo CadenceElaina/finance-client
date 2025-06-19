@@ -1,29 +1,58 @@
-import React from "react";
-import { useBudget } from "../../../../contexts/BudgetContext";
+import React, { useState, useEffect } from "react";
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
 import FormLayout from "../../../../components/ui/Form/FormLayout";
+import Button from "../../../../components/ui/Button/Button";
 import formStyles from "../../../../components/ui/Form/FormLayout.module.css";
-import budgetStyles from "./budget.module.css"; // Assuming you have a budget-specific CSS module
+import budgetStyles from "./budget.module.css";
+
+const EMPTY_INCOME = {
+  type: "salary",
+  annualPreTax: 0,
+  monthlyAfterTax: 0,
+  hourlyRate: null,
+  expectedAnnualHours: null,
+  bonusAfterTax: 0,
+  additionalIncomeAfterTax: 0,
+};
 
 const IncomeTab = () => {
-  const { budget, updateIncome } = useBudget();
-  const income = budget?.income || {};
+  const { data, updateIncome, saveData } = useFinancialData();
+  const income = data.budget?.income || EMPTY_INCOME;
 
-  const handleIncomeTypeChange = (e) => {
-    updateIncome({ type: e.target.value });
-  };
+  // Local state for form fields
+  const [form, setForm] = useState(income);
+
+  // Sync local state with context on mount or when budget changes
+  useEffect(() => {
+    setForm(income);
+  }, [income]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target; // Destructure `checked` for checkboxes
-    updateIncome({
+    const { name, value, type } = e.target;
+    setForm((prev) => ({
+      ...prev,
       [name]:
-        type === "number"
-          ? parseFloat(value) || 0
-          : type === "checkbox"
-          ? checked
-          : value,
-    });
+        type === "number" ? (value === "" ? "" : parseFloat(value)) : value,
+    }));
+  };
+
+  const handleTypeChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      type: e.target.value,
+    }));
+  };
+
+  const handleSave = () => {
+    updateIncome(form);
+    saveData({ ...data, budget: { ...data.budget, income: form } });
+  };
+
+  const handleClear = () => {
+    updateIncome(EMPTY_INCOME);
+    saveData({ ...data, budget: { ...data.budget, income: EMPTY_INCOME } });
   };
 
   return (
@@ -35,27 +64,27 @@ const IncomeTab = () => {
             <label>
               <input
                 type="radio"
-                name="incomeType"
+                name="type"
                 value="hourly"
-                checked={income.type === "hourly"}
-                onChange={handleIncomeTypeChange}
+                checked={form.type === "hourly"}
+                onChange={handleTypeChange}
               />{" "}
               Hourly
             </label>
             <label>
               <input
                 type="radio"
-                name="incomeType"
+                name="type"
                 value="salary"
-                checked={income.type === "salary"}
-                onChange={handleIncomeTypeChange}
+                checked={form.type === "salary"}
+                onChange={handleTypeChange}
               />{" "}
               Salary
             </label>
           </div>
         </div>
 
-        {income.type === "salary" && (
+        {form.type === "salary" && (
           <>
             <div className={formStyles.formGroup}>
               <label htmlFor="annualPreTax">Annual Salary (Pre-tax):</label>
@@ -63,31 +92,15 @@ const IncomeTab = () => {
                 type="number"
                 id="annualPreTax"
                 name="annualPreTax"
-                value={income.annualPreTax || ""}
+                value={form.annualPreTax}
                 onChange={handleChange}
                 placeholder="e.g. 60000"
                 min="0"
               />
             </div>
-            <div className={formStyles.formGroup}>
-              <label>Calculated Monthly After-tax:</label>
-              <span
-                className={`${budgetStyles.calculatedValue} ${
-                  budget.averageIncomeAfterTaxMonthly < 0
-                    ? budgetStyles.negative
-                    : budgetStyles.positive
-                }`}
-              >
-                $
-                {(budget.averageIncomeAfterTaxMonthly || 0).toLocaleString(
-                  undefined,
-                  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-                )}
-              </span>
-            </div>
           </>
         )}
-        {income.type === "hourly" && (
+        {form.type === "hourly" && (
           <>
             <div className={formStyles.formGroup}>
               <label htmlFor="hourlyRate">Hourly Rate (Pre-tax):</label>
@@ -95,7 +108,7 @@ const IncomeTab = () => {
                 type="number"
                 id="hourlyRate"
                 name="hourlyRate"
-                value={income.hourlyRate || ""}
+                value={form.hourlyRate}
                 onChange={handleChange}
                 placeholder="e.g. 25"
                 min="0"
@@ -109,7 +122,7 @@ const IncomeTab = () => {
                 type="number"
                 id="expectedAnnualHours"
                 name="expectedAnnualHours"
-                value={income.expectedAnnualHours || ""}
+                value={form.expectedAnnualHours}
                 onChange={handleChange}
                 placeholder="e.g. 2080"
                 min="0"
@@ -117,22 +130,19 @@ const IncomeTab = () => {
             </div>
           </>
         )}
-        {/* This field should only show if salary or hourly calculation is NOT used, or if it's the fallback manual input.
-                    If it's always manual, consider the logic for `budget.averageIncomeAfterTaxMonthly` and `income.monthlyAfterTax`.
-                    For now, assuming it's a general manual override/input. */}
+
         <div className={formStyles.formGroup}>
-          <label htmlFor="monthlyAfterTaxManual">
+          <label htmlFor="monthlyAfterTax">
             Manual Monthly Net Income (After-tax):
           </label>
           <input
             type="number"
-            id="monthlyAfterTaxManual"
+            id="monthlyAfterTax"
             name="monthlyAfterTax"
-            value={income.monthlyAfterTax || ""}
+            value={form.monthlyAfterTax}
             onChange={handleChange}
             placeholder="e.g. 3000"
             min="0"
-            required
           />
         </div>
 
@@ -142,7 +152,7 @@ const IncomeTab = () => {
             type="number"
             id="bonusAfterTax"
             name="bonusAfterTax"
-            value={income.bonusAfterTax || ""}
+            value={form.bonusAfterTax}
             onChange={handleChange}
             placeholder="e.g. 500"
             min="0"
@@ -156,13 +166,21 @@ const IncomeTab = () => {
             type="number"
             id="additionalIncomeAfterTax"
             name="additionalIncomeAfterTax"
-            value={income.additionalIncomeAfterTax || ""}
+            value={form.additionalIncomeAfterTax}
             onChange={handleChange}
             placeholder="e.g. 100"
             min="0"
           />
         </div>
       </FormLayout>
+      <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+        <Button onClick={handleSave} variant="primary">
+          Save Income
+        </Button>
+        <Button onClick={handleClear} variant="danger">
+          Clear Income
+        </Button>
+      </div>
     </Section>
   );
 };

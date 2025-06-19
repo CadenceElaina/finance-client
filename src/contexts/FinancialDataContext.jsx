@@ -1,110 +1,106 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-import { getLocalData, saveLocalData } from "../utils/localStorageUtils";
+import {
+  getLocalData,
+  saveLocalData,
+  clearLocalData,
+} from "../utils/localStorageUtils";
 import { DEMO_ACCOUNTS, DEFAULT_DEMO_BUDGET } from "../utils/constants";
-// import { fetchFinancialData, saveFinancialData } from "../services/financialService";
+import { calculateBudgetFields } from "../utils/calculations/budgetCalculations";
 
 const FinancialDataContext = createContext();
 
 export const FinancialDataProvider = ({ children }) => {
   const { user, token } = useAuth();
-  const [data, setData] = useState({
-    accounts: DEMO_ACCOUNTS,
-    budget: DEFAULT_DEMO_BUDGET,
-  });
   const [persistence, setPersistence] = useState(
     () =>
       localStorage.getItem("financialDataPersistence") ||
       (user ? "server" : "local")
   );
+  const [data, setData] = useState({
+    accounts: DEMO_ACCOUNTS,
+    budget: DEFAULT_DEMO_BUDGET,
+  });
 
+  // Load data on mount or when user/persistence changes
   useEffect(() => {
-    const load = async () => {
-      let loaded;
+    async function load() {
+      let loaded = null;
       if (user && persistence === "server") {
-        // TODO: Replace with real fetch function
-        // loaded = await fetchFinancialData(token);
-        loaded = null; // Simulate no server data for new user
-        if (loaded && loaded.accounts && loaded.budget) {
-          setData(loaded);
-        } else {
-          setData({ accounts: DEMO_ACCOUNTS, budget: DEFAULT_DEMO_BUDGET });
-        }
-      } else if (persistence === "local") {
-        loaded = getLocalData() || {
-          accounts: DEMO_ACCOUNTS,
-          budget: DEFAULT_DEMO_BUDGET,
-        };
-        setData(loaded);
-      } else {
-        setData({ accounts: DEMO_ACCOUNTS, budget: DEFAULT_DEMO_BUDGET });
+        // TODO: fetch from server
+        loaded = null;
       }
-    };
+      if (!loaded && persistence === "local") {
+        loaded = getLocalData() || null;
+      }
+      setData(
+        loaded && loaded.budget
+          ? { ...loaded, budget: calculateBudgetFields(loaded.budget) }
+          : {
+              accounts: DEMO_ACCOUNTS,
+              budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
+            }
+      );
+    }
     load();
   }, [user, token, persistence]);
 
   // Save data to correct place
   const saveData = async (newData) => {
-    setData(newData);
+    const dataToSave = newData || data; // Use current data if none provided
+    const calculatedBudget = calculateBudgetFields(dataToSave.budget);
+    setData({ ...dataToSave, budget: calculatedBudget });
     if (user && persistence === "server") {
       // TODO: save to server
-      // await saveFinancialData(newData, token);
     } else if (persistence === "local") {
-      saveLocalData(newData);
+      saveLocalData({ ...dataToSave, budget: calculatedBudget });
     }
   };
 
   // --- Update methods ---
-  const updateAccount = (updatedAccount) => {
-    const newAccounts = data.accounts.map((acc) =>
-      acc.id === updatedAccount.id ? updatedAccount : acc
-    );
-    saveData({ ...data, accounts: newAccounts });
-  };
-
-  const addAccount = (newAccount) => {
-    saveData({ ...data, accounts: [...data.accounts, newAccount] });
-  };
-
-  const removeAccount = (accountId) => {
-    saveData({
-      ...data,
-      accounts: data.accounts.filter((acc) => acc.id !== accountId),
-    });
-  };
-
-  const updateBudget = (updatedBudget) => {
+  const updateIncome = (incomeFields) => {
+    const updatedBudget = {
+      ...data.budget,
+      income: { ...data.budget.income, ...incomeFields },
+    };
     saveData({ ...data, budget: updatedBudget });
   };
 
-  // Budget helpers (optional)
-  const updateIncome = (newIncomeFields) => {
+  const clearIncome = () => {
     const updatedBudget = {
       ...data.budget,
-      income: { ...data.budget.income, ...newIncomeFields },
+      income: {
+        type: "salary",
+        annualPreTax: 0,
+        monthlyAfterTax: 0,
+        hourlyRate: null,
+        expectedAnnualHours: null,
+        bonusAfterTax: 0,
+        additionalIncomeAfterTax: 0,
+      },
     };
-    updateBudget(updatedBudget);
+    saveData({ ...data, budget: updatedBudget });
   };
 
-  const addExpense = (newExpense) => {
+  const addExpense = (expense) => {
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: [
         ...data.budget.monthlyExpenses,
-        { ...newExpense, id: `exp-${Date.now()}` },
+        { ...expense, id: `exp-${Date.now()}` },
       ],
     };
-    updateBudget(updatedBudget);
+    saveData({ ...data, budget: updatedBudget });
   };
 
-  const updateExpense = (id, updatedFields) => {
+  const updateExpense = (id, fields) => {
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: data.budget.monthlyExpenses.map((exp) =>
-        exp.id === id ? { ...exp, ...updatedFields } : exp
+        exp.id === id ? { ...exp, ...fields } : exp
       ),
     };
-    updateBudget(updatedBudget);
+    saveData({ ...data, budget: updatedBudget });
   };
 
   const removeExpense = (id) => {
@@ -114,22 +110,56 @@ export const FinancialDataProvider = ({ children }) => {
         (exp) => exp.id !== id
       ),
     };
-    updateBudget(updatedBudget);
+    saveData({ ...data, budget: updatedBudget });
+  };
+
+  const clearExpenses = () => {
+    const updatedBudget = { ...data.budget, monthlyExpenses: [] };
+    saveData({ ...data, budget: updatedBudget });
+  };
+
+  const clearBudget = () => {
+    const emptyBudget = {
+      income: {
+        type: "salary",
+        annualPreTax: 0,
+        monthlyAfterTax: 0,
+        hourlyRate: null,
+        expectedAnnualHours: null,
+        bonusAfterTax: 0,
+        additionalIncomeAfterTax: 0,
+      },
+      monthlyExpenses: [],
+    };
+    saveData({ ...data, budget: emptyBudget });
+    clearLocalData();
+  };
+
+  const resetToDemoData = () => {
+    const demoData = {
+      accounts: DEMO_ACCOUNTS,
+      budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
+    };
+    setData(demoData);
+    saveData(demoData);
   };
 
   return (
     <FinancialDataContext.Provider
       value={{
         data,
-        updateAccount,
-        addAccount,
-        removeAccount,
-        updateBudget,
+        saveData,
         updateIncome,
+        clearIncome,
         addExpense,
         updateExpense,
         removeExpense,
+        clearExpenses,
+        clearBudget,
         setPersistence,
+        persistence,
+        userSignedIn: !!user,
+        resetToDemoData,
       }}
     >
       {children}
