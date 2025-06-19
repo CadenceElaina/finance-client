@@ -1,0 +1,284 @@
+/* src/features/Dashboard/Apps/Plan/plan.module.css */
+.planAppContainer {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+}
+
+.planTabs {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.planTabContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-xs);
+    box-sizing: border-box;
+}
+
+.planContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* Goals specific styles */
+.goalsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+}
+
+.goalsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+}
+
+.goalCard {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.goalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-xs);
+}
+
+.goalTitle {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.goalType {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: var(--surface-dark);
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--border-radius-sm);
+}
+
+.goalProgress {
+    margin: var(--space-xs) 0;
+}
+
+.progressBar {
+    width: 100%;
+    height: 8px;
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: var(--space-xxs) 0;
+}
+
+.progressFill {
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+}
+
+.goalStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    font-size: var(--font-size-xs);
+}
+
+.goalStat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.statLabel {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xxs);
+}
+
+.statValue {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Calculators specific styles */
+.calculatorsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+}
+
+.calculatorCard {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.calculatorHeader {
+    text-align: center;
+    margin-bottom: var(--space-sm);
+}
+
+.calculatorTitle {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xxs) 0;
+}
+
+.calculatorDescription {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.calculatorForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.formLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.formInput {
+    padding: var(--space-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--focus-ring);
+}
+
+.calculatorResults {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+.resultItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.resultItem:last-child {
+    border-bottom: none;
+}
+
+.resultLabel {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+}
+
+.resultValue {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+/* Add new goal form styles */
+.addGoalForm {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.formRow.fullWidth {
+    grid-template-columns: 1fr;
+}
+
+.formActions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-sm);
+}
+
+/* Small app responsiveness */
+:global(.smallApp) .goalsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .calculatorsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .goalCard {
+    padding: var(--space-xs);
+}
+
+:global(.smallApp) .calculatorCard {
+    padding: var(--space-xs);
+}
+
+/* Large app scaling */
+:global(.largeApp) .planTabContent {
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .goalsGrid {
+    gap: var(--space-md);
+}
+
+:global(.largeApp) .calculatorsGrid {
+    gap: var(--space-md);
+}

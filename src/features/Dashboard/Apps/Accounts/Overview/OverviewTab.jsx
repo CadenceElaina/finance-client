@@ -20,6 +20,7 @@ const EMPTY_ACCOUNT = {
   taxStatus: "",
   interestRate: "",
   monthlyPayment: "",
+  portfolioId: null,
 };
 
 const CATEGORIES = [
@@ -33,6 +34,7 @@ const OverviewTab = ({ smallApp }) => {
     useFinancialData();
 
   const accounts = data.accounts || [];
+  const portfolios = data.portfolios || [];
 
   const {
     editMode,
@@ -45,25 +47,63 @@ const OverviewTab = ({ smallApp }) => {
     removeEditRow,
   } = useEditableTable(accounts);
 
-  const [accountCategoryFilter, setAccountCategoryFilter] = useState("all");
+  const [portfolioFilter, setPortfolioFilter] = useState("all");
   const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
   const newAccountNameRef = useRef(null);
 
   // Handle saving from control panel
   const handleSave = () => {
-    // Update accounts data
+    // Check for new portfolios that need to be created
+    const existingPortfolioNames = portfolios
+      .map((p) => p.name?.toLowerCase())
+      .filter(Boolean);
+    const newPortfolios = [...portfolios];
+    const portfolioNameToId = {};
+
+    // Map existing portfolios
+    portfolios.forEach((p) => {
+      if (p.name) {
+        portfolioNameToId[p.name.toLowerCase()] = p.id;
+      }
+    });
+
+    // Create new portfolios if needed
+    editRows.forEach((account) => {
+      if (account.portfolioName && account.portfolioName.trim()) {
+        const portfolioNameLower = account.portfolioName.toLowerCase();
+        if (!existingPortfolioNames.includes(portfolioNameLower)) {
+          const newPortfolioId = `portfolio-${Date.now()}-${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
+          newPortfolios.push({
+            id: newPortfolioId,
+            name: account.portfolioName,
+          });
+          portfolioNameToId[portfolioNameLower] = newPortfolioId;
+          existingPortfolioNames.push(portfolioNameLower);
+        }
+      }
+    });
+
+    // Update accounts with portfolio assignments
+    const updatedAccounts = editRows.map((account) => ({
+      ...account,
+      value: parseFloat(account.value) || 0,
+      interestRate: account.interestRate
+        ? parseFloat(account.interestRate)
+        : null,
+      monthlyPayment: account.monthlyPayment
+        ? parseFloat(account.monthlyPayment)
+        : null,
+      portfolioId: account.portfolioName
+        ? portfolioNameToId[account.portfolioName.toLowerCase()]
+        : null,
+    }));
+
     const updatedData = {
       ...data,
-      accounts: editRows.map((account) => ({
-        ...account,
-        value: parseFloat(account.value) || 0,
-        interestRate: account.interestRate
-          ? parseFloat(account.interestRate)
-          : null,
-        monthlyPayment: account.monthlyPayment
-          ? parseFloat(account.monthlyPayment)
-          : null,
-      })),
+      accounts: updatedAccounts,
+      portfolios: newPortfolios,
     };
 
     saveData(updatedData);
@@ -90,13 +130,23 @@ const OverviewTab = ({ smallApp }) => {
     }
   };
 
-  // Filtering for display
-  const filteredAccounts = editMode ? editRows : accounts;
+  // Add portfolio names to accounts for display
+  const accountsWithPortfolios = useMemo(() => {
+    return (editMode ? editRows : accounts).map((account) => ({
+      ...account,
+      portfolioName: account.portfolioId
+        ? portfolios.find((p) => p.id === account.portfolioId)?.name ||
+          "Unknown Portfolio"
+        : "",
+    }));
+  }, [editMode, editRows, accounts, portfolios]);
+
+  // Filtering for display - only by portfolio
   const displayAccounts =
-    accountCategoryFilter === "all"
-      ? filteredAccounts
-      : filteredAccounts.filter(
-          (acc) => acc.category === accountCategoryFilter
+    portfolioFilter === "all"
+      ? accountsWithPortfolios
+      : accountsWithPortfolios.filter(
+          (account) => account.portfolioId === portfolioFilter
         );
 
   // Calculations for snapshot
@@ -167,6 +217,7 @@ const OverviewTab = ({ smallApp }) => {
         monthlyPayment: newAccount.monthlyPayment
           ? parseFloat(newAccount.monthlyPayment)
           : null,
+        portfolioName: newAccount.portfolioName || "",
       };
 
       if (editMode) {
@@ -228,6 +279,7 @@ const OverviewTab = ({ smallApp }) => {
                 : "N/A"
               : "N/A"}
           </td>
+          <td>{account.portfolioName || "-"}</td>
         </tr>
       );
     }
@@ -335,6 +387,17 @@ const OverviewTab = ({ smallApp }) => {
           )}
         </td>
         <td>
+          <input
+            type="text"
+            value={account.portfolioName || ""}
+            onChange={(e) =>
+              updateEditRow(index, "portfolioName", e.target.value)
+            }
+            className={tableStyles.tableInput}
+            placeholder="Portfolio name"
+          />
+        </td>
+        <td>
           <button
             onClick={() => removeEditRow(index)}
             className={tableStyles.removeButton}
@@ -357,6 +420,7 @@ const OverviewTab = ({ smallApp }) => {
     { key: "taxStatus", label: "Tax Status" },
     { key: "interestRate", label: "Interest Rate" },
     { key: "monthlyPayment", label: "Monthly Payment" },
+    { key: "portfolioName", label: "Portfolio" },
   ];
 
   const editColumns = [...viewColumns, { key: "action", label: "Actions" }];
@@ -371,25 +435,27 @@ const OverviewTab = ({ smallApp }) => {
         header={
           <div className={sectionStyles.sectionHeaderRow}>
             <EditableTableHeader
-              title="Your Accounts"
+              title="Accounts"
               editMode={editMode}
               onEnterEdit={enterEditMode}
               onCancelEdit={cancelEdit}
               editable={true}
             />
-            {/* Filter controls in the same row */}
+            {/* Portfolio filter only */}
             <div className={sectionStyles.filterRow}>
               <label className={sectionStyles.filterLabel}>
-                Category:
+                Portfolio:
                 <select
-                  value={accountCategoryFilter}
-                  onChange={(e) => setAccountCategoryFilter(e.target.value)}
+                  value={portfolioFilter}
+                  onChange={(e) => setPortfolioFilter(e.target.value)}
                   className={sectionStyles.filterSelect}
                 >
-                  <option value="all">All Categories</option>
-                  <option value="Cash">Cash</option>
-                  <option value="Investments">Investments</option>
-                  <option value="Debt">Debt</option>
+                  <option value="all">All Accounts</option>
+                  {portfolios.map((portfolio) => (
+                    <option key={portfolio.id} value={portfolio.id}>
+                      {portfolio.name}
+                    </option>
+                  ))}
                 </select>
               </label>
             </div>
@@ -400,6 +466,7 @@ const OverviewTab = ({ smallApp }) => {
           columns={columns}
           data={displayAccounts}
           renderRow={renderAccountRow}
+          defaultSortColumn="value"
           extraRow={
             editMode ? (
               <tr>
@@ -499,6 +566,16 @@ const OverviewTab = ({ smallApp }) => {
                   ) : (
                     <span>-</span>
                   )}
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    name="portfolioName"
+                    value={newAccount.portfolioName || ""}
+                    onChange={handleNewAccountChange}
+                    placeholder="Portfolio name"
+                    className={tableStyles.tableInput}
+                  />
                 </td>
                 <td>
                   <button

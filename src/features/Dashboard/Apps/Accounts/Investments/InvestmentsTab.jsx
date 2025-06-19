@@ -26,7 +26,7 @@ const InvestmentsTab = ({
   portfolios = [],
   setSelectedPortfolioId,
   selectedPortfolioId,
-  holdingsHeaderTitle = "All Investments",
+  holdingsHeaderTitle = "Investments",
   showPortfolioSelectMenu = false,
   portfolioSelectMenu,
 }) => {
@@ -56,9 +56,9 @@ const InvestmentsTab = ({
       if (Array.isArray(acc.securities)) {
         acc.securities.forEach((sec, secIndex) => {
           // Find the portfolio name properly
-          const portfolio = allPortfolios.find(p => p.id === acc.portfolioId);
+          const portfolio = allPortfolios.find((p) => p.id === acc.portfolioId);
           const portfolioName = portfolio ? portfolio.name : "Unassigned";
-          
+
           rows.push({
             id: `${acc.id}-${sec.ticker || sec.name}-${secIndex}`,
             accountId: acc.id,

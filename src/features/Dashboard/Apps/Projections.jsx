@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const Projections = () => {
-    return (
-        <div>Projections</div>
-    )
-}
+  return <div>Projections</div>;
+};
 
-export default Projections
+export default Projections;

@@ -24,7 +24,8 @@ export const FinancialDataProvider = ({ children }) => {
   const [data, setData] = useState({
     accounts: DEMO_ACCOUNTS,
     budget: DEFAULT_DEMO_BUDGET,
-    portfolios: DEMO_PORTFOLIOS, // Add portfolios to initial state
+    portfolios: DEMO_PORTFOLIOS,
+    goals: [],
   });
 
   // Load data on mount or when user/persistence changes
