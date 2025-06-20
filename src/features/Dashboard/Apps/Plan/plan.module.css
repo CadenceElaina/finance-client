@@ -57,6 +57,13 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
+    position: relative;
+    transition: box-shadow var(--transition-speed-fast), border-color var(--transition-speed-fast);
+}
+
+.goalCard:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
 }
 
 .goalHeader {
@@ -83,15 +90,19 @@
 
 .goalProgress {
     margin: var(--space-xs) 0;
+    padding: var(--space-xs);
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
 }
 
 .progressBar {
     width: 100%;
-    height: 8px;
-    background: var(--surface-dark);
+    height: 10px;
+    background: var(--background-light);
     border-radius: var(--border-radius-sm);
     overflow: hidden;
-    margin: var(--space-xxs) 0;
+    margin: var(--space-xs) 0;
+    border: 1px solid var(--border-light);
 }
 
 .progressFill {
@@ -126,17 +137,28 @@
 /* Calculators specific styles */
 .calculatorsGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-sm);
-    padding: var(--space-xs);
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-md);
+    padding: var(--space-sm);
 }
 
 .calculatorCard {
+  /* background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-sm);
+  box-shadow: var(--shadow-sm); */
+}
+
+.calculatorContainer {
     background: var(--surface-light);
     border: 1px solid var(--border-light);
     border-radius: var(--border-radius-md);
     padding: var(--space-sm);
     box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
 }
 
 .calculatorHeader {
@@ -145,10 +167,11 @@
 }
 
 .calculatorTitle {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
-    margin: 0 0 var(--space-xxs) 0;
+    margin: 0;
+    text-align: center;
 }
 
 .calculatorDescription {
@@ -196,6 +219,18 @@
     margin-top: var(--space-sm);
 }
 
+.calculatorContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.calculatorChart {
+    margin-top: var(--space-sm);
+    border-top: 1px solid var(--border-light);
+    padding-top: var(--space-sm);
+}
+
 .resultItem {
     display: flex;
     justify-content: space-between;
@@ -226,6 +261,11 @@
     border-radius: var(--border-radius-md);
     padding: var(--space-sm);
     margin-bottom: var(--space-sm);
+}
+
+.addGoalForm h4 {
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: var(--space-xs);
 }
 
 .formRow {
@@ -270,6 +310,30 @@
     padding: var(--space-xs);
 }
 
+:global(.smallApp) .calculatorContainer {
+    padding: var(--space-xs);
+    gap: var(--space-xs);
+}
+
+/* Calculator specific responsive adjustments */
+:global(.smallApp) .calculatorForm {
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .formRow {
+    grid-template-columns: 1fr;
+}
+
+:global(.smallApp) .calculatorResults {
+    margin-top: var(--space-xs);
+    padding: var(--space-xs);
+}
+
+:global(.smallApp) .resultItem {
+    padding: var(--space-xxs) 0;
+    font-size: var(--font-size-xxs);
+}
+
 /* Large app scaling */
 :global(.largeApp) .planTabContent {
     padding: var(--space-sm);
@@ -281,4 +345,180 @@
 
 :global(.largeApp) .calculatorsGrid {
     gap: var(--space-md);
+}
+
+/* Large app improvements */
+:global(.largeApp) .calculatorForm {
+    gap: var(--space-md);
+}
+
+:global(.largeApp) .calculatorResults {
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+}
+
+:global(.largeApp) .formInput {
+    padding: var(--space-sm);
+    font-size: var(--font-size-base);
+}
+
+.positive {
+    color: var(--status-success);
+}
+
+.negative {
+    color: var(--status-danger);
+}
+
+/* Modal styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-lg);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+}
+
+.modal h3 {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+}
+
+.modal p {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.modalOptions {
+    margin: var(--space-md) 0;
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.radioGroup label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-speed-fast);
+}
+
+.radioGroup label:hover {
+    background: var(--surface-dark);
+}
+
+.radioGroup input[type="radio"] {
+    margin: 0;
+}
+
+.radioGroup span {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.modalActions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-lg);
+}
+
+/* Enhanced form styles for account linking */
+.accountLinkingSection {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-sm);
+    margin: var(--space-sm) 0;
+    border: 1px solid var(--border-light);
+}
+
+.accountLinkingTitle {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0 0 var(--space-xs) 0;
+}
+
+/* Goal card enhancements for linked accounts */
+.goalCard .linkedAccountIndicator {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
+    font-size: var(--font-size-xs);
+    color: var(--color-primary);
+    margin-top: var(--space-xxs);
+}
+
+.goalCard .linkedAccountIndicator::before {
+    content: "🔗";
+    font-size: 0.9em;
+}
+
+/* New styles */
+
+.goalActions {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border-light);
+    justify-content: flex-end;
+}
+
+/* Enhanced linked account display */
+.goalStat .statValue span[style*="font-size: 0.9em"] {
+    display: block;
+    margin-top: var(--space-xxs);
+    line-height: 1.2;
+}
+
+/* Responsive adjustments for goal actions */
+:global(.smallApp) .goalActions {
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+:global(.smallApp) .goalActions button {
+    font-size: var(--font-size-xxs) !important;
+    padding: var(--space-xxs) !important;
+    min-width: 50px !important;
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+    .modal {
+        padding: var(--space-md);
+        margin: var(--space-sm);
+    }
+    
+    .modalActions {
+        flex-direction: column;
+    }
+    
+    .radioGroup {
+        gap: var(--space-xs);
+    }
 }

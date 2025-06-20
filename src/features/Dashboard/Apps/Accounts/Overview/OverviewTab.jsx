@@ -1,15 +1,16 @@
-// src/features/Dashboard/Apps/Accounts/OverviewTab.jsx
-import React, { useState, useRef, useEffect, useMemo } from "react";
+// src/features/Dashboard/Apps/Accounts/Overview/OverviewTab.jsx
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
+import { useEditableTable } from "../../../../../hooks/useEditableTable";
 import Table from "../../../../../components/ui/Table/Table";
-import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 import ControlPanel from "../../../../../components/ui/ControlPanel/ControlPanel";
-import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
-import accountsStyles from "../Accounts.module.css";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
-import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
-import { useEditableTable } from "../../../../../hooks/useEditableTable";
+import AccountGoalUpdateModal from "../../../../../components/ui/Modal/AccountGoalUpdateModal";
+import accountsStyles from "../Accounts.module.css";
+import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
+import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 
 const EMPTY_ACCOUNT = {
   name: "",
@@ -29,12 +30,54 @@ const CATEGORIES = [
   { value: "Debt", label: "Debt" },
 ];
 
+// Add this function to detect open apps (you may need to adjust based on your architecture)
+const useIsAppOpen = (appId) => {
+  // This is a simplified detection - you may need to adapt based on your app management
+  // One way is to check if there's a Plan app window in the DOM
+  useEffect(() => {
+    const checkPlanApp = () => {
+      const planAppElements = document.querySelectorAll('[data-app-id="plan"]');
+      return planAppElements.length > 0;
+    };
+
+    setIsPlanAppOpen(checkPlanApp());
+
+    // Optional: Set up a mutation observer to watch for app changes
+    const observer = new MutationObserver(() => {
+      setIsPlanAppOpen(checkPlanApp());
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-app-id"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const [isPlanAppOpen, setIsPlanAppOpen] = useState(false);
+  return isPlanAppOpen;
+};
+
 const OverviewTab = ({ smallApp }) => {
-  const { data, saveData, clearAccountsData, resetAccountsToDemo } =
-    useFinancialData();
+  const {
+    data,
+    saveData,
+    clearAccountsData,
+    resetAccountsToDemo,
+    accountChangeNotifications, // Make sure this is included
+    applyGoalUpdateFromNotification,
+    dismissAccountChangeNotification,
+    clearAllAccountChangeNotifications,
+  } = useFinancialData();
 
   const accounts = data.accounts || [];
   const portfolios = data.portfolios || [];
+
+  // Modal state for account change notifications
+  const [activeNotification, setActiveNotification] = useState(null);
 
   const {
     editMode,
@@ -50,6 +93,9 @@ const OverviewTab = ({ smallApp }) => {
   const [portfolioFilter, setPortfolioFilter] = useState("all");
   const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
   const newAccountNameRef = useRef(null);
+
+  // Add this line to detect if Plan app is open
+  const isPlanAppOpen = useIsAppOpen("plan");
 
   // Handle saving from control panel
   const handleSave = () => {
@@ -238,46 +284,25 @@ const OverviewTab = ({ smallApp }) => {
 
   const renderAccountRow = (account, index) => {
     if (!editMode) {
-      // View mode - plain text, no action column
+      // View mode - display only
       return (
-        <tr key={account.id}>
+        <tr key={account.id || index}>
           <td>{account.name}</td>
           <td>{account.accountProvider}</td>
           <td>{account.category}</td>
           <td>{account.subType}</td>
-          <td>
-            <span
-              className={
-                account.value >= 0
-                  ? accountsStyles.positive
-                  : accountsStyles.negative
-              }
-            >
-              $
-              {Math.abs(account.value || 0).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
+          <td className={tableStyles.alignRight}>
+            $
+            {account.value?.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            }) || "0.00"}
           </td>
           <td>{account.taxStatus}</td>
+          <td>{account.interestRate ? `${account.interestRate}%` : "-"}</td>
           <td>
-            {account.category === "Debt"
-              ? account.interestRate
-                ? `${account.interestRate}%`
-                : "N/A"
-              : "N/A"}
-          </td>
-          <td>
-            {account.category === "Debt"
-              ? account.monthlyPayment
-                ? `$${parseFloat(account.monthlyPayment).toLocaleString(
-                    undefined,
-                    {
-                      minimumFractionDigits: 2,
-                    }
-                  )}`
-                : "N/A"
-              : "N/A"}
+            {account.monthlyPayment
+              ? `$${account.monthlyPayment.toLocaleString()}`
+              : "-"}
           </td>
           <td>{account.portfolioName || "-"}</td>
         </tr>
@@ -286,11 +311,11 @@ const OverviewTab = ({ smallApp }) => {
 
     // Edit mode - inputs
     return (
-      <tr key={account.id}>
+      <tr key={account.id || index}>
         <td>
           <input
             type="text"
-            value={account.name}
+            value={account.name || ""}
             onChange={(e) => updateEditRow(index, "name", e.target.value)}
             className={tableStyles.tableInput}
           />
@@ -298,7 +323,7 @@ const OverviewTab = ({ smallApp }) => {
         <td>
           <input
             type="text"
-            value={account.accountProvider}
+            value={account.accountProvider || ""}
             onChange={(e) =>
               updateEditRow(index, "accountProvider", e.target.value)
             }
@@ -307,7 +332,7 @@ const OverviewTab = ({ smallApp }) => {
         </td>
         <td>
           <select
-            value={account.category}
+            value={account.category || "Cash"}
             onChange={(e) => updateEditRow(index, "category", e.target.value)}
             className={tableStyles.tableSelect}
           >
@@ -321,7 +346,7 @@ const OverviewTab = ({ smallApp }) => {
         <td>
           <input
             type="text"
-            value={account.subType}
+            value={account.subType || ""}
             onChange={(e) => updateEditRow(index, "subType", e.target.value)}
             className={tableStyles.tableInput}
           />
@@ -329,73 +354,68 @@ const OverviewTab = ({ smallApp }) => {
         <td>
           <input
             type="number"
-            value={account.value}
+            value={account.value || ""}
             onChange={(e) =>
               updateEditRow(index, "value", parseFloat(e.target.value) || 0)
             }
             className={tableStyles.tableInput}
+            step="0.01"
+            min="-999999999"
+            max="999999999"
           />
         </td>
         <td>
           <input
             type="text"
-            value={account.taxStatus}
+            value={account.taxStatus || ""}
             onChange={(e) => updateEditRow(index, "taxStatus", e.target.value)}
             className={tableStyles.tableInput}
           />
         </td>
         <td>
-          {account.category === "Debt" ? (
-            <input
-              type="number"
-              value={account.interestRate || ""}
-              onChange={(e) =>
-                updateEditRow(
-                  index,
-                  "interestRate",
-                  e.target.value ? parseFloat(e.target.value) : null
-                )
-              }
-              className={tableStyles.tableInput}
-              min="0"
-              step="0.01"
-              placeholder="%"
-            />
-          ) : (
-            <span>-</span>
-          )}
-        </td>
-        <td>
-          {account.category === "Debt" ? (
-            <input
-              type="number"
-              value={account.monthlyPayment || ""}
-              onChange={(e) =>
-                updateEditRow(
-                  index,
-                  "monthlyPayment",
-                  e.target.value ? parseFloat(e.target.value) : null
-                )
-              }
-              className={tableStyles.tableInput}
-              min="0"
-              step="0.01"
-              placeholder="$"
-            />
-          ) : (
-            <span>-</span>
-          )}
+          <input
+            type="number"
+            value={account.interestRate || ""}
+            onChange={(e) =>
+              updateRow(index, "interestRate", parseFloat(e.target.value) || "")
+            }
+            className={tableStyles.tableInput}
+            step="0.01"
+            min="0"
+            max="100"
+          />
         </td>
         <td>
           <input
-            type="text"
-            value={account.portfolioName || ""}
+            type="number"
+            value={account.monthlyPayment || ""}
             onChange={(e) =>
-              updateEditRow(index, "portfolioName", e.target.value)
+              updateRow(
+                index,
+                "monthlyPayment",
+                parseFloat(e.target.value) || ""
+              )
             }
             className={tableStyles.tableInput}
-            placeholder="Portfolio name"
+            step="0.01"
+            min="0"
           />
+        </td>
+        <td>
+          <select
+            value={account.portfolioId || ""}
+            onChange={(e) =>
+              updateEditRow(index, "portfolioId", e.target.value || null)
+            }
+            className={tableStyles.tableSelect}
+          >
+            <option value="">No Portfolio</option>
+            {portfolios.map((portfolio) => (
+              <option key={portfolio.id} value={portfolio.id}>
+                {portfolio.name}
+              </option>
+            ))}
+          </select>
         </td>
         <td>
           <button
@@ -403,7 +423,7 @@ const OverviewTab = ({ smallApp }) => {
             className={tableStyles.removeButton}
             title="Remove"
           >
-            ✕
+            Remove
           </button>
         </td>
       </tr>
@@ -427,30 +447,157 @@ const OverviewTab = ({ smallApp }) => {
 
   const columns = editMode ? editColumns : viewColumns;
 
+  // Handle opening Plan app (you'll need to implement this based on your app architecture)
+  const handleOpenPlanApp = () => {
+    // This would need to be implemented based on how your apps communicate
+    // For now, we'll just close the modal and show an alert
+    alert("This would open the Plan app and navigate to the Goals tab");
+    setActiveNotification(null);
+  };
+
+  // Handle confirming goal update from notification
+  const handleConfirmGoalUpdate = (amountToAdd) => {
+    if (activeNotification) {
+      applyGoalUpdateFromNotification(activeNotification.id, amountToAdd);
+      setActiveNotification(null);
+    }
+  };
+
+  // Handle dismissing notification
+  const handleDismissNotification = (notificationId) => {
+    dismissAccountChangeNotification(notificationId);
+    if (activeNotification?.id === notificationId) {
+      setActiveNotification(null);
+    }
+  };
+
+  /*  console.log("Account Change Notifications:", accountChangeNotifications);
+  console.log("Notifications length:", accountChangeNotifications.length); */
+
   return (
     <div className={accountsStyles.overviewContentContainer}>
       <SnapshotRow items={snapshotItems} small={smallApp} />
 
+      {/* Account Change Notifications - Filter out completed goals */}
+      {accountChangeNotifications.filter(
+        (notification) => notification.goal.status !== "completed"
+      ).length > 0 && (
+        <Section
+          header={
+            <div className={sectionStyles.sectionHeaderRow}>
+              <EditableTableHeader
+                title={`Goal Updates Available (${
+                  accountChangeNotifications.filter(
+                    (notification) => notification.goal.status !== "completed"
+                  ).length
+                })`}
+                editMode={false}
+                editable={false}
+              />
+              <button
+                onClick={clearAllAccountChangeNotifications}
+                style={{
+                  background: "var(--surface-light)",
+                  color: "var(--text-secondary)",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: "var(--border-radius-sm)",
+                  padding: "var(--space-xs) var(--space-sm)",
+                  cursor: "pointer",
+                  fontSize: "var(--font-size-xs)",
+                }}
+              >
+                Dismiss All
+              </button>
+            </div>
+          }
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--space-xs)",
+              padding: "var(--space-sm)",
+            }}
+          >
+            {accountChangeNotifications
+              .filter(
+                (notification) => notification.goal.status !== "completed"
+              )
+              .map((notification) => (
+                <div
+                  key={notification.id}
+                  style={{
+                    background: "var(--surface-dark)",
+                    border: "1px solid var(--color-primary)",
+                    borderRadius: "var(--border-radius-md)",
+                    padding: "var(--space-sm)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <div>
+                    <strong>{notification.goal.name}</strong> can be updated -
+                    <span style={{ marginLeft: "var(--space-xs)" }}>
+                      {notification.accountName}: $
+                      {notification.oldValue.toLocaleString()} → $
+                      {notification.newValue.toLocaleString()}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: "var(--space-xs)" }}>
+                    <button
+                      onClick={() => setActiveNotification(notification)}
+                      style={{
+                        background: "var(--color-primary)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "var(--border-radius-sm)",
+                        padding: "var(--space-xs) var(--space-sm)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Update
+                    </button>
+                    <button
+                      onClick={() => handleDismissNotification(notification.id)}
+                      style={{
+                        background: "var(--surface-light)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border-light)",
+                        borderRadius: "var(--border-radius-sm)",
+                        padding: "var(--space-xs) var(--space-sm)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Existing accounts table */}
       <Section
         header={
           <div className={sectionStyles.sectionHeaderRow}>
             <EditableTableHeader
-              title="Accounts"
+              title="All Accounts"
               editMode={editMode}
               onEnterEdit={enterEditMode}
               onCancelEdit={cancelEdit}
               editable={true}
             />
-            {/* Portfolio filter only */}
-            <div className={sectionStyles.filterRow}>
-              <label className={sectionStyles.filterLabel}>
+            <div className={tableStyles.filterRow}>
+              <label className={tableStyles.filterLabel}>
                 Portfolio:
                 <select
                   value={portfolioFilter}
                   onChange={(e) => setPortfolioFilter(e.target.value)}
-                  className={sectionStyles.filterSelect}
+                  className={tableStyles.filterSelect}
                 >
-                  <option value="all">All Accounts</option>
+                  <option value="all">All Portfolios</option>
                   {portfolios.map((portfolio) => (
                     <option key={portfolio.id} value={portfolio.id}>
                       {portfolio.name}
@@ -466,7 +613,7 @@ const OverviewTab = ({ smallApp }) => {
           columns={columns}
           data={displayAccounts}
           renderRow={renderAccountRow}
-          defaultSortColumn="value"
+          editMode={editMode} // Pass editMode prop to Table
           extraRow={
             editMode ? (
               <tr>
@@ -523,6 +670,7 @@ const OverviewTab = ({ smallApp }) => {
                     onChange={handleNewAccountChange}
                     placeholder="0"
                     className={tableStyles.tableInput}
+                    step="0.01"
                   />
                 </td>
                 <td>
@@ -536,46 +684,41 @@ const OverviewTab = ({ smallApp }) => {
                   />
                 </td>
                 <td>
-                  {newAccount.category === "Debt" ? (
-                    <input
-                      type="number"
-                      name="interestRate"
-                      value={newAccount.interestRate}
-                      onChange={handleNewAccountChange}
-                      placeholder="%"
-                      className={tableStyles.tableInput}
-                      min="0"
-                      step="0.01"
-                    />
-                  ) : (
-                    <span>-</span>
-                  )}
-                </td>
-                <td>
-                  {newAccount.category === "Debt" ? (
-                    <input
-                      type="number"
-                      name="monthlyPayment"
-                      value={newAccount.monthlyPayment}
-                      onChange={handleNewAccountChange}
-                      placeholder="$"
-                      className={tableStyles.tableInput}
-                      min="0"
-                      step="0.01"
-                    />
-                  ) : (
-                    <span>-</span>
-                  )}
+                  <input
+                    type="number"
+                    name="interestRate"
+                    value={newAccount.interestRate}
+                    onChange={handleNewAccountChange}
+                    placeholder="0"
+                    className={tableStyles.tableInput}
+                    step="0.01"
+                  />
                 </td>
                 <td>
                   <input
-                    type="text"
-                    name="portfolioName"
-                    value={newAccount.portfolioName || ""}
+                    type="number"
+                    name="monthlyPayment"
+                    value={newAccount.monthlyPayment}
                     onChange={handleNewAccountChange}
-                    placeholder="Portfolio name"
+                    placeholder="0"
                     className={tableStyles.tableInput}
+                    step="0.01"
                   />
+                </td>
+                <td>
+                  <select
+                    name="portfolioId"
+                    value={newAccount.portfolioId || ""}
+                    onChange={handleNewAccountChange}
+                    className={tableStyles.tableSelect}
+                  >
+                    <option value="">No Portfolio</option>
+                    {portfolios.map((portfolio) => (
+                      <option key={portfolio.id} value={portfolio.id}>
+                        {portfolio.name}
+                      </option>
+                    ))}
+                  </select>
                 </td>
                 <td>
                   <button
@@ -592,7 +735,6 @@ const OverviewTab = ({ smallApp }) => {
           smallApp={smallApp}
         />
 
-        {/* Control Panel - only show in edit mode */}
         {editMode && (
           <ControlPanel
             onSave={handleSave}
@@ -603,6 +745,16 @@ const OverviewTab = ({ smallApp }) => {
           />
         )}
       </Section>
+
+      {/* Account Goal Update Modal */}
+      <AccountGoalUpdateModal
+        notification={activeNotification}
+        isOpen={!!activeNotification}
+        onClose={() => setActiveNotification(null)}
+        onConfirm={handleConfirmGoalUpdate}
+        onOpenPlanApp={handleOpenPlanApp}
+        isPlanAppOpen={isPlanAppOpen} // Pass the new prop
+      />
     </div>
   );
 };

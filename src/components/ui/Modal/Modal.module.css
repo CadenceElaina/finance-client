@@ -1,0 +1,102 @@
+/* src/components/ui/Modal/Modal.module.css */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-lg);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+}
+
+.modal h3 {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+}
+
+.modal p {
+    margin: 0 0 var(--space-md) 0;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.modalOptions {
+    margin: var(--space-md) 0;
+}
+
+.radioGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.radioGroup label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: background-color var(--transition-speed-fast);
+}
+
+.radioGroup label:hover {
+    background: var(--surface-dark);
+}
+
+.radioGroup input[type="radio"] {
+    margin: 0;
+}
+
+.radioGroup span {
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.inlineInput {
+    margin-left: var(--space-xs);
+    width: 100px;
+    padding: var(--space-xxs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.modalActions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-lg);
+}
+
+/* Responsive modal */
+@media (max-width: 600px) {
+    .modal {
+        padding: var(--space-md);
+        margin: var(--space-sm);
+    }
+    
+    .modalActions {
+        flex-direction: column;
+    }
+    
+    .radioGroup {
+        gap: var(--space-xs);
+    }
+}

@@ -4,9 +4,18 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    // Make environment variables available
+    'process.env': {},
+  },
   server: {
-    proxy: {
-      '/api': 'http://localhost:3001', // or whatever port your backend runs on
+    port: 5173,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
     },
   },
 })

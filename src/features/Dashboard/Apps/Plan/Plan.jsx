@@ -63,6 +63,7 @@ const Plan = () => {
         { id: "compound", label: "Compound", component: () => null },
         { id: "retirement", label: "Retirement", component: () => null },
         { id: "loan", label: "Loan", component: () => null },
+        { id: "savings", label: "Savings", component: () => null }, // Added savings tab
       ],
       component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
         <CalculatorsTab

@@ -58,7 +58,8 @@ const Table = ({
   className = "",
   smallApp = false,
   extraRow,
-  defaultSortColumn = null, // New prop to specify default sort column
+  defaultSortColumn = null,
+  editMode = false, // New prop to indicate edit mode
   ...props
 }) => {
   // Find the value column for default sorting
@@ -86,26 +87,33 @@ const Table = ({
   // State for sorting: { key: colKey, direction: 'asc' | 'desc' | null }
   const [sort, setSort] = useState(getDefaultSort);
 
-  // Reset to default sort when data or columns change
+  // Reset to default sort when data or columns change, but NOT during edit mode
   useEffect(() => {
-    const currentDefault = getDefaultSort();
-    // Only reset if we don't have a current sort or if the current sort column no longer exists
-    if (!sort.key || !columns.find((col) => col.key === sort.key)) {
-      setSort(currentDefault);
+    if (!editMode) {
+      const currentDefault = getDefaultSort();
+      // Only reset if we don't have a current sort or if the current sort column no longer exists
+      if (!sort.key || !columns.find((col) => col.key === sort.key)) {
+        setSort(currentDefault);
+      }
     }
-  }, [columns, data.length]); // Only reset when columns change or data length changes (new data loaded)
+  }, [columns, data.length, editMode]); // Add editMode to dependencies
 
-  // Sorted data
+  // Sorted data - don't sort during edit mode
   const sortedData = useMemo(() => {
     let currentData = [...data];
-    if (sort.key && sort.direction) {
+
+    // Only sort if not in edit mode
+    if (!editMode && sort.key && sort.direction) {
       currentData.sort(getSortFn(sort.key, sort.direction === "asc"));
     }
-    return currentData;
-  }, [data, sort]);
 
-  // Handle sort icon click
+    return currentData;
+  }, [data, sort, editMode]); // Add editMode to dependencies
+
+  // Handle sort icon click - disable during edit mode
   const handleSort = (colKey) => {
+    if (editMode) return; // Don't allow sorting during edit mode
+
     setSort((prev) => {
       if (prev.key !== colKey) {
         return { key: colKey, direction: "asc" };
@@ -132,7 +140,10 @@ const Table = ({
               <th
                 key={col.key || col.label}
                 onClick={() => handleSort(col.key)}
-                style={{ cursor: "pointer" }}
+                style={{
+                  cursor: editMode ? "default" : "pointer", // Change cursor during edit mode
+                  opacity: editMode ? 0.6 : 1, // Visual indication that sorting is disabled
+                }}
               >
                 <span
                   style={{
@@ -142,15 +153,24 @@ const Table = ({
                   }}
                 >
                   {col.label}
-                  {sort.key === col.key && sort.direction === "asc" && (
-                    <ArrowUp size={16} style={{ verticalAlign: "middle" }} />
-                  )}
-                  {sort.key === col.key && sort.direction === "desc" && (
-                    <ArrowDown size={16} style={{ verticalAlign: "middle" }} />
-                  )}
-                  {sort.key === col.key && sort.direction === null && (
-                    <X size={14} style={{ verticalAlign: "middle" }} />
-                  )}
+                  {!editMode &&
+                    sort.key === col.key &&
+                    sort.direction === "asc" && (
+                      <ArrowUp size={16} style={{ verticalAlign: "middle" }} />
+                    )}
+                  {!editMode &&
+                    sort.key === col.key &&
+                    sort.direction === "desc" && (
+                      <ArrowDown
+                        size={16}
+                        style={{ verticalAlign: "middle" }}
+                      />
+                    )}
+                  {!editMode &&
+                    sort.key === col.key &&
+                    sort.direction === null && (
+                      <X size={14} style={{ verticalAlign: "middle" }} />
+                    )}
                 </span>
               </th>
             ))}
