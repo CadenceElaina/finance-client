@@ -407,6 +407,19 @@ export const FinancialDataProvider = ({ children }) => {
       ...expense,
       id: `exp-${Date.now()}`,
     };
+
+    // If this expense is linked to a goal, update the goal
+    if (newExpense.goalId) {
+      const goal = data.goals.find((g) => g.id === newExpense.goalId);
+      if (goal) {
+        updateGoal(newExpense.goalId, {
+          linkedToBudget: true,
+          budgetExpenseId: newExpense.id,
+          monthlyContribution: parseFloat(newExpense.amount) || 0,
+        });
+      }
+    }
+
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: [...data.budget.monthlyExpenses, newExpense],
@@ -415,16 +428,38 @@ export const FinancialDataProvider = ({ children }) => {
   };
 
   const updateExpense = (id, fields) => {
+    const expense = data.budget.monthlyExpenses.find((exp) => exp.id === id);
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: data.budget.monthlyExpenses.map((exp) =>
         exp.id === id ? { ...exp, ...fields } : exp
       ),
     };
+
+    // If this expense is linked to a goal, update the goal's monthly contribution
+    if (expense && expense.goalId) {
+      const newAmount =
+        parseFloat(fields.amount) || parseFloat(expense.amount) || 0;
+      updateGoal(expense.goalId, {
+        monthlyContribution: newAmount,
+      });
+    }
+
     saveData({ ...data, budget: updatedBudget });
   };
 
   const removeExpense = (id) => {
+    const expense = data.budget.monthlyExpenses.find((exp) => exp.id === id);
+
+    // If this expense is linked to a goal, unlink it
+    if (expense && expense.goalId) {
+      updateGoal(expense.goalId, {
+        linkedToBudget: false,
+        budgetExpenseId: null,
+        monthlyContribution: 0,
+      });
+    }
+
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: data.budget.monthlyExpenses.filter(
@@ -471,28 +506,90 @@ export const FinancialDataProvider = ({ children }) => {
 
   // Add method to update goals
   const updateGoal = (goalId, updates) => {
-    const updatedGoals = data.goals.map((goal) =>
-      goal.id === goalId ? { ...goal, ...updates } : goal
-    );
-    saveData({ ...data, goals: updatedGoals });
+    const updatedGoals = data.goals.map((goal) => {
+      if (goal.id === goalId) {
+        const updatedGoal = { ...goal, ...updates };
+
+        // Check if goal is now completed
+        const isComplete =
+          updatedGoal.currentAmount >= updatedGoal.targetAmount;
+        if (isComplete && updatedGoal.status !== "completed") {
+          updatedGoal.status = "completed";
+          updatedGoal.completedDate = new Date().toISOString().split("T")[0];
+        }
+
+        return updatedGoal;
+      }
+      return goal;
+    });
+
+    // Handle budget synchronization
+    let updatedBudget = { ...data.budget };
+    const updatedGoal = updatedGoals.find((g) => g.id === goalId);
+
+    if (updatedGoal) {
+      // Remove any existing budget expense for this goal
+      updatedBudget.monthlyExpenses = updatedBudget.monthlyExpenses.filter(
+        (exp) => exp.goalId !== goalId
+      );
+
+      // Add new budget expense if goal is linked to budget
+      if (updatedGoal.linkedToBudget && updatedGoal.budgetMonthlyAmount > 0) {
+        const budgetExpense = {
+          id: updatedGoal.budgetExpenseId || `goal-expense-${goalId}`,
+          name: `Goal: ${updatedGoal.name}`,
+          cost: updatedGoal.budgetMonthlyAmount,
+          category: "flexible",
+          goalId: goalId,
+        };
+        updatedBudget.monthlyExpenses.push(budgetExpense);
+
+        // Update the goal with the budget expense ID
+        const goalIndex = updatedGoals.findIndex((g) => g.id === goalId);
+        if (goalIndex !== -1) {
+          updatedGoals[goalIndex].budgetExpenseId = budgetExpense.id;
+        }
+      }
+    }
+
+    saveData({ ...data, goals: updatedGoals, budget: updatedBudget });
   };
 
-  const removeGoal = (goalId) => {
-    const updatedGoals = data.goals.filter((goal) => goal.id !== goalId);
+  // Add method for manual goal contributions
+  const addManualGoalContribution = (goalId, amount) => {
+    const goal = data.goals.find((g) => g.id === goalId);
+    if (!goal) return;
 
-    // Also remove any budget expenses linked to this goal
-    const updatedBudget = {
-      ...data.budget,
-      monthlyExpenses: data.budget.monthlyExpenses.filter(
-        (expense) => expense.goalId !== goalId
-      ),
-    };
+    const newCurrentAmount = Math.max(0, goal.currentAmount + amount);
+    const isComplete = newCurrentAmount >= goal.targetAmount;
 
-    saveData({
-      ...data,
-      goals: updatedGoals,
-      budget: updatedBudget,
+    updateGoal(goalId, {
+      currentAmount: newCurrentAmount,
+      status: isComplete ? "completed" : goal.status,
+      completedDate:
+        isComplete && goal.status !== "completed"
+          ? new Date().toISOString().split("T")[0]
+          : goal.completedDate,
+      lastModified: new Date().toISOString().split("T")[0],
     });
+  };
+
+  // Add method to remove goals
+  const removeGoal = (goalId) => {
+    const goal = data.goals.find((g) => g.id === goalId);
+
+    // Remove goal from goals array
+    const updatedGoals = data.goals.filter((g) => g.id !== goalId);
+
+    // Remove associated budget expense if it exists
+    let updatedBudget = { ...data.budget };
+    if (goal && goal.budgetExpenseId) {
+      updatedBudget.monthlyExpenses = updatedBudget.monthlyExpenses.filter(
+        (exp) => exp.id !== goal.budgetExpenseId
+      );
+    }
+
+    saveData({ ...data, goals: updatedGoals, budget: updatedBudget });
   };
 
   return (
@@ -514,7 +611,8 @@ export const FinancialDataProvider = ({ children }) => {
         resetAccountsToDemo,
         clearAccountsData,
         updateGoal,
-        removeGoal,
+        removeGoal, // Add this line
+        addManualGoalContribution,
         // Account change notifications
         accountChangeNotifications,
         applyGoalUpdateFromNotification,

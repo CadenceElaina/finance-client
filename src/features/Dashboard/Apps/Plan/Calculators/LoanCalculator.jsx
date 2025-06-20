@@ -11,6 +11,8 @@ import {
 } from "recharts";
 import Button from "../../../../../components/ui/Button/Button";
 import planStyles from "../plan.module.css";
+import Section from "../../../../../components/ui/Section/Section";
+import SectionHeader from "../../../../../components/ui/Section/SectionHeader";
 
 const LoanCalculator = ({ smallApp }) => {
   const [inputs, setInputs] = useState({
@@ -115,9 +117,10 @@ const LoanCalculator = ({ smallApp }) => {
   };
 
   return (
-    <div className={planStyles.calculatorContainer}>
-      <h3 className={planStyles.calculatorTitle}>Loan Calculator</h3>
-
+    <Section
+      header={<SectionHeader title="Loan Calculator" />}
+      className={planStyles.calculatorContainer}
+    >
       <div className={planStyles.calculatorContent}>
         <div className={planStyles.calculatorForm}>
           <div className={planStyles.formRow}>
@@ -190,106 +193,114 @@ const LoanCalculator = ({ smallApp }) => {
           </div>
         </div>
 
-        {results && (
-          <div className={planStyles.calculatorResults}>
+        <div className={planStyles.calculatorResults}>
+          <h4
+            style={{
+              textAlign: "center",
+              marginBottom: "var(--space-sm)",
+              color: "var(--text-title)",
+            }}
+          >
+            Loan Analysis Results
+          </h4>
+
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>Monthly Payment</span>
+            <span className={planStyles.resultValue}>
+              $
+              {results.monthlyPayment.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>Time to Pay Off</span>
+            <span className={planStyles.resultValue}>
+              {results.yearsToPayoff.toFixed(1)} years
+            </span>
+          </div>
+
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>Total Interest</span>
+            <span className={planStyles.resultValue}>
+              $
+              {results.totalInterestPaid.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
+            </span>
+          </div>
+
+          {inputs.extraMonthlyPayment > 0 && (
             <div className={planStyles.resultItem}>
-              <span className={planStyles.resultLabel}>Monthly Payment</span>
-              <span className={planStyles.resultValue}>
+              <span className={planStyles.resultLabel}>Interest Saved</span>
+              <span
+                className={`${planStyles.resultValue} ${planStyles.positive}`}
+              >
                 $
-                {results.monthlyPayment.toLocaleString(undefined, {
+                {results.interestSaved.toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                 })}
               </span>
             </div>
+          )}
+        </div>
 
-            <div className={planStyles.resultItem}>
-              <span className={planStyles.resultLabel}>Time to Pay Off</span>
-              <span className={planStyles.resultValue}>
-                {results.yearsToPayoff.toFixed(1)} years
-              </span>
-            </div>
-
-            <div className={planStyles.resultItem}>
-              <span className={planStyles.resultLabel}>Total Interest</span>
-              <span className={planStyles.resultValue}>
-                $
-                {results.totalInterestPaid.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
-
-            {inputs.extraMonthlyPayment > 0 && (
-              <div className={planStyles.resultItem}>
-                <span className={planStyles.resultLabel}>Interest Saved</span>
-                <span
-                  className={`${planStyles.resultValue} ${planStyles.positive}`}
-                >
-                  $
-                  {results.interestSaved.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              </div>
-            )}
+        {chartData.length > 0 && (
+          <div className={planStyles.calculatorChart}>
+            <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
+              <AreaChart data={chartData}>
+                <XAxis
+                  dataKey="year"
+                  fontSize={smallApp ? 10 : 12}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                />
+                <YAxis
+                  fontSize={smallApp ? 10 : 12}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `$${value.toLocaleString()}`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    background: "var(--chart-tooltip-bg)",
+                    border: "1px solid var(--border-light)",
+                    color: "var(--chart-tooltip-text)",
+                    borderRadius: "var(--border-radius-md)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{
+                    fontSize: smallApp ? "0.65rem" : "0.75rem",
+                    color: "var(--chart-label-text)",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Principal Balance"
+                  stackId="1"
+                  stroke="var(--chart-color-1)"
+                  fill="var(--chart-color-1)"
+                  fillOpacity={0.6}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="Cumulative Interest"
+                  stackId="2"
+                  stroke="var(--chart-color-2)"
+                  fill="var(--chart-color-2)"
+                  fillOpacity={0.6}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         )}
       </div>
-
-      {chartData.length > 0 && (
-        <div className={planStyles.calculatorChart}>
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
-            <AreaChart data={chartData}>
-              <XAxis
-                dataKey="year"
-                fontSize={smallApp ? 10 : 12}
-                tick={{ fill: "var(--chart-label-text)" }}
-              />
-              <YAxis
-                fontSize={smallApp ? 10 : 12}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                tick={{ fill: "var(--chart-label-text)" }}
-              />
-              <Tooltip
-                formatter={(value, name) => [
-                  `$${value.toLocaleString()}`,
-                  name,
-                ]}
-                contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
-                  border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
-                  borderRadius: "var(--border-radius-md)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              />
-              <Legend
-                wrapperStyle={{
-                  fontSize: smallApp ? "0.65rem" : "0.75rem",
-                  color: "var(--chart-label-text)",
-                }}
-              />
-              <Area
-                type="monotone"
-                dataKey="Principal Balance"
-                stackId="1"
-                stroke="var(--chart-color-1)"
-                fill="var(--chart-color-1)"
-                fillOpacity={0.6}
-              />
-              <Area
-                type="monotone"
-                dataKey="Cumulative Interest"
-                stackId="2"
-                stroke="var(--chart-color-2)"
-                fill="var(--chart-color-2)"
-                fillOpacity={0.6}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </div>
+    </Section>
   );
 };
 

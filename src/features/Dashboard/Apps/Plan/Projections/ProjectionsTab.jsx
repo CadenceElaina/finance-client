@@ -3,8 +3,11 @@ import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 import planStyles from "../plan.module.css";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
+import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 
 const ProjectionsTab = ({ smallApp }) => {
+  const { data } = useFinancialData();
+
   return (
     <div className={planStyles.planContentWrapper}>
       <Section
@@ -25,26 +28,14 @@ const ProjectionsTab = ({ smallApp }) => {
             color: "var(--text-secondary)",
           }}
         >
-          <h3>Net Worth Projections</h3>
+          <h3>Coming Soon</h3>
           <p>
-            See how your net worth will grow over time based on your current
-            financial situation and goals.
+            Financial projections and scenario planning will be available here.
           </p>
-          <br />
-          <h3>Cash Flow Analysis</h3>
           <p>
-            Analyze your monthly cash flow and identify opportunities for
-            improvement.
-          </p>
-          <br />
-          <h3>Goal Progress Forecasting</h3>
-          <p>
-            Track your progress toward financial goals and adjust your strategy
-            as needed.
-          </p>
-          <br />
-          <p>
-            <strong>Coming soon...</strong>
+            This will include net worth projections, goal completion timelines,
+            and retirement planning scenarios based on your current budget,
+            accounts, and goals.
           </p>
         </div>
       </Section>

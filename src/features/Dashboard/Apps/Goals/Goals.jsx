@@ -1,11 +1,11 @@
+// src/features/Dashboard/Apps/Goals/Goals.jsx
 import React, { useRef, useState, useEffect } from "react";
 import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
-import CalculatorsTab from "./Calculators/CalculatorsTab";
-import ProjectionsTab from "./Projections/ProjectionsTab";
-import planStyles from "./plan.module.css";
+import GoalsTab from "./Goals/GoalsTab";
+import goalsStyles from "./goals.module.css";
 import { getAppSize } from "../../../../utils/getAppSize";
 
-const Plan = () => {
+const Goals = () => {
   const containerRef = useRef(null);
   const [containerSize, setContainerSize] = useState({
     width: 0,
@@ -35,31 +35,22 @@ const Plan = () => {
   const smallApp = appSize === "small";
   const largeApp = appSize === "large";
 
-  const [activeTabId, setActiveTabId] = useState("calculators");
+  const [activeTabId, setActiveTabId] = useState("goals");
 
   const tabs = [
     {
-      id: "calculators",
-      label: "Calculators",
+      id: "goals",
+      label: "Goals",
       innerTabs: [
         { id: "showAll", label: "All", component: () => null },
-        { id: "compound", label: "Compound", component: () => null },
-        { id: "retirement", label: "Retirement", component: () => null },
-        { id: "loan", label: "Loan", component: () => null },
-        { id: "savings", label: "Savings", component: () => null },
+        { id: "active", label: "Active", component: () => null },
+        { id: "completed", label: "Completed", component: () => null },
       ],
       component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
-        <CalculatorsTab
+        <GoalsTab
           smallApp={flexTabsSmallApp}
           activeInnerTabId={activeInnerTabId}
         />
-      ),
-    },
-    {
-      id: "projections",
-      label: "Projections",
-      component: ({ smallApp: flexTabsSmallApp }) => (
-        <ProjectionsTab smallApp={flexTabsSmallApp} />
       ),
     },
   ];
@@ -68,7 +59,7 @@ const Plan = () => {
     <div
       ref={containerRef}
       className={`
-        ${planStyles.planAppContainer}
+        ${goalsStyles.goalsAppContainer}
         ${smallApp ? "smallApp" : ""}
         ${largeApp ? "largeApp" : ""}
       `}
@@ -80,15 +71,15 @@ const Plan = () => {
         smallApp={smallApp}
         largeApp={largeApp}
         className={`
-          ${planStyles.planTabs}
+          ${goalsStyles.goalsTabs}
           ${smallApp ? "smallApp" : ""}
           ${largeApp ? "largeApp" : ""}
         `}
-        contentClassName={planStyles.planTabContent}
+        contentClassName={goalsStyles.goalsTabContent}
         alwaysShowInnerTabsAsRow={true}
       />
     </div>
   );
 };
 
-export default Plan;
+export default Goals;

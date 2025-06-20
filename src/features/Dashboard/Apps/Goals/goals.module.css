@@ -1,0 +1,309 @@
+/* src/features/Dashboard/Apps/Goals/goals.module.css */
+.goalsAppContainer {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+}
+
+.goalsTabs {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.goalsTabContent {
+    flex: 1;
+    padding: var(--space-xs);
+    box-sizing: border-box;
+}
+
+.goalsContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* Goals specific styles */
+.goalsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+}
+
+.goalsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+}
+
+.goalCard {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    position: relative;
+    transition: box-shadow var(--transition-speed-fast), border-color var(--transition-speed-fast);
+}
+
+.goalCard:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.goalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--space-xs);
+}
+
+.goalTitle {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.goalType {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    background: var(--surface-dark);
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--border-radius-sm);
+}
+
+.goalProgress {
+    margin: var(--space-xs) 0;
+    padding: var(--space-xs);
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
+}
+
+.progressBar {
+    width: 100%;
+    height: 10px;
+    background: var(--background-light);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    margin: var(--space-xs) 0;
+    border: 1px solid var(--border-light);
+}
+
+.progressFill {
+    height: 100%;
+    background: var(--gradient-primary);
+    transition: width 0.3s ease;
+}
+
+.goalStats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    font-size: var(--font-size-xs);
+}
+
+.goalStat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.statLabel {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xxs);
+}
+
+.statValue {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+.goalActions {
+    display: flex;
+    gap: var(--space-xs);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--border-light);
+}
+
+/* Form styles */
+.goalForm {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-sm);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.formRow.fullWidth {
+    grid-template-columns: 1fr;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.formLabel {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.formInput {
+    padding: var(--space-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: border-color var(--transition-speed-fast);
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
+}
+
+.formInput.error {
+    border-color: var(--status-danger);
+}
+
+.errorText {
+    color: var(--status-danger);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-xxs);
+}
+
+.helpText {
+    color: var(--text-secondary);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-xxs);
+}
+
+.required {
+    color: var(--status-danger);
+}
+
+.formActions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-light);
+}
+
+.fundingSection {
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-sm);
+    margin: var(--space-sm) 0;
+}
+
+.sectionTitle {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-xs);
+}
+
+.radioLabel {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+}
+
+.radioLabel input[type="checkbox"] {
+    margin: 0;
+}
+
+/* Positive/negative status colors */
+.positive {
+    color: var(--status-success);
+}
+
+.negative {
+    color: var(--status-danger);
+}
+
+.neutral {
+    color: var(--text-secondary);
+}
+
+/* Small app responsiveness */
+:global(.smallApp) .goalsGrid {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .goalCard {
+    padding: var(--space-xs);
+}
+
+/* Large app enhancements */
+:global(.largeApp) .goalsTabContent {
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .goalsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-md);
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .goalCard {
+    padding: var(--space-md);
+    gap: var(--space-sm);
+}
+
+:global(.largeApp) .goalCard .goalTitle {
+    font-size: var(--font-size-lg);
+}
+
+:global(.largeApp) .goalStats {
+    gap: var(--space-sm);
+}
+
+:global(.largeApp) .goalActions {
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+    padding-top: var(--space-sm);
+}
+
+:global(.largeApp) .goalActions button {
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs) var(--space-sm);
+    min-width: 80px;
+}

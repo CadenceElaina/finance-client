@@ -12,6 +12,8 @@ import {
 } from "recharts";
 import Button from "../../../../../components/ui/Button/Button";
 import planStyles from "../plan.module.css";
+import Section from "../../../../../components/ui/Section/Section";
+import SectionHeader from "../../../../../components/ui/Section/SectionHeader";
 
 const SavingsGoalCalculator = ({ smallApp }) => {
   const [inputs, setInputs] = useState({
@@ -196,9 +198,10 @@ const SavingsGoalCalculator = ({ smallApp }) => {
   };
 
   return (
-    <div className={planStyles.calculatorContainer}>
-      <h3 className={planStyles.calculatorTitle}>Savings Goal Calculator</h3>
-
+    <Section
+      header={<SectionHeader title="Savings Goal Calculator" />}
+      className={planStyles.calculatorContainer}
+    >
       <div className={planStyles.calculatorContent}>
         <div className={planStyles.calculatorForm}>
           <div className={planStyles.formRow}>
@@ -362,273 +365,289 @@ const SavingsGoalCalculator = ({ smallApp }) => {
           )}
         </div>
 
-        {results && (
-          <div className={planStyles.calculatorResults}>
-            {results.goalMet ? (
-              <>
-                <div className={planStyles.resultItem}>
-                  <span className={planStyles.resultLabel}>Status</span>
-                  <span
-                    className={`${planStyles.resultValue} ${planStyles.positive}`}
-                  >
-                    Goal Already Met!
-                  </span>
-                </div>
-                <div className={planStyles.resultItem}>
-                  <span className={planStyles.resultLabel}>Surplus</span>
-                  <span
-                    className={`${planStyles.resultValue} ${planStyles.positive}`}
-                  >
-                    $
-                    {results.surplus.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                {inputs.calculationType === "minimumContribution" && (
-                  <>
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Required Monthly Contribution
-                      </span>
-                      <span className={planStyles.resultValue}>
-                        $
-                        {results.requiredMonthlyContribution.toLocaleString(
-                          undefined,
-                          { minimumFractionDigits: 2 }
-                        )}
-                      </span>
-                    </div>
+        <div className={planStyles.calculatorResults}>
+          <h4 style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
+            Savings Plan Results
+          </h4>
+          {results && (
+            <>
+              {results.goalMet ? (
+                <>
+                  <div className={planStyles.resultItem}>
+                    <span className={planStyles.resultLabel}>Status</span>
+                    <span
+                      className={`${planStyles.resultValue} ${planStyles.positive}`}
+                    >
+                      Goal Already Met!
+                    </span>
+                  </div>
+                  <div className={planStyles.resultItem}>
+                    <span className={planStyles.resultLabel}>Surplus</span>
+                    <span
+                      className={`${planStyles.resultValue} ${planStyles.positive}`}
+                    >
+                      $
+                      {results.surplus.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {inputs.calculationType === "minimumContribution" && (
+                    <>
+                      <div className={planStyles.resultItem}>
+                        <span className={planStyles.resultLabel}>
+                          Required Monthly Contribution
+                        </span>
+                        <span className={planStyles.resultValue}>
+                          $
+                          {results.requiredMonthlyContribution.toLocaleString(
+                            undefined,
+                            { minimumFractionDigits: 2 }
+                          )}
+                        </span>
+                      </div>
 
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Total Contributions
-                      </span>
-                      <span className={planStyles.resultValue}>
-                        $
-                        {results.totalContributions.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
+                      <div className={planStyles.resultItem}>
+                        <span className={planStyles.resultLabel}>
+                          Total Contributions
+                        </span>
+                        <span className={planStyles.resultValue}>
+                          $
+                          {results.totalContributions.toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                            }
+                          )}
+                        </span>
+                      </div>
 
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Interest Earned
-                      </span>
-                      <span
-                        className={`${planStyles.resultValue} ${planStyles.positive}`}
-                      >
-                        $
-                        {results.interestEarned.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                  </>
-                )}
+                      <div className={planStyles.resultItem}>
+                        <span className={planStyles.resultLabel}>
+                          Interest Earned
+                        </span>
+                        <span
+                          className={`${planStyles.resultValue} ${planStyles.positive}`}
+                        >
+                          $
+                          {results.interestEarned.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+                    </>
+                  )}
 
-                {inputs.calculationType === "timeToGoal" && !results.error && (
-                  <>
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Time to Goal
-                      </span>
-                      <span className={planStyles.resultValue}>
-                        {results.monthsNeeded < 1200
-                          ? `${
-                              results.monthsNeeded
-                            } months (${results.yearsNeeded.toFixed(1)} years)`
-                          : "Goal not reachable with current contribution"}
-                      </span>
-                    </div>
-
-                    {results.monthsNeeded < 1200 && (
+                  {inputs.calculationType === "timeToGoal" &&
+                    !results.error && (
                       <>
                         <div className={planStyles.resultItem}>
                           <span className={planStyles.resultLabel}>
-                            Total Contributions
+                            Time to Goal
                           </span>
                           <span className={planStyles.resultValue}>
-                            $
-                            {results.totalContributions.toLocaleString(
-                              undefined,
-                              { minimumFractionDigits: 2 }
-                            )}
+                            {results.monthsNeeded < 1200
+                              ? `${
+                                  results.monthsNeeded
+                                } months (${results.yearsNeeded.toFixed(
+                                  1
+                                )} years)`
+                              : "Goal not reachable with current contribution"}
                           </span>
                         </div>
 
+                        {results.monthsNeeded < 1200 && (
+                          <>
+                            <div className={planStyles.resultItem}>
+                              <span className={planStyles.resultLabel}>
+                                Total Contributions
+                              </span>
+                              <span className={planStyles.resultValue}>
+                                $
+                                {results.totalContributions.toLocaleString(
+                                  undefined,
+                                  { minimumFractionDigits: 2 }
+                                )}
+                              </span>
+                            </div>
+
+                            <div className={planStyles.resultItem}>
+                              <span className={planStyles.resultLabel}>
+                                Interest Earned
+                              </span>
+                              <span
+                                className={`${planStyles.resultValue} ${planStyles.positive}`}
+                              >
+                                $
+                                {results.interestEarned.toLocaleString(
+                                  undefined,
+                                  {
+                                    minimumFractionDigits: 2,
+                                  }
+                                )}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+
+                  {inputs.calculationType === "timeToGoal" && results.error && (
+                    <div className={planStyles.resultItem}>
+                      <span className={planStyles.resultLabel}>Error</span>
+                      <span
+                        className={`${planStyles.resultValue} ${planStyles.negative}`}
+                      >
+                        {results.error}
+                      </span>
+                    </div>
+                  )}
+
+                  {inputs.calculationType === "shortfallSurplus" && (
+                    <>
+                      <div className={planStyles.resultItem}>
+                        <span className={planStyles.resultLabel}>
+                          Projected Balance
+                        </span>
+                        <span className={planStyles.resultValue}>
+                          $
+                          {results.finalBalance.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </div>
+
+                      <div className={planStyles.resultItem}>
+                        <span className={planStyles.resultLabel}>Status</span>
+                        <span
+                          className={`${planStyles.resultValue} ${
+                            results.isOnTrack
+                              ? planStyles.positive
+                              : planStyles.negative
+                          }`}
+                        >
+                          {results.isOnTrack ? "On Track!" : "Behind Goal"}
+                        </span>
+                      </div>
+
+                      {results.shortfall > 0 && (
                         <div className={planStyles.resultItem}>
                           <span className={planStyles.resultLabel}>
-                            Interest Earned
+                            Shortfall
+                          </span>
+                          <span
+                            className={`${planStyles.resultValue} ${planStyles.negative}`}
+                          >
+                            $
+                            {results.shortfall.toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                            })}
+                          </span>
+                        </div>
+                      )}
+
+                      {results.surplus > 0 && (
+                        <div className={planStyles.resultItem}>
+                          <span className={planStyles.resultLabel}>
+                            Surplus
                           </span>
                           <span
                             className={`${planStyles.resultValue} ${planStyles.positive}`}
                           >
                             $
-                            {results.interestEarned.toLocaleString(undefined, {
+                            {results.surplus.toLocaleString(undefined, {
                               minimumFractionDigits: 2,
                             })}
                           </span>
                         </div>
-                      </>
-                    )}
-                  </>
-                )}
+                      )}
 
-                {inputs.calculationType === "timeToGoal" && results.error && (
-                  <div className={planStyles.resultItem}>
-                    <span className={planStyles.resultLabel}>Error</span>
-                    <span
-                      className={`${planStyles.resultValue} ${planStyles.negative}`}
-                    >
-                      {results.error}
-                    </span>
-                  </div>
-                )}
-
-                {inputs.calculationType === "shortfallSurplus" && (
-                  <>
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Projected Balance
-                      </span>
-                      <span className={planStyles.resultValue}>
-                        $
-                        {results.finalBalance.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>Status</span>
-                      <span
-                        className={`${planStyles.resultValue} ${
-                          results.isOnTrack
-                            ? planStyles.positive
-                            : planStyles.negative
-                        }`}
-                      >
-                        {results.isOnTrack ? "On Track!" : "Behind Goal"}
-                      </span>
-                    </div>
-
-                    {results.shortfall > 0 && (
                       <div className={planStyles.resultItem}>
                         <span className={planStyles.resultLabel}>
-                          Shortfall
+                          Interest Earned
                         </span>
-                        <span
-                          className={`${planStyles.resultValue} ${planStyles.negative}`}
-                        >
-                          $
-                          {results.shortfall.toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                          })}
-                        </span>
-                      </div>
-                    )}
-
-                    {results.surplus > 0 && (
-                      <div className={planStyles.resultItem}>
-                        <span className={planStyles.resultLabel}>Surplus</span>
                         <span
                           className={`${planStyles.resultValue} ${planStyles.positive}`}
                         >
                           $
-                          {results.surplus.toLocaleString(undefined, {
+                          {results.interestEarned.toLocaleString(undefined, {
                             minimumFractionDigits: 2,
                           })}
                         </span>
                       </div>
-                    )}
-
-                    <div className={planStyles.resultItem}>
-                      <span className={planStyles.resultLabel}>
-                        Interest Earned
-                      </span>
-                      <span
-                        className={`${planStyles.resultValue} ${planStyles.positive}`}
-                      >
-                        $
-                        {results.interestEarned.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {chartData.length > 0 && (
-        <div className={planStyles.calculatorChart}>
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
-            <LineChart data={chartData}>
-              <XAxis
-                dataKey="month"
-                fontSize={smallApp ? 10 : 12}
-                tick={{ fill: "var(--chart-label-text)" }}
-                label={{
-                  value: "Months",
-                  position: "insideBottom",
-                  offset: -5,
-                }}
-              />
-              <YAxis
-                fontSize={smallApp ? 10 : 12}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                tick={{ fill: "var(--chart-label-text)" }}
-              />
-              <Tooltip
-                formatter={(value, name) => [
-                  `$${value.toLocaleString()}`,
-                  name,
-                ]}
-                contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
-                  border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
-                  borderRadius: "var(--border-radius-md)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              />
-              <Legend
-                wrapperStyle={{
-                  fontSize: smallApp ? "0.65rem" : "0.75rem",
-                  color: "var(--chart-label-text)",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="Savings Balance"
-                stroke="var(--chart-color-1)"
-                strokeWidth={2}
-                dot={false}
-              />
-              <ReferenceLine
-                y={inputs.goalAmount}
-                stroke="var(--chart-color-2)"
-                strokeDasharray="8 8"
-                strokeWidth={2}
-                label={{
-                  value: "Goal",
-                  position: "topRight",
-                  style: { fill: "var(--chart-label-text)" },
-                }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
-      )}
-    </div>
+
+        <div className={planStyles.calculatorChart}>
+          {chartData.length > 0 && (
+            <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
+              <LineChart data={chartData}>
+                <XAxis
+                  dataKey="month"
+                  fontSize={smallApp ? 10 : 12}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                  label={{
+                    value: "Months",
+                    position: "insideBottom",
+                    offset: -5,
+                  }}
+                />
+                <YAxis
+                  fontSize={smallApp ? 10 : 12}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `$${value.toLocaleString()}`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    background: "var(--chart-tooltip-bg)",
+                    border: "1px solid var(--border-light)",
+                    color: "var(--chart-tooltip-text)",
+                    borderRadius: "var(--border-radius-md)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{
+                    fontSize: smallApp ? "0.65rem" : "0.75rem",
+                    color: "var(--chart-label-text)",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Savings Balance"
+                  stroke="var(--chart-color-1)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <ReferenceLine
+                  y={inputs.goalAmount}
+                  stroke="var(--chart-color-2)"
+                  strokeDasharray="8 8"
+                  strokeWidth={2}
+                  label={{
+                    value: "Goal",
+                    position: "topRight",
+                    style: { fill: "var(--chart-label-text)" },
+                  }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+    </Section>
   );
 };
 

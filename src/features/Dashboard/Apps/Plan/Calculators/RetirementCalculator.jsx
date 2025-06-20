@@ -1,17 +1,23 @@
 // src/features/Dashboard/Apps/Plan/Calculators/RetirementCalculator.jsx
+// Update the header section to match other calculators
+
 import React, { useState, useMemo } from "react";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
+  CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
   Legend,
+  ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
+import Section from "../../../../../components/ui/Section/Section";
+import SectionHeader from "../../../../../components/ui/Section/SectionHeader";
 import Button from "../../../../../components/ui/Button/Button";
-import planStyles from "../plan.module.css";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
+import planStyles from "../plan.module.css";
 
 const RetirementCalculator = ({ smallApp }) => {
   const { data } = useFinancialData();
@@ -51,66 +57,113 @@ const RetirementCalculator = ({ smallApp }) => {
       retirementDuration,
     } = inputs;
 
-    if (retirementAge <= currentAge) return { results: null, chartData: [] };
-
-    const yearsToRetirement = retirementAge - currentAge;
-    const monthlyRate = annualReturn / 100 / 12;
-    const totalMonths = yearsToRetirement * 12;
-
-    const futureCurrentSavings =
-      currentSavings * Math.pow(1 + annualReturn / 100, yearsToRetirement);
-
-    let futureContributions = 0;
-    if (monthlyRate > 0) {
-      futureContributions =
-        (monthlyContribution * (Math.pow(1 + monthlyRate, totalMonths) - 1)) /
-        monthlyRate;
-    } else {
-      futureContributions = monthlyContribution * totalMonths;
+    if (retirementAge <= currentAge) {
+      return { results: {}, chartData: [] };
     }
 
-    const totalRetirementBalance = futureCurrentSavings + futureContributions;
-    const inflationAdjustedIncome =
-      desiredAnnualIncome *
-      Math.pow(1 + inflationRate / 100, yearsToRetirement);
-    const requiredRetirementFund = inflationAdjustedIncome * retirementDuration;
-    const sustainableAnnualWithdrawal = totalRetirementBalance * 0.04;
+    const yearsToRetirement = retirementAge - currentAge;
+    const monthlyReturnRate = annualReturn / 100 / 12;
+    const data = [];
 
-    const shortfall = requiredRetirementFund - totalRetirementBalance;
-    const surplus = totalRetirementBalance - requiredRetirementFund;
+    // Calculate accumulation phase (working years)
+    let currentBalance = currentSavings;
 
-    let additionalMonthlySavingsNeeded = 0;
-    if (shortfall > 0) {
-      if (monthlyRate > 0) {
-        additionalMonthlySavingsNeeded =
-          (shortfall * monthlyRate) /
-          (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    for (let year = 0; year <= yearsToRetirement; year++) {
+      const age = currentAge + year;
+
+      if (year === 0) {
+        // Starting point
+        data.push({
+          age,
+          year,
+          balance: currentBalance,
+          phase: "Accumulation",
+          isRetirementStart: false,
+        });
       } else {
-        additionalMonthlySavingsNeeded = shortfall / totalMonths;
+        // Apply monthly contributions and growth for the year
+        for (let month = 0; month < 12; month++) {
+          currentBalance += monthlyContribution;
+          currentBalance *= 1 + monthlyReturnRate;
+        }
+
+        data.push({
+          age,
+          year,
+          balance: currentBalance,
+          phase: "Accumulation",
+          isRetirementStart: age === retirementAge,
+        });
       }
     }
 
-    const calculatedResults = {
-      totalRetirementBalance,
-      requiredRetirementFund,
-      shortfall: shortfall > 0 ? shortfall : 0,
-      surplus: surplus > 0 ? surplus : 0,
-      sustainableAnnualWithdrawal,
-      inflationAdjustedIncome,
-      additionalMonthlySavingsNeeded,
-      isOnTrack: shortfall <= 0,
-    };
+    const retirementBalance = currentBalance;
 
-    // Chart data comparing scenarios
-    const barChartData = [
-      {
-        name: "Current Plan",
-        "Projected Balance": Math.round(totalRetirementBalance),
-        "Required Amount": Math.round(requiredRetirementFund),
+    // Calculate withdrawal phase (retirement years)
+    // Adjust desired income for inflation
+    const realAnnualIncome =
+      desiredAnnualIncome *
+      Math.pow(1 + inflationRate / 100, yearsToRetirement);
+
+    for (let year = 1; year <= retirementDuration; year++) {
+      const age = retirementAge + year;
+
+      // Apply annual growth
+      currentBalance *= 1 + annualReturn / 100;
+
+      // Subtract annual income (adjusted for ongoing inflation)
+      const currentYearIncome =
+        realAnnualIncome * Math.pow(1 + inflationRate / 100, year - 1);
+      currentBalance -= currentYearIncome;
+
+      data.push({
+        age,
+        year: yearsToRetirement + year,
+        balance: Math.max(0, currentBalance), // Don't go below 0 for display
+        phase: "Withdrawal",
+        isRetirementStart: false,
+        yearlyWithdrawal: currentYearIncome,
+      });
+
+      // If balance hits zero, note when money runs out
+      if (currentBalance <= 0) {
+        break;
+      }
+    }
+
+    // Find when money runs out
+    const moneyRunsOutYear = data.find(
+      (d) => d.phase === "Withdrawal" && d.balance <= 0
+    );
+    const yearsMoneyLasts = moneyRunsOutYear
+      ? moneyRunsOutYear.year - yearsToRetirement
+      : retirementDuration;
+
+    // Calculate if savings are sufficient
+    const finalBalance = data[data.length - 1]?.balance || 0;
+    const isSufficient = finalBalance > 0;
+
+    // Calculate required monthly contribution for success
+    let requiredMonthlyContribution = monthlyContribution;
+    if (!isSufficient) {
+      // Simple estimation - you could make this more sophisticated
+      const shortfall = Math.abs(finalBalance);
+      const monthsToRetirement = yearsToRetirement * 12;
+      requiredMonthlyContribution =
+        monthlyContribution + shortfall / monthsToRetirement;
+    }
+
+    return {
+      results: {
+        retirementBalance,
+        finalBalance,
+        isSufficient,
+        yearsMoneyLasts,
+        requiredMonthlyContribution,
+        realAnnualIncome,
       },
-    ];
-
-    return { results: calculatedResults, chartData: barChartData };
+      chartData: data,
+    };
   }, [inputs]);
 
   const resetCalculator = () => {
@@ -127,10 +180,12 @@ const RetirementCalculator = ({ smallApp }) => {
   };
 
   return (
-    <div className={planStyles.calculatorContainer}>
-      <h3 className={planStyles.calculatorTitle}>Retirement Calculator</h3>
-
+    <Section
+      header={<SectionHeader title="Retirement Calculator" />}
+      className={planStyles.calculatorContainer}
+    >
       <div className={planStyles.calculatorContent}>
+        {/* Keep existing form and results structure but standardize the title */}
         <div className={planStyles.calculatorForm}>
           <div className={planStyles.formRow}>
             <div className={planStyles.formGroup}>
@@ -146,7 +201,6 @@ const RetirementCalculator = ({ smallApp }) => {
                 max="80"
               />
             </div>
-
             <div className={planStyles.formGroup}>
               <label className={planStyles.formLabel}>Retirement Age</label>
               <input
@@ -164,7 +218,9 @@ const RetirementCalculator = ({ smallApp }) => {
 
           <div className={planStyles.formRow}>
             <div className={planStyles.formGroup}>
-              <label className={planStyles.formLabel}>Current Savings</label>
+              <label className={planStyles.formLabel}>
+                Current Retirement Savings ($)
+              </label>
               <input
                 type="number"
                 value={inputs.currentSavings}
@@ -176,10 +232,9 @@ const RetirementCalculator = ({ smallApp }) => {
                 step="1000"
               />
             </div>
-
             <div className={planStyles.formGroup}>
               <label className={planStyles.formLabel}>
-                Monthly Contribution
+                Monthly Contribution ($)
               </label>
               <input
                 type="number"
@@ -196,7 +251,9 @@ const RetirementCalculator = ({ smallApp }) => {
 
           <div className={planStyles.formRow}>
             <div className={planStyles.formGroup}>
-              <label className={planStyles.formLabel}>Annual Return (%)</label>
+              <label className={planStyles.formLabel}>
+                Expected Annual Return (%)
+              </label>
               <input
                 type="number"
                 value={inputs.annualReturn}
@@ -205,14 +262,30 @@ const RetirementCalculator = ({ smallApp }) => {
                 }
                 className={planStyles.formInput}
                 min="0"
-                max="20"
+                max="15"
                 step="0.1"
               />
             </div>
+            <div className={planStyles.formGroup}>
+              <label className={planStyles.formLabel}>Inflation Rate (%)</label>
+              <input
+                type="number"
+                value={inputs.inflationRate}
+                onChange={(e) =>
+                  handleInputChange("inflationRate", e.target.value)
+                }
+                className={planStyles.formInput}
+                min="0"
+                max="10"
+                step="0.1"
+              />
+            </div>
+          </div>
 
+          <div className={planStyles.formRow}>
             <div className={planStyles.formGroup}>
               <label className={planStyles.formLabel}>
-                Desired Annual Income
+                Desired Annual Income($)
               </label>
               <input
                 type="number"
@@ -222,7 +295,22 @@ const RetirementCalculator = ({ smallApp }) => {
                 }
                 className={planStyles.formInput}
                 min="0"
-                step="5000"
+                step="1000"
+              />
+            </div>
+            <div className={planStyles.formGroup}>
+              <label className={planStyles.formLabel}>
+                Retirement Duration (years)
+              </label>
+              <input
+                type="number"
+                value={inputs.retirementDuration}
+                onChange={(e) =>
+                  handleInputChange("retirementDuration", e.target.value)
+                }
+                className={planStyles.formInput}
+                min="5"
+                max="50"
               />
             </div>
           </div>
@@ -234,89 +322,176 @@ const RetirementCalculator = ({ smallApp }) => {
           </div>
         </div>
 
-        {results && (
-          <div className={planStyles.calculatorResults}>
-            <div className={planStyles.resultItem}>
-              <span className={planStyles.resultLabel}>Projected Balance</span>
-              <span className={planStyles.resultValue}>
-                $
-                {results.totalRetirementBalance.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            </div>
+        <div className={planStyles.calculatorResults}>
+          {/* Add a centered header like other calculators */}
+          <h4 style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
+            Retirement Projection Results
+          </h4>
 
-            <div className={planStyles.resultItem}>
-              <span className={planStyles.resultLabel}>Status</span>
-              <span
-                className={`${planStyles.resultValue} ${
-                  results.isOnTrack ? planStyles.positive : planStyles.negative
-                }`}
-              >
-                {results.isOnTrack ? "On Track!" : "Need More Savings"}
-              </span>
-            </div>
-
-            {results.shortfall > 0 && (
-              <div className={planStyles.resultItem}>
-                <span className={planStyles.resultLabel}>
-                  Additional Monthly Needed
-                </span>
-                <span
-                  className={`${planStyles.resultValue} ${planStyles.negative}`}
-                >
-                  $
-                  {results.additionalMonthlySavingsNeeded.toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2 }
-                  )}
-                </span>
-              </div>
-            )}
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>
+              Balance at Retirement:
+            </span>
+            <span
+              className={`${planStyles.resultValue} ${planStyles.positive}`}
+            >
+              $
+              {results.retirementBalance?.toLocaleString(undefined, {
+                maximumFractionDigits: 0,
+              }) || 0}
+            </span>
           </div>
-        )}
-      </div>
 
-      {chartData.length > 0 && (
-        <div className={planStyles.calculatorChart}>
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 250}>
-            <BarChart data={chartData}>
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>Money Lasts:</span>
+            <span
+              className={`${planStyles.resultValue} ${
+                results.isSufficient ? planStyles.positive : planStyles.negative
+              }`}
+            >
+              {results.yearsMoneyLasts} year
+              {results.yearsMoneyLasts !== 1 ? "s" : ""}
+              {results.isSufficient ? " (Full duration)" : " (Insufficient)"}
+            </span>
+          </div>
+
+          <div className={planStyles.resultItem}>
+            <span className={planStyles.resultLabel}>
+              Inflation-Adjusted Income:
+            </span>
+            <span className={planStyles.resultValue}>
+              $
+              {results.realAnnualIncome?.toLocaleString(undefined, {
+                maximumFractionDigits: 0,
+              }) || 0}
+              /year
+            </span>
+          </div>
+
+          {!results.isSufficient && (
+            <div className={planStyles.resultItem}>
+              <span className={planStyles.resultLabel}>
+                Required Monthly Contribution:
+              </span>
+              <span
+                className={`${planStyles.resultValue} ${planStyles.negative}`}
+              >
+                $
+                {results.requiredMonthlyContribution?.toLocaleString(
+                  undefined,
+                  { maximumFractionDigits: 0 }
+                ) || 0}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div
+          className={planStyles.calculatorChart}
+          style={{ marginTop: "var(--space-md)" }}
+        >
+          <ResponsiveContainer width="100%" height={smallApp ? 250 : 350}>
+            <LineChart
+              data={chartData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 45,
+              }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="var(--border-light)"
+              />
               <XAxis
-                dataKey="name"
-                fontSize={smallApp ? 10 : 12}
-                tick={{ fill: "var(--chart-label-text)" }}
+                dataKey="age"
+                tick={{
+                  fill: "var(--chart-label-text)",
+                  fontSize: smallApp ? 10 : 12,
+                }}
+                label={{
+                  value: "Age",
+                  position: "insideBottom",
+                  offset: -15,
+                  style: {
+                    textAnchor: "middle",
+                    fill: "var(--chart-label-text)",
+                  },
+                }}
               />
               <YAxis
-                fontSize={smallApp ? 10 : 12}
+                tick={{
+                  fill: "var(--chart-label-text)",
+                  fontSize: smallApp ? 10 : 12,
+                }}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                tick={{ fill: "var(--chart-label-text)" }}
               />
+
+              {/* Reference line at retirement age */}
+              <ReferenceLine
+                x={inputs.retirementAge}
+                stroke="var(--chart-color-3)"
+                strokeDasharray="8 8"
+                strokeWidth={2}
+                label={{
+                  value: "Retirement",
+                  position: "topLeft",
+                  fill: "var(--chart-label-text)",
+                  fontSize: smallApp ? 10 : 12,
+                }}
+              />
+
+              {/* Reference line at zero balance if money runs out */}
+              {!results.isSufficient && (
+                <ReferenceLine
+                  y={0}
+                  stroke="var(--status-danger)"
+                  strokeDasharray="4 4"
+                  strokeWidth={1}
+                />
+              )}
+
               <Tooltip
                 formatter={(value, name) => [
-                  `$${value.toLocaleString()}`,
+                  `$${value.toLocaleString(undefined, {
+                    maximumFractionDigits: 0,
+                  })}`,
                   name,
                 ]}
+                labelFormatter={(age) => `Age ${age}`}
                 contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
+                  background: "var(--surface-light)", // Fixed: use proper CSS variable
                   border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
                   borderRadius: "var(--border-radius-md)",
                   fontSize: "var(--font-size-xs)",
+                  color: "var(--text-primary)", // Fixed: ensure text color is set
+                }}
+                itemStyle={{
+                  color: "var(--text-primary)", // Fixed: ensure item text color
                 }}
               />
               <Legend
                 wrapperStyle={{
+                  paddingTop: "20px",
                   fontSize: smallApp ? "0.65rem" : "0.75rem",
                   color: "var(--chart-label-text)",
                 }}
               />
-              <Bar dataKey="Projected Balance" fill="var(--chart-color-1)" />
-              <Bar dataKey="Required Amount" fill="var(--chart-color-2)" />
-            </BarChart>
+              <Line
+                type="monotone"
+                dataKey="balance"
+                stroke="var(--chart-color-1)"
+                strokeWidth={3}
+                name="Retirement Balance"
+                dot={{ r: 2 }}
+                connectNulls={false}
+              />
+            </LineChart>
           </ResponsiveContainer>
         </div>
-      )}
-    </div>
+      </div>
+    </Section>
   );
 };
 

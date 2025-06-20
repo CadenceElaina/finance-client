@@ -11,6 +11,8 @@ import {
 } from "recharts";
 import Button from "../../../../../components/ui/Button/Button";
 import planStyles from "../plan.module.css";
+import Section from "../../../../../components/ui/Section/Section";
+import SectionHeader from "../../../../../components/ui/Section/SectionHeader";
 
 const CompoundInterestCalculator = ({ smallApp }) => {
   const [inputs, setInputs] = useState({
@@ -100,11 +102,10 @@ const CompoundInterestCalculator = ({ smallApp }) => {
   };
 
   return (
-    <div className={planStyles.calculatorContainer}>
-      <h3 className={planStyles.calculatorTitle}>
-        Compound Interest Calculator
-      </h3>
-
+    <Section
+      header={<SectionHeader title="Compound Interest Calculator" />}
+      className={planStyles.calculatorContainer}
+    >
       <div className={planStyles.calculatorContent}>
         <div className={planStyles.calculatorForm}>
           <div className={planStyles.formRow}>
@@ -196,8 +197,12 @@ const CompoundInterestCalculator = ({ smallApp }) => {
           </div>
         </div>
 
-        {results && (
-          <div className={planStyles.calculatorResults}>
+        <div className={planStyles.calculatorResults}>
+          <h4 style={{ textAlign: "center", marginBottom: "var(--space-sm)" }}>
+            Investment Growth Results
+          </h4>
+
+          {results && (
             <div className={planStyles.resultItem}>
               <span className={planStyles.resultLabel}>Final Value</span>
               <span className={planStyles.resultValue}>
@@ -207,7 +212,9 @@ const CompoundInterestCalculator = ({ smallApp }) => {
                 })}
               </span>
             </div>
+          )}
 
+          {results && (
             <div className={planStyles.resultItem}>
               <span className={planStyles.resultLabel}>
                 Total Contributions
@@ -219,7 +226,9 @@ const CompoundInterestCalculator = ({ smallApp }) => {
                 })}
               </span>
             </div>
+          )}
 
+          {results && (
             <div className={planStyles.resultItem}>
               <span className={planStyles.resultLabel}>Investment Growth</span>
               <span className={planStyles.resultValue}>
@@ -229,14 +238,18 @@ const CompoundInterestCalculator = ({ smallApp }) => {
                 })}
               </span>
             </div>
+          )}
 
+          {results && (
             <div className={planStyles.resultItem}>
               <span className={planStyles.resultLabel}>Total Return</span>
               <span className={planStyles.resultValue}>
                 {results.totalReturnPercent.toFixed(1)}%
               </span>
             </div>
+          )}
 
+          {results && (
             <div className={planStyles.resultItem}>
               <span className={planStyles.resultLabel}>
                 Inflation-Adjusted Value
@@ -248,70 +261,70 @@ const CompoundInterestCalculator = ({ smallApp }) => {
                 })}
               </span>
             </div>
+          )}
+        </div>
+
+        {chartData.length > 0 && (
+          <div className={planStyles.calculatorChart}>
+            <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
+              <LineChart data={chartData}>
+                <XAxis
+                  dataKey="year"
+                  fontSize={smallApp ? 10 : 12}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                />
+                <YAxis
+                  fontSize={smallApp ? 10 : 12}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+                  tick={{ fill: "var(--chart-label-text)" }}
+                />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `$${value.toLocaleString()}`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    background: "var(--chart-tooltip-bg)",
+                    border: "1px solid var(--border-light)",
+                    color: "var(--chart-tooltip-text)",
+                    borderRadius: "var(--border-radius-md)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                />
+                <Legend
+                  wrapperStyle={{
+                    fontSize: smallApp ? "0.65rem" : "0.75rem",
+                    color: "var(--chart-label-text)",
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Nominal Value"
+                  stroke="var(--chart-color-1)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Inflation-Adjusted"
+                  stroke="var(--chart-color-2)"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="Total Contributions"
+                  stroke="var(--chart-color-3)"
+                  strokeWidth={1}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         )}
       </div>
-
-      {chartData.length > 0 && (
-        <div className={planStyles.calculatorChart}>
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
-            <LineChart data={chartData}>
-              <XAxis
-                dataKey="year"
-                fontSize={smallApp ? 10 : 12}
-                tick={{ fill: "var(--chart-label-text)" }}
-              />
-              <YAxis
-                fontSize={smallApp ? 10 : 12}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-                tick={{ fill: "var(--chart-label-text)" }}
-              />
-              <Tooltip
-                formatter={(value, name) => [
-                  `$${value.toLocaleString()}`,
-                  name,
-                ]}
-                contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
-                  border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
-                  borderRadius: "var(--border-radius-md)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              />
-              <Legend
-                wrapperStyle={{
-                  fontSize: smallApp ? "0.65rem" : "0.75rem",
-                  color: "var(--chart-label-text)",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="Nominal Value"
-                stroke="var(--chart-color-1)"
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="Inflation-Adjusted"
-                stroke="var(--chart-color-2)"
-                strokeWidth={2}
-                strokeDasharray="5 5"
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="Total Contributions"
-                stroke="var(--chart-color-3)"
-                strokeWidth={1}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </div>
+    </Section>
   );
 };
 

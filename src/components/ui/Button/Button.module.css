@@ -106,11 +106,17 @@
     filter: none;
 }
 
-/* Large App Specific Styles */
+/* Large App Specific Styles - REDUCED */
 :global(.largeApp) .button {
-  font-size: var(--font-size-base);
-  min-width: 160px;
-  padding: var(--space-sm) var(--space-sm);
+  font-size: var(--font-size-base); /* Keep same size instead of increasing */
+  min-width: 130px; /* Reduced from 160px */
+  padding: var(--space-xs) var(--space-md); /* Reduced padding */
+}
+
+:global(.largeApp) .button.tab {
+  font-size: var(--font-size-sm); /* Reduced from var(--font-size-base) */
+  min-width: 100px; /* Reduced from larger sizes */
+  padding: var(--space-xs) var(--space-md); /* Reduced padding */
 }
 
 /* Section.module.css */

@@ -15,19 +15,18 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 const appsList = [
   { id: "accounts", name: "My Accounts" },
   { id: "budget", name: "Budget" },
-  { id: "plan", name: "Plan" },
-  { id: "reports", name: "Reports" },
   { id: "debt", name: "Debt" },
   { id: "education", name: "Education Center" },
-  { id: "projections", name: "Projections" },
   { id: "settings", name: "Settings" },
+  { id: "plan", name: "Plan" },
+  { id: "goals", name: "Goals" },
 ];
 
 const DashboardPage = ({ userData }) => {
   const DEFAULT_APP_WIDTH = 6; // was 6
   const DEFAULT_APP_HEIGHT = 7.5; // was 8
   const availableHandles = ["se"];
-  const initialAppIds = ["budget", "accounts", "plan", "reports"];
+  const initialAppIds = ["budget", "accounts", "plan", "goals"];
 
   const generateInitialLayout = (ids, cols, defaultWidth, defaultHeight) => {
     const layout = [];

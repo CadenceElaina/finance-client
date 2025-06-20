@@ -7,10 +7,8 @@ import Assistant from "./Apps/Assistant";
 import Budget from "./Apps/Budget/Budget";
 import Debt from "./Apps/Debt";
 import Education from "./Apps/Education";
-import Goals from "./Apps/Goals";
-import Plan from "./Apps/Plan/Plan"; // Fixed: Added /Plan to the path
-import Projections from "./Apps/Projections";
-import Reports from "./Apps/Reports";
+import Goals from "./Apps/Goals/Goals"; // Updated import
+import Plan from "./Apps/Plan/Plan";
 import Settings from "./Apps/Settings";
 
 const components = {
@@ -21,8 +19,6 @@ const components = {
   education: Education,
   goals: Goals,
   plan: Plan,
-  projections: Projections,
-  reports: Reports,
   settings: Settings,
 };
 
