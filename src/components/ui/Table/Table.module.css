@@ -11,30 +11,34 @@
     margin: 0 auto;
     font-size: var(--font-size-xxs);
     background: var(--surface-light);
-    border: 1px solid var(--border-light);
+    border: 2px solid var(--border-light); /* Accounting style border */
+    font-family: var(--font-family-base); /* Use Roboto instead of Courier New */
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
 }
 
 .table th,
 .table td {
-    padding: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
     text-align: left;
     color: var(--text-primary);
-    border-bottom: 1px solid var(--border-light);
+    border: 1px solid var(--border-light);
     vertical-align: middle;
     font-size: inherit;
 }
 
 .table th {
-    padding: var(--space-xxs);
+    padding: var(--space-xxs) var(--space-xs);
     background: var(--surface-dark);
     color: var(--text-primary);
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
     position: sticky;
     top: 0;
     z-index: 1;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 2px solid var(--border-light); /* Accounting style header border */
     text-align: left; 
     white-space: nowrap;
+    font-family: var(--font-family-base); /* Ensure Roboto in headers */
 }
 
 .table tr:nth-child(even) {
@@ -62,6 +66,7 @@
     background-color: var(--background-light);
     color: var(--text-primary);
     font-size: var(--font-size-xxs);
+    font-family: var(--font-family-base); /* Roboto for inputs */
     transition: all var(--transition-speed-fast) var(--transition-ease);
     height: calc(var(--font-size-xxs) + (var(--space-xxs) * 2) + 2px);
     box-sizing: border-box;
@@ -78,6 +83,7 @@
     background-color: var(--background-light);
     color: var(--text-primary);
     font-size: var(--font-size-xxs);
+    font-family: var(--font-family-base); /* Roboto for selects */
     transition: all var(--transition-speed-fast) var(--transition-ease);
 }
 
@@ -92,6 +98,7 @@
 .addButton {
     padding: var(--space-xxs) var(--space-xs);
     font-size: var(--font-size-xxs);
+    font-family: var(--font-family-base); /* Roboto for buttons */
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     transition: background-color 0.2s ease;
@@ -122,281 +129,242 @@
     color: var(--text-on-primary);
     border: 1px solid var(--color-primary);
     width: 100%;
-    min-width: 90px;
-    box-sizing: border-box;
-    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
 .addButton:hover,
 .addButton:focus {
     background-color: var(--color-primary-light);
-    color: var(--text-on-primary);
     border-color: var(--color-primary-light);
-    box-shadow: 0 0 0 2px rgba(0,177,199,0.18);
     filter: brightness(1.08);
 }
 
 .tableSection {
-    background-color: var(--surface-light);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    width: 100%;
-    max-width: none;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+    margin-bottom: var(--space-md);
 }
 
 /* --- Filter Row Styles (Moved from accounts.module.css) --- */
 .filterRow {
     display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
     align-items: center;
-    gap: var(--space-xs);
-    margin-bottom: 0;
-    justify-content: flex-end;
-    flex-wrap: wrap;
+    padding: var(--space-xs);
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-sm);
 }
 
 .filterLabel {
-    font-size: var(--font-size-xxs);
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
-    font-weight: 500;
-    white-space: nowrap;
+    margin-right: var(--space-xs);
 }
 
 .filterSelect {
-    min-width: 110px;
-    font-size: var(--font-size-xxs);
     padding: var(--space-xxs) var(--space-xs);
-    height: 28px;
-    border-radius: var(--border-radius-sm);
     border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
     background: var(--background-light);
     color: var(--text-primary);
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 18px;
-    padding-right: 26px;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-base); /* Roboto for filter selects */
 }
 
 .filterSelect:focus {
     outline: none;
     border-color: var(--color-primary);
-    box-shadow: var(--focus-ring);
+    box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
 }
 
 /* --- Table Header Title (used in SectionHeader) --- */
 .tableHeaderTitle {
     font-size: var(--font-size-base);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--text-primary);
     margin: 0;
-    flex: 1;
-    text-align: left;
 }
 
 .noResults {
     text-align: center;
-    color: var(--text-secondary);
     padding: var(--space-md);
+    color: var(--text-secondary);
     font-size: var(--font-size-sm);
+    font-family: var(--font-family-base); /* Roboto for no results */
 }
 
 .alignRight {
-    text-align: right !important;
+    text-align: right;
 }
 
+/* Standard select styling - ensure Roboto throughout */
 select,
 .filterSelect,
 .tableSelect {
-    cursor: pointer;
+    font-family: var(--font-family-base);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A8FA3'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
 }
 
 /* Large App Mode Overrides */
 :global(.largeApp) .table {
-  font-size: var(--font-size-base);
+    font-size: var(--font-size-xs);
+    border: 2px solid var(--border-light); /* Keep accounting border */
 }
+
 :global(.largeApp) .table th,
 :global(.largeApp) .table td {
-  padding: var(--space-sm) var(--space-sm);
-  font-size: var(--font-size-md);
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
 }
+
 :global(.largeApp) .tableInput,
 :global(.largeApp) .tableSelect {
-  font-size: var(--font-size-base);
-  padding: var(--space-sm) var(--space-sm);
-  height: calc(var(--font-size-base) + (var(--space-sm) * 2) + 2px);
-  background-position: right 12px center;
-  background-size: 20px;
-  padding-right: 32px;
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs);
 }
 
 .table td input[type="text"],
 .table td input[type="number"],
 .table td select {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin: 0;
+    font-family: var(--font-family-base); /* Ensure Roboto in table inputs */
 }
 
 /* Category-specific select border and option backgrounds */
 .tableSelect.required {
-    border: 1.5px solid var(--status-danger);
-    background: var(--background-light);
-    color: var(--text-primary);
+    border-color: var(--status-success);
 }
+
 .tableSelect.flexible {
-    border: 1.5px solid var(--status-warning);
-    background: var(--background-light);
-    color: var(--text-primary);
+    border-color: var(--status-warning);
 }
+
 .tableSelect.nonessential {
-    border: 1.5px solid var(--status-success);
-    background: var(--background-light);
-    color: var(--text-primary);
+    border-color: var(--color-secondary);
 }
 
 .tableSelect option.required {
-    background: var(--status-success);
-    color: var(--text-on-primary, #fff);
+    background-color: var(--status-success);
+    color: white;
 }
+
 .tableSelect option.flexible {
-    background: var(--status-warning);
-    color: var(--text-primary);
+    background-color: var(--status-warning);
+    color: white;
 }
+
 .tableSelect option.nonessential {
-    background: var(--status-danger);
-    color: var(--text-on-primary, #fff);
+    background-color: var(--color-secondary);
+    color: white;
 }
 
 /* Category-specific styling for expense categories */
 .categoryTag {
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-medium);
+    font-family: var(--font-family-base); /* Roboto for category tags */
+    color: white;
+    text-align: center;
+}
+
+.categoryTag.required {
+    background-color: var(--status-success);
+}
+
+.categoryTag.flexible {
+    background-color: var(--status-warning);
+}
+
+.categoryTag.nonessential {
+    background-color: var(--color-secondary);
+}
+
+/* Professional synced indicator - only for view mode */
+.syncedIndicator {
+    color: var(--color-primary);
+    font-style: italic;
+    font-weight: var(--font-weight-medium);
+    margin-left: var(--space-xs);
+    font-size: var(--font-size-xxs);
+    font-family: var(--font-family-base); /* Roboto for synced indicator */
+}
+
+/* Category badges for view mode - more professional looking */
+.categoryBadge {
     display: inline-block;
     padding: var(--space-xxs) var(--space-xs);
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-xxs);
     font-weight: var(--font-weight-medium);
+    font-family: var(--font-family-base); /* Roboto for category badges */
+    color: white;
     text-align: center;
     min-width: 80px;
-    color: var(--text-on-primary);
-}
-
-.categoryTag.required {
-    background-color: var(--status-danger);
-    color: var(--text-on-primary);
-}
-
-.categoryTag.flexible {
-    background-color: var(--status-warning);
-    color: var(--text-primary);
-}
-
-.categoryTag.nonessential {
-  background: rgba(var(--status-success-rgb), 0.1);
-  color: var(--status-success);
-  border: 1px solid rgba(var(--status-success-rgb), 0.3);
-}
-
-/* Professional synced indicator - only for view mode */
-.syncedIndicator {
-  margin-left: var(--space-xs);
-  font-size: var(--font-size-xxs);
-  color: var(--color-primary);
-  font-style: italic;
-  font-weight: var(--font-weight-medium);
-  opacity: 0.8;
-  white-space: nowrap;
-}
-
-/* Category badges for view mode - more professional looking */
-.categoryBadge {
-  display: inline-block;
-  padding: var(--space-xxs) var(--space-xs);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-xxs);
-  font-weight: var(--font-weight-semibold);
-  text-align: center;
-  min-width: 80px;
-  text-transform: capitalize;
-  letter-spacing: 0.5px;
-  border: 1px solid transparent;
 }
 
 .categoryBadge.required {
-  background-color: rgba(220, 53, 69, 0.1);
-  color: var(--status-danger);
-  border-color: rgba(220, 53, 69, 0.3);
+    background-color: var(--status-success);
 }
 
 .categoryBadge.flexible {
-  background-color: rgba(255, 193, 7, 0.15);
-  color: #b8860b;
-  border-color: rgba(255, 193, 7, 0.4);
+    background-color: var(--status-warning);
 }
 
 .categoryBadge.nonessential {
-  background: rgba(var(--status-success-rgb), 0.1);
-  color: var(--status-success);
-  border: 1px solid rgba(var(--status-success-rgb), 0.3);
+    background-color: var(--color-secondary);
 }
 
 /* Category-specific select borders for edit mode */
 .tableSelect.required {
-  border-left: 3px solid var(--status-danger) !important;
-  background-color: rgba(220, 53, 69, 0.02);
+    border-color: var(--status-success);
+    box-shadow: 0 0 0 1px var(--status-success);
 }
 
 .tableSelect.flexible {
-  border-left: 3px solid #ffc107 !important;
-  background-color: rgba(255, 193, 7, 0.02);
+    border-color: var(--status-warning);
+    box-shadow: 0 0 0 1px var(--status-warning);
 }
 
 .tableSelect.nonessential {
-  border-color: var(--status-success);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 1px var(--color-secondary);
 }
-
-/* Enhanced disabled input styling - for debt payments */
-/* .disabledInput {
-  background: var(--surface-accent);
-  color: var(--text-tertiary);
-  cursor: not-allowed;
-  opacity: 0.7;
-} */
 
 /* Ensure focus states work properly with category colors */
 .tableSelect:focus.required {
-  border-left-color: var(--status-danger) !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+    border-color: var(--status-success);
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
 }
 
 .tableSelect:focus.flexible {
-  border-left-color: #ffc107 !important;
-  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+    border-color: var(--status-warning);
+    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
 }
 
 .tableSelect:focus.nonessential {
-  border-color: var(--status-success);
-  box-shadow: 0 0 0 2px rgba(var(--status-success-rgb), 0.2);
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 2px rgba(255, 176, 156, 0.25);
 }
 
 /* Style for calculated/read-only fields in tables */
 .calculatedField {
-  background: var(--surface-dark) !important;
-  color: var(--text-secondary) !important;
-  border-color: var(--border-light) !important;
-  cursor: not-allowed !important;
-  font-style: italic;
-  opacity: 0.8;
-  text-align: center;
+    background: var(--surface-dark);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    padding: var(--space-xxs);
+    font-family: var(--font-family-base); /* Roboto for calculated fields */
+    font-weight: var(--font-weight-medium);
+    text-align: right;
 }
 
 .calculatedField:focus {
-  outline: none !important;
-  box-shadow: none !important;
+    outline: none;
+    border-color: var(--border-light);
 }
 
 /* Add better spacing for income table */
@@ -404,5 +372,6 @@ select,
 .tableInput[placeholder="2080"],
 .tableInput[placeholder="75000"],
 .tableInput[placeholder="4100"] {
-  text-align: right;
+    text-align: right;
+    font-family: var(--font-family-base); /* Roboto for number inputs */
 }

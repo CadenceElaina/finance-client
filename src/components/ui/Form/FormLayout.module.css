@@ -52,6 +52,7 @@ input,
 select {
     padding: var(--space-xxs) var(--space-xs);
     font-size: var(--font-size-sm);
+    font-family: var(--font-family-base); /* Ensure Roboto */
     border-radius: var(--border-radius-md);
     border: 1px solid var(--border-light);
     background: var(--background-light);
