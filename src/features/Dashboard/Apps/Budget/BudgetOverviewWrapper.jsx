@@ -76,27 +76,31 @@ const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
   return (
     <div className={budgetStyles.budgetContentWrapper}>
       {smallApp ? (
+        // Small app: Show either all content or specific tab based on activeInnerTabId
         !activeInnerTabId || activeInnerTabId === "showAll" ? (
           <>
             <SummaryTab smallApp={smallApp} />
-            <ExpensesTab {...expensesProps} smallApp={smallApp} />
+            <ExpensesTab
+              expenses={budget.monthlyExpenses}
+              smallApp={smallApp}
+            />
           </>
         ) : activeInnerTabId === "expenses" ? (
-          <ExpensesTab {...expensesProps} smallApp={smallApp} />
+          <ExpensesTab expenses={budget.monthlyExpenses} smallApp={smallApp} />
         ) : (
-          <>
-            <SummaryTab smallApp={smallApp} />
-          </>
+          <SummaryTab smallApp={smallApp} />
         )
       ) : (
+        // Base/Large app: Always show two-column layout
         <TwoColumnLayout
           className={sectionStyles.columns45_55}
-          left={
-            <>
-              <SummaryTab smallApp={smallApp} />
-            </>
+          left={<SummaryTab smallApp={smallApp} />}
+          right={
+            <ExpensesTab
+              expenses={budget.monthlyExpenses}
+              smallApp={smallApp}
+            />
           }
-          right={<ExpensesTab {...expensesProps} smallApp={smallApp} />}
           smallApp={smallApp}
         />
       )}

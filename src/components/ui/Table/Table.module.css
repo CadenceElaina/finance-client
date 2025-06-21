@@ -73,6 +73,12 @@
     max-width: 100%;
     box-sizing: border-box;
     padding: var(--space-xxs) var(--space-xxs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-xxs);
+    transition: all var(--transition-speed-fast) var(--transition-ease);
 }
 
 .tableInput:focus,
@@ -265,4 +271,116 @@ select,
 .tableSelect option.nonessential {
     background: var(--status-danger);
     color: var(--text-on-primary, #fff);
+}
+
+/* Category-specific styling for expense categories */
+.categoryTag {
+    display: inline-block;
+    padding: var(--space-xxs) var(--space-xs);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-medium);
+    text-align: center;
+    min-width: 80px;
+    color: var(--text-on-primary);
+}
+
+.categoryTag.required {
+    background-color: var(--status-danger);
+    color: var(--text-on-primary);
+}
+
+.categoryTag.flexible {
+    background-color: var(--status-warning);
+    color: var(--text-primary);
+}
+
+.categoryTag.nonessential {
+    background-color: var(--status-success);
+    color: var(--text-on-primary);
+}
+
+/* Professional synced indicator - only for view mode */
+.syncedIndicator {
+  margin-left: var(--space-xs);
+  font-size: var(--font-size-xxs);
+  color: var(--color-primary);
+  font-style: italic;
+  font-weight: var(--font-weight-medium);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* Category badges for view mode - more professional looking */
+.categoryBadge {
+  display: inline-block;
+  padding: var(--space-xxs) var(--space-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xxs);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  min-width: 80px;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+  border: 1px solid transparent;
+}
+
+.categoryBadge.required {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: var(--status-danger);
+  border-color: rgba(220, 53, 69, 0.3);
+}
+
+.categoryBadge.flexible {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #b8860b;
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.categoryBadge.nonessential {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: var(--status-success);
+  border-color: rgba(40, 167, 69, 0.3);
+}
+
+/* Category-specific select borders for edit mode - FIXED */
+.tableSelect.required {
+  border-left: 3px solid var(--status-danger) !important;
+  background-color: rgba(220, 53, 69, 0.02);
+}
+
+.tableSelect.flexible {
+  border-left: 3px solid #ffc107 !important;
+  background-color: rgba(255, 193, 7, 0.02);
+}
+
+.tableSelect.nonessential {
+  border-left: 3px solid var(--status-success) !important;
+  background-color: rgba(40, 167, 69, 0.02);
+}
+
+/* Enhanced disabled input styling - for debt payments */
+.disabledInput {
+  background-color: var(--surface-dark) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-light) !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* Ensure focus states work properly with category colors */
+.tableSelect:focus.required {
+  border-left-color: var(--status-danger) !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.tableSelect:focus.flexible {
+  border-left-color: #ffc107 !important;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.2);
+}
+
+.tableSelect:focus.nonessential {
+  border-left-color: var(--status-success) !important;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }

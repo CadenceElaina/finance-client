@@ -1,4 +1,4 @@
-// src/components/ui/Section/Section.jsx s
+// src/components/ui/Section/Section.jsx
 import React from "react";
 import styles from "./Section.module.css";
 

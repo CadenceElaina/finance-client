@@ -1,0 +1,51 @@
+/* src/styles/toast-custom.css */
+/* Custom React Toastify styles for proper line break handling */
+
+.Toastify__toast {
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-lg);
+  font-family: var(--font-family-base);
+  white-space: pre-line !important; /* Force line breaks */
+  line-height: 1.5 !important;
+  word-wrap: break-word;
+}
+
+.Toastify__toast--info {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border-left: 4px solid var(--color-primary);
+}
+
+.Toastify__toast--success {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border-left: 4px solid var(--status-success);
+}
+
+.Toastify__toast--warning {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border-left: 4px solid var(--status-warning);
+}
+
+.Toastify__toast--error {
+  background: var(--surface-light);
+  color: var(--text-primary);
+  border-left: 4px solid var(--status-danger);
+}
+
+/* Ensure the toast content respects line breaks */
+.Toastify__toast-body {
+  white-space: pre-line !important;
+  line-height: 1.5 !important;
+  margin: 0;
+  padding: 0;
+  word-wrap: break-word;
+}
+
+/* Additional specificity for the content div */
+.Toastify__toast-body > div {
+  white-space: pre-line !important;
+  line-height: 1.5 !important;
+}

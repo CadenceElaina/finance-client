@@ -1,5 +1,6 @@
 // src/features/Dashboard/Apps/Accounts/Overview/OverviewTab.jsx
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
+import { useToast } from "../../../../../hooks/useToast";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
 import Table from "../../../../../components/ui/Table/Table";
@@ -103,8 +104,9 @@ const OverviewTab = ({ smallApp }) => {
     applyGoalUpdateFromNotification,
     dismissAccountChangeNotification,
     clearAllAccountChangeNotifications,
-    showNotification,
   } = useFinancialData();
+
+  const { showSuccess, showInfo } = useToast(); // Use specific toast methods
 
   const accounts = data.accounts || [];
   const portfolios = data.portfolios || [];
@@ -154,48 +156,75 @@ const OverviewTab = ({ smallApp }) => {
     cancelEdit();
   };
 
-  // Simplified handleSave function - let context handle debt sync detection
+  // Update the handleSave function
   const handleSave = () => {
-    // Detect debt payment changes for notification
-    const debtPaymentChanges = [];
+    // Find changed debt payment accounts
+    const originalDebtAccounts = accounts.filter(
+      (acc) => acc.category === "Debt"
+    );
+    const editedDebtAccounts = editRows.filter(
+      (acc) => acc.category === "Debt"
+    );
 
-    editRows.forEach((editedAccount) => {
-      if (editedAccount.category === "Debt") {
-        const originalPayment =
-          originalDebtPayments[editedAccount.id]?.monthlyPayment || 0;
-        const newPayment = editedAccount.monthlyPayment || 0;
+    let expenseChanges = [];
 
-        if (originalPayment !== newPayment) {
-          debtPaymentChanges.push({
-            accountId: editedAccount.id,
-            accountName: editedAccount.name,
-            oldPayment: originalPayment,
-            newPayment: newPayment,
-            changeType: newPayment > originalPayment ? "increase" : "decrease",
+    // Track changes to debt account monthly payments
+    editedDebtAccounts.forEach((editedAcc) => {
+      const origAcc = originalDebtAccounts.find((o) => o.id === editedAcc.id);
+      if (origAcc && origAcc.monthlyPayment !== editedAcc.monthlyPayment) {
+        const oldPayment = origAcc.monthlyPayment || 0;
+        const newPayment = editedAcc.monthlyPayment || 0;
+
+        if (oldPayment !== newPayment) {
+          expenseChanges.push({
+            name: editedAcc.name,
+            oldAmount: oldPayment,
+            newAmount: newPayment,
+            type:
+              newPayment === 0
+                ? "removed"
+                : oldPayment === 0
+                ? "added"
+                : "updated",
           });
         }
       }
     });
 
-    // Check for removed debt accounts
-    const editRowIds = editRows.map((row) => row.id);
-    accounts.forEach((originalAccount) => {
-      if (
-        originalAccount.category === "Debt" &&
-        originalAccount.monthlyPayment > 0 &&
-        !editRowIds.includes(originalAccount.id)
-      ) {
-        debtPaymentChanges.push({
-          accountId: originalAccount.id,
-          accountName: originalAccount.name,
-          oldPayment: originalAccount.monthlyPayment,
-          newPayment: 0,
-          changeType: "remove",
-        });
-      }
+    // Check for new debt accounts with monthly payments
+    const newDebtAccounts = editRows.filter(
+      (editedAcc) =>
+        editedAcc.category === "Debt" &&
+        editedAcc.monthlyPayment > 0 &&
+        !accounts.find((origAcc) => origAcc.id === editedAcc.id)
+    );
+
+    newDebtAccounts.forEach((newAcc) => {
+      expenseChanges.push({
+        name: newAcc.name,
+        oldAmount: 0,
+        newAmount: newAcc.monthlyPayment,
+        type: "added",
+      });
     });
 
-    // Save the data first - the context will handle the automatic debt sync
+    // Check for removed debt accounts
+    const removedDebtAccounts = originalDebtAccounts.filter(
+      (origAcc) =>
+        origAcc.monthlyPayment > 0 &&
+        !editRows.find((editedAcc) => editedAcc.id === origAcc.id)
+    );
+
+    removedDebtAccounts.forEach((removedAcc) => {
+      expenseChanges.push({
+        name: removedAcc.name,
+        oldAmount: removedAcc.monthlyPayment,
+        newAmount: 0,
+        type: "removed",
+      });
+    });
+
+    // Save the data first
     const updatedData = {
       ...data,
       accounts: editRows,
@@ -204,41 +233,42 @@ const OverviewTab = ({ smallApp }) => {
     exitEditMode();
     setOriginalDebtPayments({});
 
-    // Show notification if there were debt payment changes
-    if (debtPaymentChanges.length > 0) {
-      let message =
-        "Budget automatically updated with debt payment changes:\n\n";
-
-      debtPaymentChanges.forEach((change) => {
-        switch (change.changeType) {
-          case "increase":
-            message += `• ${change.accountName}: Payment increased to $${change.newPayment}/month\n`;
-            break;
-          case "decrease":
-            message += `• ${change.accountName}: Payment decreased to $${change.newPayment}/month\n`;
-            break;
-          case "remove":
-            message += `• ${change.accountName}: Payment removed ($${change.oldPayment}/month)\n`;
-            break;
+    // Show a single notification for expense changes
+    if (expenseChanges.length > 0) {
+      let message;
+      if (expenseChanges.length === 1) {
+        const change = expenseChanges[0];
+        if (change.type === "added") {
+          message = `Expense added: ${change.name} payment ($${change.newAmount}/month)`;
+        } else if (change.type === "removed") {
+          message = `Expense removed: ${change.name} payment (was $${change.oldAmount}/month)`;
+        } else {
+          message = `Expense updated: ${change.name} payment ($${change.oldAmount} → $${change.newAmount}/month)`;
         }
-      });
-
-      message += "\nYou can adjust these in the Budget app if needed.";
-
-      showNotification({
-        type: "info",
-        title: "Budget Updated",
-        message,
-        duration: 8000,
-      });
+      } else {
+        message =
+          "Expenses updated:\n" +
+          expenseChanges
+            .map((change, i) => {
+              if (change.type === "added") {
+                return `${i + 1}. ${change.name} payment added ($${
+                  change.newAmount
+                }/month)`;
+              } else if (change.type === "removed") {
+                return `${i + 1}. ${change.name} payment removed (was $${
+                  change.oldAmount
+                }/month)`;
+              } else {
+                return `${i + 1}. ${change.name} payment ($${
+                  change.oldAmount
+                } → $${change.newAmount}/month)`;
+              }
+            })
+            .join("\n");
+      }
+      showInfo(message, { autoClose: 6000 });
     } else {
-      // Standard save notification
-      showNotification({
-        type: "success",
-        title: "Accounts Saved",
-        message: "Your account changes have been saved successfully.",
-        duration: 3000,
-      });
+      showSuccess("Accounts saved successfully!");
     }
   };
 

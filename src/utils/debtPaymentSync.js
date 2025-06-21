@@ -1,14 +1,18 @@
 // src/utils/debtPaymentSync.js
+// Update to better handle removals
+
 export const syncDebtPaymentsToExpenses = (accounts, expenses) => {
   const debtAccounts = accounts.filter(acc => 
     acc.category === "Debt" && acc.monthlyPayment > 0
   );
   
-  const updatedExpenses = [...expenses];
+  // Start with existing expenses, filtered to remove old debt payments
+  const nonDebtExpenses = expenses.filter(exp => !exp.isDebtPayment);
+  const updatedExpenses = [...nonDebtExpenses];
   
+  // Add current debt payments
   debtAccounts.forEach(debtAccount => {
     const expenseId = `exp-debt-${debtAccount.id}`;
-    const existingExpenseIndex = updatedExpenses.findIndex(exp => exp.id === expenseId);
     
     const debtExpense = {
       id: expenseId,
@@ -19,23 +23,10 @@ export const syncDebtPaymentsToExpenses = (accounts, expenses) => {
       isDebtPayment: true
     };
     
-    if (existingExpenseIndex >= 0) {
-      // Update existing debt payment expense
-      updatedExpenses[existingExpenseIndex] = debtExpense;
-    } else {
-      // Add new debt payment expense
-      updatedExpenses.push(debtExpense);
-    }
+    updatedExpenses.push(debtExpense);
   });
   
-  // Remove debt payment expenses for accounts that no longer exist or have no payment
-  const validDebtAccountIds = debtAccounts.map(acc => acc.id);
-  const filteredExpenses = updatedExpenses.filter(expense => {
-    if (!expense.isDebtPayment) return true;
-    return validDebtAccountIds.includes(expense.linkedToAccountId);
-  });
-  
-  return filteredExpenses;
+  return updatedExpenses;
 };
 
 export const syncExpenseToDebtPayment = (accounts, expenseId, newAmount) => {

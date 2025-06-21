@@ -1,17 +1,15 @@
 // src/features/Dashboard/Apps/Budget/ExpensesTab.jsx
 import React, { useState, useRef } from "react";
+import { useToast } from "../../../../hooks/useToast";
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
+import { useEditableTable } from "../../../../hooks/useEditableTable";
 import Table from "../../../../components/ui/Table/Table";
 import tableStyles from "../../../../components/ui/Table/Table.module.css";
 import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
-import { useFinancialData } from "../../../../contexts/FinancialDataContext";
-import { useEditableTable } from "../../../../hooks/useEditableTable";
 import EditableTableHeader from "../../../../components/ui/Table/EditableTableHeader";
 import ControlPanel from "../../../../components/ui/ControlPanel/ControlPanel";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
-import { DEFAULT_DEMO_BUDGET } from "../../../../utils/constants";
-import Notification from "../../../../components/ui/Notification/Notification";
-import { useNotification } from "../../../../hooks/useNotification";
 
 const ExpensesTab = ({ expenses, smallApp }) => {
   const {
@@ -22,8 +20,9 @@ const ExpensesTab = ({ expenses, smallApp }) => {
     data,
     clearExpenses,
     resetBudgetToDemo,
-    showNotification,
   } = useFinancialData();
+
+  const { showSuccess, showWarning, showInfo } = useToast(); // Use specific toast methods
 
   const {
     editMode,
@@ -44,94 +43,131 @@ const ExpensesTab = ({ expenses, smallApp }) => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const newExpenseNameRef = useRef(null);
 
-  // Track removed debt payments for notification
-  const [removedDebtPayments, setRemovedDebtPayments] = useState([]);
-
   // Handle saving from control panel
   const handleSave = () => {
-    // Detect debt payment changes for notification
-    const debtPaymentChanges = [];
-
-    // Check for removed debt payment expenses
+    // Find changed debt payment expenses
     const originalDebtPayments = expenses.filter((exp) => exp.isDebtPayment);
     const editedDebtPayments = editRows.filter((exp) => exp.isDebtPayment);
 
-    originalDebtPayments.forEach((originalExp) => {
-      const stillExists = editedDebtPayments.find(
-        (editedExp) => editedExp.id === originalExp.id
-      );
-      if (!stillExists) {
-        debtPaymentChanges.push({
-          type: "removed",
-          accountName: originalExp.name.replace(" Payment", ""),
-          amount: originalExp.cost,
-          expenseId: originalExp.id,
-        });
-      }
-    });
+    let updatedAccounts = [...data.accounts];
+    let accountChanges = [];
 
-    // Check for updated debt payment amounts
+    // Track changes to debt payment expenses
     editedDebtPayments.forEach((editedExp) => {
-      const originalExp = originalDebtPayments.find(
-        (orig) => orig.id === editedExp.id
-      );
-      if (originalExp && originalExp.cost !== editedExp.cost) {
-        debtPaymentChanges.push({
-          type: "updated",
-          accountName: editedExp.name.replace(" Payment", ""),
-          oldAmount: originalExp.cost,
-          newAmount: editedExp.cost,
-          expenseId: editedExp.id,
+      const origExp = originalDebtPayments.find((o) => o.id === editedExp.id);
+      if (
+        !origExp ||
+        origExp.cost !== editedExp.cost ||
+        origExp.category !== editedExp.category
+      ) {
+        // Update the linked account's monthlyPayment
+        updatedAccounts = updatedAccounts.map((acc) => {
+          if (acc.id === editedExp.linkedToAccountId) {
+            const oldPayment = acc.monthlyPayment || 0;
+            const newPayment = editedExp.cost;
+
+            if (oldPayment !== newPayment) {
+              accountChanges.push({
+                name: acc.name,
+                oldAmount: oldPayment,
+                newAmount: newPayment,
+                type:
+                  newPayment === 0
+                    ? "removed"
+                    : oldPayment === 0
+                    ? "added"
+                    : "updated",
+              });
+            }
+
+            return {
+              ...acc,
+              monthlyPayment: newPayment,
+            };
+          }
+          return acc;
         });
       }
     });
 
-    // Create updated budget with new expenses
+    // Check for removed debt payment expenses
+    const removedDebtPayments = originalDebtPayments.filter(
+      (origExp) =>
+        !editedDebtPayments.find((editedExp) => editedExp.id === origExp.id)
+    );
+
+    removedDebtPayments.forEach((removedExp) => {
+      updatedAccounts = updatedAccounts.map((acc) => {
+        if (acc.id === removedExp.linkedToAccountId) {
+          const oldPayment = acc.monthlyPayment || 0;
+
+          if (oldPayment > 0) {
+            accountChanges.push({
+              name: acc.name,
+              oldAmount: oldPayment,
+              newAmount: 0,
+              type: "removed",
+            });
+          }
+
+          return {
+            ...acc,
+            monthlyPayment: 0,
+          };
+        }
+        return acc;
+      });
+    });
+
+    // Save updated budget and accounts
     const updatedBudget = {
       ...data.budget,
       monthlyExpenses: editRows,
     };
-
-    // Save the data
     const updatedData = {
       ...data,
       budget: updatedBudget,
+      accounts: updatedAccounts,
     };
-
     saveData(updatedData);
     exitEditMode();
 
-    // Show notification if there were debt payment changes
-    if (debtPaymentChanges.length > 0) {
-      let message = "Budget updated with debt payment changes:\n\n";
-
-      debtPaymentChanges.forEach((change) => {
-        switch (change.type) {
-          case "updated":
-            message += `• Updated: ${change.accountName} payment ($${change.oldAmount} → $${change.newAmount}/month)\n`;
-            break;
-          case "removed":
-            message += `• Removed: ${change.accountName} payment ($${change.amount}/month)\n`;
-            break;
+    // Show a single notification for account changes
+    if (accountChanges.length > 0) {
+      let message;
+      if (accountChanges.length === 1) {
+        const change = accountChanges[0];
+        if (change.type === "added") {
+          message = `Account updated: ${change.name} monthly payment added ($${change.newAmount})`;
+        } else if (change.type === "removed") {
+          message = `Account updated: ${change.name} monthly payment removed (was $${change.oldAmount})`;
+        } else {
+          message = `Account updated: ${change.name} monthly payment ($${change.oldAmount} → $${change.newAmount})`;
         }
-      });
-
-      message += "\nCorresponding account monthly payments have been updated.";
-
-      showNotification({
-        type: "info",
-        title: "Accounts Updated",
-        message,
-        duration: 6000,
-      });
+      } else {
+        message =
+          "Accounts updated:\n" +
+          accountChanges
+            .map((change, i) => {
+              if (change.type === "added") {
+                return `${i + 1}. ${change.name} monthly payment added ($${
+                  change.newAmount
+                })`;
+              } else if (change.type === "removed") {
+                return `${i + 1}. ${
+                  change.name
+                } monthly payment removed (was $${change.oldAmount})`;
+              } else {
+                return `${i + 1}. ${change.name} monthly payment ($${
+                  change.oldAmount
+                } → $${change.newAmount})`;
+              }
+            })
+            .join("\n");
+      }
+      showInfo(message, { autoClose: 6000 });
     } else {
-      // Standard save notification
-      showNotification({
-        type: "success",
-        title: "Expenses Saved",
-        message: "Your expense changes have been saved successfully.",
-        duration: 3000,
-      });
+      showSuccess("Expenses saved successfully!");
     }
   };
 
@@ -144,6 +180,7 @@ const ExpensesTab = ({ expenses, smallApp }) => {
     ) {
       resetBudgetToDemo();
       exitEditMode();
+      showInfo("Expenses reset to demo data");
     }
   };
 
@@ -152,6 +189,7 @@ const ExpensesTab = ({ expenses, smallApp }) => {
     if (window.confirm("Clear all expenses? This action cannot be undone.")) {
       clearExpenses();
       exitEditMode();
+      showWarning("All expenses cleared");
     }
   };
 
@@ -186,27 +224,10 @@ const ExpensesTab = ({ expenses, smallApp }) => {
 
   // FIX: Update expense removal to use expense ID instead of index
   const handleRemoveExpense = (expenseId) => {
-    // Find the expense in editRows by ID
     const expenseIndex = editRows.findIndex((exp) => exp.id === expenseId);
-    if (expenseIndex === -1) return;
-
-    const expense = editRows[expenseIndex];
-
-    // If it's a debt payment, just remove it - notification will be handled on save
-    if (expense.isDebtPayment) {
-      // Track for notification later
-      setRemovedDebtPayments((prev) => [
-        ...prev,
-        {
-          name: expense.name,
-          cost: expense.cost,
-          linkedAccountId: expense.linkedToAccountId,
-        },
-      ]);
+    if (expenseIndex !== -1) {
+      removeEditRow(expenseIndex);
     }
-
-    // Remove from edit rows
-    removeEditRow(expenseIndex);
   };
 
   const filteredExpenses = editMode ? editRows : expenses;
@@ -217,23 +238,17 @@ const ExpensesTab = ({ expenses, smallApp }) => {
 
   // FIX: Update renderExpenseRow to pass expense ID instead of index
   const renderExpenseRow = (expense, index) => {
+    // Helper for category class
+    const getCategoryClassName = (category) =>
+      category === "non-essential" ? "nonessential" : category || "required";
+
     if (!editMode) {
-      // View mode
       return (
         <tr key={expense.id || index}>
           <td>
-            {expense.name}
+            {expense.name.replace(" Payment", "")}
             {expense.isDebtPayment && (
-              <span
-                style={{
-                  marginLeft: "8px",
-                  fontSize: "var(--font-size-xxs)",
-                  color: "var(--text-secondary)",
-                  fontStyle: "italic",
-                }}
-              >
-                (Auto-synced)
-              </span>
+              <span className={tableStyles.syncedIndicator}>(Synced)</span>
             )}
           </td>
           <td className={tableStyles.alignRight}>
@@ -241,8 +256,8 @@ const ExpensesTab = ({ expenses, smallApp }) => {
           </td>
           <td>
             <span
-              className={`${tableStyles.categoryTag} ${
-                tableStyles[expense.category] || ""
+              className={`${tableStyles.categoryBadge} ${
+                tableStyles[getCategoryClassName(expense.category)]
               }`}
             >
               {expense.category === "non-essential"
@@ -255,44 +270,35 @@ const ExpensesTab = ({ expenses, smallApp }) => {
       );
     }
 
-    // Edit mode
-    const isDebtPayment = expense.isDebtPayment;
-
+    // Edit mode: DO NOT disable debt payment fields
     return (
       <tr key={expense.id || index}>
         <td>
           <input
             type="text"
-            value={expense.name || ""}
-            onChange={(e) => updateEditRow(index, "name", e.target.value)}
+            value={expense.name.replace(" Payment", "") || ""}
+            onChange={(e) =>
+              updateEditRow(
+                index,
+                "name",
+                e.target.value + (expense.isDebtPayment ? " Payment" : "")
+              )
+            }
             className={tableStyles.tableInput}
             placeholder="Expense name"
-            disabled={isDebtPayment}
-            style={isDebtPayment ? { opacity: 0.6 } : {}}
           />
         </td>
         <td>
           <input
             type="number"
             value={expense.cost || ""}
-            onChange={(e) => {
-              if (isDebtPayment) {
-                // For debt payments, don't allow direct editing - they're synced from accounts
-                return;
-              }
-              updateEditRow(index, "cost", parseFloat(e.target.value) || 0);
-            }}
+            onChange={(e) =>
+              updateEditRow(index, "cost", parseFloat(e.target.value) || 0)
+            }
             className={tableStyles.tableInput}
             placeholder="0"
             step="0.01"
             min="0"
-            disabled={isDebtPayment}
-            style={isDebtPayment ? { opacity: 0.6 } : {}}
-            title={
-              isDebtPayment
-                ? "This amount is synced from your debt account. Edit the monthly payment in the Accounts app to change this value."
-                : ""
-            }
           />
         </td>
         <td>
@@ -300,10 +306,8 @@ const ExpensesTab = ({ expenses, smallApp }) => {
             value={expense.category || "required"}
             onChange={(e) => updateEditRow(index, "category", e.target.value)}
             className={`${tableStyles.tableSelect} ${
-              tableStyles[expense.category] || ""
+              tableStyles[getCategoryClassName(expense.category)]
             }`}
-            disabled={isDebtPayment}
-            style={isDebtPayment ? { opacity: 0.6 } : {}}
           >
             <option value="required">Required</option>
             <option value="flexible">Flexible</option>
@@ -312,13 +316,8 @@ const ExpensesTab = ({ expenses, smallApp }) => {
         </td>
         <td>
           <button
-            onClick={() => handleRemoveExpense(expense.id)} // Pass expense ID instead of index
+            onClick={() => handleRemoveExpense(expense.id)}
             className={tableStyles.removeButton}
-            title={
-              isDebtPayment
-                ? "Remove debt payment (will also update account)"
-                : "Remove expense"
-            }
           >
             Remove
           </button>
@@ -396,7 +395,13 @@ const ExpensesTab = ({ expenses, smallApp }) => {
                   name="category"
                   value={newExpense.category}
                   onChange={handleNewExpenseChange}
-                  className={tableStyles.tableSelect}
+                  className={`${tableStyles.tableSelect} ${
+                    tableStyles[
+                      newExpense.category === "non-essential"
+                        ? "nonessential"
+                        : newExpense.category
+                    ]
+                  }`}
                 >
                   <option value="required">Required</option>
                   <option value="flexible">Flexible</option>
