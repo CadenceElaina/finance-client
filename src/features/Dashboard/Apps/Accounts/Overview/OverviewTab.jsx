@@ -16,9 +16,9 @@ const EMPTY_ACCOUNT = {
   name: "",
   accountProvider: "",
   category: "Cash",
-  subType: "",
+  subType: "Checking",
   value: "",
-  taxStatus: "",
+  taxStatus: "Taxable",
   interestRate: "",
   monthlyPayment: "",
   portfolioId: null,
@@ -61,16 +61,49 @@ const useIsAppOpen = (appId) => {
   return isPlanAppOpen;
 };
 
+const ACCOUNT_SUBTYPES = {
+  Cash: [
+    { value: "Checking", label: "Checking" },
+    { value: "Savings", label: "Savings" },
+    { value: "Money Market", label: "Money Market" },
+    { value: "CD", label: "Certificate of Deposit" },
+    { value: "Other Cash", label: "Other Cash" },
+  ],
+  Investments: [
+    { value: "401(k)", label: "401(k)" },
+    { value: "403(b)", label: "403(b)" },
+    { value: "TSP", label: "Thrift Savings Plan (TSP)" },
+    { value: "Roth IRA", label: "Roth IRA" },
+    { value: "Traditional IRA", label: "Traditional IRA" },
+    { value: "SEP IRA", label: "SEP IRA" },
+    { value: "SIMPLE IRA", label: "SIMPLE IRA" },
+    { value: "Taxable Brokerage", label: "Taxable Brokerage" },
+    { value: "529 Plan", label: "529 Education Plan" },
+    { value: "HSA", label: "Health Savings Account" },
+    { value: "Other Investment", label: "Other Investment" },
+  ],
+  Debt: [
+    { value: "Credit Card", label: "Credit Card" },
+    { value: "Personal Loan", label: "Personal Loan" },
+    { value: "Student Loan", label: "Student Loan" },
+    { value: "Auto Loan", label: "Auto Loan" },
+    { value: "Mortgage", label: "Mortgage" },
+    { value: "HELOC", label: "Home Equity Line of Credit" },
+    { value: "Other Debt", label: "Other Debt" },
+  ],
+};
+
 const OverviewTab = ({ smallApp }) => {
   const {
     data,
     saveData,
     clearAccountsData,
     resetAccountsToDemo,
-    accountChangeNotifications, // Make sure this is included
+    accountChangeNotifications,
     applyGoalUpdateFromNotification,
     dismissAccountChangeNotification,
     clearAllAccountChangeNotifications,
+    showNotification,
   } = useFinancialData();
 
   const accounts = data.accounts || [];
@@ -94,85 +127,138 @@ const OverviewTab = ({ smallApp }) => {
   const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
   const newAccountNameRef = useRef(null);
 
+  // FIX: Add the missing state declaration
+  const [originalDebtPayments, setOriginalDebtPayments] = useState({});
+
   // Add this line to detect if Plan app is open
   const isPlanAppOpen = useIsAppOpen("plan");
 
-  // Handle saving from control panel
-  const handleSave = () => {
-    // Check for new portfolios that need to be created
-    const existingPortfolioNames = portfolios
-      .map((p) => p.name?.toLowerCase())
-      .filter(Boolean);
-    const newPortfolios = [...portfolios];
-    const portfolioNameToId = {};
-
-    // Map existing portfolios
-    portfolios.forEach((p) => {
-      if (p.name) {
-        portfolioNameToId[p.name.toLowerCase()] = p.id;
+  // Update enterEditMode to track original debt payments
+  const handleEnterEditMode = () => {
+    const debtPayments = {};
+    accounts.forEach((account) => {
+      if (account.category === "Debt") {
+        debtPayments[account.id] = {
+          name: account.name,
+          monthlyPayment: account.monthlyPayment || 0,
+        };
       }
     });
+    setOriginalDebtPayments(debtPayments);
+    enterEditMode();
+  };
 
-    // Create new portfolios if needed
-    editRows.forEach((account) => {
-      if (account.portfolioName && account.portfolioName.trim()) {
-        const portfolioNameLower = account.portfolioName.toLowerCase();
-        if (!existingPortfolioNames.includes(portfolioNameLower)) {
-          const newPortfolioId = `portfolio-${Date.now()}-${Math.random()
-            .toString(36)
-            .substr(2, 9)}`;
-          newPortfolios.push({
-            id: newPortfolioId,
-            name: account.portfolioName,
+  // Update cancelEdit to clear tracking
+  const handleCancelEdit = () => {
+    setOriginalDebtPayments({});
+    cancelEdit();
+  };
+
+  // Simplified handleSave function - let context handle debt sync detection
+  const handleSave = () => {
+    // Detect debt payment changes for notification
+    const debtPaymentChanges = [];
+
+    editRows.forEach((editedAccount) => {
+      if (editedAccount.category === "Debt") {
+        const originalPayment =
+          originalDebtPayments[editedAccount.id]?.monthlyPayment || 0;
+        const newPayment = editedAccount.monthlyPayment || 0;
+
+        if (originalPayment !== newPayment) {
+          debtPaymentChanges.push({
+            accountId: editedAccount.id,
+            accountName: editedAccount.name,
+            oldPayment: originalPayment,
+            newPayment: newPayment,
+            changeType: newPayment > originalPayment ? "increase" : "decrease",
           });
-          portfolioNameToId[portfolioNameLower] = newPortfolioId;
-          existingPortfolioNames.push(portfolioNameLower);
         }
       }
     });
 
-    // Update accounts with portfolio assignments
-    const updatedAccounts = editRows.map((account) => ({
-      ...account,
-      value: parseFloat(account.value) || 0,
-      interestRate: account.interestRate
-        ? parseFloat(account.interestRate)
-        : null,
-      monthlyPayment: account.monthlyPayment
-        ? parseFloat(account.monthlyPayment)
-        : null,
-      portfolioId: account.portfolioName
-        ? portfolioNameToId[account.portfolioName.toLowerCase()]
-        : null,
-    }));
+    // Check for removed debt accounts
+    const editRowIds = editRows.map((row) => row.id);
+    accounts.forEach((originalAccount) => {
+      if (
+        originalAccount.category === "Debt" &&
+        originalAccount.monthlyPayment > 0 &&
+        !editRowIds.includes(originalAccount.id)
+      ) {
+        debtPaymentChanges.push({
+          accountId: originalAccount.id,
+          accountName: originalAccount.name,
+          oldPayment: originalAccount.monthlyPayment,
+          newPayment: 0,
+          changeType: "remove",
+        });
+      }
+    });
 
+    // Save the data first - the context will handle the automatic debt sync
     const updatedData = {
       ...data,
-      accounts: updatedAccounts,
-      portfolios: newPortfolios,
+      accounts: editRows,
     };
-
     saveData(updatedData);
     exitEditMode();
+    setOriginalDebtPayments({});
+
+    // Show notification if there were debt payment changes
+    if (debtPaymentChanges.length > 0) {
+      let message =
+        "Budget automatically updated with debt payment changes:\n\n";
+
+      debtPaymentChanges.forEach((change) => {
+        switch (change.changeType) {
+          case "increase":
+            message += `• ${change.accountName}: Payment increased to $${change.newPayment}/month\n`;
+            break;
+          case "decrease":
+            message += `• ${change.accountName}: Payment decreased to $${change.newPayment}/month\n`;
+            break;
+          case "remove":
+            message += `• ${change.accountName}: Payment removed ($${change.oldPayment}/month)\n`;
+            break;
+        }
+      });
+
+      message += "\nYou can adjust these in the Budget app if needed.";
+
+      showNotification({
+        type: "info",
+        title: "Budget Updated",
+        message,
+        duration: 8000,
+      });
+    } else {
+      // Standard save notification
+      showNotification({
+        type: "success",
+        title: "Accounts Saved",
+        message: "Your account changes have been saved successfully.",
+        duration: 3000,
+      });
+    }
   };
 
   // Handle reset to demo accounts
   const handleResetToDemo = () => {
-    if (editMode) {
+    if (
+      window.confirm(
+        "Reset all accounts to demo data? This will clear your current accounts."
+      )
+    ) {
       resetAccountsToDemo();
       exitEditMode();
-    } else {
-      resetAccountsToDemo();
     }
   };
 
   // Handle clear all accounts
   const handleClearAll = () => {
-    if (editMode) {
+    if (window.confirm("Clear all accounts? This action cannot be undone.")) {
       clearAccountsData();
       exitEditMode();
-    } else {
-      clearAccountsData();
     }
   };
 
@@ -238,47 +324,109 @@ const OverviewTab = ({ smallApp }) => {
     },
   ];
 
+  const [showNewPortfolioInput, setShowNewPortfolioInput] = useState(false);
+  const [newPortfolioName, setNewPortfolioName] = useState("");
+
   const handleNewAccountChange = (e) => {
     const { name, value } = e.target;
-    setNewAccount((prev) => ({
-      ...prev,
-      [name]:
-        name === "value" || name === "interestRate" || name === "monthlyPayment"
-          ? value === ""
-            ? ""
-            : parseFloat(value) || ""
-          : value,
-    }));
+
+    if (name === "category") {
+      // When category changes, reset fields appropriately
+      const defaultSubType = ACCOUNT_SUBTYPES[value]?.[0]?.value || "";
+      setNewAccount((prev) => ({
+        ...prev,
+        category: value,
+        subType: defaultSubType,
+        // Reset fields based on category
+        taxStatus: value === "Debt" ? "N/A" : "",
+        portfolioId: value === "Investments" ? prev.portfolioId : null,
+        // Clear debt-specific fields if not debt category
+        ...(value !== "Debt" && {
+          interestRate: "",
+          monthlyPayment: "",
+        }),
+        // Set appropriate tax status defaults
+        ...(value === "Cash" && { taxStatus: "Taxable" }),
+        ...(value === "Investments" && { taxStatus: "" }),
+      }));
+    } else if (name === "portfolioId" && value === "__new__") {
+      // Handle new portfolio creation
+      const portfolioName = prompt("Enter new portfolio name:");
+      if (portfolioName && portfolioName.trim()) {
+        const newPortfolioId = `portfolio-${Date.now()}`;
+        const newPortfolio = {
+          id: newPortfolioId,
+          name: portfolioName.trim(),
+        };
+
+        // Add the new portfolio to the data
+        const updatedData = {
+          ...data,
+          portfolios: [...portfolios, newPortfolio],
+        };
+        saveData(updatedData);
+
+        // Set the new portfolio as selected
+        setNewAccount((prev) => ({
+          ...prev,
+          portfolioId: newPortfolioId,
+        }));
+      }
+    } else {
+      setNewAccount((prev) => ({
+        ...prev,
+        [name]:
+          name === "value" ||
+          name === "interestRate" ||
+          name === "monthlyPayment"
+            ? value === ""
+              ? ""
+              : parseFloat(value) || 0
+            : value,
+      }));
+    }
   };
 
   const handleAddAccount = () => {
-    if (newAccount.name && newAccount.accountProvider) {
-      const account = {
-        id: `acc-${Date.now()}`,
-        ...newAccount,
-        value: parseFloat(newAccount.value) || 0,
-        interestRate: newAccount.interestRate
-          ? parseFloat(newAccount.interestRate)
-          : null,
-        monthlyPayment: newAccount.monthlyPayment
-          ? parseFloat(newAccount.monthlyPayment)
-          : null,
-        portfolioName: newAccount.portfolioName || "",
-      };
+    if (!newAccount.name.trim()) {
+      alert("Please enter an account name");
+      return;
+    }
 
-      if (editMode) {
-        addEditRow(account);
-      } else {
-        // If not in edit mode, directly update data
-        const updatedData = {
-          ...data,
-          accounts: [...accounts, account],
-        };
-        saveData(updatedData);
-      }
+    if (!newAccount.subType) {
+      alert("Please select an account type");
+      return;
+    }
 
-      setNewAccount({ ...EMPTY_ACCOUNT });
-      newAccountNameRef.current?.focus();
+    let accountValue = parseFloat(newAccount.value) || 0;
+
+    // For debt accounts, make the value negative
+    if (newAccount.category === "Debt" && accountValue > 0) {
+      accountValue = -accountValue;
+    }
+
+    const accountWithId = {
+      ...newAccount,
+      id: `acc-${Date.now()}`,
+      value: accountValue,
+      interestRate:
+        newAccount.category === "Debt"
+          ? parseFloat(newAccount.interestRate) || 0
+          : null,
+      monthlyPayment:
+        newAccount.category === "Debt"
+          ? parseFloat(newAccount.monthlyPayment) || 0
+          : null,
+      taxStatus: newAccount.category === "Debt" ? "N/A" : newAccount.taxStatus,
+      portfolioId:
+        newAccount.category === "Investments" ? newAccount.portfolioId : null,
+    };
+
+    addEditRow(accountWithId);
+    setNewAccount({ ...EMPTY_ACCOUNT });
+
+    if (newAccountNameRef.current) {
+      newAccountNameRef.current.focus();
     }
   };
 
@@ -292,16 +440,23 @@ const OverviewTab = ({ smallApp }) => {
           <td>{account.category}</td>
           <td>{account.subType}</td>
           <td className={tableStyles.alignRight}>
-            $
-            {account.value?.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            }) || "0.00"}
+            {account.category === "Debt" && account.value < 0
+              ? `-$${Math.abs(account.value).toLocaleString()}`
+              : `$${(account.value || 0).toLocaleString()}`}
           </td>
           <td>{account.taxStatus}</td>
-          <td>{account.interestRate ? `${account.interestRate}%` : "-"}</td>
+          <td>
+            {account.interestRate
+              ? `${account.interestRate}%`
+              : account.category === "Debt"
+              ? "0%"
+              : "-"}
+          </td>
           <td>
             {account.monthlyPayment
-              ? `$${account.monthlyPayment.toLocaleString()}`
+              ? `$${account.monthlyPayment}`
+              : account.category === "Debt"
+              ? "$0"
               : "-"}
           </td>
           <td>{account.portfolioName || "-"}</td>
@@ -309,7 +464,11 @@ const OverviewTab = ({ smallApp }) => {
       );
     }
 
-    // Edit mode - inputs
+    // Edit mode
+    const isDebtAccount = account.category === "Debt";
+    const isInvestmentAccount = account.category === "Investments";
+    const availableSubTypes = ACCOUNT_SUBTYPES[account.category] || [];
+
     return (
       <tr key={account.id || index}>
         <td>
@@ -318,6 +477,7 @@ const OverviewTab = ({ smallApp }) => {
             value={account.name || ""}
             onChange={(e) => updateEditRow(index, "name", e.target.value)}
             className={tableStyles.tableInput}
+            placeholder="Account name"
           />
         </td>
         <td>
@@ -328,12 +488,36 @@ const OverviewTab = ({ smallApp }) => {
               updateEditRow(index, "accountProvider", e.target.value)
             }
             className={tableStyles.tableInput}
+            placeholder="Institution"
           />
         </td>
         <td>
           <select
             value={account.category || "Cash"}
-            onChange={(e) => updateEditRow(index, "category", e.target.value)}
+            onChange={(e) => {
+              const newCategory = e.target.value;
+              const defaultSubType =
+                ACCOUNT_SUBTYPES[newCategory]?.[0]?.value || "";
+
+              // Update multiple fields when category changes
+              updateEditRow(index, "category", newCategory);
+              updateEditRow(index, "subType", defaultSubType);
+
+              // Handle tax status
+              if (newCategory === "Debt") {
+                updateEditRow(index, "taxStatus", "N/A");
+                updateEditRow(index, "portfolioId", null);
+              } else if (newCategory === "Cash") {
+                updateEditRow(index, "taxStatus", "Taxable");
+                updateEditRow(index, "portfolioId", null);
+                updateEditRow(index, "interestRate", null);
+                updateEditRow(index, "monthlyPayment", null);
+              } else if (newCategory === "Investments") {
+                updateEditRow(index, "taxStatus", "");
+                updateEditRow(index, "interestRate", null);
+                updateEditRow(index, "monthlyPayment", null);
+              }
+            }}
             className={tableStyles.tableSelect}
           >
             {CATEGORIES.map((cat) => (
@@ -344,84 +528,164 @@ const OverviewTab = ({ smallApp }) => {
           </select>
         </td>
         <td>
-          <input
-            type="text"
+          <select
             value={account.subType || ""}
             onChange={(e) => updateEditRow(index, "subType", e.target.value)}
-            className={tableStyles.tableInput}
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            value={account.value || ""}
-            onChange={(e) =>
-              updateEditRow(index, "value", parseFloat(e.target.value) || 0)
-            }
-            className={tableStyles.tableInput}
-            step="0.01"
-            min="-999999999"
-            max="999999999"
-          />
-        </td>
-        <td>
-          <input
-            type="text"
-            value={account.taxStatus || ""}
-            onChange={(e) => updateEditRow(index, "taxStatus", e.target.value)}
-            className={tableStyles.tableInput}
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            value={account.interestRate || ""}
-            onChange={(e) =>
-              updateRow(index, "interestRate", parseFloat(e.target.value) || "")
-            }
-            className={tableStyles.tableInput}
-            step="0.01"
-            min="0"
-            max="100"
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            value={account.monthlyPayment || ""}
-            onChange={(e) =>
-              updateRow(
-                index,
-                "monthlyPayment",
-                parseFloat(e.target.value) || ""
-              )
-            }
-            className={tableStyles.tableInput}
-            step="0.01"
-            min="0"
-          />
-        </td>
-        <td>
-          <select
-            value={account.portfolioId || ""}
-            onChange={(e) =>
-              updateEditRow(index, "portfolioId", e.target.value || null)
-            }
             className={tableStyles.tableSelect}
           >
-            <option value="">No Portfolio</option>
-            {portfolios.map((portfolio) => (
-              <option key={portfolio.id} value={portfolio.id}>
-                {portfolio.name}
+            <option value="">Select Type</option>
+            {availableSubTypes.map((subType) => (
+              <option key={subType.value} value={subType.value}>
+                {subType.label}
               </option>
             ))}
           </select>
         </td>
         <td>
+          <input
+            type="number"
+            value={Math.abs(account.value) || ""}
+            onChange={(e) => {
+              let inputValue = parseFloat(e.target.value) || 0;
+              // For debt accounts, store as negative
+              if (isDebtAccount && inputValue > 0) {
+                inputValue = -inputValue;
+              }
+              updateEditRow(index, "value", inputValue);
+            }}
+            className={tableStyles.tableInput}
+            placeholder={isDebtAccount ? "Enter positive amount" : "0"}
+            step="0.01"
+            min="0"
+          />
+        </td>
+        <td>
+          {isDebtAccount ? (
+            <span
+              className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+            >
+              N/A
+            </span>
+          ) : (
+            <select
+              value={account.taxStatus || ""}
+              onChange={(e) =>
+                updateEditRow(index, "taxStatus", e.target.value)
+              }
+              className={tableStyles.tableSelect}
+            >
+              <option value="">Select Status</option>
+              <option value="Taxable">Taxable</option>
+              <option value="Tax-deferred">Tax-deferred</option>
+              <option value="Tax-free">Tax-free</option>
+              <option value="N/A">N/A</option>
+            </select>
+          )}
+        </td>
+        <td>
+          {isDebtAccount ? (
+            <input
+              type="number"
+              value={account.interestRate || ""}
+              onChange={(e) =>
+                updateEditRow(
+                  index,
+                  "interestRate",
+                  parseFloat(e.target.value) || 0
+                )
+              }
+              className={tableStyles.tableInput}
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              max="100"
+              title="Changes will be reflected in your budget when you save"
+            />
+          ) : (
+            <span
+              className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+            >
+              -
+            </span>
+          )}
+        </td>
+        <td>
+          {isDebtAccount ? (
+            <input
+              type="number"
+              value={account.monthlyPayment || ""}
+              onChange={(e) =>
+                updateEditRow(
+                  index,
+                  "monthlyPayment",
+                  parseFloat(e.target.value) || 0
+                )
+              }
+              className={tableStyles.tableInput}
+              placeholder="0"
+              step="0.01"
+              min="0"
+              title="Changes will be reflected in your budget when you save"
+            />
+          ) : (
+            <span
+              className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+            >
+              -
+            </span>
+          )}
+        </td>
+        <td>
+          {isInvestmentAccount ? (
+            <select
+              value={account.portfolioId || ""}
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  const portfolioName = prompt("Enter new portfolio name:");
+                  if (portfolioName && portfolioName.trim()) {
+                    const newPortfolioId = `portfolio-${Date.now()}`;
+                    const newPortfolio = {
+                      id: newPortfolioId,
+                      name: portfolioName.trim(),
+                    };
+
+                    // Add the new portfolio to the data
+                    const updatedData = {
+                      ...data,
+                      portfolios: [...portfolios, newPortfolio],
+                    };
+                    saveData(updatedData);
+
+                    // Set the new portfolio for this account
+                    updateEditRow(index, "portfolioId", newPortfolioId);
+                  }
+                } else {
+                  updateEditRow(index, "portfolioId", e.target.value);
+                }
+              }}
+              className={tableStyles.tableSelect}
+            >
+              <option value="">No Portfolio</option>
+              {portfolios.map((portfolio) => (
+                <option key={portfolio.id} value={portfolio.id}>
+                  {portfolio.name}
+                </option>
+              ))}
+              <option value="__new__">+ Create New Portfolio</option>
+            </select>
+          ) : (
+            <span
+              className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+            >
+              -
+            </span>
+          )}
+        </td>
+        <td>
           <button
             onClick={() => removeEditRow(index)}
             className={tableStyles.removeButton}
-            title="Remove"
+            title="Remove account"
           >
             Remove
           </button>
@@ -476,6 +740,19 @@ const OverviewTab = ({ smallApp }) => {
 
   return (
     <div className={accountsStyles.overviewContentContainer}>
+      {/* Account change notification modal */}
+      <AccountGoalUpdateModal
+        notification={activeNotification}
+        isOpen={!!activeNotification}
+        onClose={() => setActiveNotification(null)}
+        onConfirm={(notificationId, amountToAdd) =>
+          handleApplyGoalUpdate(notificationId, amountToAdd)
+        }
+        onOpenPlanApp={() => {
+          /* Handle opening plan app if needed */
+        }}
+      />
+
       <SnapshotRow items={snapshotItems} small={smallApp} />
 
       {/* Account Change Notifications - Filter out completed goals */}
@@ -583,10 +860,10 @@ const OverviewTab = ({ smallApp }) => {
         header={
           <div className={sectionStyles.sectionHeaderRow}>
             <EditableTableHeader
-              title="All Accounts"
+              title="Accounts Overview"
               editMode={editMode}
-              onEnterEdit={enterEditMode}
-              onCancelEdit={cancelEdit}
+              onEnterEdit={handleEnterEditMode} // Use the fixed handler
+              onCancelEdit={handleCancelEdit} // Use the fixed handler
               editable={true}
             />
             <div className={tableStyles.filterRow}>
@@ -598,9 +875,9 @@ const OverviewTab = ({ smallApp }) => {
                   className={tableStyles.filterSelect}
                 >
                   <option value="all">All Portfolios</option>
-                  {portfolios.map((portfolio) => (
-                    <option key={portfolio.id} value={portfolio.id}>
-                      {portfolio.name}
+                  {portfolios.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
                     </option>
                   ))}
                 </select>
@@ -653,14 +930,21 @@ const OverviewTab = ({ smallApp }) => {
                   </select>
                 </td>
                 <td>
-                  <input
-                    type="text"
+                  <select
                     name="subType"
                     value={newAccount.subType}
                     onChange={handleNewAccountChange}
-                    placeholder="Type"
-                    className={tableStyles.tableInput}
-                  />
+                    className={tableStyles.tableSelect}
+                  >
+                    <option value="">Select Type</option>
+                    {(ACCOUNT_SUBTYPES[newAccount.category] || []).map(
+                      (subType) => (
+                        <option key={subType.value} value={subType.value}>
+                          {subType.label}
+                        </option>
+                      )
+                    )}
+                  </select>
                 </td>
                 <td>
                   <input
@@ -668,57 +952,102 @@ const OverviewTab = ({ smallApp }) => {
                     name="value"
                     value={newAccount.value}
                     onChange={handleNewAccountChange}
-                    placeholder="0"
+                    placeholder={
+                      newAccount.category === "Debt"
+                        ? "Enter positive amount"
+                        : "0"
+                    }
                     className={tableStyles.tableInput}
                     step="0.01"
+                    min="0"
                   />
                 </td>
                 <td>
-                  <input
-                    type="text"
-                    name="taxStatus"
-                    value={newAccount.taxStatus}
-                    onChange={handleNewAccountChange}
-                    placeholder="Tax status"
-                    className={tableStyles.tableInput}
-                  />
+                  {newAccount.category === "Debt" ? (
+                    <span
+                      className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+                    >
+                      N/A
+                    </span>
+                  ) : (
+                    <select
+                      name="taxStatus"
+                      value={newAccount.taxStatus}
+                      onChange={handleNewAccountChange}
+                      className={tableStyles.tableSelect}
+                    >
+                      <option value="">Select Status</option>
+                      <option value="Taxable">Taxable</option>
+                      <option value="Tax-deferred">Tax-deferred</option>
+                      <option value="Tax-free">Tax-free</option>
+                      <option value="N/A">N/A</option>
+                    </select>
+                  )}
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    name="interestRate"
-                    value={newAccount.interestRate}
-                    onChange={handleNewAccountChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    step="0.01"
-                  />
+                  {newAccount.category === "Debt" ? (
+                    <input
+                      type="number"
+                      name="interestRate"
+                      value={newAccount.interestRate}
+                      onChange={handleNewAccountChange}
+                      placeholder="0.00"
+                      className={tableStyles.tableInput}
+                      step="0.01"
+                      min="0"
+                      max="100"
+                    />
+                  ) : (
+                    <span
+                      className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+                    >
+                      -
+                    </span>
+                  )}
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    name="monthlyPayment"
-                    value={newAccount.monthlyPayment}
-                    onChange={handleNewAccountChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    step="0.01"
-                  />
+                  {newAccount.category === "Debt" ? (
+                    <input
+                      type="number"
+                      name="monthlyPayment"
+                      value={newAccount.monthlyPayment}
+                      onChange={handleNewAccountChange}
+                      placeholder="0"
+                      className={tableStyles.tableInput}
+                      step="0.01"
+                      min="0"
+                    />
+                  ) : (
+                    <span
+                      className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+                    >
+                      -
+                    </span>
+                  )}
                 </td>
                 <td>
-                  <select
-                    name="portfolioId"
-                    value={newAccount.portfolioId || ""}
-                    onChange={handleNewAccountChange}
-                    className={tableStyles.tableSelect}
-                  >
-                    <option value="">No Portfolio</option>
-                    {portfolios.map((portfolio) => (
-                      <option key={portfolio.id} value={portfolio.id}>
-                        {portfolio.name}
-                      </option>
-                    ))}
-                  </select>
+                  {newAccount.category === "Investments" ? (
+                    <select
+                      name="portfolioId"
+                      value={newAccount.portfolioId || ""}
+                      onChange={handleNewAccountChange}
+                      className={tableStyles.tableSelect}
+                    >
+                      <option value="">No Portfolio</option>
+                      {portfolios.map((portfolio) => (
+                        <option key={portfolio.id} value={portfolio.id}>
+                          {portfolio.name}
+                        </option>
+                      ))}
+                      <option value="__new__">+ Create New Portfolio</option>
+                    </select>
+                  ) : (
+                    <span
+                      className={`${tableStyles.tableInput} ${tableStyles.disabledInput}`}
+                    >
+                      -
+                    </span>
+                  )}
                 </td>
                 <td>
                   <button
@@ -737,7 +1066,7 @@ const OverviewTab = ({ smallApp }) => {
 
         {editMode && (
           <ControlPanel
-            onSave={handleSave}
+            onSave={handleSave} // Use the fixed handler
             saveLabel="Save Accounts"
             onReset={handleResetToDemo}
             onClear={handleClearAll}
@@ -745,16 +1074,6 @@ const OverviewTab = ({ smallApp }) => {
           />
         )}
       </Section>
-
-      {/* Account Goal Update Modal */}
-      <AccountGoalUpdateModal
-        notification={activeNotification}
-        isOpen={!!activeNotification}
-        onClose={() => setActiveNotification(null)}
-        onConfirm={handleConfirmGoalUpdate}
-        onOpenPlanApp={handleOpenPlanApp}
-        isPlanAppOpen={isPlanAppOpen} // Pass the new prop
-      />
     </div>
   );
 };

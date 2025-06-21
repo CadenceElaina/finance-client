@@ -1,0 +1,694 @@
+/* src/features/Dashboard/Apps/Plan/plan.module.css */
+.planAppContainer {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    box-sizing: border-box;
+}
+
+.planTabs {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.planTabContent {
+    flex: 1;
+    padding: var(--space-xs);
+    box-sizing: border-box;
+}
+
+.planContentWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+/* Calculators Grid */
+.calculatorsGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+    padding: var(--space-sm);
+    align-items: start;
+}
+
+/* Calculator Container */
+.calculatorContainer {
+    background: var(--surface-light);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    padding: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+}
+
+.calculatorContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    flex: 1;
+}
+
+.calculatorForm {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    border: 1px solid var(--border-light);
+}
+
+.calculatorResults {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    border: 1px solid var(--border-light);
+    margin: 0;
+}
+
+.calculatorResults h4 {
+    margin: 0 0 var(--space-sm) 0;
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.calculatorChart {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-sm);
+    border: 1px solid var(--border-light);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Form styling for calculators */
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xxs);
+}
+
+.formLabel {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 0;
+}
+
+.formInput {
+    padding: var(--space-xs);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-sm);
+    background: var(--background-light);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-speed-fast);
+}
+
+.formInput:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.18);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.formActions {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--border-light);
+}
+
+/* Result item styling */
+.resultItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border-light);
+    font-size: var(--font-size-sm);
+}
+
+.resultItem:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.resultLabel {
+    color: var(--text-secondary);
+    font-weight: var(--font-weight-medium);
+}
+
+.resultValue {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+}
+
+/* Status colors */
+.positive {
+    color: var(--status-success);
+}
+
+.negative {
+    color: var(--status-danger);
+}
+
+.neutral {
+    color: var(--text-secondary);
+}
+
+/* Calculator-specific form styling */
+.calculatorForm .formGroup {
+    margin-bottom: var(--space-sm);
+}
+
+.calculatorForm .formInput,
+.calculatorForm .formSelect {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.calculatorForm .radioGroup {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    margin-top: var(--space-xs);
+}
+
+.calculatorForm .radioGroup label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.calculatorForm .radioGroup input[type="radio"] {
+    margin: 0;
+}
+
+/* Small app responsiveness */
+:global(.smallApp) .calculatorsGrid {
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+}
+
+:global(.smallApp) .calculatorContent {
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+}
+
+:global(.smallApp) .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+}
+
+:global(.smallApp) .calculatorChart {
+    padding: var(--space-xs);
+}
+
+:global(.smallApp) .resultItem {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xxs) 0;
+}
+
+:global(.smallApp) .formInput {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xxs);
+}
+
+/* Large app scaling - REDUCED */
+:global(.largeApp) .planTabContent {
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .calculatorsGrid {
+    gap: var(--space-md);
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .calculatorContainer {
+    padding: var(--space-md);
+}
+
+:global(.largeApp) .calculatorContent {
+    gap: var(--space-md);
+    padding: var(--space-md);
+}
+
+:global(.largeApp) .calculatorForm {
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .calculatorResults {
+    padding: var(--space-sm);
+}
+
+:global(.largeApp) .calculatorResults h4 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-sm);
+}
+
+:global(.largeApp) .formInput {
+    padding: var(--space-xs);
+    font-size: var(--font-size-base);
+}
+
+:global(.largeApp) .formLabel {
+    font-size: var(--font-size-base);
+}
+
+:global(.largeApp) .formRow {
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+:global(.largeApp) .formActions {
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+    padding-top: var(--space-sm);
+}
+
+:global(.largeApp) .resultItem {
+    font-size: var(--font-size-base);
+    padding: var(--space-xs) 0;
+}
+
+:global(.largeApp) .calculatorChart {
+    padding: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+/* Projections specific styles */
+.projectionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md);
+}
+
+.projectionCard {
+    background: var(--surface-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.projectionTitle {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+    text-align: center;
+}
+
+.projectionContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Timeline visualization */
+.timelineContainer {
+    background: var(--surface-dark);
+    border-radius: var(--border-radius-md);
+    padding: var(--space-md);
+    margin: var(--space-md) 0;
+}
+
+.timelineItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.timelineItem:last-child {
+    border-bottom: none;
+}
+
+.timelineLabel {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.timelineValue {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+/* Chart improvements for calculators */
+.calculatorChart .recharts-tooltip-wrapper {
+    background: var(--surface-light) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--border-radius-md) !important;
+}
+
+/* Fix any hover effects that might be causing issues */
+.calculatorContainer *:hover {
+    background: inherit;
+}
+
+.formInput:hover {
+    background: var(--background-light);
+    border-color: var(--color-primary);
+}
+
+/* Ensure proper spacing for chart legends and axes */
+.calculatorChart .recharts-legend-wrapper {
+    padding-top: 20px !important;
+}
+
+/* Coming soon placeholder styling */
+.comingSoon {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-secondary);
+}
+
+.comingSoon h3 {
+    color: var(--text-primary);
+    margin-bottom: var(--space-md);
+}
+
+.comingSoon p {
+    line-height: 1.6;
+    margin-bottom: var(--space-sm);
+}
+
+/* Add these styles for the Investment Roadmap */
+
+/* Roadmap Settings */
+.roadmapSettings {
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  border: 1px solid var(--border-light);
+}
+
+.roadmapSettings h4 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+}
+
+.settingsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.settingGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settingGroup label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+}
+
+.realReturnInfo {
+  text-align: center;
+  color: var(--color-primary);
+  background: var(--surface-light);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-primary);
+}
+
+/* Roadmap Timeline */
+.roadmapContainer {
+  margin-top: var(--space-md);
+}
+
+.roadmapTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  position: relative;
+}
+
+.roadmapStep {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.stepConnector {
+  position: relative;
+  width: 4px;
+  min-height: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-md);
+}
+
+.connectorLine {
+  width: 2px;
+  height: 60px;
+  background: var(--border-light);
+  margin-top: var(--space-sm);
+}
+
+.stepCard {
+  flex: 1;
+  background: var(--surface-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  border: 1px solid var(--border-light);
+  border-left: 4px solid var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-speed-fast);
+}
+
+.stepCard:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.stepHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.stepIconGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  height: 48px;
+}
+
+.stepIcon {
+  position: relative;
+  z-index: 1;
+}
+
+.statusIcon {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: var(--surface-light);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.stepInfo {
+  flex: 1;
+}
+
+.stepTitle {
+  margin: 0 0 var(--space-xs) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+}
+
+.stepSubtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.stepPriority {
+  background: var(--color-primary);
+  color: var(--text-on-primary);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  flex-shrink: 0;
+}
+
+.stepProgress {
+  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.progressBar {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.progressFill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: var(--border-radius-sm);
+}
+
+.progressText {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.stepDetails {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stepAction,
+.stepAmount,
+.stepAllocation {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.stepExplanation {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-style: italic;
+  line-height: 1.4;
+  padding: var(--space-xs);
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Summary */
+.roadmapSummary {
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-lg);
+  border: 1px solid var(--border-light);
+}
+
+.roadmapSummary h4 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-sm);
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs);
+  background: var(--surface-light);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.summaryItem span:first-child {
+  color: var(--text-secondary);
+}
+
+.summaryItem span:last-child {
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Small app responsiveness */
+:global(.smallApp) .settingsRow {
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+}
+
+:global(.smallApp) .stepHeader {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+
+:global(.smallApp) .stepIconGroup {
+  min-width: 40px;
+  height: 40px;
+}
+
+:global(.smallApp) .stepPriority {
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-size-xs);
+  align-self: flex-end;
+}
+
+:global(.smallApp) .summaryGrid {
+  grid-template-columns: 1fr;
+}
+
+/* Large app enhancements */
+:global(.largeApp) .roadmapSettings {
+  padding: var(--space-sm);
+}
+
+:global(.largeApp) .stepCard {
+  padding: var(--space-sm);
+}
+
+:global(.largeApp) .roadmapSummary {
+  padding: var(--space-sm);
+}

@@ -20,6 +20,15 @@ export const DEFAULT_DEMO_BUDGET = {
         { id: "exp-5", name: "Transportation", cost: 100, category: "flexible" },
         { id: "exp-6", name: "Dining Out", cost: 200, category: "non-essential" },
         { id: "exp-7", name: "Entertainment", cost: 100, category: "non-essential" },
+        // Add demo debt payment from the credit card account
+        { 
+            id: "exp-debt-acc-6", 
+            name: "Credit Card Payment", 
+            cost: 150, 
+            category: "required",
+            linkedToAccountId: "acc-6", // Link to the credit card account
+            isDebtPayment: true 
+        },
     ],
 };
 

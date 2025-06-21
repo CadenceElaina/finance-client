@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
 import CalculatorsTab from "./Calculators/CalculatorsTab";
 import ProjectionsTab from "./Projections/ProjectionsTab";
+import InvestmentRoadmapTab from "./Investments/InvestmentRoadmapTab";
 import planStyles from "./plan.module.css";
 import { getAppSize } from "../../../../utils/getAppSize";
 
@@ -35,9 +36,16 @@ const Plan = () => {
   const smallApp = appSize === "small";
   const largeApp = appSize === "large";
 
-  const [activeTabId, setActiveTabId] = useState("calculators");
+  const [activeTabId, setActiveTabId] = useState("invest");
 
   const tabs = [
+    {
+      id: "invest",
+      label: "Invest",
+      component: ({ smallApp: flexTabsSmallApp }) => (
+        <InvestmentRoadmapTab smallApp={flexTabsSmallApp} />
+      ),
+    },
     {
       id: "calculators",
       label: "Calculators",

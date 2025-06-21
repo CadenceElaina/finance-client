@@ -15,6 +15,13 @@ import {
   saveLocalData,
   clearLocalData,
 } from "../utils/localStorageUtils";
+import {
+  syncDebtPaymentsToExpenses,
+  syncExpenseToDebtPayment,
+  removeDebtPaymentExpense,
+} from "../utils/debtPaymentSync";
+import { useNotification } from "../hooks/useNotification";
+import { useGlobalNotification } from "../components/providers/NotificationProvider";
 
 const FinancialDataContext = createContext();
 
@@ -134,7 +141,28 @@ export const FinancialDataProvider = ({ children }) => {
   // Save data to correct place - Updated to check for account changes BEFORE saving
   const saveData = async (newData) => {
     const dataToSave = newData || data;
-    const calculatedBudget = calculateBudgetFields(dataToSave.budget);
+
+    // Store the original expenses before syncing
+    const originalExpenses = data.budget?.monthlyExpenses || [];
+
+    // Sync debt payments to expenses before calculating budget
+    const syncedExpenses = syncDebtPaymentsToExpenses(
+      dataToSave.accounts || [],
+      dataToSave.budget?.monthlyExpenses || []
+    );
+
+    // Detect changes between original and synced expenses
+    const debtPaymentChanges = detectDebtPaymentChanges(
+      originalExpenses,
+      syncedExpenses
+    );
+
+    const budgetWithSyncedExpenses = {
+      ...dataToSave.budget,
+      monthlyExpenses: syncedExpenses,
+    };
+
+    const calculatedBudget = calculateBudgetFields(budgetWithSyncedExpenses);
     const finalData = { ...dataToSave, budget: calculatedBudget };
 
     /*   console.log("Saving data - checking for account changes first...");
@@ -258,6 +286,86 @@ export const FinancialDataProvider = ({ children }) => {
     } else if (persistence === "local") {
       saveLocalData(finalData);
     }
+  };
+
+  // Helper function to detect debt payment changes
+  const detectDebtPaymentChanges = (originalExpenses, syncedExpenses) => {
+    const changes = [];
+
+    // Check for new debt payment expenses
+    syncedExpenses.forEach((expense) => {
+      if (expense.isDebtPayment) {
+        const originalExpense = originalExpenses.find(
+          (exp) => exp.id === expense.id
+        );
+        if (!originalExpense) {
+          // New debt payment added
+          changes.push({
+            type: "added",
+            accountName: expense.name.replace(" Payment", ""),
+            amount: expense.cost,
+            expenseId: expense.id,
+          });
+        } else if (originalExpense.cost !== expense.cost) {
+          // Debt payment amount changed
+          changes.push({
+            type: "updated",
+            accountName: expense.name.replace(" Payment", ""),
+            oldAmount: originalExpense.cost,
+            newAmount: expense.cost,
+            expenseId: expense.id,
+          });
+        }
+      }
+    });
+
+    // Check for removed debt payment expenses
+    originalExpenses.forEach((expense) => {
+      if (expense.isDebtPayment) {
+        const syncedExpense = syncedExpenses.find(
+          (exp) => exp.id === expense.id
+        );
+        if (!syncedExpense) {
+          // Debt payment removed
+          changes.push({
+            type: "removed",
+            accountName: expense.name.replace(" Payment", ""),
+            amount: expense.cost,
+            expenseId: expense.id,
+          });
+        }
+      }
+    });
+
+    return changes;
+  };
+
+  // Helper function to show debt sync notification
+  const showDebtSyncNotification = (changes) => {
+    let message = "Budget automatically updated with debt payment changes:\n\n";
+
+    changes.forEach((change) => {
+      switch (change.type) {
+        case "added":
+          message += `• Added: ${change.accountName} payment ($${change.amount}/month)\n`;
+          break;
+        case "updated":
+          message += `• Updated: ${change.accountName} payment ($${change.oldAmount} → $${change.newAmount}/month)\n`;
+          break;
+        case "removed":
+          message += `• Removed: ${change.accountName} payment ($${change.amount}/month)\n`;
+          break;
+      }
+    });
+
+    message += "\nYou can adjust these in the Budget app if needed.";
+
+    showNotification({
+      type: "info",
+      title: "Budget Updated",
+      message,
+      duration: 8000,
+    });
   };
 
   // Apply goal update from account change notification - FIXED VERSION
@@ -592,6 +700,138 @@ export const FinancialDataProvider = ({ children }) => {
     saveData({ ...data, goals: updatedGoals, budget: updatedBudget });
   };
 
+  // Add new methods for debt payment operations
+  const updateAccountWithDebtSync = (accountId, updates) => {
+    const updatedAccounts = data.accounts.map((acc) =>
+      acc.id === accountId ? { ...acc, ...updates } : acc
+    );
+
+    // If this is a debt account and monthly payment changed, sync to expenses
+    const account = updatedAccounts.find((acc) => acc.id === accountId);
+    if (account?.category === "Debt" && updates.monthlyPayment !== undefined) {
+      const syncedExpenses = syncDebtPaymentsToExpenses(
+        updatedAccounts,
+        data.budget?.monthlyExpenses || []
+      );
+
+      const updatedBudget = {
+        ...data.budget,
+        monthlyExpenses: syncedExpenses,
+      };
+
+      saveData({
+        ...data,
+        accounts: updatedAccounts,
+        budget: updatedBudget,
+      });
+    } else {
+      saveData({
+        ...data,
+        accounts: updatedAccounts,
+      });
+    }
+  };
+
+  const removeAccountWithDebtSync = (accountId) => {
+    const account = data.accounts.find((acc) => acc.id === accountId);
+    const updatedAccounts = data.accounts.filter((acc) => acc.id !== accountId);
+
+    // If this was a debt account, remove its payment from expenses
+    if (account?.category === "Debt" && account.monthlyPayment > 0) {
+      const updatedExpenses =
+        data.budget?.monthlyExpenses?.filter(
+          (exp) => exp.linkedToAccountId !== accountId
+        ) || [];
+
+      const updatedBudget = {
+        ...data.budget,
+        monthlyExpenses: updatedExpenses,
+      };
+
+      saveData({
+        ...data,
+        accounts: updatedAccounts,
+        budget: updatedBudget,
+      });
+    } else {
+      saveData({
+        ...data,
+        accounts: updatedAccounts,
+      });
+    }
+  };
+
+  const updateExpenseWithDebtSync = (expenseId, updates) => {
+    const expense = data.budget?.monthlyExpenses?.find(
+      (exp) => exp.id === expenseId
+    );
+
+    // If this is a debt payment expense and cost changed, sync to account
+    if (expense?.isDebtPayment && updates.cost !== undefined) {
+      const updatedAccounts = syncExpenseToDebtPayment(
+        data.accounts,
+        expenseId,
+        updates.cost
+      );
+
+      const updatedExpenses =
+        data.budget?.monthlyExpenses?.map((exp) =>
+          exp.id === expenseId ? { ...exp, ...updates } : exp
+        ) || [];
+
+      const updatedBudget = {
+        ...data.budget,
+        monthlyExpenses: updatedExpenses,
+      };
+
+      saveData({
+        ...data,
+        accounts: updatedAccounts,
+        budget: updatedBudget,
+      });
+    } else {
+      // Regular expense update
+      updateExpense(expenseId, updates);
+    }
+  };
+
+  const removeExpenseWithDebtSync = (expenseId) => {
+    const expense = data.budget?.monthlyExpenses?.find(
+      (exp) => exp.id === expenseId
+    );
+
+    if (expense?.isDebtPayment) {
+      const result = removeDebtPaymentExpense(
+        data.accounts,
+        data.budget?.monthlyExpenses || [],
+        expenseId
+      );
+
+      const updatedBudget = {
+        ...data.budget,
+        monthlyExpenses: result.updatedExpenses,
+      };
+
+      return {
+        needsConfirmation: true,
+        accountName: result.accountName,
+        onConfirm: () =>
+          saveData({
+            ...data,
+            accounts: result.updatedAccounts,
+            budget: updatedBudget,
+          }),
+      };
+    } else {
+      // Regular expense removal
+      removeExpense(expenseId);
+      return { needsConfirmation: false };
+    }
+  };
+
+  // Get notification function from global provider
+  const { showNotification } = useGlobalNotification();
+
   return (
     <FinancialDataContext.Provider
       value={{
@@ -620,6 +860,11 @@ export const FinancialDataProvider = ({ children }) => {
         clearAllAccountChangeNotifications,
         clearDismissedNotifications,
         resetDismissalForGoalAccount,
+        updateAccountWithDebtSync,
+        removeAccountWithDebtSync,
+        updateExpenseWithDebtSync,
+        removeExpenseWithDebtSync,
+        showNotification, // Expose notification function
       }}
     >
       {children}
