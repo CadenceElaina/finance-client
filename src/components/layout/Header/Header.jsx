@@ -15,7 +15,7 @@ const Header = () => {
   const themes = [
     { value: "light", label: "Light" },
     { value: "tokyo-night", label: "Tokyo Night" },
-    { value: "ultra-dark", label: "Ultra Dark" },
+    { value: "dark", label: "Dark" },
     { value: "high-contrast-dark", label: "High Contrast Dark" },
     { value: "vibrant-green", label: "Vibrant Green" },
     { value: "vibrant-orange", label: "Vibrant Orange" },

@@ -1,13 +1,62 @@
 /* src/components/ui/Section/section.module.css */
 
 .section {
-    background-color: var(--surface-light);
-    box-shadow: var(--shadow-sm);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-light);
-    display: flex; 
-    flex-direction: column;
-    height: 100%;
+  background-color: var(--surface-light);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  /* Border left by default */
+  border-left: 5px solid var(--section-border-color, var(--color-primary));
+  transition: border-left-color 0.2s;
+}
+
+/* Remove border if requested */
+.noBorderLeft {
+  border-left: none !important;
+}
+
+/* Status-based border colors */
+.borderSuccess {
+  --section-border-color: var(--status-success);
+}
+.borderWarning {
+  --section-border-color: var(--status-warning);
+}
+.borderError {
+  --section-border-color: var(--status-danger);
+}
+.borderInfo {
+  --section-border-color: var(--status-info);
+}
+.borderPrimary {
+  --section-border-color: var(--color-primary);
+}
+.borderSecondary {
+  --section-border-color: var(--color-secondary);
+}
+.borderNeutral {
+  --section-border-color: var(--text-tertiary);
+}
+
+/* Theme-specific overrides (optional, for more vibrancy) */
+body[data-theme="dark"] .section {
+  border-left: 5px solid var(--section-border-color, var(--color-primary));
+}
+body[data-theme="tokyo-night"] .section {
+  border-left: 5px solid var(--section-border-color, #7aa2f7);
+}
+body[data-theme="high-contrast-dark"] .section {
+  border-left: 5px solid var(--section-border-color, #00ffff);
+}
+body[data-theme="vibrant-green"] .section {
+  border-left: 5px solid var(--section-border-color, #00e676);
+}
+body[data-theme="vibrant-orange"] .section {
+  border-left: 5px solid var(--section-border-color, #ff9800);
 }
 
 .sectionHeader {

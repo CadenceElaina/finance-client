@@ -1,187 +1,151 @@
 // src/features/Dashboard/Apps/Budget/utils/columnDefinitions.js
-export const createIncomeColumns = (type, editMode) => {
-  const baseColumns = [
-    { key: "type", label: "Type", className: "descriptionColumn" }
-  ];
+const INCOME_TYPES = [
+  { value: 'salary', label: 'Salary' },
+  { value: 'hourly', label: 'Hourly' }
+];
 
-  if (editMode) {
-    if (type === "salary") {
-      return [
-        ...baseColumns,
-        { 
-          key: "annualPreTax", 
-          label: "Annual (PT)",
-          title: "Annual Pre-tax: Enter your yearly salary before taxes",
-          className: "amountColumn",
-          type: "number",
-          placeholder: "75000",
-          step: "1000",
-          min: "0"
-        },
-        { 
-          key: "monthlyAfterTax", 
-          label: "Monthly (AT)",
-          title: "Monthly After-tax: Enter your take-home pay per month",
-          className: "amountColumn",
-          type: "number", 
-          placeholder: "4100",
-          step: "100",
-          min: "0"
-        },
-        { 
-          key: "additionalAnnualAT", 
-          label: "Add. Annual (AT)",
-          title: "Additional Annual After-tax: Enter bonuses, side income, or other annual income (after taxes)",
-          className: "amountColumn",
-          type: "number", 
-          placeholder: "5000",
-          step: "500",
-          min: "0"
-        },
-      ];
-    } else {
-      return [
-        ...baseColumns,
-        { 
-          key: "hourlyRate", 
-          label: "Hourly Rate", 
-          className: "amountColumn",
-          type: "number",
-          placeholder: "25.00", 
-          step: "0.25",
-          min: "0"
-        },
-        { 
-          key: "expectedHours", 
-          label: "Expected Hours/Year", 
-          className: "amountColumn",
-          type: "number",
-          placeholder: "2080",
-          step: "40", 
-          min: "0"
-        },
-        { 
-          key: "monthlyAfterTax", 
-          label: "Monthly (AT)",
-          title: "Monthly After-tax: Enter your take-home pay per month",
-          className: "amountColumn",
-          type: "number",
-          placeholder: "4100",
-          step: "100", 
-          min: "0"
-        },
-        { 
-          key: "additionalAnnualAT", 
-          label: "add. Annual (AT)",
-          title: "Additional Annual After-tax: Enter bonuses, side income, or other annual income (after taxes)",
-          className: "amountColumn",
-          type: "number", 
-          placeholder: "5000",
-          step: "500", 
-          min: "0"
-        },
-      ];
+const formatCurrency = (value) => `$${(value || 0).toLocaleString()}`;
+const formatHourlyRate = (value) => `$${(value || 0).toFixed(2)}/hr`;
+const formatPercentage = (value) => `${(value || 0).toFixed(1)}%`;
+
+// Simplified column factory
+export const createColumnConfig = (type, mode) => {
+  const baseColumns = {
+    type: { key: "type", label: "Type", type: "select", options: INCOME_TYPES },
+    annualPreTax: { 
+      key: "annualPreTax", 
+      label: "Annual (PT)",
+      type: "number",
+      placeholder: "75000",
+      step: "1000",
+      min: "0",
+      formatter: formatCurrency,
+      title: "Annual Pre-tax: Enter your yearly salary before taxes"
+    },
+    monthlyPreTax: {
+      key: "monthlyPreTax",
+      label: "Monthly (PT)",
+      formatter: formatCurrency,
+      title: "Monthly Pre-tax: Calculated monthly income before taxes",
+      readOnly: true
+    },
+    monthlyAfterTax: { 
+      key: "monthlyAfterTax", 
+      label: "Monthly (AT)",
+      type: "number",
+      placeholder: "4100",
+      step: "100",
+      min: "0",
+      formatter: formatCurrency,
+      title: "Monthly After-tax: Enter your take-home pay per month"
+    },
+    hourlyRate: { 
+      key: "hourlyRate", 
+      label: "Hourly Rate",
+      type: "number",
+      placeholder: "25.00",
+      step: "0.25",
+      min: "0",
+      formatter: formatHourlyRate,
+      title: "Hourly Rate: Enter your hourly wage before taxes"
+    },
+    expectedHours: { 
+      key: "expectedHours", 
+      label: "Expected Hours/Year",
+      type: "number",
+      placeholder: "2080",
+      step: "40",
+      min: "0",
+      title: "Expected Annual Hours: Enter expected hours per year"
+    },
+    additionalAnnualAT: { 
+      key: "additionalAnnualAT", 
+      label: "Add. Annual (AT)",
+      type: "number",
+      placeholder: "5000",
+      step: "500",
+      min: "0",
+      formatter: formatCurrency,
+      title: "Additional Annual After-tax: Enter bonuses, side income, or other annual income (after taxes)"
+    },
+    annualAfterTax: {
+      key: "annualAfterTax",
+      label: "Total Annual (AT)",
+      formatter: formatCurrency,
+      title: "Total Annual After-tax: Monthly income × 12 + additional annual income",
+      readOnly: true
+    },
+    effectiveTaxRate: {
+      key: "effectiveTaxRate",
+      label: "Tax Rate",
+      formatter: formatPercentage,
+      title: "Effective Tax Rate: Calculated based on pre-tax and after-tax income",
+      readOnly: true
     }
-  }
+  };
 
-  // View mode columns - with calculated display formatting
-  return getViewModeColumns(type);
+  // Define column sets for different income types and modes
+  const columnSets = {
+    salary: {
+      edit: ['type', 'annualPreTax', 'monthlyAfterTax', 'additionalAnnualAT'],
+      view: ['type', 'annualPreTax', 'monthlyPreTax', 'monthlyAfterTax', 'additionalAnnualAT', 'annualAfterTax']
+    },
+    hourly: {
+      edit: ['type', 'hourlyRate', 'expectedHours', 'monthlyAfterTax', 'additionalAnnualAT'],
+      view: ['type', 'hourlyRate', 'annualPreTax', 'monthlyPreTax', 'monthlyAfterTax', 'additionalAnnualAT', 'annualAfterTax']
+    }
+  };
+
+  const columns = columnSets[type]?.[mode] || columnSets.salary[mode];
+  return columns.map(key => baseColumns[key]).filter(Boolean);
 };
 
-const getViewModeColumns = (type) => {
-  const baseViewColumns = [
-    { key: "type", label: "Type" }
-  ];
-
-  if (type === "salary") {
-    return [
-      ...baseViewColumns,
-      {
-        key: "annualPreTax",
-        label: "Annual (PT)",
-        title: "Annual Pre-tax: Income before taxes and deductions",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "monthlyPreTax", 
-        label: "Monthly (PT)",
-        title: "Monthly Pre-tax: Calculated monthly income before taxes",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "monthlyAfterTax",
-        label: "Monthly (AT)", 
-        title: "Monthly After-tax: Take-home pay after taxes and deductions",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "additionalAnnualAT",
-        label: "Add. Annual (AT)", 
-        title: "Additional Annual After-tax: Bonuses, side income, or other annual income",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "annualAfterTax",
-        label: "Total Annual (AT)",
-        title: "Total Annual After-tax: Monthly income × 12 + additional annual income", 
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-    ];
-  } else {
-    return [
-      ...baseViewColumns,
-      { 
-        key: "hourlyRate", 
-        label: "Hourly Rate",
-        formatter: (value) => `$${(value || 0).toFixed(2)}/hr`
-      },
-      {
-        key: "annualPreTax",
-        label: "Annual (PT)",
-        title: "Annual Pre-tax: Calculated yearly income before taxes",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "monthlyPreTax",
-        label: "Monthly (PT)", 
-        title: "Monthly Pre-tax: Calculated monthly income before taxes",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "monthlyAfterTax",
-        label: "Monthly (AT)",
-        title: "Monthly After-tax: Take-home pay after taxes and deductions", 
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "additionalAnnualAT",
-        label: "Add. Annual (AT)", 
-        title: "Additional Annual After-tax: Bonuses, side income, or other annual income",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-      {
-        key: "annualAfterTax",
-        label: "Total Annual (AT)",
-        title: "Total Annual After-tax: (Hourly rate × hours × 12) + additional annual income",
-        formatter: (value) => `$${(value || 0).toLocaleString()}`
-      },
-    ];
-  }
+// Simplified main function
+export const createIncomeColumns = (type, editMode) => {
+  return createColumnConfig(type, editMode ? 'edit' : 'view');
 };
 
+// Expense column configuration
 export const createExpenseColumns = (editMode) => {
-  const baseColumns = [
-    { key: "name", label: "Expense", className: "descriptionColumn" },
-    { key: "category", label: "Category", className: "categoryColumn" },
-    { key: "cost", label: "Cost", className: "amountColumn" },
-  ];
+  const baseExpenseColumns = {
+    name: {
+      key: "name",
+      label: "Expense Name",
+      type: "text",
+      placeholder: "Enter expense name",
+      required: true
+    },
+    cost: {
+      key: "cost",
+      label: "Monthly Cost",
+      type: "number",
+      placeholder: "0.00",
+      step: "0.01",
+      min: "0",
+      formatter: formatCurrency
+    },
+    category: {
+      key: "category",
+      label: "Category",
+      type: "select",
+      options: [
+        { value: "required", label: "Required" },
+        { value: "flexible", label: "Flexible" },
+        { value: "non-essential", label: "Non-essential" }
+      ]
+    },
+    actions: {
+      key: "actions",
+      label: "Actions",
+      type: "actions"
+    }
+  };
 
-  if (editMode) {
-    return [
-      ...baseColumns,
-      { key: "actions", label: "Actions", className: "actionsColumn" }
-    ];
-  }
+  const columnSets = {
+    edit: ['name', 'cost', 'category', 'actions'],
+    view: ['name', 'cost', 'category']
+  };
 
-  return baseColumns;
+  const columns = columnSets[editMode ? 'edit' : 'view'];
+  return columns.map(key => baseExpenseColumns[key]).filter(Boolean);
 };

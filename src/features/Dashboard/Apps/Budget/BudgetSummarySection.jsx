@@ -1,6 +1,7 @@
 // src/features/Dashboard/Apps/Budget/BudgetSummarySection.jsx
 import React from "react";
 import Section from "../../../../components/ui/Section/Section";
+import { useSectionBorder } from "../../../../hooks/useSectionBorder";
 import budgetStyles from "./budget.module.css";
 
 const BudgetSummarySection = ({ budget, smallApp }) => {
@@ -17,11 +18,18 @@ const BudgetSummarySection = ({ budget, smallApp }) => {
   const expenseRate =
     monthlyIncomeAT > 0 ? (monthlyExpenses / monthlyIncomeAT) * 100 : 0;
 
+  // Use the border hook to determine border style based on discretionary income
+  const borderProps = useSectionBorder({
+    borderStatus: monthlyDiscretionary >= 0 ? "positive" : "negative",
+    borderThickness: "normal",
+  });
+
   return (
     <Section
-      title="Budget Summary"
-      className={`${budgetStyles.summarySection} ${budgetStyles.compactSection}`}
+      header={<h3>Budget Summary</h3>}
+      {...borderProps}
       smallApp={smallApp}
+      className={`${budgetStyles.summarySection} ${budgetStyles.compactSection}`}
     >
       <div className={budgetStyles.accountingTable}>
         <table

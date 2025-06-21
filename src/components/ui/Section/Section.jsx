@@ -9,21 +9,32 @@ const Section = ({
   className = "",
   style,
   contentStyle,
-  smallApp, // Extract smallApp to prevent it from being spread to DOM
+  border = "primary", // 'primary', 'success', 'warning', 'error', 'info', 'secondary', 'neutral'
+  noBorderLeft = false,
   ...props
-}) => (
-  <section
-    className={`${styles.section} ${className}`}
-    style={style}
-    {...props}
-  >
-    {(title || header) && (
-      <div className={styles.sectionHeader}>{header || <h3>{title}</h3>}</div>
-    )}
-    <div className={styles.sectionContent} style={contentStyle}>
-      {children}
-    </div>
-  </section>
-);
+}) => {
+  // Map border prop to class
+  const borderClass =
+    border && !noBorderLeft
+      ? styles[`border${border.charAt(0).toUpperCase() + border.slice(1)}`] ||
+        ""
+      : "";
+  const noBorderClass = noBorderLeft ? styles.noBorderLeft : "";
+
+  return (
+    <section
+      className={`${styles.section} ${borderClass} ${noBorderClass} ${className}`}
+      style={style}
+      {...props}
+    >
+      {(title || header) && (
+        <div className={styles.sectionHeader}>{header || <h3>{title}</h3>}</div>
+      )}
+      <div className={styles.sectionContent} style={contentStyle}>
+        {children}
+      </div>
+    </section>
+  );
+};
 
 export default Section;

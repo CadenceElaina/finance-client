@@ -5,8 +5,9 @@ import EditableTableHeader from "../../../../components/ui/Table/EditableTableHe
 import ControlPanel from "../../../../components/ui/ControlPanel/ControlPanel";
 import BudgetFormInput from "../../../../components/ui/Form/BudgetFormInput";
 import BudgetFormSelect from "../../../../components/ui/Form/BudgetFormSelect";
-import { useEditableTable } from "../../../../hooks/useEditableTable";
-import { useIncomeSection } from "../../../../hooks/useIncomeCalculations";
+import { useBudgetForm } from "../../../../hooks/useBudgetForm";
+import { useIncomeCalculations } from "../../../../hooks/useIncomeCalculations";
+import { DEFAULT_DEMO_BUDGET } from "../../../../utils/constants";
 import budgetStyles from "./budget.module.css";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
 
@@ -16,33 +17,84 @@ const INCOME_TYPE_OPTIONS = [
 ];
 
 const IncomeSection = ({ budget, smallApp }) => {
-  const { tableData, saveIncome, clearIncome } = useIncomeSection(budget);
+  const incomeData = budget?.income || {};
+  const calculations = useIncomeCalculations(incomeData);
+
+  // Create standardized income data array for form handling
+  const tableData = [
+    {
+      id: "income-1",
+      type: incomeData.type || "salary",
+      hourlyRate: incomeData.hourlyRate || "",
+      expectedHours: incomeData.expectedAnnualHours || 2080,
+      annualPreTax: incomeData.annualPreTax || "",
+      monthlyAfterTax: incomeData.monthlyAfterTax || "",
+      additionalAnnualAT: incomeData.additionalAnnualAT || "",
+      ...calculations,
+    },
+  ];
 
   const {
     editMode,
     editRows,
     enterEditMode,
     cancelEdit,
-    exitEditMode,
+    handleSave: formSave,
+    handleClear: formClear,
+    handleResetToDemo,
     updateEditRow,
-  } = useEditableTable(tableData);
+  } = useBudgetForm("income", tableData[0]);
 
   const displayData = editMode ? editRows : tableData;
   const row = displayData[0] || {};
   const currentType = row.type || "salary";
 
   const handleSave = () => {
-    saveIncome(editRows);
-    exitEditMode();
+    const editRow = editRows[0];
+    if (!editRow) return;
+
+    // Create the income object structure that matches the budget's income format
+    const incomeUpdate = {
+      type: editRow.type,
+      monthlyAfterTax: parseFloat(editRow.monthlyAfterTax) || 0,
+      additionalAnnualAT: parseFloat(editRow.additionalAnnualAT) || 0,
+    };
+
+    if (editRow.type === "hourly") {
+      incomeUpdate.hourlyRate = parseFloat(editRow.hourlyRate) || 0;
+      incomeUpdate.expectedAnnualHours =
+        parseFloat(editRow.expectedHours) || 2080;
+      // For hourly, calculate annualPreTax from hourly rate and hours
+      incomeUpdate.annualPreTax =
+        incomeUpdate.hourlyRate * incomeUpdate.expectedAnnualHours;
+    } else {
+      incomeUpdate.annualPreTax = parseFloat(editRow.annualPreTax) || 0;
+      // Clear hourly fields for salary type
+      incomeUpdate.hourlyRate = null;
+      incomeUpdate.expectedAnnualHours = null;
+    }
+
+    return formSave(incomeUpdate, "Income saved successfully!");
   };
 
   const handleClear = () => {
-    clearIncome();
-    exitEditMode();
+    const clearedIncome = {
+      type: "salary",
+      annualPreTax: 0,
+      monthlyAfterTax: 0,
+      additionalAnnualAT: 0,
+      hourlyRate: null,
+      expectedAnnualHours: null,
+    };
+    formClear(clearedIncome, "Income cleared!");
+  };
+
+  const handleReset = () => {
+    handleResetToDemo(DEFAULT_DEMO_BUDGET.income, "Income reset to demo data!");
   };
 
   if (!editMode) {
-    // View mode - display as cards (without income type card)
+    // View mode - display as cards
     return (
       <Section
         header={
@@ -254,7 +306,7 @@ const IncomeSection = ({ budget, smallApp }) => {
         onSave={handleSave}
         saveLabel="Save Income"
         onClear={handleClear}
-        resetLabel="Clear Income"
+        onReset={handleReset}
       />
     </Section>
   );

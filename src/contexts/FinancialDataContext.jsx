@@ -1,34 +1,23 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useMemo,
-} from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-import { useToast } from "../hooks/useToast"; // Updated import
+import { useToast } from "../hooks/useToast";
 import {
   loadFinancialData,
   saveFinancialDataUtil,
 } from "../utils/dataPersistence";
-import { calculateBudgetFields } from "../utils/calculations/budgetCalculations";
-import { syncDebtPaymentsToExpenses } from "../utils/debtPaymentSync";
 import {
   DEMO_ACCOUNTS,
   DEFAULT_DEMO_BUDGET,
   DEMO_PORTFOLIOS,
 } from "../utils/constants";
-import {
-  getLocalData,
-  saveLocalData,
-  clearLocalData,
-} from "../utils/localStorageUtils";
+import { DebtSyncService } from "../services/debtSyncService";
+import { enrichBudgetWithCalculations } from "../utils/calculations/budgetCalculations";
 
 const FinancialDataContext = createContext();
 
 export const FinancialDataProvider = ({ children }) => {
   const { user, token } = useAuth();
-  const { showNotification } = useToast(); // Updated hook usage
+  const { showNotification } = useToast();
   const [persistence, setPersistence] = useState(
     () =>
       localStorage.getItem("financialDataPersistence") ||
@@ -68,7 +57,7 @@ export const FinancialDataProvider = ({ children }) => {
     try {
       localStorage.setItem(
         "dismissedGoalNotifications",
-        JSON.stringify([...dismissedNotificationIds])
+        JSON.stringify(dismissedNotificationIds)
       );
     } catch (error) {
       console.error("Error saving dismissed notifications:", error);
@@ -78,57 +67,30 @@ export const FinancialDataProvider = ({ children }) => {
   // Load data on mount or when user/persistence changes
   useEffect(() => {
     async function load() {
-      let loaded = null;
-      if (user && persistence === "server") {
-        loaded = null; // TODO: fetch from server
+      try {
+        const loaded = await loadFinancialData({ user, token, persistence });
+
+        // Enrich budget with calculations on load
+        const enrichedData = {
+          ...loaded,
+          budget: enrichBudgetWithCalculations(loaded.budget),
+        };
+
+        setData(enrichedData);
+        updatePreviousAccountValues(enrichedData.accounts);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Failed to load financial data:", error);
+        showNotification({
+          type: "error",
+          title: "Load Error",
+          message:
+            "Failed to load your financial data. Using demo data instead.",
+        });
       }
-      if (!loaded && persistence === "local") {
-        loaded = getLocalData() || null;
-      }
-
-      const finalData =
-        loaded && loaded.budget
-          ? {
-              ...loaded,
-              budget: calculateBudgetFields(loaded.budget),
-              portfolios: loaded.portfolios || DEMO_PORTFOLIOS,
-              goals: loaded.goals || [],
-            }
-          : {
-              accounts: DEMO_ACCOUNTS,
-              budget: calculateBudgetFields(DEFAULT_DEMO_BUDGET),
-              portfolios: DEMO_PORTFOLIOS,
-              goals: [],
-            };
-
-      setData(finalData);
-
-      // Initialize previous account values immediately after data load
-      const accountMap = {};
-      finalData.accounts.forEach((acc) => {
-        accountMap[acc.id] = acc.value || 0;
-      });
-      setPreviousAccountValues(accountMap);
-
-      // Clear notifications when new data is loaded
-      setAccountChangeNotifications([]);
-      setIsInitialized(true);
-
-      /*   console.log("FinancialDataContext initialized:", {
-        accounts: finalData.accounts.length,
-        goals: finalData.goals.length,
-        accountValues: accountMap,
-      }); */
     }
     load();
   }, [user, token, persistence]);
-
-  // Update the createNotificationId function to include account values
-  const createNotificationId = (goalId, accountId, oldValue, newValue) => {
-    return `${goalId}-${accountId}-${oldValue.toFixed(2)}-${newValue.toFixed(
-      2
-    )}`;
-  };
 
   // Helper function to update previous account values
   const updatePreviousAccountValues = (accounts) => {
@@ -137,291 +99,158 @@ export const FinancialDataProvider = ({ children }) => {
       accountMap[acc.id] = acc.value || 0;
     });
     setPreviousAccountValues(accountMap);
-    /*   console.log("Updated previous account values:", accountMap); */
   };
 
   // Helper function to check for account changes that should trigger goal notifications
   const checkAccountChangesForGoals = (accounts, goals, previousValues) => {
-    if (!goals || goals.length === 0) return;
-    if (!accounts || accounts.length === 0) return;
-    if (!previousValues || Object.keys(previousValues).length === 0) return;
+    if (!isInitialized || goals.length === 0) return [];
 
-    const newNotifications = [];
+    const notifications = [];
+    const now = new Date().toISOString().split("T")[0];
 
     accounts.forEach((account) => {
-      const accountId = account.id;
-      const currentValue = account.value || 0;
-      const previousValue = previousValues[accountId] || 0;
+      const oldValue = previousValues[account.id] || 0;
+      const newValue = account.value || 0;
+      const valueChange = newValue - oldValue;
 
-      // Only process if the account value has increased
-      if (currentValue > previousValue) {
-        const valueIncrease = currentValue - previousValue;
+      if (Math.abs(valueChange) < 0.01) return;
 
-        // Find goals that could be funded by this account
-        const eligibleGoals = goals.filter(
-          (goal) =>
-            goal.status === "active" &&
-            goal.fundingType === "account" &&
-            goal.fundingAccountId === accountId &&
-            goal.currentAmount < goal.targetAmount
+      const linkedGoals = goals.filter(
+        (goal) =>
+          goal.fundingAccountId === account.id &&
+          goal.status === "active" &&
+          goal.fundingType === "account"
+      );
+
+      linkedGoals.forEach((goal) => {
+        const notificationId = createNotificationId(
+          goal.id,
+          account.id,
+          oldValue,
+          newValue
         );
 
-        eligibleGoals.forEach((goal) => {
-          const notificationId = createNotificationId(
-            goal.id,
-            accountId,
-            previousValue,
-            currentValue
-          );
-
-          // Check if this notification was already dismissed
-          if (dismissedNotificationIds.includes(notificationId)) {
-            return;
-          }
-
-          // Check if we already have a notification for this goal-account pair
-          const existingNotification = accountChangeNotifications.find(
-            (notification) =>
-              notification.goal.id === goal.id &&
-              notification.accountId === accountId
-          );
-
-          if (!existingNotification) {
-            newNotifications.push({
-              id: notificationId,
-              goal,
-              accountId,
-              accountName: account.name,
-              oldValue: previousValue,
-              newValue: currentValue,
-              valueIncrease,
-              timestamp: Date.now(),
-            });
-          }
-        });
-      }
+        if (!dismissedNotificationIds.includes(notificationId)) {
+          notifications.push({
+            id: notificationId,
+            goalId: goal.id,
+            goal,
+            accountId: account.id,
+            accountName: account.name,
+            oldValue,
+            newValue,
+            valueChange,
+            dateCreated: now,
+          });
+        }
+      });
     });
 
-    if (newNotifications.length > 0) {
-      setAccountChangeNotifications((prev) => [...prev, ...newNotifications]);
-    }
+    return notifications;
   };
 
   // Helper function to detect debt payment changes
   const detectDebtPaymentChanges = (originalExpenses, syncedExpenses) => {
-    const changes = [];
-
-    // Check for new debt payment expenses
-    syncedExpenses.forEach((expense) => {
-      if (expense.isDebtPayment) {
-        const originalExpense = originalExpenses.find(
-          (exp) => exp.id === expense.id
-        );
-        if (!originalExpense) {
-          // New debt payment added
-          changes.push({
-            type: "added",
-            accountName: expense.name.replace(" Payment", ""),
-            amount: expense.cost,
-            expenseId: expense.id,
-          });
-        } else if (originalExpense.cost !== expense.cost) {
-          // Debt payment amount changed
-          changes.push({
-            type: "updated",
-            accountName: expense.name.replace(" Payment", ""),
-            oldAmount: originalExpense.cost,
-            newAmount: expense.cost,
-            expenseId: expense.id,
-          });
-        }
-      }
-    });
-
-    // Check for removed debt payment expenses
-    originalExpenses.forEach((expense) => {
-      if (expense.isDebtPayment) {
-        const syncedExpense = syncedExpenses.find(
-          (exp) => exp.id === expense.id
-        );
-        if (!syncedExpense) {
-          // Debt payment removed
-          changes.push({
-            type: "removed",
-            accountName: expense.name.replace(" Payment", ""),
-            amount: expense.cost,
-            expenseId: expense.id,
-          });
-        }
-      }
-    });
-
-    return changes;
-  };
-
-  // Add this helper function to recalculate budget fields
-  const recalculateBudgetFields = (budgetData) => {
-    if (!budgetData) return budgetData;
-
-    const income = budgetData.income || {};
-    const expenses = budgetData.monthlyExpenses || [];
-    const totalMonthlyExpenses = expenses.reduce(
-      (acc, item) => acc + (parseFloat(item.cost) || 0),
-      0
+    return DebtSyncService.detectDebtPaymentChanges(
+      originalExpenses,
+      syncedExpenses
     );
-
-    let annualPreTax = 0;
-    let monthlyAfterTax = 0;
-
-    if (income.type === "salary") {
-      annualPreTax = income.annualPreTax || 0;
-      monthlyAfterTax = income.monthlyAfterTax || 0;
-    } else if (income.type === "hourly") {
-      annualPreTax =
-        (income.hourlyRate || 0) * (income.expectedAnnualHours || 0);
-      monthlyAfterTax = income.monthlyAfterTax || 0;
-    }
-
-    const annualAfterTax =
-      monthlyAfterTax * 12 +
-      (income.bonusAfterTax || 0) +
-      (income.additionalIncomeAfterTax || 0);
-
-    const monthlyPreTax = annualPreTax / 12;
-    const discretionaryIncome = monthlyAfterTax - totalMonthlyExpenses;
-
-    return {
-      ...budgetData,
-      totalMonthlyExpenses,
-      annualPreTax,
-      monthlyAfterTax,
-      annualAfterTax,
-      monthlyPreTax,
-      discretionaryIncome,
-    };
   };
 
-  // Save data to correct place - Updated to check for account changes BEFORE saving
+  // Enhanced save data function with debt sync service
   const saveData = async (newData) => {
-    const dataToSave = newData || data;
-
-    // Check if this is a manual debt payment removal from expenses
-    const originalExpenses = data.budget?.monthlyExpenses || [];
-    const newExpenses = dataToSave.budget?.monthlyExpenses || [];
-
-    // Find manually removed debt payments
-    const manuallyRemovedDebtPayments = originalExpenses.filter(
-      (originalExp) =>
-        originalExp.isDebtPayment &&
-        !newExpenses.find((newExp) => newExp.id === originalExp.id)
-    );
-
-    // If debt payments were manually removed, update the corresponding accounts
-    let finalData = { ...dataToSave };
-    if (manuallyRemovedDebtPayments.length > 0) {
-      const updatedAccounts = finalData.accounts.map((account) => {
-        const removedPayment = manuallyRemovedDebtPayments.find(
-          (payment) => payment.linkedToAccountId === account.id
-        );
-
-        if (removedPayment) {
-          return {
-            ...account,
-            monthlyPayment: 0,
-          };
-        }
-        return account;
-      });
-
-      finalData = {
-        ...finalData,
-        accounts: updatedAccounts,
-      };
-    }
-
-    // Now do the normal debt sync (this will handle additions and updates)
-    const syncedExpenses = syncDebtPaymentsToExpenses(
-      finalData.accounts || [],
-      finalData.budget?.monthlyExpenses || []
-    );
-
-    const budgetWithSyncedExpenses = {
-      ...finalData.budget,
-      monthlyExpenses: syncedExpenses,
-    };
-
-    const calculatedBudget = calculateBudgetFields(budgetWithSyncedExpenses);
-    const finalDataWithCalculations = {
-      ...finalData,
-      budget: calculatedBudget,
-    };
-
-    // Check for account changes BEFORE saving
-    const previousValues = { ...previousAccountValues };
-    updatePreviousAccountValues(finalDataWithCalculations.accounts || []);
-
     try {
-      // Recalculate budget fields before saving
-      if (finalDataWithCalculations.budget) {
-        finalDataWithCalculations.budget = recalculateBudgetFields(
-          finalDataWithCalculations.budget
-        );
-      }
+      // Create enriched data with calculations
+      const enrichedData = {
+        ...newData,
+        budget: enrichBudgetWithCalculations(newData.budget),
+      };
 
+      // Check for account changes that should trigger goal notifications BEFORE saving
+      const accountNotifications = checkAccountChangesForGoals(
+        enrichedData.accounts,
+        enrichedData.goals,
+        previousAccountValues
+      );
+
+      // Detect debt payment sync needs
+      const syncedExpenses = DebtSyncService.syncAccountsToExpenses(
+        enrichedData.accounts,
+        enrichedData.budget.monthlyExpenses
+      );
+
+      const debtChanges = detectDebtPaymentChanges(
+        enrichedData.budget.monthlyExpenses,
+        syncedExpenses
+      );
+
+      // Apply synced expenses to budget
+      const finalData = {
+        ...enrichedData,
+        budget: {
+          ...enrichedData.budget,
+          monthlyExpenses: syncedExpenses,
+        },
+      };
+
+      // Re-enrich budget after expense sync
+      finalData.budget = enrichBudgetWithCalculations(finalData.budget);
+
+      // Save to persistence layer
       await saveFinancialDataUtil({
         user,
         token,
         persistence,
-        data: finalDataWithCalculations,
+        data: finalData,
       });
-      setData(finalDataWithCalculations);
-      setIsInitialized(true);
 
-      // Remove automatic debt sync notifications since components handle them now
-      // showDebtSyncNotification(debtPaymentChanges); // REMOVED
+      // Update state
+      setData(finalData);
+      updatePreviousAccountValues(finalData.accounts);
 
-      // Check for goal linking after successful save
-      checkAccountChangesForGoals(
-        finalDataWithCalculations.accounts || [],
-        finalDataWithCalculations.goals || [],
-        previousValues
-      );
+      // Add any new account change notifications
+      if (accountNotifications.length > 0) {
+        setAccountChangeNotifications((prev) => [
+          ...prev,
+          ...accountNotifications,
+        ]);
+      }
+
+      // Show debt sync notification if there were changes
+      if (debtChanges.length > 0) {
+        showDebtSyncNotification(debtChanges);
+      }
     } catch (error) {
       console.error("Failed to save data:", error);
       showNotification({
         type: "error",
-        title: "Save Failed",
-        message: "Failed to save data. Please try again.",
+        title: "Save Error",
+        message: "Failed to save your data. Please try again.",
       });
     }
   };
 
   // Helper function to show debt sync notification using toast
   const showDebtSyncNotification = (changes) => {
-    let message = "Budget automatically updated with debt payment changes:\n\n";
-
-    changes.forEach((change) => {
-      switch (change.type) {
-        case "added":
-          message += `• Added: ${change.accountName} payment ($${change.amount}/month)\n`;
-          break;
-        case "updated":
-          message += `• Updated: ${change.accountName} payment ($${change.oldAmount} → $${change.newAmount}/month)\n`;
-          break;
-        case "removed":
-          message += `• Removed: ${change.accountName} payment ($${change.amount}/month)\n`;
-          break;
-      }
-    });
-
-    message += "\nYou can adjust these in the Budget app if needed.";
+    const changesSummary = changes
+      .map(
+        (change) =>
+          `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
+      )
+      .join("\n");
 
     showNotification({
-      type: "info",
-      title: "Budget Updated",
-      message,
-      duration: 8000,
+      type: "warning",
+      title: "Debt Payments Synchronized",
+      message: `Budget expenses updated to match account payments:\n${changesSummary}`,
     });
+  };
+
+  // Update the createNotificationId function to include account values
+  const createNotificationId = (goalId, accountId, oldValue, newValue) => {
+    return `${goalId}-${accountId}-${oldValue.toFixed(2)}-${newValue.toFixed(
+      2
+    )}`;
   };
 
   // Apply goal update from account change notification - FIXED VERSION
@@ -463,7 +292,7 @@ export const FinancialDataProvider = ({ children }) => {
     };
 
     // For goal updates, we don't want to trigger new notifications, so we update directly
-    const calculatedBudget = calculateBudgetFields(updatedData.budget);
+    const calculatedBudget = enrichBudgetWithCalculations(updatedData.budget);
     const finalData = { ...updatedData, budget: calculatedBudget };
 
     setData(finalData);
@@ -474,7 +303,7 @@ export const FinancialDataProvider = ({ children }) => {
     if (user && persistence === "server") {
       // TODO: save to server
     } else if (persistence === "local") {
-      saveLocalData(finalData);
+      saveFinancialDataUtil(finalData);
     }
 
     // Remove the notification and DO NOT mark it as dismissed when applying

@@ -1,50 +1,86 @@
 import React from "react";
 import styles from "./SnapshotRow.module.css";
 
-// items: [{ label, value, valueClass (optional), valueSuffix (optional) }]
-const SnapshotRow = ({ items, small }) => (
-  <div
-    className={
-      small
-        ? `${styles.snapshotRow} ${styles.snapshotRowSmall}`
-        : styles.snapshotRow
+const SnapshotRow = ({
+  items,
+  small = false,
+  variant = "default", // "default", "compact", "cards"
+  columns = "auto", // "auto", 2, 3, 4, 5
+}) => {
+  const getColumnClass = () => {
+    if (columns === "auto") return "";
+    return styles[`columns${columns}`];
+  };
+
+  const getVariantClass = () => {
+    switch (variant) {
+      case "compact":
+        return styles.compact;
+      case "cards":
+        return styles.cards;
+      default:
+        return "";
     }
-  >
-    {items.map((item, idx) => (
-      <div
-        key={item.label || idx}
-        className={
-          small
-            ? `${styles.snapshotItem} ${styles.snapshotItemSmall}`
-            : styles.snapshotItem
-        }
-      >
-        <span
-          className={
-            small
-              ? `${styles.snapshotLabel} ${styles.snapshotLabelSmall}`
-              : styles.snapshotLabel
-          }
+  };
+
+  return (
+    <div
+      className={`
+        ${styles.snapshotRow} 
+        ${small ? styles.snapshotRowSmall : ""} 
+        ${getVariantClass()}
+        ${getColumnClass()}
+      `}
+    >
+      {items.map((item, idx) => (
+        <div
+          key={item.label || idx}
+          className={`
+            ${styles.snapshotItem} 
+            ${small ? styles.snapshotItemSmall : ""}
+            ${item.highlight ? styles.highlighted : ""}
+            ${item.status ? styles[item.status] : ""}
+          `}
         >
-          {item.label}
-        </span>
-        <span
-          className={
-            (item.valueClass ? styles[item.valueClass] : "") +
-            " " +
-            (small ? styles.valueSmall : styles.value)
-          }
-        >
-          {item.value}
-          {item.valueSuffix && (
-            <span style={{ marginLeft: 6, fontSize: "0.95em" }}>
-              {item.valueSuffix}
+          {item.icon && <div className={styles.snapshotIcon}>{item.icon}</div>}
+          <div className={styles.snapshotContent}>
+            <span
+              className={`
+                ${styles.snapshotLabel} 
+                ${small ? styles.snapshotLabelSmall : ""}
+              `}
+            >
+              {item.label}
             </span>
+            <div className={styles.snapshotValueWrapper}>
+              <span
+                className={`
+                  ${item.valueClass ? styles[item.valueClass] : ""} 
+                  ${small ? styles.valueSmall : styles.value}
+                  ${item.emphasized ? styles.emphasized : ""}
+                `}
+              >
+                {item.value}
+              </span>
+              {item.valueSuffix && (
+                <span className={styles.valueSuffix}>{item.valueSuffix}</span>
+              )}
+            </div>
+            {item.subtext && (
+              <span className={styles.snapshotSubtext}>{item.subtext}</span>
+            )}
+          </div>
+          {item.trend && (
+            <div className={`${styles.trendIndicator} ${styles[item.trend]}`}>
+              {item.trend === "up" && "↗"}
+              {item.trend === "down" && "↘"}
+              {item.trend === "stable" && "→"}
+            </div>
           )}
-        </span>
-      </div>
-    ))}
-  </div>
-);
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default SnapshotRow;
