@@ -296,8 +296,9 @@ select,
 }
 
 .categoryTag.nonessential {
-    background-color: var(--status-success);
-    color: var(--text-on-primary);
+  background: rgba(var(--status-success-rgb), 0.1);
+  color: var(--status-success);
+  border: 1px solid rgba(var(--status-success-rgb), 0.3);
 }
 
 /* Professional synced indicator - only for view mode */
@@ -338,12 +339,12 @@ select,
 }
 
 .categoryBadge.nonessential {
-  background-color: rgba(40, 167, 69, 0.1);
+  background: rgba(var(--status-success-rgb), 0.1);
   color: var(--status-success);
-  border-color: rgba(40, 167, 69, 0.3);
+  border: 1px solid rgba(var(--status-success-rgb), 0.3);
 }
 
-/* Category-specific select borders for edit mode - FIXED */
+/* Category-specific select borders for edit mode */
 .tableSelect.required {
   border-left: 3px solid var(--status-danger) !important;
   background-color: rgba(220, 53, 69, 0.02);
@@ -355,19 +356,16 @@ select,
 }
 
 .tableSelect.nonessential {
-  border-left: 3px solid var(--status-success) !important;
-  background-color: rgba(40, 167, 69, 0.02);
+  border-color: var(--status-success);
 }
 
 /* Enhanced disabled input styling - for debt payments */
-.disabledInput {
-  background-color: var(--surface-dark) !important;
-  color: var(--text-secondary) !important;
-  border-color: var(--border-light) !important;
-  cursor: not-allowed !important;
+/* .disabledInput {
+  background: var(--surface-accent);
+  color: var(--text-tertiary);
+  cursor: not-allowed;
   opacity: 0.7;
-  font-style: italic;
-}
+} */
 
 /* Ensure focus states work properly with category colors */
 .tableSelect:focus.required {
@@ -381,6 +379,30 @@ select,
 }
 
 .tableSelect:focus.nonessential {
-  border-left-color: var(--status-success) !important;
-  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+  border-color: var(--status-success);
+  box-shadow: 0 0 0 2px rgba(var(--status-success-rgb), 0.2);
+}
+
+/* Style for calculated/read-only fields in tables */
+.calculatedField {
+  background: var(--surface-dark) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-light) !important;
+  cursor: not-allowed !important;
+  font-style: italic;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.calculatedField:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Add better spacing for income table */
+.tableInput[placeholder="25.00"],
+.tableInput[placeholder="2080"],
+.tableInput[placeholder="75000"],
+.tableInput[placeholder="4100"] {
+  text-align: right;
 }

@@ -259,6 +259,48 @@ export const FinancialDataProvider = ({ children }) => {
     return changes;
   };
 
+  // Add this helper function to recalculate budget fields
+  const recalculateBudgetFields = (budgetData) => {
+    if (!budgetData) return budgetData;
+
+    const income = budgetData.income || {};
+    const expenses = budgetData.monthlyExpenses || [];
+    const totalMonthlyExpenses = expenses.reduce(
+      (acc, item) => acc + (parseFloat(item.cost) || 0),
+      0
+    );
+
+    let annualPreTax = 0;
+    let monthlyAfterTax = 0;
+
+    if (income.type === "salary") {
+      annualPreTax = income.annualPreTax || 0;
+      monthlyAfterTax = income.monthlyAfterTax || 0;
+    } else if (income.type === "hourly") {
+      annualPreTax =
+        (income.hourlyRate || 0) * (income.expectedAnnualHours || 0);
+      monthlyAfterTax = income.monthlyAfterTax || 0;
+    }
+
+    const annualAfterTax =
+      monthlyAfterTax * 12 +
+      (income.bonusAfterTax || 0) +
+      (income.additionalIncomeAfterTax || 0);
+
+    const monthlyPreTax = annualPreTax / 12;
+    const discretionaryIncome = monthlyAfterTax - totalMonthlyExpenses;
+
+    return {
+      ...budgetData,
+      totalMonthlyExpenses,
+      annualPreTax,
+      monthlyAfterTax,
+      annualAfterTax,
+      monthlyPreTax,
+      discretionaryIncome,
+    };
+  };
+
   // Save data to correct place - Updated to check for account changes BEFORE saving
   const saveData = async (newData) => {
     const dataToSave = newData || data;
@@ -319,6 +361,13 @@ export const FinancialDataProvider = ({ children }) => {
     updatePreviousAccountValues(finalDataWithCalculations.accounts || []);
 
     try {
+      // Recalculate budget fields before saving
+      if (finalDataWithCalculations.budget) {
+        finalDataWithCalculations.budget = recalculateBudgetFields(
+          finalDataWithCalculations.budget
+        );
+      }
+
       await saveFinancialDataUtil({
         user,
         token,

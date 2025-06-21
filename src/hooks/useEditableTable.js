@@ -1,20 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export const useEditableTable = (initialData = []) => {
   const [editMode, setEditMode] = useState(false);
-  const [editRows, setEditRows] = useState(initialData);
+  const [editRows, setEditRows] = useState([]);
+  
+  // Use ref to track the previous initialData to avoid infinite loops
+  const prevInitialDataRef = useRef();
+  const initialDataStringified = JSON.stringify(initialData);
 
-  // Sync editRows with external data when not in edit mode OR when initialData changes
+  // Only sync when NOT in edit mode AND when initialData actually changes
   useEffect(() => {
-    if (!editMode) {
-      setEditRows(initialData);
+    const prevStringified = JSON.stringify(prevInitialDataRef.current);
+    
+    if (!editMode && initialDataStringified !== prevStringified) {
+      setEditRows([...initialData]);
+      prevInitialDataRef.current = initialData;
     }
-  }, [initialData, editMode]);
+  }, [editMode, initialDataStringified, initialData]);
 
-  // Also sync when initialData changes even in edit mode (for real-time updates)
+  // Initialize editRows on mount
   useEffect(() => {
-    setEditRows(initialData);
-  }, [initialData]);
+    if (prevInitialDataRef.current === undefined) {
+      setEditRows([...initialData]);
+      prevInitialDataRef.current = initialData;
+    }
+  }, []); // Only run on mount
 
   const enterEditMode = () => {
     setEditRows([...initialData]); // Create a copy to avoid mutations

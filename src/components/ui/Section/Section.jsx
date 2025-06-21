@@ -1,4 +1,4 @@
-// src/components/ui/Section/Section.jsx
+// src/components/ui/Section/Section.jsx s
 import React from "react";
 import styles from "./Section.module.css";
 
@@ -9,6 +9,7 @@ const Section = ({
   className = "",
   style,
   contentStyle,
+  smallApp, // Extract smallApp to prevent it from being spread to DOM
   ...props
 }) => (
   <section

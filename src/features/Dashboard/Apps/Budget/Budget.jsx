@@ -1,11 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import BudgetOverviewWrapper from "./BudgetOverviewWrapper";
-import IncomeTab from "./IncomeTab";
-import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
-import budgetStyles from "./budget.module.css"; // Renamed to budgetStyles for consistency
+import budgetStyles from "./budget.module.css";
 import { getAppSize } from "../../../../utils/getAppSize";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
-import BudgetChartsTab from "./BudgetChartsTab";
 
 const Budget = () => {
   const containerRef = useRef(null);
@@ -13,9 +10,6 @@ const Budget = () => {
     width: 0,
     height: 0,
   });
-  const { data, updateIncome, addExpense, updateExpense, removeExpense } =
-    useFinancialData();
-  const budget = data.budget;
 
   useEffect(() => {
     const updateSize = () => {
@@ -51,63 +45,71 @@ const Budget = () => {
   const smallApp = appSize === "small";
   const largeApp = appSize === "large";
 
-  const [activeMainTabId, setActiveMainTabId] = useState("budget");
-
-  const tabs = [
-    {
-      id: "budget",
-      label: "Overview",
-      innerTabs: [
-        { id: "showAll", label: "All", component: () => null },
-        { id: "summary", label: "Summary", component: () => null },
-        { id: "expenses", label: "Expenses", component: () => null },
-      ],
-      component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
-        <BudgetOverviewWrapper
-          smallApp={flexTabsSmallApp}
-          activeInnerTabId={activeInnerTabId}
-        />
-      ),
-    },
-    {
-      id: "charts",
-      label: "Charts",
-      component: ({ smallApp: flexTabsSmallApp }) => (
-        <BudgetChartsTab
-          expenses={budget.monthlyExpenses}
-          smallApp={flexTabsSmallApp}
-        />
-      ),
-    },
-    {
-      id: "income",
-      label: "Income",
-      component: () => <IncomeTab />,
-    },
-  ];
+  // For small apps, we can still use the inner tab selection for different views
+  const [activeInnerTabId, setActiveInnerTabId] = useState("showAll");
 
   return (
     <div
       ref={containerRef}
       className={`
-                ${budgetStyles.budgetAppContainer}
-                ${smallApp ? "smallApp" : ""}
-                ${largeApp ? "largeApp" : ""}
-            `}
+        ${budgetStyles.budgetAppContainer}
+        ${smallApp ? "smallApp" : ""}
+        ${largeApp ? "largeApp" : ""}
+      `}
     >
-      <FlexibleTabs
-        tabs={tabs}
-        activeTabId={activeMainTabId}
-        onTabChange={setActiveMainTabId}
-        smallApp={smallApp}
-        largeApp={largeApp}
-        className={`
-                    ${budgetStyles.budgetAppContainer}
-                    ${smallApp ? "smallApp" : ""}
-                    ${largeApp ? "largeApp" : ""}
-                `}
-        contentClassName={budgetStyles.budgetTabContent}
-      />
+      {smallApp ? (
+        // Small app: Show simple button navigation for different views
+        <div className={budgetStyles.budgetAppContent}>
+          <div className={budgetStyles.smallAppNav}>
+            <button
+              className={`${budgetStyles.navButton} ${
+                activeInnerTabId === "showAll" ? budgetStyles.active : ""
+              }`}
+              onClick={() => setActiveInnerTabId("showAll")}
+            >
+              All
+            </button>
+            <button
+              className={`${budgetStyles.navButton} ${
+                activeInnerTabId === "income" ? budgetStyles.active : ""
+              }`}
+              onClick={() => setActiveInnerTabId("income")}
+            >
+              Income
+            </button>
+            <button
+              className={`${budgetStyles.navButton} ${
+                activeInnerTabId === "expenses" ? budgetStyles.active : ""
+              }`}
+              onClick={() => setActiveInnerTabId("expenses")}
+            >
+              Expenses
+            </button>
+            <button
+              className={`${budgetStyles.navButton} ${
+                activeInnerTabId === "summary" ? budgetStyles.active : ""
+              }`}
+              onClick={() => setActiveInnerTabId("summary")}
+            >
+              Chart
+            </button>
+          </div>
+          <div className={budgetStyles.budgetTabContent}>
+            <BudgetOverviewWrapper
+              smallApp={smallApp}
+              activeInnerTabId={activeInnerTabId}
+            />
+          </div>
+        </div>
+      ) : (
+        // Medium/Large app: Show all sections directly
+        <div className={budgetStyles.budgetTabContent}>
+          <BudgetOverviewWrapper
+            smallApp={smallApp}
+            activeInnerTabId="showAll"
+          />
+        </div>
+      )}
     </div>
   );
 };
