@@ -1,14 +1,17 @@
 // src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
-import React, { useState, useRef, useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Section from "../../../../components/ui/Section/Section";
+import Table from "../../../../components/ui/Table/Table";
 import EditableTableHeader from "../../../../components/ui/Table/EditableTableHeader";
+import BudgetFormInput from "../../../../components/ui/Form/BudgetFormInput";
+import BudgetFormSelect from "../../../../components/ui/Form/BudgetFormSelect";
 import ControlPanel from "../../../../components/ui/ControlPanel/ControlPanel";
-import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import { useEditableTable } from "../../../../hooks/useEditableTable";
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import { useToast } from "../../../../hooks/useToast";
-import budgetStyles from "./budget.module.css";
-import sectionStyles from "../../../../components/ui/Section/Section.module.css";
+import { DebtSyncService } from "../../../../services/debtSyncService"; // Re-add this import
 import tableStyles from "../../../../components/ui/Table/Table.module.css";
+import sectionStyles from "../../../../components/ui/Section/Section.module.css";
 
 const EMPTY_EXPENSE = {
   name: "",
@@ -16,10 +19,16 @@ const EMPTY_EXPENSE = {
   category: "required",
 };
 
+const CATEGORY_COLORS = {
+  required: "#dc3545", // red
+  flexible: "#ff9800", // orange
+  "non-essential": "#28a745", // green
+};
+
 const ExpensesSection = ({ budget, smallApp }) => {
   const { saveData, data, clearExpenses, resetBudgetToDemo } =
     useFinancialData();
-  const { showSuccess, showWarning, showInfo } = useToast();
+  const { showSuccess, showInfo } = useToast(); // Re-add showInfo
 
   const expenses = budget?.monthlyExpenses || [];
 
@@ -39,252 +48,298 @@ const ExpensesSection = ({ budget, smallApp }) => {
 
   // Calculate total expenses dynamically based on current edit state
   const totalExpenses = useMemo(() => {
-    const currentExpenses = editMode ? editRows : expenses;
-    return currentExpenses.reduce(
-      (sum, expense) => sum + (parseFloat(expense.cost) || 0),
+    const activeExpenses = editMode ? editRows : expenses;
+    return activeExpenses.reduce(
+      (sum, exp) => sum + (parseFloat(exp.cost) || 0),
       0
     );
   }, [editMode, editRows, expenses]);
 
+  // Sort expenses by cost descending ONLY in view mode, preserve order in edit mode
+  const displayExpenses = useMemo(() => {
+    if (editMode) {
+      // In edit mode, return editRows without any sorting
+      return editRows;
+    }
+    // In view mode, sort by cost descending
+    return [...expenses].sort(
+      (a, b) => (parseFloat(b.cost) || 0) - (parseFloat(a.cost) || 0)
+    );
+  }, [editMode, expenses, editRows]);
+
   // Handle saving from control panel
   const handleSave = () => {
-    // Find changed debt payment expenses
-    const originalDebtPayments = expenses.filter((exp) => exp.isDebtPayment);
-    const editedDebtPayments = editRows.filter((exp) => exp.isDebtPayment);
+    // Detect debt payment changes for notification
+    const debtChanges = DebtSyncService.detectDebtPaymentChanges(
+      expenses,
+      editRows
+    );
 
-    const debtPaymentChanges = [];
+    // Update the budget with new expenses
+    const updatedData = {
+      ...data,
+      budget: {
+        ...data.budget,
+        monthlyExpenses: editRows,
+      },
+    };
 
-    editedDebtPayments.forEach((editedExpense) => {
-      const originalExpense = originalDebtPayments.find(
-        (orig) => orig.id === editedExpense.id
+    // If there are debt payment changes, also update the accounts
+    if (debtChanges.length > 0) {
+      const updatedAccounts = DebtSyncService.applyChangesToAccounts(
+        data.accounts,
+        debtChanges
       );
-      if (
-        originalExpense &&
-        parseFloat(editedExpense.cost) !== parseFloat(originalExpense.cost)
-      ) {
-        debtPaymentChanges.push({
-          expenseId: editedExpense.id,
-          oldAmount: originalExpense.cost,
-          newAmount: parseFloat(editedExpense.cost),
-          expenseName: editedExpense.name,
-        });
-      }
-    });
-
-    // Update all expenses in context
-    const updatedData = { ...data };
-    updatedData.budget = { ...updatedData.budget };
-    updatedData.budget.monthlyExpenses = editRows.map((expense) => ({
-      ...expense,
-      cost: parseFloat(expense.cost) || 0,
-    }));
-
-    // Handle debt payment account updates
-    if (debtPaymentChanges.length > 0) {
-      updatedData.accounts = updatedData.accounts.map((account) => {
-        const change = debtPaymentChanges.find(
-          (change) => change.expenseId === `exp-debt-${account.id}`
-        );
-        if (change) {
-          return { ...account, monthlyPayment: change.newAmount };
-        }
-        return account;
-      });
+      updatedData.accounts = updatedAccounts;
     }
 
-    // Handle removed debt payments by setting monthlyPayment to 0
-    const removedDebtIds = originalDebtPayments
-      .filter((orig) => !editRows.find((edit) => edit.id === orig.id))
-      .map((expense) => expense.linkedToAccountId);
-
-    if (removedDebtIds.length > 0) {
-      updatedData.accounts = updatedData.accounts.map((account) => {
-        if (removedDebtIds.includes(account.id)) {
-          return { ...account, monthlyPayment: 0 };
-        }
-        return account;
-      });
-    }
-
-    // Save updated data
     saveData(updatedData);
     exitEditMode();
-
-    // Show notifications for debt payment changes
-    if (debtPaymentChanges.length > 0) {
-      showDebtSyncNotification(debtPaymentChanges);
-    }
-
-    if (removedDebtIds.length > 0) {
-      showInfo(
-        `Removed ${removedDebtIds.length} debt payment(s). The corresponding account monthly payments have been set to $0.`
-      );
-    }
-
     showSuccess("Expenses saved successfully!");
+
+    // Show debt sync notification if there are changes
+    if (debtChanges.length > 0) {
+      showDebtSyncNotification(debtChanges);
+    }
   };
 
   // Helper function to show debt sync notification using toast
   const showDebtSyncNotification = (changes) => {
-    const changeText = changes
+    const changesSummary = changes
       .map(
         (change) =>
-          `• ${change.expenseName}: $${change.oldAmount} → $${change.newAmount}`
+          `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
       )
       .join("\n");
 
-    showInfo(
-      `Debt Payment Changes:\n${changeText}\n\nCorresponding account monthly payments have been updated.`,
-      {
-        autoClose: 8000,
-      }
-    );
+    showInfo(`Debt payments updated:\n${changesSummary}`);
   };
 
   // Handle reset to demo expenses
   const handleResetToDemo = () => {
-    resetBudgetToDemo();
-    exitEditMode();
-    showSuccess("Expenses reset to demo data!");
+    if (
+      window.confirm(
+        "Reset expenses to demo data? This will overwrite your current expenses."
+      )
+    ) {
+      resetBudgetToDemo();
+      exitEditMode();
+    }
   };
 
   // Handle clear all expenses
   const handleClearAll = () => {
-    clearExpenses();
-    exitEditMode();
-    showWarning("All expenses cleared!");
-  };
-
-  const handleNewExpenseChange = (e) => {
-    const { name, value, type } = e.target;
-    setNewExpense((prev) => ({
-      ...prev,
-      [name]: type === "number" ? (value === "" ? "" : value) : value,
-    }));
+    if (
+      window.confirm(
+        "Clear all expenses? This will remove all your expense data."
+      )
+    ) {
+      clearExpenses();
+      exitEditMode();
+    }
   };
 
   const handleAddExpense = () => {
-    if (!newExpense.name.trim()) {
-      newExpenseNameRef.current?.focus();
-      return;
-    }
+    if (!newExpense.name.trim()) return;
 
-    const expenseToAdd = {
+    const expense = {
       id: `exp-${Date.now()}`,
-      name: newExpense.name.trim(),
+      name: newExpense.name,
       cost: parseFloat(newExpense.cost) || 0,
       category: newExpense.category,
     };
 
-    addEditRow(expenseToAdd);
+    addEditRow(expense);
     setNewExpense({ ...EMPTY_EXPENSE });
-    newExpenseNameRef.current?.focus();
+
+    // Focus the name input for the next expense
+    setTimeout(() => {
+      if (newExpenseNameRef.current) {
+        newExpenseNameRef.current.focus();
+      }
+    }, 0);
   };
 
   const handleRemoveExpense = (expenseId) => {
     const expenseIndex = editRows.findIndex((exp) => exp.id === expenseId);
     if (expenseIndex >= 0) {
-      // Remove without confirmation modal
       removeEditRow(expenseIndex);
     }
   };
 
-  const displayExpenses = editMode ? editRows : expenses;
+  // Category badge for view mode
+  const CategoryBadge = ({ category }) => (
+    <span
+      className={tableStyles.categoryBadge}
+      style={{
+        background: `${CATEGORY_COLORS[category] || "#888"}20`,
+        color: CATEGORY_COLORS[category] || "#888",
+        border: `1.5px solid ${CATEGORY_COLORS[category] || "#888"}`,
+        padding: "var(--space-xxs) var(--space-xs)",
+        borderRadius: "var(--border-radius-sm)",
+        fontSize: "var(--font-size-xxs)",
+        fontWeight: "var(--font-weight-medium)",
+        textTransform: "capitalize",
+      }}
+    >
+      {category === "required"
+        ? "Required"
+        : category === "flexible"
+        ? "Flexible"
+        : category === "non-essential"
+        ? "Non-essential"
+        : category}
+    </span>
+  );
+
+  // Category select for edit mode with colored border
+  const CategorySelect = ({ value, onChange, disabled }) => (
+    <BudgetFormSelect
+      options={[
+        { value: "required", label: "Required" },
+        { value: "flexible", label: "Flexible" },
+        { value: "non-essential", label: "Non-essential" },
+      ]}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      className={tableStyles.tableSelect}
+      style={{
+        borderColor: CATEGORY_COLORS[value] || "#888",
+        borderWidth: "2px",
+      }}
+    />
+  );
 
   const renderExpenseRow = (expense, index) => {
-    if (!editMode) {
-      // View mode - accounting table styling with category in middle
+    const isDebtPayment = expense.isDebtPayment;
+    const category = expense.category || "required";
+
+    if (editMode) {
       return (
-        <tr key={expense.id || index} className={budgetStyles.expenseItemRow}>
-          <td className={budgetStyles.expenseLabel}>
-            {expense.name}
-            {expense.isDebtPayment && (
-              <span className={budgetStyles.syncedIndicator}>(Synced)</span>
-            )}
+        <tr key={expense.id || index}>
+          <td>
+            <BudgetFormInput
+              column={{ type: "text", placeholder: "Expense name" }}
+              value={expense.name || ""}
+              onChange={(value) => updateEditRow(index, "name", value)}
+              disabled={false} // Always editable in edit mode
+            />
           </td>
-          <td className={budgetStyles.categoryBadge}>
-            <span
-              className={`${budgetStyles.categoryTag} ${
-                budgetStyles[
-                  expense.category === "non-essential"
-                    ? "nonessential"
-                    : expense.category
-                ]
-              }`}
+          <td>
+            <CategorySelect
+              value={category}
+              onChange={(value) => updateEditRow(index, "category", value)}
+              disabled={false} // Always editable in edit mode
+            />
+          </td>
+          <td>
+            <BudgetFormInput
+              column={{
+                type: "number",
+                placeholder: "0.00",
+                step: "0.01",
+                min: "0",
+              }}
+              value={expense.cost || ""}
+              onChange={(value) => updateEditRow(index, "cost", value)}
+              disabled={false} // Always editable in edit mode
+            />
+          </td>
+          <td>
+            {/* Always show X button for removal, regardless of debt payment status */}
+            <button
+              className={tableStyles.removeButton}
+              onClick={() => handleRemoveExpense(expense.id)}
+              title={
+                isDebtPayment
+                  ? "Remove synced expense (will reset account payment to $0)"
+                  : "Remove expense"
+              }
             >
-              {expense.category === "non-essential"
-                ? "Non-essential"
-                : expense.category.charAt(0).toUpperCase() +
-                  expense.category.slice(1)}
-            </span>
-          </td>
-          <td className={budgetStyles.expenseAmount}>
-            ${expense.cost?.toLocaleString() || "0"}
+              ✕
+            </button>
+            {/* Show sync indicator only in addition to remove button */}
+            {isDebtPayment && (
+              <span
+                className={tableStyles.syncedIndicator}
+                title="Synced with debt account"
+                style={{ marginLeft: "var(--space-xs)" }}
+              >
+                🔗
+              </span>
+            )}
           </td>
         </tr>
       );
     }
 
-    // Edit mode - table inputs with category in middle (NO SPECIAL STYLING FOR DEBT PAYMENTS)
+    // View mode
     return (
       <tr key={expense.id || index}>
         <td>
-          <input
-            type="text"
-            value={expense.name}
-            onChange={(e) => updateEditRow(index, "name", e.target.value)}
-            className={tableStyles.tableInput}
-            disabled={expense.isDebtPayment}
-            title={
-              expense.isDebtPayment
-                ? "This expense is synced with a debt account"
-                : ""
-            }
-          />
+          {expense.name}
+          {isDebtPayment && (
+            <span
+              style={{
+                fontStyle: "italic",
+                color: "var(--text-secondary)",
+                marginLeft: "var(--space-xs)",
+              }}
+            >
+              (synced)
+            </span>
+          )}
         </td>
         <td>
-          <select
-            value={expense.category}
-            onChange={(e) => updateEditRow(index, "category", e.target.value)}
-            className={`${tableStyles.tableSelect} ${
-              tableStyles[
-                expense.category === "non-essential"
-                  ? "nonessential"
-                  : expense.category
-              ]
-            }`}
-            disabled={expense.isDebtPayment}
-            title={
-              expense.isDebtPayment ? "Category is fixed for debt payments" : ""
-            }
-          >
-            <option value="required">Required</option>
-            <option value="flexible">Flexible</option>
-            <option value="non-essential">Non-essential</option>
-          </select>
+          <CategoryBadge category={category} />
         </td>
-        <td>
-          <input
-            type="number"
-            value={expense.cost}
-            onChange={(e) => updateEditRow(index, "cost", e.target.value)}
-            className={tableStyles.tableInput}
-            step="0.01"
-            min="0"
-          />
-        </td>
-        <td>
-          <button
-            onClick={() => handleRemoveExpense(expense.id)}
-            className={tableStyles.removeButton}
-            title="Remove expense"
-          >
-            ×
-          </button>
+        <td className={tableStyles.alignRight}>
+          $
+          {(expense.cost || 0).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+          })}
         </td>
       </tr>
     );
   };
+
+  // Define columns with correct order: Expense Name, Category, Cost
+  const viewColumns = [
+    { key: "name", label: "Expense Name" },
+    { key: "category", label: "Category" },
+    { key: "cost", label: "Monthly Cost" },
+  ];
+
+  const editColumns = [
+    { key: "name", label: "Expense Name" },
+    { key: "category", label: "Category" },
+    { key: "cost", label: "Monthly Cost" },
+    { key: "actions", label: "Actions" },
+  ];
+
+  const columns = editMode ? editColumns : viewColumns;
+
+  // Total row at the bottom
+  const totalRow = (
+    <tr style={{ borderTop: "2px solid var(--border-light)" }}>
+      <td style={{ fontWeight: "bold" }}></td>
+      <td style={{ fontWeight: "bold", textAlign: "right" }}>
+        Total Monthly Expenses
+      </td>
+      <td
+        className={tableStyles.alignRight}
+        style={{
+          fontWeight: "bold",
+          color: "var(--color-primary)",
+          fontSize: "var(--font-size-base)",
+        }}
+      >
+        ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+      </td>
+      {editMode && <td></td>}
+    </tr>
+  );
 
   return (
     <Section
@@ -297,111 +352,84 @@ const ExpensesSection = ({ budget, smallApp }) => {
             onCancelEdit={cancelEdit}
             editable={true}
           />
+          <div className={sectionStyles.sectionHeaderRight}>
+            <span
+              style={{
+                fontSize: "var(--font-size-xs)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Total: ${totalExpenses.toLocaleString()}
+            </span>
+          </div>
         </div>
       }
-      className={`${budgetStyles.expensesSection} ${budgetStyles.compactSection}`}
-      smallApp={smallApp}
     >
-      <div className={budgetStyles.accountingTable}>
-        <table
-          className={`${budgetStyles.accountingTableGrid} ${budgetStyles.compactTable}`}
-        >
-          <thead>
-            <tr>
-              <th className={budgetStyles.descriptionColumn}>Expense</th>
-              <th className={budgetStyles.categoryColumn}>Category</th>
-              <th className={budgetStyles.amountColumn}>Cost</th>
-              {editMode && (
-                <th className={budgetStyles.actionsColumn}>Actions</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {displayExpenses.map((expense, idx) =>
-              renderExpenseRow(expense, idx)
-            )}
-
-            {/* Add new expense row in edit mode */}
+      <Table
+        columns={columns}
+        data={displayExpenses}
+        renderRow={renderExpenseRow}
+        smallApp={smallApp}
+        editMode={editMode}
+        defaultSortColumn="cost"
+        disableSortingInEditMode={true} // Disable sorting in edit mode
+        extraRow={
+          <>
             {editMode && (
               <tr>
                 <td>
-                  <input
-                    ref={newExpenseNameRef}
-                    type="text"
-                    name="name"
+                  <BudgetFormInput
+                    column={{ type: "text", placeholder: "New expense name" }}
                     value={newExpense.name}
-                    onChange={handleNewExpenseChange}
-                    placeholder="Expense name"
-                    className={tableStyles.tableInput}
+                    onChange={(value) =>
+                      setNewExpense((prev) => ({ ...prev, name: value }))
+                    }
+                    ref={newExpenseNameRef}
                   />
                 </td>
                 <td>
-                  <select
-                    name="category"
+                  <CategorySelect
                     value={newExpense.category}
-                    onChange={handleNewExpenseChange}
-                    className={`${tableStyles.tableSelect} ${
-                      tableStyles[
-                        newExpense.category === "non-essential"
-                          ? "nonessential"
-                          : newExpense.category
-                      ]
-                    }`}
-                  >
-                    <option value="required">Required</option>
-                    <option value="flexible">Flexible</option>
-                    <option value="non-essential">Non-essential</option>
-                  </select>
+                    onChange={(value) =>
+                      setNewExpense((prev) => ({ ...prev, category: value }))
+                    }
+                  />
                 </td>
                 <td>
-                  <input
-                    type="number"
-                    name="cost"
+                  <BudgetFormInput
+                    column={{
+                      type: "number",
+                      placeholder: "0.00",
+                      step: "0.01",
+                      min: "0",
+                    }}
                     value={newExpense.cost}
-                    onChange={handleNewExpenseChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    step="0.01"
-                    min="0"
+                    onChange={(value) =>
+                      setNewExpense((prev) => ({ ...prev, cost: value }))
+                    }
                   />
                 </td>
                 <td>
                   <button
-                    onClick={handleAddExpense}
                     className={tableStyles.addButton}
-                    title="Add"
+                    onClick={handleAddExpense}
+                    disabled={!newExpense.name.trim()}
+                    title="Add expense"
                   >
-                    +
+                    ✓
                   </button>
                 </td>
               </tr>
             )}
-
-            {/* Accounting-style separator and total */}
-            <tr className={budgetStyles.separatorRow}>
-              <td colSpan={editMode ? 4 : 3}></td>
-            </tr>
-            <tr className={budgetStyles.totalRow}>
-              <td className={budgetStyles.totalLabel}>
-                <strong>Total Monthly Expenses</strong>
-              </td>
-              <td></td>
-              <td className={budgetStyles.totalAmount}>
-                <strong>${totalExpenses.toLocaleString()}</strong>
-              </td>
-              {editMode && <td></td>}
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
+            {totalRow}
+          </>
+        }
+      />
       {editMode && (
         <ControlPanel
           onSave={handleSave}
-          saveLabel="Save Expenses"
           onReset={handleResetToDemo}
           onClear={handleClearAll}
-          resetLabel="Reset to Demo"
         />
       )}
     </Section>

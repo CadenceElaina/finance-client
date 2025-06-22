@@ -59,16 +59,17 @@ const Table = ({
   smallApp = false,
   extraRow,
   defaultSortColumn = null,
-  editMode = false, // New prop to indicate edit mode
+  editMode = false,
+  disableSortingInEditMode = true, // New prop to control sorting behavior in edit mode
   ...props
 }) => {
-  // Find the value column for default sorting
+  // Find the default sort column
   const getDefaultSort = () => {
     if (defaultSortColumn) {
       return { key: defaultSortColumn, direction: "desc" };
     }
 
-    // Auto-detect value column
+    // Auto-detect value/cost column for descending sort
     const valueColumn = columns.find(
       (col) =>
         col.key &&
@@ -84,46 +85,48 @@ const Table = ({
     return { key: null, direction: null };
   };
 
-  // State for sorting: { key: colKey, direction: 'asc' | 'desc' | null }
+  // State for sorting
   const [sort, setSort] = useState(getDefaultSort);
 
   // Reset to default sort when data or columns change, but NOT during edit mode
   useEffect(() => {
     if (!editMode) {
-      const currentDefault = getDefaultSort();
-      // Only reset if we don't have a current sort or if the current sort column no longer exists
-      if (!sort.key || !columns.find((col) => col.key === sort.key)) {
-        setSort(currentDefault);
-      }
+      setSort(getDefaultSort());
     }
-  }, [columns, data.length, editMode]); // Add editMode to dependencies
+  }, [columns, data.length, editMode, defaultSortColumn]);
 
-  // Sorted data - don't sort during edit mode
+  // Sorted data - don't sort during edit mode if disabled
   const sortedData = useMemo(() => {
-    let currentData = [...data];
-
-    // Only sort if not in edit mode
-    if (!editMode && sort.key && sort.direction) {
-      currentData.sort(getSortFn(sort.key, sort.direction === "asc"));
+    if (editMode && disableSortingInEditMode) {
+      return data; // Return data as-is during edit mode
     }
 
-    return currentData;
-  }, [data, sort, editMode]); // Add editMode to dependencies
+    if (!sort.key || !sort.direction) {
+      return data;
+    }
 
-  // Handle sort icon click - disable during edit mode
+    return [...data].sort(getSortFn(sort.key, sort.direction === "asc"));
+  }, [data, sort, editMode, disableSortingInEditMode]);
+
+  // Handle sort icon click - disable during edit mode if specified
   const handleSort = (colKey) => {
-    if (editMode) return; // Don't allow sorting during edit mode
+    if (editMode && disableSortingInEditMode) return;
 
-    setSort((prev) => {
-      if (prev.key !== colKey) {
-        return { key: colKey, direction: "asc" };
-      } else if (prev.direction === "asc") {
+    if (!colKey) return;
+
+    setSort((prevSort) => {
+      if (prevSort.key !== colKey) {
         return { key: colKey, direction: "desc" };
-      } else if (prev.direction === "desc") {
-        return { key: null, direction: null };
-      } else {
-        return { key: colKey, direction: "asc" };
       }
+
+      const nextDirection =
+        prevSort.direction === "desc"
+          ? "asc"
+          : prevSort.direction === "asc"
+          ? null
+          : "desc";
+
+      return { key: colKey, direction: nextDirection };
     });
   };
 
@@ -141,8 +144,11 @@ const Table = ({
                 key={col.key || col.label}
                 onClick={() => handleSort(col.key)}
                 style={{
-                  cursor: editMode ? "default" : "pointer", // Change cursor during edit mode
-                  opacity: editMode ? 0.6 : 1, // Visual indication that sorting is disabled
+                  cursor:
+                    editMode && disableSortingInEditMode
+                      ? "default"
+                      : "pointer",
+                  opacity: editMode && disableSortingInEditMode ? 0.6 : 1,
                 }}
               >
                 <span
@@ -153,12 +159,12 @@ const Table = ({
                   }}
                 >
                   {col.label}
-                  {!editMode &&
+                  {!(editMode && disableSortingInEditMode) &&
                     sort.key === col.key &&
                     sort.direction === "asc" && (
                       <ArrowUp size={16} style={{ verticalAlign: "middle" }} />
                     )}
-                  {!editMode &&
+                  {!(editMode && disableSortingInEditMode) &&
                     sort.key === col.key &&
                     sort.direction === "desc" && (
                       <ArrowDown
@@ -166,7 +172,7 @@ const Table = ({
                         style={{ verticalAlign: "middle" }}
                       />
                     )}
-                  {!editMode &&
+                  {!(editMode && disableSortingInEditMode) &&
                     sort.key === col.key &&
                     sort.direction === null && (
                       <X size={14} style={{ verticalAlign: "middle" }} />
@@ -183,15 +189,19 @@ const Table = ({
             ) : (
               <tr key={row.id || idx}>
                 {columns.map((col) => {
-                  let value = row[col.key];
-                  if (col.key.toLowerCase().includes("date")) {
-                    value = formatDate(value);
+                  let cellValue = row[col.key];
+
+                  // Apply formatter if it exists
+                  if (col.formatter && typeof col.formatter === "function") {
+                    cellValue = col.formatter(cellValue, row);
                   }
-                  return (
-                    <td key={col.key}>
-                      {col.render ? col.render(value, row, idx) : value}
-                    </td>
-                  );
+
+                  // Format dates
+                  if (col.key && col.key.toLowerCase().includes("date")) {
+                    cellValue = formatDate(cellValue);
+                  }
+
+                  return <td key={col.key || col.label}>{cellValue}</td>;
                 })}
               </tr>
             )

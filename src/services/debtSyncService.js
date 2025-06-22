@@ -11,7 +11,9 @@ export class DebtSyncService {
     
     // Find debt payment expenses that changed
     const debtExpenses = newExpenses.filter(exp => exp.isDebtPayment);
+    const originalDebtExpenses = originalExpenses.filter(exp => exp.isDebtPayment);
     
+    // Check for modified debt payments
     debtExpenses.forEach(newExp => {
       const originalExp = originalExpenses.find(exp => exp.id === newExp.id);
       
@@ -22,6 +24,22 @@ export class DebtSyncService {
           oldAmount: originalExp.cost,
           newAmount: newExp.cost,
           accountName: newExp.name.replace(' Payment', ''),
+        });
+      }
+    });
+    
+    // Check for removed debt payments
+    originalDebtExpenses.forEach(originalExp => {
+      const stillExists = newExpenses.find(exp => exp.id === originalExp.id);
+      
+      if (!stillExists) {
+        changes.push({
+          expenseId: originalExp.id,
+          accountId: originalExp.linkedToAccountId,
+          oldAmount: originalExp.cost,
+          newAmount: 0, // Set to 0 when removed
+          accountName: originalExp.name.replace(' Payment', ''),
+          removed: true,
         });
       }
     });

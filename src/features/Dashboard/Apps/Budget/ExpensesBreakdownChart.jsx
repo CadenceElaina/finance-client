@@ -10,6 +10,7 @@ import {
 import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
 import budgetStyles from "./budget.module.css";
+import sectionStyles from "../../../../components/ui/Section/Section.module.css";
 
 const COLORS = [
   "var(--chart-color-1)",
@@ -40,7 +41,8 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
       .map((expense) => ({
         name: expense.name,
         value: expense.cost,
-        percentage: totalBudget > 0 ? ((expense.cost / totalBudget) * 100).toFixed(1) : 0,
+        percentage:
+          totalBudget > 0 ? ((expense.cost / totalBudget) * 100).toFixed(1) : 0,
         category: expense.category || "required",
       }))
       .sort((a, b) => b.value - a.value); // Sort by value descending
@@ -59,13 +61,15 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
       .map(([category, value]) => ({
         name: CATEGORY_LABELS[category] || category,
         value,
-        percentage: totalBudget > 0 ? ((value / totalBudget) * 100).toFixed(1) : 0,
+        percentage:
+          totalBudget > 0 ? ((value / totalBudget) * 100).toFixed(1) : 0,
         category,
       }))
       .sort((a, b) => b.value - a.value); // Sort by value descending
   }, [expenses, totalBudget]);
 
-  const currentData = viewMode === "individual" ? individualPieData : categoryPieData;
+  const currentData =
+    viewMode === "individual" ? individualPieData : categoryPieData;
 
   // Custom label renderer for the pie chart
   const renderLabel = ({
@@ -105,20 +109,21 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
   };
 
   const totalExpenses = currentData.reduce((sum, item) => sum + item.value, 0);
-  const budgetUsedPercentage = totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(1) : 0;
+  const budgetUsedPercentage =
+    totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(1) : 0;
   const discretionaryIncome = totalBudget - totalExpenses;
 
-  // Create the select menu component
+  // Create the select menu component using standard styling
   const viewSelectMenu = (
-    <div className={budgetStyles.selectGroup}>
-      <label htmlFor="view-mode-select" className={budgetStyles.selectLabel}>
+    <div className={sectionStyles.selectGroup}>
+      <label htmlFor="view-mode-select" className={sectionStyles.selectLabel}>
         View:
       </label>
       <select
         id="view-mode-select"
         value={viewMode}
         onChange={(e) => setViewMode(e.target.value)}
-        className={budgetStyles.chartSelect}
+        className={sectionStyles.baseSelect}
       >
         <option value="individual">Individual Expenses</option>
         <option value="category">By Category</option>
@@ -129,10 +134,7 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
   return (
     <Section
       header={
-        <SectionHeader
-          title="Expenses Breakdown"
-          right={viewSelectMenu}
-        />
+        <SectionHeader title="Expenses Breakdown" right={viewSelectMenu} />
       }
       className={budgetStyles.chartSection}
       smallApp={smallApp}
@@ -154,9 +156,13 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
           </div>
           <div className={budgetStyles.summaryItem}>
             <span className={budgetStyles.summaryLabel}>Discretionary:</span>
-            <span className={`${budgetStyles.summaryValue} ${
-              discretionaryIncome >= 0 ? budgetStyles.positive : budgetStyles.negative
-            }`}>
+            <span
+              className={`${budgetStyles.summaryValue} ${
+                discretionaryIncome >= 0
+                  ? budgetStyles.positive
+                  : budgetStyles.negative
+              }`}
+            >
               ${discretionaryIncome.toLocaleString()}
             </span>
           </div>

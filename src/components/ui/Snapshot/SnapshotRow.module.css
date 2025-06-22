@@ -15,8 +15,8 @@
     background: var(--surface-light);
     border: 1.5px solid var(--border-light);
     border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-md) var(--space-sm);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-sm) var(--space-sm);
     display: flex;
     flex-direction: column;
     align-items: center;

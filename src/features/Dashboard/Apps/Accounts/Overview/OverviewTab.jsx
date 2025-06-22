@@ -125,7 +125,7 @@ const OverviewTab = ({ smallApp }) => {
     removeEditRow,
   } = useEditableTable(accounts);
 
-  const [portfolioFilter, setPortfolioFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
   const newAccountNameRef = useRef(null);
 
@@ -292,24 +292,52 @@ const OverviewTab = ({ smallApp }) => {
     }
   };
 
-  // Add portfolio names to accounts for display
-  const accountsWithPortfolios = useMemo(() => {
-    return (editMode ? editRows : accounts).map((account) => ({
-      ...account,
-      portfolioName: account.portfolioId
-        ? portfolios.find((p) => p.id === account.portfolioId)?.name ||
-          "Unknown Portfolio"
-        : "",
-    }));
-  }, [editMode, editRows, accounts, portfolios]);
+  // Update filtering for display - by category instead of portfolio
+  const displayAccounts = useMemo(() => {
+    const accountsWithPortfolios = editMode ? editRows : accounts;
 
-  // Filtering for display - only by portfolio
-  const displayAccounts =
-    portfolioFilter === "all"
-      ? accountsWithPortfolios
-      : accountsWithPortfolios.filter(
-          (account) => account.portfolioId === portfolioFilter
-        );
+    if (categoryFilter === "all") {
+      return accountsWithPortfolios.map((account) => ({
+        ...account,
+        portfolioName:
+          account.portfolioId &&
+          portfolios.find((p) => p.id === account.portfolioId)?.name
+            ? portfolios.find((p) => p.id === account.portfolioId)?.name
+            : "N/A",
+      }));
+    }
+
+    return accountsWithPortfolios
+      .filter((account) => account.category === categoryFilter)
+      .map((account) => ({
+        ...account,
+        portfolioName:
+          account.portfolioId &&
+          portfolios.find((p) => p.id === account.portfolioId)?.name
+            ? portfolios.find((p) => p.id === account.portfolioId)?.name
+            : "N/A",
+      }));
+  }, [editMode, editRows, accounts, portfolios, categoryFilter]);
+
+  // Category select menu (use consistent styling)
+  const categorySelectMenu = (
+    <div className={sectionStyles.selectGroup}>
+      <label htmlFor="category-select" className={sectionStyles.selectLabel}>
+        Category:
+      </label>
+      <select
+        id="category-select"
+        value={categoryFilter}
+        onChange={(e) => setCategoryFilter(e.target.value)}
+        className={sectionStyles.baseSelect}
+      >
+        <option value="all">All Categories</option>
+        <option value="Cash">Cash</option>
+        <option value="Investments">Investments</option>
+        <option value="Debt">Debt</option>
+      </select>
+    </div>
+  );
 
   // Calculations for snapshot
   const totalCash = accounts
@@ -783,12 +811,11 @@ const OverviewTab = ({ smallApp }) => {
         }}
       />
 
+      {/* Snapshot Row */}
       <SnapshotRow items={snapshotItems} small={smallApp} />
 
-      {/* Account Change Notifications - Filter out completed goals */}
-      {accountChangeNotifications.filter(
-        (notification) => notification.goal.status !== "completed"
-      ).length > 0 && (
+      {/* Account Change Notifications */}
+      {accountChangeNotifications.length > 0 && (
         <Section
           header={
             <div className={sectionStyles.sectionHeaderRow}>
@@ -885,33 +912,19 @@ const OverviewTab = ({ smallApp }) => {
         </Section>
       )}
 
-      {/* Existing accounts table */}
+      {/* Accounts Table */}
       <Section
         header={
           <div className={sectionStyles.sectionHeaderRow}>
             <EditableTableHeader
-              title="Accounts Overview"
+              title="All Accounts"
               editMode={editMode}
-              onEnterEdit={handleEnterEditMode} // Use the fixed handler
-              onCancelEdit={handleCancelEdit} // Use the fixed handler
+              onEnterEdit={handleEnterEditMode}
+              onCancelEdit={handleCancelEdit}
               editable={true}
             />
-            <div className={tableStyles.filterRow}>
-              <label className={tableStyles.filterLabel}>
-                Portfolio:
-                <select
-                  value={portfolioFilter}
-                  onChange={(e) => setPortfolioFilter(e.target.value)}
-                  className={tableStyles.filterSelect}
-                >
-                  <option value="all">All Portfolios</option>
-                  {portfolios.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <div className={sectionStyles.sectionHeaderRight}>
+              {categorySelectMenu}
             </div>
           </div>
         }

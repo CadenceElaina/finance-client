@@ -9,6 +9,7 @@ import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import { DEMO_PORTFOLIOS } from "../../../../utils/constants";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
 import SnapshotRow from "../../../../components/ui/Snapshot/SnapshotRow";
+import sectionStyles from "../../../../components/ui/Section/Section.module.css";
 
 const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
   const { data } = useFinancialData();
@@ -32,20 +33,17 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
       ? "All Portfolios"
       : portfolios.find((p) => p.id === selectedPortfolioId)?.name || "";
 
-  // Portfolio select menu (use a class for alignment)
+  // Portfolio select menu (use standard styling)
   const portfolioSelectMenu = (
-    <div className={accountsStyles.portfolioSelectMenuRow}>
-      <label
-        htmlFor="portfolio-select"
-        className={accountsStyles.portfolioSelectLabel}
-      >
+    <div className={sectionStyles.selectGroup}>
+      <label htmlFor="portfolio-select" className={sectionStyles.selectLabel}>
         Portfolio:
       </label>
       <select
         id="portfolio-select"
         value={selectedPortfolioId}
         onChange={(e) => setSelectedPortfolioId(e.target.value)}
-        className={accountsStyles.portfolioSelectMenu}
+        className={sectionStyles.baseSelect}
       >
         <option value="all">All Portfolios</option>
         {portfolios.map((p) => (

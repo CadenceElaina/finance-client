@@ -17,15 +17,6 @@
     font-weight: 600;
 }
 
-.tableColumn {
-}
-
-.chartsColumn {
-    gap: var(--space-xxs);
-    display: flex;
-    flex-direction: column;
-}
-
 .chartContainer{
     padding: 0;
     display: flex;
@@ -45,22 +36,7 @@
     font-weight: var(--font-weight-semibold);
 }
 
-.portfolioSelectMenu {
-}
-
-.portfolioSelectMenuRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs);
-  justify-content: flex-end;
-}
-
-.portfolioSelectLabel {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
+/* Container layouts */
 .portfoliosContentContainer {
     display: flex;
     flex-direction: column;
@@ -69,9 +45,28 @@
     padding: var(--space-xs);
     gap: var(--space-xs);
     overflow: auto;
-    min-height: 0; /* Important for proper flexbox behavior */
+    min-height: 0;
 }
 
+.overviewContentContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    height: 100%;
+}
+
+/* Chart row layouts */
+.breakdownChartsRow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--space-xs);
+    width: 55%;
+    margin: 0 auto;
+    margin-bottom: var(--space-xs);
+    align-items: stretch;
+}
+
+/* Responsive adjustments */
 :global(.smallApp) .portfoliosContentContainer {
     padding: var(--space-xxs);
     gap: var(--space-sm);
@@ -80,43 +75,4 @@
 :global(.largeApp) .portfoliosContentContainer {
     padding: var(--space-sm);
     gap: var(--space-lg);
-}
-
-.portfoliosChartsRow {
-    display: flex;
-    flex-direction: row;
-    gap: var(--space-sm);
-    width: 100%;
-}
-
-:global(.smallApp) .portfoliosChartsRow {
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-:global(.largeApp) .portfoliosChartsRow {
-    gap: var(--space-md);
-}
-
-.breakdownChartsRow {
-  display: flex;
-  flex-direction: row;
-  gap: var(--space-xs);
-  width: 55%;
-  margin: 0 auto;
-  margin-bottom: var(--space-xs);
-  align-items: stretch;
-}
-
-.breakdownChartsRowSmall {
-  /* Remove or comment out this class to always keep row layout */
-  /* flex-direction: column; */
-  /* gap: 8px; */
-}
-
-.overviewContentContainer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  height: 100%;
 }

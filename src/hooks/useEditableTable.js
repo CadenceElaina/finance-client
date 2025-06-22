@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 export const useEditableTable = (initialData = []) => {
   const [editMode, setEditMode] = useState(false);
   const [editRows, setEditRows] = useState([]);
+  const [originalOrder, setOriginalOrder] = useState([]); // Track original order
   
   // Use ref to track the previous initialData to avoid infinite loops
   const prevInitialDataRef = useRef();
@@ -14,6 +15,7 @@ export const useEditableTable = (initialData = []) => {
     
     if (!editMode && initialDataStringified !== prevStringified) {
       setEditRows([...initialData]);
+      setOriginalOrder([...initialData]); // Store original order
       prevInitialDataRef.current = initialData;
     }
   }, [editMode, initialDataStringified, initialData]);
@@ -22,17 +24,19 @@ export const useEditableTable = (initialData = []) => {
   useEffect(() => {
     if (prevInitialDataRef.current === undefined) {
       setEditRows([...initialData]);
+      setOriginalOrder([...initialData]); // Store original order
       prevInitialDataRef.current = initialData;
     }
   }, []); // Only run on mount
 
   const enterEditMode = () => {
+    setOriginalOrder([...initialData]); // Capture current order when entering edit mode
     setEditRows([...initialData]); // Create a copy to avoid mutations
     setEditMode(true);
   };
 
   const cancelEdit = () => {
-    setEditRows([...initialData]); // Reset to current data
+    setEditRows([...originalOrder]); // Reset to original order, not current sorted order
     setEditMode(false);
   };
 
@@ -59,6 +63,7 @@ export const useEditableTable = (initialData = []) => {
     exitEditMode: () => setEditMode(false),
     updateEditRow,
     addEditRow,
-    removeEditRow
+    removeEditRow,
+    originalOrder // Expose original order if needed
   };
 };

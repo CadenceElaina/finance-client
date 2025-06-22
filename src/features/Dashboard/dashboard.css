@@ -98,7 +98,7 @@
 
 .app-body {
     /*     padding: var(--space-md); */
-    background: transparent;
+    background: var(--surface-dark);
     color: var(--text-primary);
     border-bottom-left-radius: var(--border-radius-lg);
     border-bottom-right-radius: var(--border-radius-lg);

@@ -158,42 +158,53 @@ export const FinancialDataProvider = ({ children }) => {
   };
 
   // Enhanced save data function with debt sync service
+  // Update the saveData function to ensure budget is always enriched
   const saveData = async (newData) => {
     try {
-      // Create enriched data with calculations
-      const enrichedData = {
-        ...newData,
-        budget: enrichBudgetWithCalculations(newData.budget),
+      // Store previous account values for goal linking
+      const previousAccountValues = {};
+      data.accounts.forEach((acc) => {
+        previousAccountValues[acc.id] = acc.value;
+      });
+
+      // FIXED: Ensure we have a complete data object
+      const finalData = {
+        accounts: data.accounts || [],
+        budget: data.budget || {},
+        portfolios: data.portfolios || [],
+        goals: data.goals || [],
+        ...newData, // Override with new data
       };
 
-      // Check for account changes that should trigger goal notifications BEFORE saving
+      // FIXED: Ensure budget is enriched before saving and updating state
+      if (finalData.budget) {
+        finalData.budget = enrichBudgetWithCalculations(finalData.budget);
+      }
+
+      // Check for account changes that might affect goals
       const accountNotifications = checkAccountChangesForGoals(
-        enrichedData.accounts,
-        enrichedData.goals,
+        finalData.accounts,
+        finalData.goals,
         previousAccountValues
       );
 
-      // Detect debt payment sync needs
-      const syncedExpenses = DebtSyncService.syncAccountsToExpenses(
-        enrichedData.accounts,
-        enrichedData.budget.monthlyExpenses
-      );
+      // Detect debt payment changes
+      const debtChanges = finalData.budget?.monthlyExpenses
+        ? detectDebtPaymentChanges(
+            data.budget?.monthlyExpenses || [],
+            finalData.budget.monthlyExpenses
+          )
+        : [];
 
-      const debtChanges = detectDebtPaymentChanges(
-        enrichedData.budget.monthlyExpenses,
-        syncedExpenses
-      );
+      // Apply debt payment changes to accounts if any
+      if (debtChanges.length > 0) {
+        finalData.accounts = DebtSyncService.applyChangesToAccounts(
+          finalData.accounts,
+          debtChanges
+        );
+      }
 
-      // Apply synced expenses to budget
-      const finalData = {
-        ...enrichedData,
-        budget: {
-          ...enrichedData.budget,
-          monthlyExpenses: syncedExpenses,
-        },
-      };
-
-      // Re-enrich budget after expense sync
+      // Re-enrich budget after any changes
       finalData.budget = enrichBudgetWithCalculations(finalData.budget);
 
       // Save to persistence layer
@@ -208,15 +219,19 @@ export const FinancialDataProvider = ({ children }) => {
       setData(finalData);
       updatePreviousAccountValues(finalData.accounts);
 
-      // Add any new account change notifications
+      // Process goal-related notifications if they exist
       if (accountNotifications.length > 0) {
-        setAccountChangeNotifications((prev) => [
-          ...prev,
-          ...accountNotifications,
-        ]);
+        setAccountChangeNotifications((prev) => {
+          const newNotifications = accountNotifications.filter(
+            (newNotif) =>
+              !dismissedNotificationIds.includes(newNotif.id) &&
+              !prev.some((existingNotif) => existingNotif.id === newNotif.id)
+          );
+          return [...prev, ...newNotifications];
+        });
       }
 
-      // Show debt sync notification if there were changes
+      // Show debt sync notifications if any changes
       if (debtChanges.length > 0) {
         showDebtSyncNotification(debtChanges);
       }

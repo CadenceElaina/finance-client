@@ -9,8 +9,9 @@ const Section = ({
   className = "",
   style,
   contentStyle,
-  border = "primary", // 'primary', 'success', 'warning', 'error', 'info', 'secondary', 'neutral'
+  border = "primary",
   noBorderLeft = false,
+  smallApp, // Extract this prop so it doesn't get passed to DOM
   ...props
 }) => {
   // Map border prop to class

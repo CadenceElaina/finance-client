@@ -1,6 +1,7 @@
 // src/features/Dashboard/Apps/Budget/BudgetOverviewWrapper.jsx
 import React from "react";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
+import { enrichBudgetWithCalculations } from "../../../../utils/calculations/budgetCalculations";
 import IncomeSection from "./IncomeSection";
 import ExpensesSection from "./ExpensesSection";
 import ExpensesBreakdownChart from "./ExpensesBreakdownChart";
@@ -9,14 +10,11 @@ import budgetStyles from "./budget.module.css";
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
   const { data } = useFinancialData();
 
-  // Ensure budget always has a default structure
-  const budget = data?.budget || {
-    income: {},
-    monthlyExpenses: [],
-    monthlyAfterTax: 0,
-    annualAfterTax: 0,
-    totalMonthlyExpenses: 0,
-  };
+  // FIXED: Ensure budget is enriched with calculations and handle null cases
+  const rawBudget = data?.budget || null;
+
+  // Apply calculations to get proper totals - this will handle null budget gracefully
+  const budget = enrichBudgetWithCalculations(rawBudget);
 
   if (smallApp) {
     // Small app: Show sections based on inner tab selection

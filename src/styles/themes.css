@@ -146,7 +146,7 @@ body[data-theme="high-contrast-dark"] {
     --shadow-lg: 0 0 0 3.5px #FFFF00, 0 10px 20px rgba(0,0,0,0.75);
     --shadow-elevated: 0 0 0 4.5px #FFFF00, 0 5px 15px rgba(0,0,0,0.75);
 
-    --app-orb-shadow: 0 0 0 3px #FFFF00, 0 6px 20px rgba(255, 255, 0, 0.2);
+    --app-orb-shadow: 0 0 0 3px #FFFF00, 0 4px 12px #00FFFF;
     --app-orb-menu-bg: #1B1B1B;
     --app-orb-menu-shadow: 0 10px 30px rgba(255, 255, 0, 0.15);
 
@@ -333,175 +333,75 @@ body[data-theme="vibrant-orange"] {
     --chart-color-8: #E09060; /* Lighter Muted Orange */
 }
 
-/* Tokyo Night Theme */
-body[data-theme="tokyo-night"] {
-    /* Gogh Theme Inspiration (for reference) */
-    /* #414868 - Your current border/tertiary, also primary-dark */
-    /* #F7768E - Danger */
-    /* #9ECE6A - Success */
-    /* #E0AF68 - Warning */
-    /* #7AA2F7 - Primary */
-    /* #BB9AF7 - Secondary */
-    /* #7DCFFF - Primary Light / Info */
-    /* #A9B1D6 - Secondary Light / Secondary Text */
-    /* #C0CAF5 - Primary Text */
-
-    /* Base Colors */
-    --background-light: #1A1B26;
-    --surface-light: #24283B;
-    --surface-dark: #16161E;
-    --border-light: #414868;
-
-    /* Text Colors */
-    --text-primary: #C0CAF5;
-    --text-secondary: #A9B1D6;
-    --text-tertiary: #414868;
-    --text-light: #C0CAF5;
-    --text-on-primary: #1A1B26;
-    --text-on-secondary: #1A1B26;
-    --text-disabled: #414868;
-
-    /* Brand/Accent Colors - Directly from Gogh Palette */
-    --color-primary: #7AA2F7;
-    --color-primary-light: #7DCFFF;
-    --color-primary-dark: #414868;
-    --color-secondary: #BB9AF7;
-    --color-secondary-light: #A9B1D6;
-    --color-secondary-dark: #7B68A6;
-
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, #7AA2F7 0%, #7DCFFF 100%);
-    --gradient-secondary: linear-gradient(135deg, #BB9AF7 0%, #A9B1D6 100%);
-
-    /* Status Colors - Directly from Gogh Palette */
-    --status-success: #9ECE6A;
-    --status-warning: #E0AF68;
-    --status-danger: #F7768E;
-    --status-info: #7DCFFF;
-
-    /* Interactive States */
-    --focus-ring: 0 0 0 3px #7AA2F7;
-    --button-hover-bg: var(--gradient-primary);
-    --button-active-bg: var(--color-primary-dark);
-    --link-color: var(--color-primary-light);
-    --link-hover-color: var(--color-primary);
-    --link-active-color: var(--color-primary-dark);
-    --interactive-disabled-bg: #2B2F44;
-    --interactive-disabled-text: var(--text-tertiary);
-
-    /* Component Specific */
-    --dashboard-button-bg: #414868;
-    --dashboard-button-text: #C0CAF5;
-    --app-launcher-button-text: #C0CAF5;
-    --app-launcher-button-border-color: #414868;
-    --app-launcher-button-hover-border-color: #7AA2F7;
-
-    --table-row-even-bg: rgba(255, 255, 255, 0.02);
-    --table-row-hover-bg: rgba(255, 255, 255, 0.05);
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(122, 162, 247, 0.13), 0 1px 2px rgba(0,0,0,0.40);
-    --shadow-md: 0 4px 6px rgba(122, 162, 247, 0.18), 0 4px 8px rgba(0,0,0,0.50);
-    --shadow-lg: 0 10px 20px rgba(122, 162, 247, 0.22), 0 10px 20px rgba(0,0,0,0.60);
-    --shadow-elevated: 0 5px 15px rgba(122, 162, 247, 0.22), 0 5px 15px rgba(0,0,0,0.60);
-
-    --app-orb-shadow: 0 0 0 3px var(--border-light), var(--shadow-elevated);
-    --app-orb-menu-bg: var(--surface-light);
-    --app-orb-menu-shadow: var(--shadow-lg);
-
-    /* Glass Effect */
-    --glass-background: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-
-    /* Chart Colors */
-  --chart-label-text: #C0CAF5; /* Light text for dark background */
-    --chart-bg: #24283B;
-    --chart-grid: #414868;
-    --chart-tooltip-bg: #24283B;
-    --chart-tooltip-text: #C0CAF5;
-
-    --chart-color-1: #7AA2F7; /* Primary Blue */
-    --chart-color-2: #BB9AF7; /* Secondary Purple */
-    --chart-color-3: #9ECE6A; /* Success Green */
-    --chart-color-4: #E0AF68; /* Warning Orange */
-    --chart-color-5: #F7768E; /* Danger Red */
-    --chart-color-6: #7DCFFF; /* Info Light Blue */
-    --chart-color-7: #A9B1D6; /* Secondary Text */
-    --chart-color-8: #414868; /* Tertiary/Border */
-    --status-danger: #ff5370; /* Tokyo Night red */
-    --status-danger-dark: #ff869a; /* Slightly lighter for hover */
-    --text-on-danger: #fff;
-}
-
-/* Dark Mode */
+/* --- DARK MODE --- */
 body[data-theme="dark"] {
-    --background-light: #181a22;
-    --surface-light: #23263a;
-    --surface-dark: #181a22;
+    --background-light: #181a22;         /* Site background */
+    --surface-light: #23263a;            /* App window, section/card background */
+    --surface-dark: #181a22;             /* Header, app header */
+    --surface-variant: #23263a;          /* Section header, table header */
     --border-light: #23263a;
-    --text-primary: #f5f7fa;
+    --border-subtle: #23263a;
+    --border-active: #00b1c7;
+
+    --text-primary: #f3f6fa;
     --text-secondary: #b0b7c3;
     --text-tertiary: #6b7280;
-    --text-light: #f5f7fa;
+    --text-light: #f3f6fa;
     --text-on-primary: #181a22;
     --text-on-secondary: #181a22;
     --text-disabled: #6b7280;
+
     --color-primary: #00b1c7;
-    --color-primary-light: #00aebf;
+    --color-primary-light: #00e6ff;
     --color-primary-dark: #005f6b;
     --color-secondary: #ff8c69;
-    --color-secondary-light: #ff9b7a;
+    --color-secondary-light: #ffb09c;
     --color-secondary-dark: #cc7054;
-    --gradient-primary: linear-gradient(135deg, #00aebf 0%, #007b8c 100%);
+
+    --gradient-primary: linear-gradient(135deg, #00b1c7 0%, #007b8c 100%);
     --gradient-secondary: linear-gradient(135deg, #ff8c69 0%, #ffb09c 100%);
 
-    /* Status Colors */
     --status-success: #28a745;
     --status-warning: #ffc107;
     --status-danger: #dc3545;
     --status-info: #17a2b8;
 
-    /* Interactive States */
-    --focus-ring: 0 0 0 3px rgba(255, 255, 255, 0.3);
-    --button-hover-bg: #2c2f38;
-    --button-active-bg: #3a3f47;
-    --link-color: var(--color-primary);
-    --link-hover-color: var(--color-primary-light);
-    --link-active-color: var(--color-primary-dark);
-    --interactive-disabled-bg: #2c2f38;
+    --focus-ring: 0 0 0 3px #00b1c7;
+    --button-hover-bg: #00e6ff;
+    --button-active-bg: #005f6b;
+    --link-color: #00b1c7;
+    --link-hover-color: #00e6ff;
+    --link-active-color: #005f6b;
+
+    --interactive-disabled-bg: #23263a;
     --interactive-disabled-text: #6b7280;
 
-    /* Component Specific */
+    --table-row-even-bg: #23263a;
+    --table-row-hover-bg: #23263a;
+
     --dashboard-button-bg: #23263a;
-    --dashboard-button-text: #f5f7fa;
-    --app-launcher-button-text: #f5f7fa;
-    --app-launcher-button-border-color: #414868;
+    --dashboard-button-text: #f3f6fa;
+    --app-launcher-button-text: #f3f6fa;
+    --app-launcher-button-border-color: #23263a;
     --app-launcher-button-hover-border-color: #00b1c7;
 
-    --table-row-even-bg: rgba(255, 255, 255, 0.05);
-    --table-row-hover-bg: rgba(255, 255, 255, 0.1);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.18);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.22);
+    --shadow-lg: 0 10px 24px rgba(0,0,0,0.28);
+    --shadow-elevated: 0 6px 20px rgba(0,177,199,0.18);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(255, 255, 255, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px rgba(255, 255, 255, 0.15), 0 4px 8px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 20px rgba(255, 255, 255, 0.2), 0 10px 20px rgba(0, 0, 0, 0.4);
-    --shadow-elevated: 0 5px 15px rgba(255, 255, 255, 0.25), 0 5px 15px rgba(0, 0, 0, 0.5);
+    --app-orb-shadow: 0 0 0 3px var(--border-active), 0 4px 12px rgba(0,177,199,0.25);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
 
-    --app-orb-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3), 0 6px 20px rgba(0, 0, 0, 0.5);
-    --app-orb-menu-bg: #23263a;
-    --app-orb-menu-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --glass-background: rgba(35,38,58,0.7);
+    --glass-border: rgba(0,177,199,0.18);
 
-    /* Glass Effect */
-    --glass-background: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.3);
-
-    /* Chart Colors */
-    --chart-label-text: #f5f7fa;
+    --chart-label-text: #f3f6fa;
     --chart-bg: #23263a;
-    --chart-grid: #414868;
-    --chart-tooltip-bg: #2c2f38;
-    --chart-tooltip-text: #f5f7fa;
-
+    --chart-grid: #23263a;
+    --chart-tooltip-bg: #23263a;
+    --chart-tooltip-text: #f3f6fa;
     --chart-color-1: #00b1c7;
     --chart-color-2: #ff8c69;
     --chart-color-3: #ffc107;
@@ -510,4 +410,83 @@ body[data-theme="dark"] {
     --chart-color-6: #e83e8c;
     --chart-color-7: #fd7e14;
     --chart-color-8: #20c997;
+}
+
+/* --- TOKYO NIGHT --- */
+body[data-theme="tokyo-night"] {
+    --background-light: #1a1b26;
+    --surface-light: #24283b;
+    --surface-dark: #1a1b26;
+    --surface-variant: #414868;
+    --border-light: #414868;
+    --border-subtle: #414868;
+    --border-active: #7aa2f7;
+
+    --text-primary: #c0caf5;
+    --text-secondary: #9aa5ce;
+    --text-tertiary: #565f89;
+    --text-light: #c0caf5;
+    --text-on-primary: #1a1b26;
+    --text-on-secondary: #1a1b26;
+    --text-disabled: #565f89;
+
+    --color-primary: #7aa2f7;
+    --color-primary-light: #8db4f8;
+    --color-primary-dark: #5a7ed6;
+    --color-secondary: #bb9af7;
+    --color-secondary-light: #cfc9f7;
+    --color-secondary-dark: #a18ad7;
+
+    --gradient-primary: linear-gradient(135deg, #7aa2f7 0%, #bb9af7 100%);
+    --gradient-secondary: linear-gradient(135deg, #bb9af7 0%, #7dcfff 100%);
+
+    --status-success: #9ece6a;
+    --status-warning: #e0af68;
+    --status-danger: #f7768e;
+    --status-info: #7dcfff;
+
+    --focus-ring: 0 0 0 3px #7aa2f7;
+    --button-hover-bg: #8db4f8;
+    --button-active-bg: #5a7ed6;
+    --link-color: #7aa2f7;
+    --link-hover-color: #bb9af7;
+    --link-active-color: #5a7ed6;
+
+    --interactive-disabled-bg: #414868;
+    --interactive-disabled-text: #565f89;
+
+    --table-row-even-bg: #24283b;
+    --table-row-hover-bg: #414868;
+
+    --dashboard-button-bg: #24283b;
+    --dashboard-button-text: #c0caf5;
+    --app-launcher-button-text: #c0caf5;
+    --app-launcher-button-border-color: #414868;
+    --app-launcher-button-hover-border-color: #7aa2f7;
+
+    --shadow-sm: 0 1px 3px rgba(122,162,247,0.10);
+    --shadow-md: 0 4px 12px rgba(122,162,247,0.16);
+    --shadow-lg: 0 10px 24px rgba(122,162,247,0.22);
+    --shadow-elevated: 0 6px 20px rgba(122,162,247,0.22);
+
+    --app-orb-shadow: 0 0 0 3px var(--border-active), 0 4px 12px rgba(122,162,247,0.25);
+    --app-orb-menu-bg: var(--surface-light);
+    --app-orb-menu-shadow: var(--shadow-lg);
+
+    --glass-background: rgba(36,40,59,0.7);
+    --glass-border: rgba(122,162,247,0.18);
+
+    --chart-label-text: #c0caf5;
+    --chart-bg: #24283b;
+    --chart-grid: #414868;
+    --chart-tooltip-bg: #24283b;
+    --chart-tooltip-text: #c0caf5;
+    --chart-color-1: #7aa2f7;
+    --chart-color-2: #bb9af7;
+    --chart-color-3: #7dcfff;
+    --chart-color-4: #9ece6a;
+    --chart-color-5: #ff9e64;
+    --chart-color-6: #f7768e;
+    --chart-color-7: #e0af68;
+    --chart-color-8: #73daca;
 }
