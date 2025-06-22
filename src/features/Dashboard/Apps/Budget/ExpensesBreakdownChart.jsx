@@ -82,7 +82,7 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
     value,
     percentage,
   }) => {
-    if (percent < 0.03) return null; // Hide labels for slices < 3%
+    if (percent < 0.01) return null; // Hide labels for slices < 3%
 
     const RADIAN = Math.PI / 180;
     const radius = outerRadius + (smallApp ? 25 : 35);
@@ -171,16 +171,16 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
 
       <div className={budgetStyles.chartContainer}>
         {currentData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 280}>
+          <ResponsiveContainer width="100%" height={smallApp ? 200 : 290}>
             <PieChart>
               <Pie
                 data={currentData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
-                cy="50%"
-                outerRadius={smallApp ? "60%" : "65%"}
-                innerRadius="35%"
+                cy="45%"
+                outerRadius={smallApp ? "50%" : "55%"}
+                innerRadius="30%"
                 label={renderLabel}
                 labelLine={false}
               >
@@ -197,9 +197,9 @@ const ExpensesBreakdownChart = ({ budget, smallApp }) => {
                   `${name} (${props.payload.percentage}% of budget)`,
                 ]}
                 contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
+                  background: "var(--color-secondary)",
                   border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-on-secondary)",
                   borderRadius: "var(--border-radius-md)",
                   fontSize: "var(--font-size-xs)",
                 }}

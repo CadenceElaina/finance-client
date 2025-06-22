@@ -61,12 +61,12 @@ const AccountsBreakdownCharts = ({
                 contentStyle={{
                   background: "var(--chart-tooltip-bg)",
                   border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-primary)",
                   borderRadius: "var(--border-radius-md)",
                   fontSize: "var(--font-size-xs)",
                 }}
                 itemStyle={{
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-primary)",
                   fontSize: "var(--font-size-xs)",
                 }}
               />
@@ -75,7 +75,7 @@ const AccountsBreakdownCharts = ({
                 verticalAlign="bottom"
                 layout="horizontal"
                 wrapperStyle={{
-                  color: "var(--chart-label-text)",
+                  color: "var(--text-primary)",
                   fontSize: smallApp ? "0.65rem" : "var(--font-size-xs)",
                 }}
               />
@@ -125,12 +125,12 @@ const AccountsBreakdownCharts = ({
                 contentStyle={{
                   background: "var(--chart-tooltip-bg)",
                   border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-primary)",
                   borderRadius: "var(--border-radius-md)",
                   fontSize: "var(--font-size-xs)",
                 }}
                 itemStyle={{
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-primary)",
                   fontSize: "var(--font-size-xs)",
                 }}
               />

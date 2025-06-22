@@ -19,7 +19,7 @@
 
 .table th,
 .table td {
-    padding: var(--space-xxs) var(--space-xs);
+    padding: var(--space-xxs);
     text-align: left;
     color: var(--text-primary);
     border: 1px solid var(--border-light);
@@ -142,38 +142,6 @@
     margin-bottom: var(--space-md);
 }
 
-/* --- Filter Row Styles (Moved from accounts.module.css) --- */
-.filterRow {
-    display: flex;
-    gap: var(--space-sm);
-    margin-bottom: var(--space-sm);
-    align-items: center;
-    padding: var(--space-xs);
-    background: var(--surface-dark);
-    border-radius: var(--border-radius-sm);
-}
-
-.filterLabel {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin-right: var(--space-xs);
-}
-
-.filterSelect {
-    padding: var(--space-xxs) var(--space-xs);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    background: var(--background-light);
-    color: var(--text-primary);
-    font-size: var(--font-size-xs);
-    font-family: var(--font-family-base); /* Roboto for filter selects */
-}
-
-.filterSelect:focus {
-    outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
-}
 
 /* --- Table Header Title (used in SectionHeader) --- */
 .tableHeaderTitle {

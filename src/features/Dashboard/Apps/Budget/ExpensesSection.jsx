@@ -332,7 +332,8 @@ const ExpensesSection = ({ budget, smallApp }) => {
         style={{
           fontWeight: "bold",
           color: "var(--color-primary)",
-          fontSize: "var(--font-size-base)",
+          fontSize: "var(--font-size-xs)",
+          borderTop: "2px solid var(--color-secondary)",
         }}
       >
         ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}

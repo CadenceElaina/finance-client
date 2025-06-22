@@ -42,18 +42,18 @@ const AllocationTab = ({
     const securitiesInPortfolio = [];
     let cashTotal = 0;
     relevantAccounts.forEach((acc) => {
-      if (typeof acc.cashBalance === "number" && acc.cashBalance > 0) {
-        cashTotal += acc.cashBalance;
-      }
       if (Array.isArray(acc.securities)) {
         securitiesInPortfolio.push(...acc.securities);
+      }
+      if (typeof acc.cashBalance === "number") {
+        cashTotal += acc.cashBalance;
       }
     });
 
     const aggregatedSecurities = securitiesInPortfolio.reduce((acc, curr) => {
       const key = curr.ticker || curr.name;
       if (!acc[key]) {
-        acc[key] = { name: key, value: 0 };
+        acc[key] = { name: curr.name, value: 0 };
       }
       acc[key].value += curr.value || 0;
       return acc;
@@ -73,12 +73,6 @@ const AllocationTab = ({
     return { pieData: currentPieData, totalValue: currentTotalValue };
   }, [allAccounts, portfolioId]);
 
-  // --- Label with percentage ---
-  const renderLabel = ({ name, value }) => {
-    const percent = totalValue ? ((value / totalValue) * 100).toFixed(1) : 0;
-    return `${name} (${percent}%)`;
-  };
-
   // Sort pieData by value descending (largest first)
   const sortedPieData = [...pieData].sort((a, b) => b.value - a.value);
 
@@ -94,56 +88,54 @@ const AllocationTab = ({
     value,
     index,
   }) => {
-    if (!totalValue) return null; // Always show, even for small percentages
+    if (percent < 0.02) return null; // Don't show labels for very small slices
 
     const RADIAN = Math.PI / 180;
-    // Start at the outer edge of the pie
-    const lineStartRadius = outerRadius + 6;
-    const lineMidRadius = outerRadius + 28; // How far out the "elbow" is
-    const labelOffset = 18; // Horizontal offset for label from elbow
+    const lineStartRadius = outerRadius + 8;
+    const lineMidRadius = outerRadius + 35;
+    const labelOffset = 20;
 
-    // Calculate the angle and direction
     const angle = -midAngle;
     const sin = Math.sin(angle * RADIAN);
     const cos = Math.cos(angle * RADIAN);
 
-    // Start point (pie edge)
     const sx = cx + lineStartRadius * cos;
     const sy = cy + lineStartRadius * sin;
-
-    // Elbow point (straight out from pie)
     const mx = cx + lineMidRadius * cos;
     const my = cy + lineMidRadius * sin;
-
-    // End point (horizontal, left or right)
-    const ex = mx + (cos >= 0 ? labelOffset : -labelOffset);
+    const ex = mx + (cos >= 0 ? 1 : -1) * labelOffset;
     const ey = my;
 
-    // Label position (a bit past the end of the line)
-    const lx = ex + (cos >= 0 ? 4 : -4);
-    const ly = ey;
-
-    const percentDisplay = ((value / totalValue) * 100).toFixed(1);
+    const textAnchor = cos >= 0 ? "start" : "end";
+    const percentText = `${(percent * 100).toFixed(1)}%`;
 
     return (
-      <g>
-        {/* Draw the elbow line: pie edge -> elbow -> horizontal to label */}
-        <polyline
-          points={`${sx},${sy} ${mx},${my} ${ex},${ey}`}
+      <g key={`label-${index}`}>
+        <path
+          d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`}
           stroke="var(--chart-label-text)"
           strokeWidth={1}
           fill="none"
         />
+        <circle cx={ex} cy={ey} r={2} fill="var(--chart-label-text)" />
         <text
-          x={lx}
-          y={ly}
+          x={ex + (cos >= 0 ? 1 : -1) * 5}
+          y={ey - 5}
+          textAnchor={textAnchor}
           fill="var(--chart-label-text)"
-          textAnchor={cos >= 0 ? "start" : "end"}
-          dominantBaseline="central"
-          fontSize="var(--font-size-xxs)" // <-- Use your CSS variable here
-          style={{ fontWeight: 500, pointerEvents: "none" }}
+          fontSize={smallApp ? "10px" : "12px"}
+          fontWeight="600"
         >
-          {`${name} (${percentDisplay}%)`}
+          {name}
+        </text>
+        <text
+          x={ex + (cos >= 0 ? 1 : -1) * 5}
+          y={ey + 10}
+          textAnchor={textAnchor}
+          fill="var(--chart-label-text)"
+          fontSize={smallApp ? "9px" : "11px"}
+        >
+          {percentText}
         </text>
       </g>
     );
@@ -154,9 +146,36 @@ const AllocationTab = ({
       header={
         <SectionHeader
           title={
-            portfolioName
-              ? `${portfolioName}'s Allocation`
-              : "Portfolio Allocation"
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-md)",
+              }}
+            >
+              <span>
+                {portfolioName
+                  ? `${portfolioName}'s Allocation`
+                  : "Portfolio Allocation"}
+              </span>
+              <div
+                style={{
+                  fontSize: "var(--font-size-lg)",
+                  fontWeight: "var(--font-weight-bold)",
+                  color: "var(--color-primary)",
+                  background: "var(--surface-dark)",
+                  padding: "var(--space-xs) var(--space-sm)",
+                  borderRadius: "var(--border-radius-md)",
+                  border: "2px solid var(--color-primary)",
+                }}
+              >
+                $
+                {totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
+            </div>
           }
           right={showPortfolioSelectMenu ? portfolioSelectMenu : null}
         />
@@ -165,21 +184,21 @@ const AllocationTab = ({
     >
       <div
         className={accountsStyles.chartContainer}
-        style={{ height: smallApp ? 250 : 327 }}
+        style={{ height: smallApp ? 275 : 313 }} // Increased height
       >
         {sortedPieData.length > 0 ? (
           <ResponsiveContainer>
-            <PieChart>
+            <PieChart margin={{ top: 20, right: 80, bottom: 20, left: 80 }}>
               <Pie
                 data={sortedPieData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius="80%"
-                innerRadius="45%"
+                outerRadius={smallApp ? "40%" : "50%"}
+                innerRadius={smallApp ? "20%" : "25%"}
                 label={renderCustomLabel}
-                labelLine={true} // Enable label lines
+                labelLine={false}
               >
                 {sortedPieData.map((entry, idx) => (
                   <Cell
@@ -189,39 +208,22 @@ const AllocationTab = ({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value, name) => {
-                  const percentage = totalValue
-                    ? ((value / totalValue) * 100).toFixed(2)
-                    : 0;
-                  return [
-                    `$${value.toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })} (${percentage}%)`,
-                    name,
-                  ];
-                }}
+                formatter={(value, name) => [
+                  `$${value.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                  })}`,
+                  name,
+                ]}
                 contentStyle={{
-                  background: "var(--chart-tooltip-bg)",
+                  background: "var(--color-secondary)",
                   border: "1px solid var(--border-light)",
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-on-secondary)",
                   borderRadius: "var(--border-radius-md)",
                   fontSize: "var(--font-size-xs)",
                 }}
                 itemStyle={{
-                  color: "var(--chart-tooltip-text)",
+                  color: "var(--text-on-secondary)",
                   fontSize: "var(--font-size-xs)",
-                }}
-              />
-              <Legend
-                align="center"
-                verticalAlign="bottom"
-                layout="horizontal"
-                iconSize={10}
-                wrapperStyle={{
-                  fontSize: smallApp ? "0.65rem" : "0.75rem",
-                  color: "var(--chart-label-text)",
-                  paddingTop: smallApp ? "5px" : "10px",
-                  lineHeight: "1.5",
                 }}
               />
             </PieChart>

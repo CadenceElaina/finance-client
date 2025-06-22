@@ -6,3 +6,11 @@ body {
         color var(--transition-speed-normal) var(--transition-ease);
     font-family: var(--font-family-base), Arial, sans-serif;
 }
+
+/* Add to your global CSS or chart-specific CSS */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: var(--color-secondary);
+  border-radius: var(--border-radius-md) !important;
+  border: 1px solid var(--border-light) !important;
+  font-size: var(--font-size-xs) !important;
+}
