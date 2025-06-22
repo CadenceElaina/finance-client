@@ -1,16 +1,17 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useMemo, memo } from "react";
 import {
   PieChart,
   Pie,
   Cell,
-  ResponsiveContainer,
   Tooltip,
   Legend,
+  ResponsiveContainer,
 } from "recharts";
 import Section from "../../../../components/ui/Section/Section";
 import SectionHeader from "../../../../components/ui/Section/SectionHeader";
-import budgetStyles from "./budget.module.css";
+import ChartSummary from "../../../../components/ui/Chart/ChartSummary";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
+import budgetStyles from "./budget.module.css";
 
 const COLORS = [
   "var(--chart-color-1)",
@@ -23,207 +24,232 @@ const COLORS = [
   "var(--chart-color-8)",
 ];
 
-const CATEGORY_LABELS = {
-  required: "Required",
-  flexible: "Flexible",
-  "non-essential": "Non-essential",
-};
+const ExpensesBreakdownChart = memo(
+  ({ budget, smallApp }) => {
+    const [viewMode, setViewMode] = useState("individual");
 
-const ExpensesBreakdownChart = ({ budget, smallApp }) => {
-  const expenses = budget?.monthlyExpenses || [];
-  const totalBudget = budget?.monthlyAfterTax || 0;
-  const [viewMode, setViewMode] = useState("individual"); // "individual" or "category"
+    // Memoize expensive chart data calculations with proper 2 decimal place formatting
+    const chartData = useMemo(() => {
+      const expenses = budget?.monthlyExpenses || [];
+      const totalBudget = budget?.monthlyAfterTax || 0;
 
-  // Create pie chart data for individual expenses (as percentage of total budget)
-  const individualPieData = useMemo(() => {
-    return expenses
-      .filter((expense) => expense.cost > 0)
-      .map((expense) => ({
-        name: expense.name,
-        value: expense.cost,
-        percentage:
-          totalBudget > 0 ? ((expense.cost / totalBudget) * 100).toFixed(1) : 0,
-        category: expense.category || "required",
-      }))
-      .sort((a, b) => b.value - a.value); // Sort by value descending
-  }, [expenses, totalBudget]);
+      if (viewMode === "individual") {
+        return expenses
+          .filter((expense) => expense.cost > 0)
+          .map((expense) => {
+            const cost = parseFloat(expense.cost) || 0;
+            const percentage = totalBudget > 0 ? (cost / totalBudget) * 100 : 0;
 
-  // Create pie chart data grouped by category (as percentage of total budget)
-  const categoryPieData = useMemo(() => {
-    const categoryTotals = expenses.reduce((acc, expense) => {
-      const category = expense.category || "required";
-      acc[category] = (acc[category] || 0) + (expense.cost || 0);
-      return acc;
-    }, {});
+            return {
+              name: expense.name,
+              value: cost,
+              percentage: parseFloat(percentage.toFixed(2)), // Format to 2 decimal places
+            };
+          })
+          .sort((a, b) => b.value - a.value);
+      } else {
+        // Category grouping logic with proper formatting
+        const categoryTotals = expenses.reduce((acc, expense) => {
+          const category = expense.category || "other";
+          const cost = parseFloat(expense.cost) || 0;
+          acc[category] = (acc[category] || 0) + cost;
+          return acc;
+        }, {});
 
-    return Object.entries(categoryTotals)
-      .filter(([_, value]) => value > 0)
-      .map(([category, value]) => ({
-        name: CATEGORY_LABELS[category] || category,
-        value,
-        percentage:
-          totalBudget > 0 ? ((value / totalBudget) * 100).toFixed(1) : 0,
-        category,
-      }))
-      .sort((a, b) => b.value - a.value); // Sort by value descending
-  }, [expenses, totalBudget]);
+        return Object.entries(categoryTotals)
+          .map(([category, value]) => {
+            const percentage =
+              totalBudget > 0 ? (value / totalBudget) * 100 : 0;
 
-  const currentData =
-    viewMode === "individual" ? individualPieData : categoryPieData;
+            return {
+              name: category,
+              value: value,
+              percentage: parseFloat(percentage.toFixed(2)), // Format to 2 decimal places
+            };
+          })
+          .sort((a, b) => b.value - a.value);
+      }
+    }, [budget?.monthlyExpenses, budget?.monthlyAfterTax, viewMode]);
 
-  // Custom label renderer for the pie chart
-  const renderLabel = ({
-    cx,
-    cy,
-    midAngle,
-    outerRadius,
-    percent,
-    name,
-    value,
-    percentage,
-  }) => {
-    if (percent < 0.01) return null; // Hide labels for slices < 3%
+    const currentData = chartData;
 
-    const RADIAN = Math.PI / 180;
-    const radius = outerRadius + (smallApp ? 25 : 35);
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
-    const textAnchor = x > cx ? "start" : "end";
+    // Custom label renderer for the pie chart with 2 decimal place formatting
+    const renderLabel = ({ cx, cy, midAngle, outerRadius, percent, name }) => {
+      if (percent < 0.02) return null; // Don't show labels for very small slices
+
+      const RADIAN = Math.PI / 180;
+      // Increased spacing from pie chart
+      const labelRadius = outerRadius + (smallApp ? 25 : 35);
+      const x = cx + labelRadius * Math.cos(-midAngle * RADIAN);
+      const y = cy + labelRadius * Math.sin(-midAngle * RADIAN);
+
+      // Format percentage to 2 decimal places
+      const formattedPercent = (percent * 100).toFixed(2);
+
+      return (
+        <text
+          x={x}
+          y={y}
+          fill="var(--chart-label-text)"
+          textAnchor={x > cx ? "start" : "end"}
+          dominantBaseline="central"
+          fontSize={smallApp ? "var(--font-size-xxxs)" : "var(--font-size-xxs)"}
+          fontWeight="var(--font-weight-medium)"
+        >
+          {name} ({formattedPercent}%)
+        </text>
+      );
+    };
+
+    const totalExpenses = currentData.reduce(
+      (sum, item) => sum + item.value,
+      0
+    );
+    const budgetUsedPercentage =
+      budget?.monthlyAfterTax > 0
+        ? ((totalExpenses / budget?.monthlyAfterTax) * 100).toFixed(2) // Format to 2 decimal places
+        : "0.00";
+    const discretionaryIncome = (budget?.monthlyAfterTax || 0) - totalExpenses;
+
+    // Create the select menu component using standard styling
+    const viewSelectMenu = (
+      <div className={sectionStyles.selectGroup}>
+        <label htmlFor="view-mode-select" className={sectionStyles.selectLabel}>
+          View:
+        </label>
+        <select
+          id="view-mode-select"
+          value={viewMode}
+          onChange={(e) => setViewMode(e.target.value)}
+          className={sectionStyles.baseSelect}
+        >
+          <option value="individual">Individual Expenses</option>
+          <option value="category">By Category</option>
+        </select>
+      </div>
+    );
+
+    const summaryItems = [
+      {
+        label: "Budget Used",
+        value: `${budgetUsedPercentage}%`, // Now formatted to 2 decimal places
+        valueClass:
+          parseFloat(budgetUsedPercentage) > 90 ? "negative" : "positive",
+      },
+      {
+        label: "Discretionary",
+        value: `$${discretionaryIncome.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+        valueClass: discretionaryIncome >= 0 ? "positive" : "negative",
+      },
+      {
+        label: "Total Expenses",
+        value: `$${totalExpenses.toLocaleString(undefined, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+        valueClass: "neutral",
+      },
+    ];
 
     return (
-      <text
-        x={x}
-        y={y}
-        fill="var(--chart-label-text)"
-        textAnchor={textAnchor}
-        dominantBaseline="central"
-        fontSize={smallApp ? "9px" : "11px"}
-        fontWeight="500"
+      <Section
+        header={
+          <SectionHeader title="Expenses Breakdown" right={viewSelectMenu} />
+        }
+        className={budgetStyles.chartSection}
       >
-        {`${name}`}
-        <tspan x={x} dy="12" fontSize={smallApp ? "8px" : "10px"} opacity="0.8">
-          {`${percentage}% of budget`}
-        </tspan>
-      </text>
-    );
-  };
-
-  const totalExpenses = currentData.reduce((sum, item) => sum + item.value, 0);
-  const budgetUsedPercentage =
-    totalBudget > 0 ? ((totalExpenses / totalBudget) * 100).toFixed(1) : 0;
-  const discretionaryIncome = totalBudget - totalExpenses;
-
-  // Create the select menu component using standard styling
-  const viewSelectMenu = (
-    <div className={sectionStyles.selectGroup}>
-      <label htmlFor="view-mode-select" className={sectionStyles.selectLabel}>
-        View:
-      </label>
-      <select
-        id="view-mode-select"
-        value={viewMode}
-        onChange={(e) => setViewMode(e.target.value)}
-        className={sectionStyles.baseSelect}
-      >
-        <option value="individual">Individual Expenses</option>
-        <option value="category">By Category</option>
-      </select>
-    </div>
-  );
-
-  return (
-    <Section
-      header={
-        <SectionHeader title="Expenses Breakdown" right={viewSelectMenu} />
-      }
-      className={budgetStyles.chartSection}
-      smallApp={smallApp}
-    >
-      {/* Summary stats ABOVE chart */}
-      {totalExpenses > 0 && (
-        <div className={budgetStyles.chartSummaryTop}>
-          <div className={budgetStyles.summaryItem}>
-            <span className={budgetStyles.summaryLabel}>Monthly Budget:</span>
-            <span className={budgetStyles.summaryValue}>
-              ${totalBudget.toLocaleString()}
-            </span>
-          </div>
-          <div className={budgetStyles.summaryItem}>
-            <span className={budgetStyles.summaryLabel}>Used:</span>
-            <span className={budgetStyles.summaryValue}>
-              ${totalExpenses.toLocaleString()} ({budgetUsedPercentage}%)
-            </span>
-          </div>
-          <div className={budgetStyles.summaryItem}>
-            <span className={budgetStyles.summaryLabel}>Discretionary:</span>
-            <span
-              className={`${budgetStyles.summaryValue} ${
-                discretionaryIncome >= 0
-                  ? budgetStyles.positive
-                  : budgetStyles.negative
-              }`}
-            >
-              ${discretionaryIncome.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className={budgetStyles.chartContainer}>
-        {currentData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={smallApp ? 200 : 290}>
-            <PieChart>
-              <Pie
-                data={currentData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="45%"
-                outerRadius={smallApp ? "50%" : "55%"}
-                innerRadius="30%"
-                label={renderLabel}
-                labelLine={false}
+        <ChartSummary items={summaryItems} />
+        <div className={budgetStyles.chartContainer}>
+          {currentData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={smallApp ? 300 : 380}>
+              <PieChart
+                margin={{
+                  top: 20,
+                  right: smallApp ? 60 : 80,
+                  bottom: smallApp ? 60 : 80,
+                  left: smallApp ? 60 : 80,
+                }}
               >
-                {currentData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${entry.name}-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value, name, props) => [
-                  `$${value.toLocaleString()}`,
-                  `${name} (${props.payload.percentage}% of budget)`,
-                ]}
-                contentStyle={{
-                  background: "var(--color-secondary)",
-                  border: "1px solid var(--border-light)",
-                  color: "var(--text-on-secondary)",
-                  borderRadius: "var(--border-radius-md)",
-                  fontSize: "var(--font-size-xs)",
-                }}
-              />
-              <Legend
-                align="center"
-                verticalAlign="bottom"
-                layout="horizontal"
-                iconSize={6}
-                wrapperStyle={{
-                  fontSize: smallApp ? "0.55rem" : "0.65rem",
-                  color: "var(--chart-label-text)",
-                  paddingTop: smallApp ? "4px" : "8px",
-                  lineHeight: "1.2",
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className={budgetStyles.noChartData}>No expenses to display</div>
-        )}
-      </div>
-    </Section>
-  );
-};
+                <Pie
+                  data={currentData}
+                  cx="50%"
+                  cy="45%"
+                  labelLine={false}
+                  label={renderLabel}
+                  outerRadius={smallApp ? "35%" : "40%"}
+                  fill="#8884d8"
+                  dataKey="value"
+                  animationBegin={0}
+                  animationDuration={0}
+                  isAnimationActive={false}
+                >
+                  {currentData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value, name) => [
+                    `$${value.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}`,
+                    name,
+                  ]}
+                  contentStyle={{
+                    background: "var(--color-secondary)",
+                    border: "1px solid var(--border-light)",
+                    color: "var(--text-on-secondary)",
+                    borderRadius: "var(--border-radius-md)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                  itemStyle={{
+                    color: "var(--text-on-secondary)",
+                    fontSize: "var(--font-size-xs)",
+                  }}
+                  animationDuration={0}
+                  isAnimationActive={false}
+                />
+                <Legend
+                  verticalAlign="bottom"
+                  height={smallApp ? 40 : 50}
+                  wrapperStyle={{
+                    paddingTop: smallApp ? "20px" : "30px",
+                    fontSize: smallApp ? "0.65rem" : "0.75rem",
+                    color: "var(--chart-label-text)",
+                    lineHeight: "1.2",
+                  }}
+                  iconType="circle"
+                  iconSize={smallApp ? 8 : 10}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className={budgetStyles.noChartData}>
+              No expense data to display. Add some expenses to see the
+              breakdown.
+            </div>
+          )}
+        </div>
+      </Section>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison function
+    return (
+      prevProps.smallApp === nextProps.smallApp &&
+      prevProps.budget?.monthlyAfterTax === nextProps.budget?.monthlyAfterTax &&
+      prevProps.budget?.monthlyExpenses?.length ===
+        nextProps.budget?.monthlyExpenses?.length &&
+      JSON.stringify(prevProps.budget?.monthlyExpenses) ===
+        JSON.stringify(nextProps.budget?.monthlyExpenses)
+    );
+  }
+);
 
 export default ExpensesBreakdownChart;

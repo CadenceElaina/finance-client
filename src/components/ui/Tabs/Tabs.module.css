@@ -34,9 +34,6 @@
 /* Inner Tabs Container */
 .innerTab {
     position: relative;
-    transition: transform var(--tab-slide-duration, 0.25s) var(--tab-slide-ease, cubic-bezier(0.25, 0.8, 0.25, 1)),
-        opacity var(--tab-slide-duration, 0.25s) var(--tab-slide-ease, cubic-bezier(0.25, 0.8, 0.25, 1)),
-        background 0.12s, color 0.12s, box-shadow 0.12s;
     transform-origin: center center;
     will-change: transform, opacity;
     border: 1px solid var(--border-light);

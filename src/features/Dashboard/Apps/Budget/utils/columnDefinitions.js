@@ -6,9 +6,8 @@ const INCOME_TYPES = [
 
 const formatCurrency = (value) => `$${(value || 0).toLocaleString()}`;
 const formatHourlyRate = (value) => `$${(value || 0).toFixed(2)}/hr`;
-const formatPercentage = (value) => `${(value || 0).toFixed(1)}%`;
 
-// Simplified column factory
+// Simplified column factory - REMOVED effectiveTaxRate
 export const createColumnConfig = (type, mode) => {
   const baseColumns = {
     type: { key: "type", label: "Type", type: "select", options: INCOME_TYPES },
@@ -70,29 +69,23 @@ export const createColumnConfig = (type, mode) => {
     },
     annualAfterTax: {
       key: "annualAfterTax",
-      label: "Total Annual (AT)",
+      label: "Annual (AT)",
       formatter: formatCurrency,
-      title: "Total Annual After-tax: Monthly income × 12 + additional annual income",
-      readOnly: true
-    },
-    effectiveTaxRate: {
-      key: "effectiveTaxRate",
-      label: "Tax Rate",
-      formatter: formatPercentage,
-      title: "Effective Tax Rate: Calculated based on pre-tax and after-tax income",
+      title: "Annual After-tax: Monthly income × 12 + additional annual income",
       readOnly: true
     }
+    // REMOVED: effectiveTaxRate
   };
 
   // Define column sets for different income types and modes
   const columnSets = {
     salary: {
       edit: ['type', 'annualPreTax', 'monthlyAfterTax', 'additionalAnnualAT'],
-      view: ['type', 'annualPreTax', 'monthlyPreTax', 'monthlyAfterTax', 'additionalAnnualAT', 'annualAfterTax']
+      view: ['type', 'monthlyAfterTax', 'monthlyPreTax', 'annualPreTax', 'annualAfterTax']
     },
     hourly: {
       edit: ['type', 'hourlyRate', 'expectedHours', 'monthlyAfterTax', 'additionalAnnualAT'],
-      view: ['type', 'hourlyRate', 'annualPreTax', 'monthlyPreTax', 'monthlyAfterTax', 'additionalAnnualAT', 'annualAfterTax']
+      view: ['type', 'hourlyRate', 'monthlyAfterTax', 'monthlyPreTax', 'annualPreTax', 'annualAfterTax']
     }
   };
 

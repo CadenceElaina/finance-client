@@ -343,3 +343,86 @@ select,
     text-align: right;
     font-family: var(--font-family-base); /* Roboto for number inputs */
 }
+
+/* Compact select styling for narrow columns */
+.compactSelect {
+  min-width: 120px;
+  max-width: 150px;
+  font-size: var(--font-size-xs);
+}
+
+/* Text wrapping for longer content */
+.wrappedText {
+  display: block;
+  word-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.2;
+  max-width: 120px;
+}
+
+/* Muted text for N/A values */
+.mutedText {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: var(--font-size-xs);
+}
+
+/* Center alignment */
+.alignCenter {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Column width controls */
+.accountsTable {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.accountsTable th:nth-child(1) { width: 15%; } /* Account Name */
+.accountsTable th:nth-child(2) { width: 12%; } /* Provider */
+.accountsTable th:nth-child(3) { width: 12%; } /* Balance */
+.accountsTable th:nth-child(4) { width: 10%; } /* Interest Rate */
+.accountsTable th:nth-child(5) { width: 10%; } /* Monthly Payment */
+.accountsTable th:nth-child(6) { width: 10%; } /* Category */
+.accountsTable th:nth-child(7) { width: 12%; } /* Type */
+.accountsTable th:nth-child(8) { width: 12%; } /* Tax Status */
+.accountsTable th:nth-child(9) { width: 12%; } /* Portfolio */
+.accountsTable th:nth-child(10) { width: 5%; }  /* Actions */
+
+/* Responsive adjustments for small apps */
+:global(.smallApp) .accountsTable th:nth-child(1) { width: 20%; }
+:global(.smallApp) .accountsTable th:nth-child(2) { width: 15%; }
+:global(.smallApp) .accountsTable th:nth-child(3) { width: 15%; }
+:global(.smallApp) .accountsTable th:nth-child(4) { width: 8%; }
+:global(.smallApp) .accountsTable th:nth-child(5) { width: 8%; }
+:global(.smallApp) .accountsTable th:nth-child(6) { width: 8%; }
+:global(.smallApp) .accountsTable th:nth-child(7) { width: 10%; }
+:global(.smallApp) .accountsTable th:nth-child(8) { width: 10%; }
+:global(.smallApp) .accountsTable th:nth-child(9) { width: 10%; }
+:global(.smallApp) .accountsTable th:nth-child(10) { width: 6%; }
+
+/* Better select dropdown styling */
+.tableSelect {
+  width: 100%;
+  padding: var(--space-xxs);
+  font-size: var(--font-size-xs);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  background: var(--background-light);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.tableSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
+}
+
+/* Ensure dropdown options wrap properly */
+.tableSelect option {
+  padding: var(--space-xxs);
+  white-space: normal;
+  word-wrap: break-word;
+}

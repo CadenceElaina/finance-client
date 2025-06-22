@@ -1,10 +1,7 @@
 // src/features/Dashboard/Apps/Plan/Goals/GoalCard.jsx
 import React from "react";
 import Button from "../../../../../components/ui/Button/Button";
-import {
-  calculateProgress,
-  calculateTimeToGoal,
-} from "../utils/goalCalculations";
+
 import goalsStyles from "../goals.module.css";
 
 const GoalCard = ({

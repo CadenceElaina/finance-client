@@ -1,42 +1,23 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
+import { useAppSize } from "../../../../contexts/AppSizeContext";
+import { useAppSizeRef } from "../../../../hooks/useAppSizeRegistration";
+import { getAppSizeClasses } from "../../../../utils/getAppSize";
 import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
 import CalculatorsTab from "./Calculators/CalculatorsTab";
 import ProjectionsTab from "./Projections/ProjectionsTab";
 import InvestmentRoadmapTab from "./Investments/InvestmentRoadmapTab";
 import planStyles from "./plan.module.css";
-import { getAppSize } from "../../../../utils/getAppSize";
 
-const Plan = () => {
-  const containerRef = useRef(null);
-  const [containerSize, setContainerSize] = useState({
-    width: 0,
-    height: 0,
-  });
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const setInitialSize = () => {
-      const rect = containerRef.current.getBoundingClientRect();
-      setContainerSize({ width: rect.width, height: rect.height });
-    };
-    setInitialSize();
-    const resizeObserver = new window.ResizeObserver((entries) => {
-      for (let entry of entries) {
-        if (entry.target === containerRef.current) {
-          const { width, height } = entry.contentRect;
-          setContainerSize({ width, height });
-        }
-      }
-    });
-    resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
-  }, []);
-
-  const appSize = getAppSize(containerSize);
-  const smallApp = appSize === "small";
-  const largeApp = appSize === "large";
-
+const Plan = React.memo(() => {
+  const appId = "plan";
+  const containerRef = useAppSizeRef(appId);
+  const appSize = useAppSize(appId);
   const [activeTabId, setActiveTabId] = useState("invest");
+
+  const { smallApp, largeApp } = useMemo(
+    () => getAppSizeClasses(appSize),
+    [appSize]
+  );
 
   const tabs = [
     {
@@ -75,11 +56,9 @@ const Plan = () => {
   return (
     <div
       ref={containerRef}
-      className={`
-        ${planStyles.planAppContainer}
-        ${smallApp ? "smallApp" : ""}
-        ${largeApp ? "largeApp" : ""}
-      `}
+      className={`${planStyles.planAppContainer} ${
+        smallApp ? "smallApp" : ""
+      } ${largeApp ? "largeApp" : ""}`}
     >
       <FlexibleTabs
         tabs={tabs}
@@ -87,16 +66,13 @@ const Plan = () => {
         onTabChange={setActiveTabId}
         smallApp={smallApp}
         largeApp={largeApp}
-        className={`
-          ${planStyles.planTabs}
-          ${smallApp ? "smallApp" : ""}
-          ${largeApp ? "largeApp" : ""}
-        `}
+        className={planStyles.planTabs}
         contentClassName={planStyles.planTabContent}
         alwaysShowInnerTabsAsRow={true}
       />
     </div>
   );
-};
+});
 
+Plan.displayName = "Plan";
 export default Plan;

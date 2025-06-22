@@ -1,16 +1,17 @@
-// src/utils/debtPaymentSync.js
-// Update to better handle removals
+// src/utils/debtPaymentSync.js - ENHANCED
 
-export const syncDebtPaymentsToExpenses = (accounts, expenses) => {
+// Enhanced bidirectional debt payment synchronization
+
+export const syncDebtPaymentsToExpenses = (accounts, existingExpenses) => {
   const debtAccounts = accounts.filter(acc => 
-    acc.category === "Debt" && acc.monthlyPayment > 0
+    acc.category === "Debt" && (acc.monthlyPayment || 0) > 0
   );
   
-  // Start with existing expenses, filtered to remove old debt payments
-  const nonDebtExpenses = expenses.filter(exp => !exp.isDebtPayment);
+  // Start with non-debt expenses
+  const nonDebtExpenses = existingExpenses.filter(exp => !exp.isDebtPayment);
   const updatedExpenses = [...nonDebtExpenses];
   
-  // Add current debt payments
+  // Add/update debt payment expenses
   debtAccounts.forEach(debtAccount => {
     const expenseId = `exp-debt-${debtAccount.id}`;
     
@@ -29,35 +30,66 @@ export const syncDebtPaymentsToExpenses = (accounts, expenses) => {
   return updatedExpenses;
 };
 
-export const syncExpenseToDebtPayment = (accounts, expenseId, newAmount) => {
-  const updatedAccounts = [...accounts];
+export const syncExpensesToDebtAccounts = (accounts, expenses) => {
+  const debtPaymentExpenses = expenses.filter(exp => exp.isDebtPayment);
   
-  // Find the expense's linked account
-  const linkedAccountId = expenseId.replace('exp-debt-', '');
-  const accountIndex = updatedAccounts.findIndex(acc => acc.id === linkedAccountId);
-  
-  if (accountIndex >= 0 && updatedAccounts[accountIndex].category === "Debt") {
-    updatedAccounts[accountIndex] = {
-      ...updatedAccounts[accountIndex],
-      monthlyPayment: newAmount
-    };
-  }
-  
-  return updatedAccounts;
+  return accounts.map(account => {
+    if (account.category === "Debt") {
+      const linkedExpense = debtPaymentExpenses.find(exp => 
+        exp.linkedToAccountId === account.id
+      );
+      
+      if (linkedExpense) {
+        return {
+          ...account,
+          monthlyPayment: parseFloat(linkedExpense.cost) || 0
+        };
+      }
+    }
+    return account;
+  });
 };
 
-export const removeDebtPaymentExpense = (accounts, expenses, expenseId) => {
-  const linkedAccountId = expenseId.replace('exp-debt-', '');
-  const account = accounts.find(acc => acc.id === linkedAccountId);
-  
-  return {
-    accountName: account?.name || "Unknown Account",
-    linkedAccountId,
-    updatedExpenses: expenses.filter(exp => exp.id !== expenseId),
-    updatedAccounts: accounts.map(acc => 
-      acc.id === linkedAccountId 
-        ? { ...acc, monthlyPayment: 0 }
-        : acc
-    )
-  };
+export const detectDebtPaymentChanges = (originalExpenses, newExpenses) => {
+  const changes = [];
+
+  newExpenses.forEach(expense => {
+    if (expense.isDebtPayment) {
+      const originalExpense = originalExpenses.find(orig => orig.id === expense.id);
+      if (originalExpense && originalExpense.cost !== expense.cost) {
+        changes.push({
+          expenseId: expense.id,
+          accountId: expense.linkedToAccountId,
+          accountName: expense.name.replace(' Payment', ''),
+          oldAmount: originalExpense.cost,
+          newAmount: expense.cost,
+        });
+      }
+    }
+  });
+
+  return changes;
+};
+
+export const detectAccountDebtChanges = (originalAccounts, newAccounts) => {
+  const changes = [];
+
+  newAccounts.forEach(account => {
+    if (account.category === "Debt" && account.monthlyPayment) {
+      const originalAccount = originalAccounts.find(orig => orig.id === account.id);
+      const oldPayment = originalAccount?.monthlyPayment || 0;
+      const newPayment = account.monthlyPayment || 0;
+      
+      if (oldPayment !== newPayment) {
+        changes.push({
+          accountId: account.id,
+          accountName: account.name,
+          oldAmount: oldPayment,
+          newAmount: newPayment,
+        });
+      }
+    }
+  });
+
+  return changes;
 };

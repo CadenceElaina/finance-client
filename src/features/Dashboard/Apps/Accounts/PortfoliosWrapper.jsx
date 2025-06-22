@@ -1,39 +1,28 @@
 // src/features/Dashboard/Apps/Accounts/PortfoliosWrapper.jsx
 import React, { useState } from "react";
+import { useAccountsSection } from "../../../../hooks/useAccountsSection";
 import InvestmentsTab from "./Investments/InvestmentsTab";
 import AllocationTab from "./Investments/AllocationTab";
 import PerformanceTab from "./Investments/PerformanceTab";
-import accountsStyles from "./Accounts.module.css";
-import budgetStyles from "../Budget/budget.module.css";
-import { useFinancialData } from "../../../../contexts/FinancialDataContext";
-import { DEMO_PORTFOLIOS } from "../../../../utils/constants";
-import SectionHeader from "../../../../components/ui/Section/SectionHeader";
 import SnapshotRow from "../../../../components/ui/Snapshot/SnapshotRow";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
+import accountsStyles from "./Accounts.module.css";
 
 const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
-  const { data } = useFinancialData();
-  const allAccounts = data.accounts || [];
-  const allPortfolios = data.portfolios || []; // Use actual portfolios from data
-
-  // Filter portfolios that have securities
-  const portfolios = allPortfolios.filter((p) => {
-    const portfolioAccounts = allAccounts.filter(
-      (acc) => acc.portfolioId === p.id && acc.category === "Investments"
-    );
-    return portfolioAccounts.some(
-      (acc) => Array.isArray(acc.securities) && acc.securities.length > 0
-    );
-  });
-
-  // Portfolio selection state
   const [selectedPortfolioId, setSelectedPortfolioId] = useState("all");
+
+  const {
+    allAccounts,
+    portfolios,
+    portfoliosWithSecurities,
+    portfolioMetrics,
+  } = useAccountsSection("all", selectedPortfolioId);
+
   const selectedPortfolioName =
     selectedPortfolioId === "all"
       ? "All Portfolios"
       : portfolios.find((p) => p.id === selectedPortfolioId)?.name || "";
 
-  // Portfolio select menu (use standard styling)
   const portfolioSelectMenu = (
     <div className={sectionStyles.selectGroup}>
       <label htmlFor="portfolio-select" className={sectionStyles.selectLabel}>
@@ -46,7 +35,7 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
         className={sectionStyles.baseSelect}
       >
         <option value="all">All Portfolios</option>
-        {portfolios.map((p) => (
+        {portfoliosWithSecurities.map((p) => (
           <option key={p.id} value={p.id}>
             {p.name}
           </option>
@@ -55,90 +44,33 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
     </div>
   );
 
-  // Calculate snapshot for selected portfolio
-  const relevantAccounts =
-    selectedPortfolioId === "all"
-      ? allAccounts.filter(
-          (acc) => acc.category === "Investments" && acc.hasSecurities
-        )
-      : allAccounts.filter(
-          (acc) =>
-            acc.category === "Investments" &&
-            acc.hasSecurities &&
-            acc.portfolioId === selectedPortfolioId
-        );
-
-  // Calculate cash balance for the selected portfolio
-  const cashBalance =
-    selectedPortfolioId === "all"
-      ? allAccounts
-          .filter(
-            (acc) =>
-              acc.category === "Investments" &&
-              typeof acc.cashBalance === "number"
-          )
-          .reduce((sum, acc) => sum + acc.cashBalance, 0)
-      : allAccounts
-          .filter(
-            (acc) =>
-              acc.category === "Investments" &&
-              acc.portfolioId === selectedPortfolioId &&
-              typeof acc.cashBalance === "number"
-          )
-          .reduce((sum, acc) => sum + acc.cashBalance, 0);
-
-  // Calculate value for selected portfolio
-  const value = relevantAccounts.reduce(
-    (sum, acc) => sum + (acc.value || 0),
-    0
-  );
-
-  // Calculate cost basis for investments (sum of purchasePrice * quantity for all securities)
-  let totalCostBasis = 0;
-  relevantAccounts.forEach((acc) => {
-    if (Array.isArray(acc.securities)) {
-      acc.securities.forEach((sec) => {
-        totalCostBasis += (sec.purchasePrice || 0) * (sec.quantity || 0);
-      });
-    }
-  });
-
-  const gainLoss = value - totalCostBasis;
-  const gainLossPercent =
-    totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
-
   const snapshotItems = [
     {
       label: "Value",
-      value: `$${value.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-      })}`,
+      value: `$${(
+        portfolioMetrics.totalValue + portfolioMetrics.cashBalance
+      ).toLocaleString()}`,
       valueClass: "positive",
     },
     {
-      label: "Cash Balance",
-      value: `$${cashBalance.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-      })}`,
-      valueClass: "positive",
+      label: "Gain/Loss",
+      value: `$${portfolioMetrics.gainLoss.toLocaleString()}`,
+      valueClass: portfolioMetrics.gainLoss >= 0 ? "positive" : "negative",
+      suffix: ` (${portfolioMetrics.gainLossPercent.toFixed(1)}%)`,
     },
     {
-      label: "Performance",
-      value: `${gainLoss >= 0 ? "+" : "-"}$${Math.abs(gainLoss).toLocaleString(
-        undefined,
-        { minimumFractionDigits: 2 }
-      )}`,
-      valueClass: gainLoss >= 0 ? "positive" : "negative",
-      valueSuffix:
-        totalCostBasis > 0
-          ? `(${gainLossPercent >= 0 ? "+" : "-"}${Math.abs(
-              gainLossPercent
-            ).toFixed(2)}%)`
-          : null,
+      label: "Securities",
+      value: portfolioMetrics.securitiesCount.toString(),
+      valueClass: "neutral",
+    },
+    {
+      label: "Cash",
+      value: `$${portfolioMetrics.cashBalance.toLocaleString()}`,
+      valueClass: "neutral",
     },
   ];
 
-  const tabProps = {
+  const commonTabProps = {
     smallApp,
     portfolioId: selectedPortfolioId,
     portfolioName: selectedPortfolioName,
@@ -146,32 +78,39 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
     setSelectedPortfolioId,
     selectedPortfolioId,
     portfolioSelectMenu,
+    showPortfolioSelectMenu: true,
   };
 
-  // Table header for holdings
   const investmentsHeaderTitle =
     selectedPortfolioId === "all"
       ? "All Investments"
       : `${selectedPortfolioName}'s Investments`;
 
+  const showInvestments =
+    !activeInnerTabId || activeInnerTabId === "investments";
+  const showAllocation = activeInnerTabId === "allocation";
+  const showPerformance = activeInnerTabId === "performance";
+
   return (
     <div className={accountsStyles.portfoliosContentContainer}>
-      {(!activeInnerTabId || activeInnerTabId === "investments") && (
-        <>
-          <SnapshotRow items={snapshotItems} small={smallApp} />
-          <InvestmentsTab
-            {...tabProps}
-            investmentsHeaderTitle={investmentsHeaderTitle}
-            showPortfolioSelectMenu
-          />
-        </>
-      )}
-      {activeInnerTabId === "allocation" && (
-        <AllocationTab {...tabProps} showPortfolioSelectMenu />
-      )}
-      {activeInnerTabId === "performance" && (
-        <PerformanceTab {...tabProps} showPortfolioSelectMenu />
-      )}
+      {/* Always render snapshot row */}
+      <SnapshotRow items={snapshotItems} small={smallApp} />
+
+      {/* Use visibility instead of conditional rendering to prevent chart re-creation */}
+      <div style={{ display: showInvestments ? "block" : "none" }}>
+        <InvestmentsTab
+          {...commonTabProps}
+          investmentsHeaderTitle={investmentsHeaderTitle}
+        />
+      </div>
+
+      <div style={{ display: showAllocation ? "block" : "none" }}>
+        <AllocationTab {...commonTabProps} />
+      </div>
+
+      <div style={{ display: showPerformance ? "block" : "none" }}>
+        <PerformanceTab {...commonTabProps} />
+      </div>
     </div>
   );
 };

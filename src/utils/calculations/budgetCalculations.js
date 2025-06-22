@@ -1,17 +1,56 @@
-export function calculateBudgetFields(budget) {
-  if (!budget) return {
-    totalMonthlyExpenses: 0,
-    annualPreTax: 0,
-    monthlyAfterTax: 0,
-    annualAfterTax: 0,
-    monthlyPreTax: 0,
-    discretionaryIncome: 0,
-    effectiveTaxRate: 0,
+import { useMemo } from 'react';
+
+// Memoized calculation function
+const calculateBudgetFieldsMemo = (() => {
+  let cache = new Map();
+  const maxCacheSize = 10;
+
+  return (budget) => {
+    // Create cache key from relevant budget properties
+    const cacheKey = JSON.stringify({
+      incomeType: budget?.income?.type,
+      monthlyAfterTax: budget?.income?.monthlyAfterTax,
+      annualPreTax: budget?.income?.annualPreTax,
+      additionalAnnualAT: budget?.income?.additionalAnnualAT,
+      hourlyRate: budget?.income?.hourlyRate,
+      expectedHours: budget?.income?.expectedAnnualHours,
+      expensesTotal: budget?.monthlyExpenses?.reduce((sum, exp) => sum + (parseFloat(exp.cost) || 0), 0)
+    });
+
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey);
+    }
+
+    const result = calculateBudgetFields(budget);
+
+    // Manage cache size
+    if (cache.size >= maxCacheSize) {
+      const firstKey = cache.keys().next().value;
+      cache.delete(firstKey);
+    }
+    cache.set(cacheKey, result);
+
+    return result;
   };
+})();
+
+function calculateBudgetFields(budget) {
+  if (!budget) {
+    return {
+      totalMonthlyExpenses: 0,
+      annualPreTax: 0,
+      monthlyAfterTax: 0,
+      annualAfterTax: 0,
+      monthlyPreTax: 0,
+      discretionaryIncome: 0,
+    };
+  }
   
   const income = budget.income || {};
   const expenses = budget.monthlyExpenses || [];
-  const totalMonthlyExpenses = expenses.reduce((acc, item) => acc + (parseFloat(item.cost) || 0), 0);
+  
+  const totalMonthlyExpenses = expenses.reduce((acc, item) => 
+    acc + (parseFloat(item.cost) || 0), 0);
 
   let annualPreTax = 0;
   let monthlyAfterTax = 0;
@@ -25,40 +64,38 @@ export function calculateBudgetFields(budget) {
     const hourlyRate = parseFloat(income.hourlyRate) || 0;
     const expectedHours = parseFloat(income.expectedAnnualHours) || 2080;
     annualPreTax = hourlyRate * expectedHours;
-    monthlyAfterTax = parseFloat(income.monthlyAfterTax) || 0;
     monthlyPreTax = annualPreTax / 12;
+    monthlyAfterTax = parseFloat(income.monthlyAfterTax) || 0;
   }
 
-  // FIXED: Include additional annual income in monthly calculation
+  // Include additional annual income
   const additionalMonthlyAT = (parseFloat(income.additionalAnnualAT) || 0) / 12;
   const totalMonthlyAfterTax = monthlyAfterTax + additionalMonthlyAT;
   
-  // Calculate total annual after-tax including additional income
   const annualAfterTax = (monthlyAfterTax * 12) + (parseFloat(income.additionalAnnualAT) || 0);
-  
-  // FIXED: Use total monthly after-tax for discretionary calculation
   const discretionaryIncome = totalMonthlyAfterTax - totalMonthlyExpenses;
-
-  // Calculate effective tax rate based on primary income only (not including additional)
-  const effectiveTaxRate = annualPreTax > 0 ? 
-    ((annualPreTax - (monthlyAfterTax * 12)) / annualPreTax) * 100 : 0;
 
   return {
     totalMonthlyExpenses,
     annualPreTax,
-    monthlyAfterTax: totalMonthlyAfterTax, // FIXED: Return total monthly including additional
+    monthlyAfterTax: totalMonthlyAfterTax,
     annualAfterTax,
     monthlyPreTax,
     discretionaryIncome,
-    effectiveTaxRate,
   };
 }
 
-// Helper function to merge budget with calculated fields
+export { calculateBudgetFields, calculateBudgetFieldsMemo };
+
 export function enrichBudgetWithCalculations(budget) {
-  if (!budget) {
+  if (!budget || typeof budget !== 'object') {
     return {
-      income: {},
+      income: {
+        type: "salary",
+        monthlyAfterTax: 0,
+        annualPreTax: 0,
+        additionalAnnualAT: 0
+      },
       monthlyExpenses: [],
       totalMonthlyExpenses: 0,
       annualPreTax: 0,
@@ -66,54 +103,33 @@ export function enrichBudgetWithCalculations(budget) {
       annualAfterTax: 0,
       monthlyPreTax: 0,
       discretionaryIncome: 0,
-      effectiveTaxRate: 0,
     };
   }
 
-  const calculations = calculateBudgetFields(budget);
+  const normalizedBudget = {
+    income: budget.income || {},
+    monthlyExpenses: Array.isArray(budget.monthlyExpenses) ? budget.monthlyExpenses : [],
+    ...budget
+  };
+
+  const calculations = calculateBudgetFieldsMemo(normalizedBudget);
+  
   return {
-    ...budget,
+    ...normalizedBudget,
     ...calculations,
   };
 }
 
-// Helper function to validate budget data
-export function validateBudgetData(budget) {
-  const errors = {};
-  
-  if (!budget || !budget.income) {
-    errors.income = 'Income data is required';
-    return {
-      isValid: false,
-      errors
-    };
-  }
-
-  const income = budget.income;
-  
-  if (income.type === 'salary' && (!income.annualPreTax || parseFloat(income.annualPreTax) <= 0)) {
-    errors.annualPreTax = 'Annual salary must be greater than 0';
-  }
-  if (income.type === 'hourly' && (!income.hourlyRate || parseFloat(income.hourlyRate) <= 0)) {
-    errors.hourlyRate = 'Hourly rate must be greater than 0';
-  }
-  if (!income.monthlyAfterTax || parseFloat(income.monthlyAfterTax) <= 0) {
-    errors.monthlyAfterTax = 'Monthly after-tax income must be greater than 0';
-  }
-  
-  if (budget.monthlyExpenses && Array.isArray(budget.monthlyExpenses)) {
-    budget.monthlyExpenses.forEach((expense, index) => {
-      if (!expense.name || expense.name.trim() === '') {
-        errors[`expense_${index}_name`] = 'Expense name is required';
-      }
-      if (expense.cost === undefined || parseFloat(expense.cost) < 0) {
-        errors[`expense_${index}_cost`] = 'Expense cost must be 0 or greater';
-      }
-    });
-  }
-  
-  return {
-    isValid: Object.keys(errors).length === 0,
-    errors
-  };
-}
+// Hook for components
+export const useBudgetCalculations = (budget) => {
+  return useMemo(() => calculateBudgetFieldsMemo(budget), [
+    budget?.income?.type,
+    budget?.income?.annualPreTax,
+    budget?.income?.monthlyAfterTax,
+    budget?.income?.additionalAnnualAT,
+    budget?.income?.hourlyRate,
+    budget?.income?.expectedAnnualHours,
+    budget?.monthlyExpenses?.length,
+    budget?.monthlyExpenses?.reduce((sum, exp) => sum + (parseFloat(exp.cost) || 0), 0)
+  ]);
+};

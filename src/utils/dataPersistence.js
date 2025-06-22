@@ -3,51 +3,38 @@ import { fetchFinancialData, saveFinancialData } from "../services/financialServ
 import { DEMO_ACCOUNTS, DEFAULT_DEMO_BUDGET, DEMO_PORTFOLIOS } from "./constants";
 
 export async function loadFinancialData({ user, token, persistence }) {
+  let rawData = null;
+  
   if (user && persistence === "server") {
     try {
-      const loaded = await fetchFinancialData(token);
-      if (loaded && loaded.accounts && loaded.budget) {
-        // Ensure portfolios exist
-        return {
-          ...loaded,
-          portfolios: loaded.portfolios || DEMO_PORTFOLIOS,
-          goals: loaded.goals || []
-        };
-      }
+      rawData = await fetchFinancialData(token);
     } catch (error) {
       console.warn('Failed to load from server, falling back to demo data:', error);
     }
-    // Fallback to demo data if server fails
-    return { 
-      accounts: DEMO_ACCOUNTS, 
-      budget: DEFAULT_DEMO_BUDGET,
-      portfolios: DEMO_PORTFOLIOS,
-      goals: []
-    };
   } else if (persistence === "local") {
-    const localData = getLocalData();
-    if (localData) {
-      return {
-        accounts: localData.accounts || DEMO_ACCOUNTS,
-        budget: localData.budget || DEFAULT_DEMO_BUDGET,
-        portfolios: localData.portfolios || DEMO_PORTFOLIOS,
-        goals: localData.goals || []
-      };
-    }
-    return { 
-      accounts: DEMO_ACCOUNTS, 
-      budget: DEFAULT_DEMO_BUDGET,
-      portfolios: DEMO_PORTFOLIOS,
-      goals: []
-    };
-  } else {
-    return { 
+    rawData = getLocalData();
+  }
+
+  // FIXED: Fallback to demo data with proper structure
+  if (!rawData) {
+    rawData = { 
       accounts: DEMO_ACCOUNTS, 
       budget: DEFAULT_DEMO_BUDGET,
       portfolios: DEMO_PORTFOLIOS,
       goals: []
     };
   }
+
+  // FIXED: Ensure all required fields exist
+  const normalizedData = {
+    accounts: rawData.accounts || DEMO_ACCOUNTS,
+    budget: rawData.budget || DEFAULT_DEMO_BUDGET,
+    portfolios: rawData.portfolios || DEMO_PORTFOLIOS,
+    goals: rawData.goals || []
+  };
+
+  // FIXED: Don't enrich here - let context handle it
+  return normalizedData;
 }
 
 export async function saveFinancialDataUtil({ user, token, persistence, data }) {

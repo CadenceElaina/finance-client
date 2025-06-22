@@ -48,28 +48,13 @@
     box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: row;
-    animation: slideInRight var(--dropdown-slide-duration, 0.18s) var(--dropdown-slide-ease, cubic-bezier(0.4, 0, 0.2, 1));
-    transition: opacity var(--dropdown-slide-duration, 0.18s) var(--dropdown-slide-ease, cubic-bezier(0.4, 0, 0.2, 1)),
-        transform var(--dropdown-slide-duration, 0.18s) var(--dropdown-slide-ease, cubic-bezier(0.4, 0, 0.2, 1));
-    opacity: 1;
+ 
     transform: translateX(0);
     height: 100%;
     align-items: stretch;
     min-width: unset;
     margin: 0 auto;
     padding: 0;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(-16px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
 }
 
 .menuItem {

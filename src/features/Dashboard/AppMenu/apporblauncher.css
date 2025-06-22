@@ -2,10 +2,12 @@
     position: absolute;
     top: 0;
     left: 0;
-    /* min-height: 385px; */
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Force GPU acceleration */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .app-orb,
@@ -26,26 +28,30 @@
     color: var(--text-light);
     position: relative;
     box-shadow: var(--app-orb-shadow);
-    transition: background 0.2s, box-shadow 0.2s;
+    transition: transform 0.15s ease-out, filter 0.15s ease-out;
+    /* Optimize for animations */
+    will-change: transform, filter;
+    /* Force GPU layer */
+    transform: translateZ(0);
 }
 
 .app-orb:hover {
-    transform: scale(1.05);
+    transform: translateZ(0) scale(1.05);
     filter: brightness(1.1);
 }
 
 .app-orb.active {
-    transform: scale(1.1);
+    transform: translateZ(0) scale(1.1);
     box-shadow: 0 0 0 3px var(--border-active), var(--shadow-elevated);
-    /* Slightly smaller active border */
-    box-shadow: var(--app-orb-shadow);
 }
 
 .orb-icon {
     font-size: 2rem;
-    /* Slightly smaller icon */
     font-weight: 200;
     line-height: 1;
+    /* Prevent text reflow */
+    width: 1em;
+    text-align: center;
 }
 
 .app-orb-menu {
@@ -59,6 +65,8 @@
     pointer-events: auto;
     background: var(--app-orb-menu-bg);
     box-shadow: var(--app-orb-menu-shadow);
+    /* Force GPU layer */
+    transform: translate(-50%, -50%) translateZ(0);
 }
 
 .app-orb-launcher-container .app-orb-menu {
@@ -92,13 +100,14 @@
     margin-left: -30px;
     margin-top: -30px;
     box-shadow: var(--shadow-sm);
-
-    /* Adjust position so its center is at (x,y) from JS */
-    /* Negative half of new width */
-    /* Negative half of new height */
-
+    transition: transform 0.12s ease-out, filter 0.12s ease-out, border-color 0.12s ease-out;
     transform-origin: center center;
-    /* Ensure transform-origin is center for stable scaling */
+    /* Optimize for animations */
+    will-change: transform, filter;
+    /* Force GPU layer */
+    transform: translateZ(0);
+    /* Prevent layout shifts */
+    contain: layout style paint;
 }
 
 .app-orb.active+.app-orb-menu .app-orb-item {
@@ -107,33 +116,37 @@
 }
 
 .app-orb-item:hover {
-    transform: scale(1.08);
-    /* Slightly less scaling on hover */
+    transform: translateZ(0) scale(1.08);
     filter: brightness(1.2);
     border-color: var(--color-primary);
 }
 
 .app-orb-item.active {
     border: 1px solid var(--border-active);
-    /* Smaller active border */
     box-shadow: 0 0 0 1px var(--border-active), var(--shadow-md);
-    /* Smaller active shadow */
     filter: brightness(1.2);
 }
 
 .app-orb-item-icon {
     font-size: 1.6rem;
-    /* Smaller icon in items */
     font-weight: bold;
+    /* Prevent text reflow */
+    width: 1em;
+    text-align: center;
+    line-height: 1;
 }
 
 .app-orb-item-label {
     font-size: 0.7rem;
-    /* Smaller label font size */
     text-align: center;
+    /* Prevent text wrapping */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
-/* Add media queries for smaller screens if needed */
+/* Performance optimizations for mobile */
 @media (max-width: 768px) {
     .app-orb {
         width: 40px;
@@ -158,4 +171,23 @@
     .app-orb-item-label {
         font-size: 0.6rem;
     }
+}
+
+/* Reduce animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+    .app-orb,
+    .app-orb-item {
+        transition: none;
+    }
+}
+
+/* Force hardware acceleration for supported browsers */
+.app-orb-launcher-container,
+.app-orb,
+.app-orb-menu,
+.app-orb-item {
+    -webkit-transform: translateZ(0);
+    -moz-transform: translateZ(0);
+    -ms-transform: translateZ(0);
+    -o-transform: translateZ(0);
 }

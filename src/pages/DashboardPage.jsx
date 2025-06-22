@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import DashboardApp from "../features/Dashboard/DashboardApp";
 import GridItemWrapper from "../features/Dashboard/GridItemWrapper";
 import AppOrbLauncher from "../features/Dashboard/AppMenu/AppOrbLauncher";
+import { AppSizeProvider } from "../contexts/AppSizeContext";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -23,8 +24,8 @@ const appsList = [
 ];
 
 const DashboardPage = ({ userData }) => {
-  const DEFAULT_APP_WIDTH = 6; // was 6
-  const DEFAULT_APP_HEIGHT = 7.5; // was 8
+  const DEFAULT_APP_WIDTH = 6;
+  const DEFAULT_APP_HEIGHT = 7.5;
   const availableHandles = ["se"];
   const initialAppIds = ["budget", "accounts", "plan", "goals"];
 
@@ -224,7 +225,7 @@ const DashboardPage = ({ userData }) => {
   }
 
   return (
-    <>
+    <AppSizeProvider>
       <div className="dashboard-container">
         <ResponsiveGridLayout
           className="dashboard-grid"
@@ -266,7 +267,8 @@ const DashboardPage = ({ userData }) => {
         openApp={openApp}
         openAppIds={openAppIds}
       />
-    </>
+    </AppSizeProvider>
   );
 };
+
 export default DashboardPage;

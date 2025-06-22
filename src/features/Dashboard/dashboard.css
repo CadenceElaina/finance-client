@@ -36,7 +36,6 @@
     border-color: var(--app-launcher-button-hover-border-color, var(--color-primary));
 }
 
-
 .app-header {
     background: var(--surface-dark);
     color: var(--text-light);

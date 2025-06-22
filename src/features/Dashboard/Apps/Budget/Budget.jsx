@@ -1,64 +1,56 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
+import { useAppSize } from "../../../../contexts/AppSizeContext";
+import { useAppSizeRef } from "../../../../hooks/useAppSizeRegistration";
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
+import { getAppSizeClasses } from "../../../../utils/getAppSize";
 import BudgetOverviewWrapper from "./BudgetOverviewWrapper";
 import budgetStyles from "./budget.module.css";
-import { getAppSize } from "../../../../utils/getAppSize";
-import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 
-const Budget = () => {
-  const containerRef = useRef(null);
-  const [containerSize, setContainerSize] = useState({
-    width: 0,
-    height: 0,
-  });
-
-  useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setContainerSize({ width: rect.width, height: rect.height });
-      }
-    };
-    updateSize();
-
-    let resizeObserver = null;
-    if (containerRef.current && window.ResizeObserver) {
-      resizeObserver = new window.ResizeObserver((entries) => {
-        for (let entry of entries) {
-          if (entry.target === containerRef.current) {
-            const { width, height } = entry.contentRect;
-            setContainerSize({ width, height });
-          }
-        }
-      });
-      resizeObserver.observe(containerRef.current);
-    }
-
-    window.addEventListener("resize", updateSize);
-
-    return () => {
-      if (resizeObserver) resizeObserver.disconnect();
-      window.removeEventListener("resize", updateSize);
-    };
-  }, []);
-
-  const appSize = getAppSize(containerSize);
-  const smallApp = appSize === "small";
-  const largeApp = appSize === "large";
-
-  // For small apps, we can still use the inner tab selection for different views
+const Budget = React.memo(() => {
+  const appId = "budget";
+  const containerRef = useAppSizeRef(appId);
+  const appSize = useAppSize(appId);
   const [activeInnerTabId, setActiveInnerTabId] = useState("showAll");
 
+  // FIXED: Add financial data check
+  const financialDataResult = useFinancialData();
+
+  // FIXED: Handle loading state
+  if (!financialDataResult?.data) {
+    return (
+      <div
+        ref={containerRef}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          color: "var(--text-secondary)",
+        }}
+      >
+        <div>Loading budget data...</div>
+      </div>
+    );
+  }
+
+  // Memoize size-dependent values
+  const sizeClasses = useMemo(() => getAppSizeClasses(appSize), [appSize]);
+  const { smallApp, largeApp } = sizeClasses;
+
+  // Memoize the container class string
+  const containerClassName = useMemo(
+    () =>
+      `
+    ${budgetStyles.budgetAppContainer}
+    ${smallApp ? "smallApp" : ""}
+    ${largeApp ? "largeApp" : ""}
+  `.trim(),
+    [smallApp, largeApp]
+  );
+
   return (
-    <div
-      ref={containerRef}
-      className={`
-        ${budgetStyles.budgetAppContainer}
-        ${smallApp ? "smallApp" : ""}
-        ${largeApp ? "largeApp" : ""}
-      `}
-    >
+    <div ref={containerRef} className={containerClassName}>
       {smallApp ? (
-        // Small app: Show simple button navigation for different views
         <div className={budgetStyles.budgetAppContent}>
           <div className={budgetStyles.smallAppNav}>
             <button
@@ -102,7 +94,6 @@ const Budget = () => {
           </div>
         </div>
       ) : (
-        // Medium/Large app: Show all sections directly
         <div className={budgetStyles.budgetTabContent}>
           <BudgetOverviewWrapper
             smallApp={smallApp}
@@ -112,6 +103,8 @@ const Budget = () => {
       )}
     </div>
   );
-};
+});
+
+Budget.displayName = "Budget";
 
 export default Budget;

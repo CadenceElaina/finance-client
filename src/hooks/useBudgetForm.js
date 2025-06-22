@@ -4,8 +4,30 @@ import { useFinancialData } from "../contexts/FinancialDataContext";
 import { useToast } from "./useToast";
 
 export const useBudgetForm = (sectionKey, defaultItem = {}, options = {}) => {
-  const { data, saveData } = useFinancialData();
+  const financialDataResult = useFinancialData();
   const { showSuccess, showWarning } = useToast();
+  
+  // Add safety check for undefined data
+  if (!financialDataResult || !financialDataResult.data) {
+    // Return a safe default state while data is loading
+    return {
+      editMode: false,
+      editRows: [],
+      enterEditMode: () => {},
+      cancelEdit: () => {},
+      exitEditMode: () => {},
+      updateEditRow: () => {},
+      addEditRow: () => {},
+      removeEditRow: () => {},
+      handleSave: () => {},
+      handleClear: () => {},
+      handleResetToDemo: () => {},
+      sectionData: [],
+      isValid: true,
+    };
+  }
+
+  const { data, saveData } = financialDataResult;
   
   const {
     onSaveSuccess = null,
@@ -107,6 +129,6 @@ export const useBudgetForm = (sectionKey, defaultItem = {}, options = {}) => {
     handleClear,
     handleResetToDemo,
     sectionData,
-    isValid: true, // Always valid now
+    isValid: true,
   };
 };

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import styles from "./InnerTabs.module.css";
 
-const CLOSE_DELAY = 180; // ms
+const CLOSE_DELAY = 0; // ms
 
 const InnerTabs = ({
   tabs,

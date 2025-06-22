@@ -1,15 +1,30 @@
-import React from "react";
+import React, { Suspense } from "react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+// Import components directly (not lazy for now to fix the immediate issue)
 import Accounts from "./Apps/Accounts/Accounts";
 import Assistant from "./Apps/Assistant";
 import Budget from "./Apps/Budget/Budget";
 import Debt from "./Apps/Debt";
 import Education from "./Apps/Education";
-import Goals from "./Apps/Goals/Goals"; // Updated import
+import Goals from "./Apps/Goals/Goals";
 import Plan from "./Apps/Plan/Plan";
 import Settings from "./Apps/Settings";
+
+const LoadingSpinner = () => (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      height: "200px",
+      color: "var(--text-secondary)",
+    }}
+  >
+    Loading...
+  </div>
+);
 
 const components = {
   accounts: Accounts,
@@ -24,6 +39,7 @@ const components = {
 
 const DashboardApp = ({ appId, userData, closeApp, isSelected }) => {
   const Component = components[appId];
+
   return (
     <div className={`app-window glass${isSelected ? " selected" : ""}`}>
       <div className="app-header">

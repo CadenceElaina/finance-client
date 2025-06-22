@@ -7,10 +7,10 @@ const DEFAULT_HOURS = 2080;
 export const useIncomeCalculations = (incomeData) => {
   return useMemo(() => {
     const hourlyRate = parseFloat(incomeData.hourlyRate) || 0;
-    const expectedHours = parseFloat(incomeData.expectedHours) || DEFAULT_HOURS;
+    const expectedHours = parseFloat(incomeData.expectedAnnualHours) || DEFAULT_HOURS;
     const annualPreTax = parseFloat(incomeData.annualPreTax) || 0;
     const monthlyAfterTax = parseFloat(incomeData.monthlyAfterTax) || 0;
-    const additionalAnnualAT = parseFloat(incomeData.additionalAnnualAT) || 0; // NEW
+    const additionalAnnualAT = parseFloat(incomeData.additionalAnnualAT) || 0;
 
     let calculatedAnnualPreTax = annualPreTax;
     let calculatedMonthlyPreTax = annualPreTax / 12;
@@ -23,12 +23,6 @@ export const useIncomeCalculations = (incomeData) => {
       calculatedMonthlyPreTax = calculatedAnnualPreTax / 12;
     }
 
-    // Calculate effective tax rate based on primary income only (not including additional)
-    const primaryAnnualAfterTax = monthlyAfterTax * 12;
-    const effectiveTaxRate = calculatedAnnualPreTax > 0 
-      ? ((calculatedAnnualPreTax - primaryAnnualAfterTax) / calculatedAnnualPreTax) * 100
-      : 0;
-
     // Estimate missing values based on available data
     const estimatedMonthlyAfterTax = incomeData.type === "hourly" && !monthlyAfterTax
       ? calculatedMonthlyPreTax * 0.75 // Rough 25% tax estimate
@@ -38,12 +32,11 @@ export const useIncomeCalculations = (incomeData) => {
       // Core calculated values
       annualPreTax: calculatedAnnualPreTax,
       monthlyPreTax: calculatedMonthlyPreTax,
-      annualAfterTax: calculatedAnnualAfterTax, // Now includes additional income
-      primaryAnnualAfterTax: primaryAnnualAfterTax, // Just from monthly * 12
+      annualAfterTax: calculatedAnnualAfterTax,
+      monthlyAfterTax: monthlyAfterTax, // Just the primary monthly income
       additionalAnnualAT: additionalAnnualAT,
       
       // Additional useful calculations
-      effectiveTaxRate,
       estimatedMonthlyAfterTax,
       
       // Validation helpers
@@ -57,7 +50,6 @@ export const useIncomeCalculations = (incomeData) => {
         annualAfterTax: calculatedAnnualAfterTax.toLocaleString(),
         monthlyAfterTax: monthlyAfterTax.toLocaleString(),
         additionalAnnualAT: additionalAnnualAT.toLocaleString(),
-        effectiveTaxRate: `${effectiveTaxRate.toFixed(1)}%`
       }
     };
   }, [incomeData]);
@@ -78,7 +70,7 @@ export const useIncomeSection = (budget) => {
     expectedHours: incomeData.expectedAnnualHours || DEFAULT_HOURS,
     annualPreTax: incomeData.annualPreTax || "",
     monthlyAfterTax: incomeData.monthlyAfterTax || "",
-    additionalAnnualAT: incomeData.additionalAnnualAT || "", // NEW
+    additionalAnnualAT: incomeData.additionalAnnualAT || "",
     ...calculations
   }], [incomeData, calculations]);
 
@@ -87,7 +79,7 @@ export const useIncomeSection = (budget) => {
     const incomeUpdate = {
       type: row.type,
       monthlyAfterTax: parseFloat(row.monthlyAfterTax) || 0,
-      additionalAnnualAT: parseFloat(row.additionalAnnualAT) || 0, // NEW
+      additionalAnnualAT: parseFloat(row.additionalAnnualAT) || 0,
     };
 
     if (row.type === "hourly") {
@@ -106,7 +98,7 @@ export const useIncomeSection = (budget) => {
       type: "salary",
       annualPreTax: 0,
       monthlyAfterTax: 0,
-      additionalAnnualAT: 0, // NEW
+      additionalAnnualAT: 0,
       hourlyRate: null,
       expectedAnnualHours: null,
     };

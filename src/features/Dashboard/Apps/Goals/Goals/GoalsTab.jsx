@@ -1,26 +1,59 @@
 // src/features/Dashboard/Apps/Plan/Goals/GoalsTab.jsx
-import React, { useState, useMemo } from "react";
-import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
+import React, { useState, useMemo, useEffect } from "react";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
-import GoalCard from "./GoalCard";
 import GoalForm from "./GoalForm";
+import GoalCard from "./GoalCard";
+import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import {
   calculateProgress,
   calculateTimeToGoal,
-} from "../utils/goalCalculations";
-import goalsStyles from "../goals.module.css";
+} from "../../Plan/utils/calculationUtils";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
+import goalsStyles from "../goals.module.css";
 
 const GoalsTab = ({ smallApp, activeInnerTabId }) => {
-  const { data, saveData, updateGoal, addManualGoalContribution } =
-    useFinancialData();
+  // SAFETY CHECK: Add early return if financial data context is not ready
+  const financialDataResult = useFinancialData();
+
+  if (!financialDataResult) {
+    return (
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Loading goals data...
+      </div>
+    );
+  }
+
+  const { data, saveData, updateGoal, addManualGoalContribution, removeGoal } =
+    financialDataResult;
+
+  // SAFETY CHECK: Ensure data exists
+  if (!data) {
+    return (
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Initializing goals...
+      </div>
+    );
+  }
+
   const { goals, accounts, budget } = data;
 
   // Calculate available discretionary income
-  const monthlyDiscretionary = budget.discretionaryIncome || 0;
-  const allocatedToGoals = goals
+  const monthlyDiscretionary = budget?.discretionaryIncome || 0;
+  const allocatedToGoals = (goals || [])
     .filter((g) => g.linkedToBudget && g.status === "active")
     .reduce((sum, g) => sum + (parseFloat(g.monthlyContribution) || 0), 0);
   const availableDiscretionary = monthlyDiscretionary - allocatedToGoals;
@@ -31,11 +64,25 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   const handleSaveGoal = (goalData) => {
     if (editingGoal) {
       // Update existing goal
-      updateGoal(editingGoal.id, goalData);
+      updateGoal(editingGoal.id, {
+        ...goalData,
+        lastModified: new Date().toISOString().split("T")[0],
+      });
     } else {
       // Add new goal
-      const newGoals = [...goals, goalData];
-      saveData({ ...data, goals: newGoals });
+      const newGoal = {
+        ...goalData,
+        id: `goal-${Date.now()}`,
+        status: "active",
+        currentAmount: parseFloat(goalData.currentAmount) || 0,
+        targetAmount: parseFloat(goalData.targetAmount) || 0,
+        monthlyContribution: parseFloat(goalData.monthlyContribution) || 0,
+        dateCreated: new Date().toISOString().split("T")[0],
+        lastModified: new Date().toISOString().split("T")[0],
+      };
+
+      const updatedGoals = [...(goals || []), newGoal];
+      saveData({ ...data, goals: updatedGoals });
     }
 
     setShowAddForm(false);
@@ -49,8 +96,13 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
   const handleRemoveGoal = (goalId) => {
     if (window.confirm("Are you sure you want to remove this goal?")) {
-      const updatedGoals = goals.filter((g) => g.id !== goalId);
-      saveData({ ...data, goals: updatedGoals });
+      if (removeGoal) {
+        removeGoal(goalId);
+      } else {
+        // Fallback if removeGoal is not available
+        const updatedGoals = (goals || []).filter((g) => g.id !== goalId);
+        saveData({ ...data, goals: updatedGoals });
+      }
     }
   };
 
@@ -60,22 +112,52 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   };
 
   const handleManualContribution = (goalId, amount) => {
-    addManualGoalContribution(goalId, amount);
+    if (addManualGoalContribution) {
+      addManualGoalContribution(goalId, amount);
+    } else {
+      // Fallback if addManualGoalContribution is not available
+      const updatedGoals = (goals || []).map((goal) => {
+        if (goal.id === goalId) {
+          const newAmount = (goal.currentAmount || 0) + amount;
+          return {
+            ...goal,
+            currentAmount: Math.min(goal.targetAmount, newAmount),
+            lastModified: new Date().toISOString().split("T")[0],
+          };
+        }
+        return goal;
+      });
+      saveData({ ...data, goals: updatedGoals });
+    }
   };
 
   const handleStatusToggle = (goalId) => {
-    const goal = goals.find((g) => g.id === goalId);
+    const goal = (goals || []).find((g) => g.id === goalId);
     if (!goal || goal.status === "completed") return;
 
     const newStatus = goal.status === "active" ? "paused" : "active";
-    updateGoal(goalId, {
-      status: newStatus,
-      lastModified: new Date().toISOString().split("T")[0],
-    });
+    if (updateGoal) {
+      updateGoal(goalId, {
+        status: newStatus,
+        lastModified: new Date().toISOString().split("T")[0],
+      });
+    } else {
+      // Fallback
+      const updatedGoals = (goals || []).map((g) =>
+        g.id === goalId
+          ? {
+              ...g,
+              status: newStatus,
+              lastModified: new Date().toISOString().split("T")[0],
+            }
+          : g
+      );
+      saveData({ ...data, goals: updatedGoals });
+    }
   };
 
   // Filter goals based on active inner tab
-  const filteredGoals = goals.filter((goal) => {
+  const filteredGoals = (goals || []).filter((goal) => {
     if (!activeInnerTabId || activeInnerTabId === "showAll") return true;
     if (activeInnerTabId === "active") return goal.status === "active";
     if (activeInnerTabId === "completed") return goal.status === "completed";
@@ -84,8 +166,9 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
   // Add goals summary calculations
   const goalsSummary = useMemo(() => {
-    const activeGoals = goals.filter((g) => g.status === "active");
-    const completedGoals = goals.filter((g) => g.status === "completed");
+    const safeGoals = goals || [];
+    const activeGoals = safeGoals.filter((g) => g.status === "active");
+    const completedGoals = safeGoals.filter((g) => g.status === "completed");
 
     const totalTargetAmount = activeGoals.reduce(
       (sum, g) => sum + (g.targetAmount || 0),
@@ -183,7 +266,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
         <div className={goalsStyles.goalsGrid}>
           {filteredGoals.map((goal) => {
-            const fundingAccount = accounts.find(
+            const fundingAccount = (accounts || []).find(
               (acc) => acc.id === goal.fundingAccountId
             );
 

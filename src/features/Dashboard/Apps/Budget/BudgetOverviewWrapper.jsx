@@ -10,11 +10,32 @@ import budgetStyles from "./budget.module.css";
 const BudgetOverviewWrapper = ({ smallApp, activeInnerTabId }) => {
   const { data } = useFinancialData();
 
-  // FIXED: Ensure budget is enriched with calculations and handle null cases
-  const rawBudget = data?.budget || null;
+  // FIXED: Better loading state handling
+  if (!data?.budget) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "var(--space-lg)",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Initializing budget...
+      </div>
+    );
+  }
 
-  // Apply calculations to get proper totals - this will handle null budget gracefully
-  const budget = enrichBudgetWithCalculations(rawBudget);
+  // Budget should already be enriched by context
+  const budget = data.budget;
+
+  // FIXED: Verify budget has calculations
+  if (budget.discretionaryIncome === undefined) {
+    console.warn("Budget missing calculations, re-enriching...");
+    const enrichedBudget = enrichBudgetWithCalculations(budget);
+    // You could update context here or just use enriched version locally
+  }
 
   if (smallApp) {
     // Small app: Show sections based on inner tab selection

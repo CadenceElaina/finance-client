@@ -2,24 +2,45 @@
 import React, { useState, useMemo } from "react";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
-import Button from "../../../../../components/ui/Button/Button";
-import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
-import planStyles from "../plan.module.css";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
-import {
-  ChevronRight,
-  CheckCircle,
-  AlertCircle,
-  DollarSign,
-  TrendingUp,
-  Shield,
-  CreditCard,
-  Building,
-  Target,
-} from "lucide-react";
+import planStyles from "../plan.module.css";
+import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 
 const InvestmentRoadmapTab = ({ smallApp }) => {
-  const { data } = useFinancialData();
+  // SAFETY CHECK: Add early return if financial data context is not ready
+  const financialDataResult = useFinancialData();
+
+  if (!financialDataResult) {
+    return (
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Loading investment data...
+      </div>
+    );
+  }
+
+  const { data } = financialDataResult;
+
+  // SAFETY CHECK: Ensure data exists
+  if (!data) {
+    return (
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Initializing investment roadmap...
+      </div>
+    );
+  }
+
   const { accounts, budget, goals } = data;
 
   // User settings
@@ -31,259 +52,173 @@ const InvestmentRoadmapTab = ({ smallApp }) => {
 
   // Calculate investment roadmap logic
   const roadmapAnalysis = useMemo(() => {
-    const monthlyExpenses = budget.totalMonthlyExpenses || 0;
-    const discretionaryIncome = budget.discretionaryIncome || 0;
+    // SAFETY CHECK: Ensure budget exists and has required properties
+    const safeMonthlyExpenses = budget?.totalMonthlyExpenses || 0;
+    const safeDiscretionaryIncome = budget?.discretionaryIncome || 0;
+    const safeAccounts = accounts || [];
 
-    // Get all debts (excluding mortgage for now)
-    const debts = accounts.filter(
-      (acc) =>
-        acc.category === "Debt" && acc.subType !== "Mortgage" && acc.value < 0
-    );
-
-    // Calculate emergency fund status
-    const emergencyFundTarget = monthlyExpenses * 6;
-    const currentEmergencyFund = accounts
+    // Calculate emergency fund needs (3-6 months of expenses)
+    const emergencyFundTarget = safeMonthlyExpenses * 6;
+    const currentCash = safeAccounts
       .filter((acc) => acc.category === "Cash")
       .reduce((sum, acc) => sum + (acc.value || 0), 0);
 
-    // Get current investment balances
-    const currentRetirementSavings = accounts
+    const emergencyFundGap = Math.max(0, emergencyFundTarget - currentCash);
+
+    // Calculate high-interest debt
+    const highInterestDebt = safeAccounts
       .filter(
         (acc) =>
-          acc.category === "Investments" &&
-          (acc.subType === "401(k)" ||
-            acc.subType === "403(b)" ||
-            acc.subType === "TSP")
+          acc.category === "Debt" &&
+          (acc.interestRate || 0) > settings.debtThreshold
       )
-      .reduce((sum, acc) => sum + (acc.value || 0), 0);
+      .reduce((sum, acc) => sum + Math.abs(acc.value || 0), 0);
 
-    const currentIRASavings = accounts
-      .filter(
-        (acc) =>
-          acc.category === "Investments" &&
-          (acc.subType === "Roth IRA" || acc.subType === "Traditional IRA")
-      )
-      .reduce((sum, acc) => sum + (acc.value || 0), 0);
-
-    const currentTaxableSavings = accounts
-      .filter(
-        (acc) =>
-          acc.category === "Investments" && acc.subType === "Taxable Brokerage"
-      )
-      .reduce((sum, acc) => sum + (acc.value || 0), 0);
-
-    // Calculate real rates
-    const realInvestmentReturn =
-      settings.expectedReturn - settings.inflationRate;
-
-    // Analyze debt prioritization
-    const highInterestDebts = debts.filter(
-      (debt) => (debt.interestRate || 0) > settings.debtThreshold
+    // Calculate current retirement savings
+    const retirementAccounts = safeAccounts.filter(
+      (acc) =>
+        acc.category === "Investments" &&
+        (acc.subType?.includes("401") || acc.subType?.includes("IRA"))
     );
-
-    const mediumInterestDebts = debts.filter((debt) => {
-      const rate = debt.interestRate || 0;
-      return rate > 4 && rate <= settings.debtThreshold;
-    });
-
-    const lowInterestDebts = debts.filter(
-      (debt) => (debt.interestRate || 0) <= 4
+    const currentRetirementSavings = retirementAccounts.reduce(
+      (sum, acc) => sum + (acc.value || 0),
+      0
     );
 
     return {
-      monthlyExpenses,
-      discretionaryIncome,
+      monthlyExpenses: safeMonthlyExpenses,
+      discretionaryIncome: safeDiscretionaryIncome,
       emergencyFundTarget,
-      currentEmergencyFund,
-      emergencyFundProgress:
-        emergencyFundTarget > 0
-          ? (currentEmergencyFund / emergencyFundTarget) * 100
-          : 100,
-      debts: {
-        high: highInterestDebts,
-        medium: mediumInterestDebts,
-        low: lowInterestDebts,
-        total: debts.reduce((sum, debt) => sum + Math.abs(debt.value || 0), 0),
-      },
-      investments: {
-        retirement: currentRetirementSavings,
-        ira: currentIRASavings,
-        taxable: currentTaxableSavings,
-      },
-      realInvestmentReturn,
+      currentCash,
+      emergencyFundGap,
+      highInterestDebt,
+      currentRetirementSavings,
+      hasHighInterestDebt: highInterestDebt > 0,
+      hasEmergencyFundGap: emergencyFundGap > 0,
     };
   }, [accounts, budget, settings]);
 
   // Generate roadmap steps
   const roadmapSteps = useMemo(() => {
     const steps = [];
-    let remainingDiscretionary = roadmapAnalysis.discretionaryIncome;
+    let remainingIncome = roadmapAnalysis.discretionaryIncome;
 
-    // Step 1: High-Interest Debt
-    if (roadmapAnalysis.debts.high.length > 0) {
-      const totalHighDebt = roadmapAnalysis.debts.high.reduce(
-        (sum, debt) => sum + Math.abs(debt.value || 0),
-        0
-      );
-      const highestDebt = roadmapAnalysis.debts.high.reduce((prev, current) =>
-        (prev.interestRate || 0) > (current.interestRate || 0) ? prev : current
-      );
-
+    // Step 1: Emergency Fund Starter (if needed)
+    if (
+      roadmapAnalysis.hasEmergencyFundGap &&
+      roadmapAnalysis.currentCash < 1000
+    ) {
+      const allocation = Math.min(remainingIncome * 0.3, 500);
       steps.push({
-        id: "high-debt",
-        title: "Eliminate High-Interest Debt",
-        subtitle: `Focus on debt above ${settings.debtThreshold}%`,
-        status: "action-required",
-        priority: 1,
-        icon: CreditCard,
+        id: 1,
+        title: "Emergency Fund Starter",
+        subtitle: "Build $1,000 emergency fund",
+        priority: "Critical",
+        status: "pending",
+        action: "Save to high-yield savings",
+        allocation: allocation,
+        explanation: "Start with a small emergency fund before tackling debt.",
+        icon: "🚨",
+        progress: Math.min((roadmapAnalysis.currentCash / 1000) * 100, 100),
+      });
+      remainingIncome -= allocation;
+    }
+
+    // Step 2: High-Interest Debt (if any)
+    if (roadmapAnalysis.hasHighInterestDebt) {
+      const allocation = Math.min(remainingIncome * 0.7, remainingIncome - 200);
+      steps.push({
+        id: 2,
+        title: "Pay Off High-Interest Debt",
+        subtitle: `$${roadmapAnalysis.highInterestDebt.toLocaleString()} at >${
+          settings.debtThreshold
+        }%`,
+        priority: "High",
+        status: "pending",
+        action: "Pay minimums + extra payments",
+        allocation: allocation,
+        explanation: `Debt above ${settings.debtThreshold}% costs more than expected investment returns.`,
+        icon: "💳",
         progress: 0,
-        amount: totalHighDebt,
-        action: `Pay off ${highestDebt.name} (${highestDebt.interestRate}% APR)`,
-        explanation: `Paying off debt with ${highestDebt.interestRate}% interest gives you a guaranteed return that beats most investments.`,
-        allocation: Math.min(remainingDiscretionary * 0.8, totalHighDebt / 12), // 80% of discretionary or what's needed
       });
-      remainingDiscretionary -= Math.min(
-        remainingDiscretionary * 0.8,
-        totalHighDebt / 12
-      );
+      remainingIncome -= allocation;
     }
 
-    // Step 2: Emergency Fund
-    const emergencyShortfall = Math.max(
-      0,
-      roadmapAnalysis.emergencyFundTarget - roadmapAnalysis.currentEmergencyFund
-    );
-    if (emergencyShortfall > 0) {
+    // Step 3: Employer 401k Match (if applicable)
+    const monthlyMatch = 200; // Estimated - could be calculated from accounts
+    if (remainingIncome > 0) {
+      const allocation = Math.min(monthlyMatch, remainingIncome);
       steps.push({
-        id: "emergency-fund",
-        title: "Build Emergency Fund",
-        subtitle: "6 months of living expenses",
-        status:
-          roadmapAnalysis.emergencyFundProgress >= 100
-            ? "complete"
-            : "in-progress",
-        priority: 2,
-        icon: Shield,
-        progress: roadmapAnalysis.emergencyFundProgress,
-        amount: emergencyShortfall,
-        action: `Save $${emergencyShortfall.toLocaleString()} more`,
+        id: 3,
+        title: "Employer 401(k) Match",
+        subtitle: "Free money from employer",
+        priority: "High",
+        status: "active",
+        action: "Contribute to get full match",
+        allocation: allocation,
+        explanation: "Employer match is an immediate 100% return.",
+        icon: "🎯",
+        progress: 75,
+      });
+      remainingIncome -= allocation;
+    }
+
+    // Step 4: Complete Emergency Fund
+    if (
+      roadmapAnalysis.hasEmergencyFundGap &&
+      roadmapAnalysis.currentCash >= 1000
+    ) {
+      const allocation = Math.min(remainingIncome * 0.5, 500);
+      steps.push({
+        id: 4,
+        title: "Complete Emergency Fund",
+        subtitle: `Build ${roadmapAnalysis.emergencyFundTarget.toLocaleString()} (6 months expenses)`,
+        priority: "Medium",
+        status: "pending",
+        action: "Continue saving to high-yield account",
+        allocation: allocation,
+        explanation: "Full emergency fund protects your investments.",
+        icon: "🛡️",
+        progress:
+          (roadmapAnalysis.currentCash / roadmapAnalysis.emergencyFundTarget) *
+          100,
+      });
+      remainingIncome -= allocation;
+    }
+
+    // Step 5: Roth IRA
+    if (remainingIncome > 0) {
+      const allocation = Math.min(remainingIncome, 500);
+      steps.push({
+        id: 5,
+        title: "Roth IRA",
+        subtitle: "Tax-free growth and withdrawals",
+        priority: "Medium",
+        status: "pending",
+        action: "Open and fund Roth IRA",
+        allocation: allocation,
         explanation:
-          "Emergency fund provides financial security and prevents debt accumulation during unexpected events.",
-        allocation: Math.min(
-          remainingDiscretionary * 0.3,
-          emergencyShortfall / 12
-        ),
+          "Tax-free growth with flexibility for early withdrawal of contributions.",
+        icon: "📈",
+        progress: 25,
       });
-      remainingDiscretionary -= Math.min(
-        remainingDiscretionary * 0.3,
-        emergencyShortfall / 12
-      );
-    } else {
-      steps.push({
-        id: "emergency-fund",
-        title: "Emergency Fund Complete",
-        subtitle: "6 months of expenses saved ✓",
-        status: "complete",
-        priority: 2,
-        icon: Shield,
-        progress: 100,
-        amount: 0,
-        action: "Maintain current balance",
-        explanation: "Your emergency fund is fully funded!",
-        allocation: 0,
-      });
+      remainingIncome -= allocation;
     }
 
-    // Step 3: Employer Match (informational)
-    steps.push({
-      id: "employer-match",
-      title: "Maximize Employer 401k Match",
-      subtitle: "Free money from your employer",
-      status: "info",
-      priority: 3,
-      icon: Building,
-      progress: null,
-      amount: null,
-      action: "Update in Income section if not already maxed",
-      explanation:
-        "Employer matching is an immediate 100% return on investment. Update your income if you're not contributing enough.",
-      allocation: 0,
-    });
-
-    // Step 4: Medium Interest Debt Decision
-    if (roadmapAnalysis.debts.medium.length > 0) {
-      const totalMediumDebt = roadmapAnalysis.debts.medium.reduce(
-        (sum, debt) => sum + Math.abs(debt.value || 0),
-        0
-      );
-
+    // Step 6: Additional 401k or Taxable Investments
+    if (remainingIncome > 50) {
       steps.push({
-        id: "medium-debt",
-        title: "Medium-Interest Debt Strategy",
-        subtitle: `Debt between 4-${settings.debtThreshold}%: Balanced approach`,
-        status: "strategy",
-        priority: 4,
-        icon: TrendingUp,
-        progress: null,
-        amount: totalMediumDebt,
-        action: "Split strategy: 50% extra payments, 50% investing",
-        explanation: `With moderate interest rates, a balanced approach of extra payments and investing often works well.`,
-        allocation: Math.min(
-          remainingDiscretionary * 0.5,
-          totalMediumDebt / 24
-        ), // 50% for 2 years
-      });
-      remainingDiscretionary -= Math.min(
-        remainingDiscretionary * 0.5,
-        totalMediumDebt / 24
-      );
-    }
-
-    // Step 5: IRA Maximization
-    const iraLimit = 7000; // 2024 limit + catch-up for age 50+
-    const currentIRAContributions = 0; // This should come from user input or be tracked
-    const iraShortfall = iraLimit - currentIRAContributions;
-
-    if (iraShortfall > 0 && remainingDiscretionary > 0) {
-      steps.push({
-        id: "ira-max",
-        title: "Maximize IRA Contributions",
-        subtitle: "Roth or Traditional IRA",
-        status: "recommended",
-        priority: 5,
-        icon: Target,
-        progress: (currentIRAContributions / iraLimit) * 100,
-        amount: iraShortfall,
-        action: `Contribute $${Math.min(
-          iraShortfall,
-          remainingDiscretionary * 12
-        ).toLocaleString()} annually`,
+        id: 6,
+        title: "Additional Investments",
+        subtitle: "Maximize 401(k) or taxable accounts",
+        priority: "Low",
+        status: "future",
+        action: "Increase 401(k) or open brokerage",
+        allocation: remainingIncome,
         explanation:
-          "IRAs offer tax advantages for retirement savings. Choose Roth for tax-free growth or Traditional for current tax deduction.",
-        allocation: Math.min(remainingDiscretionary, iraShortfall / 12),
-      });
-      remainingDiscretionary -= Math.min(
-        remainingDiscretionary,
-        iraShortfall / 12
-      );
-    }
-
-    // Step 6: Surplus Investment
-    if (remainingDiscretionary > 100) {
-      // Only show if meaningful amount
-      steps.push({
-        id: "surplus-investment",
-        title: "Invest Surplus Income",
-        subtitle: "Taxable brokerage or additional goals",
-        status: "opportunity",
-        priority: 6,
-        icon: DollarSign,
-        progress: null,
-        amount: remainingDiscretionary * 12,
-        action: `Invest $${remainingDiscretionary.toLocaleString()}/month in taxable accounts`,
-        explanation:
-          "After completing the essential steps, invest remaining funds for long-term growth or specific goals.",
-        allocation: remainingDiscretionary,
+          "Continue building wealth through diversified investments.",
+        icon: "🚀",
+        progress: 0,
       });
     }
 
@@ -292,20 +227,14 @@ const InvestmentRoadmapTab = ({ smallApp }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "complete":
+      case "completed":
         return "var(--status-success)";
-      case "action-required":
-        return "var(--status-danger)";
-      case "in-progress":
-        return "var(--status-warning)";
-      case "recommended":
+      case "active":
         return "var(--color-primary)";
-      case "strategy":
-        return "var(--color-secondary)";
-      case "opportunity":
+      case "pending":
+        return "var(--status-warning)";
+      case "future":
         return "var(--text-secondary)";
-      case "info":
-        return "var(--status-info)";
       default:
         return "var(--text-secondary)";
     }
@@ -313,14 +242,16 @@ const InvestmentRoadmapTab = ({ smallApp }) => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "complete":
-        return CheckCircle;
-      case "action-required":
-        return AlertCircle;
-      case "in-progress":
-        return TrendingUp;
+      case "completed":
+        return "✅";
+      case "active":
+        return "⚡";
+      case "pending":
+        return "⏳";
+      case "future":
+        return "💭";
       default:
-        return ChevronRight;
+        return "❓";
     }
   };
 
@@ -346,7 +277,7 @@ const InvestmentRoadmapTab = ({ smallApp }) => {
           </div>
         }
       >
-        {/* Settings Section */}
+        {/* Investment Assumptions Settings */}
         <div className={planStyles.roadmapSettings}>
           <h4>Investment Assumptions</h4>
           <div className={planStyles.settingsRow}>
@@ -413,94 +344,87 @@ const InvestmentRoadmapTab = ({ smallApp }) => {
           </div>
         </div>
 
-        {/* Roadmap Steps */}
+        {/* Roadmap Timeline */}
         <div className={planStyles.roadmapContainer}>
           <div className={planStyles.roadmapTimeline}>
-            {roadmapSteps.map((step, index) => {
-              const StatusIcon = getStatusIcon(step.status);
-              const StepIcon = step.icon;
-
-              return (
-                <div key={step.id} className={planStyles.roadmapStep}>
+            {roadmapSteps.map((step, index) => (
+              <div key={step.id} className={planStyles.roadmapStep}>
+                {index < roadmapSteps.length - 1 && (
                   <div className={planStyles.stepConnector}>
-                    {index < roadmapSteps.length - 1 && (
-                      <div className={planStyles.connectorLine} />
-                    )}
+                    <div className={planStyles.connectorLine}></div>
                   </div>
-
-                  <div
-                    className={planStyles.stepCard}
-                    style={{ borderLeftColor: getStatusColor(step.status) }}
-                  >
-                    <div className={planStyles.stepHeader}>
-                      <div className={planStyles.stepIconGroup}>
-                        <StepIcon
-                          size={24}
-                          color={getStatusColor(step.status)}
-                          className={planStyles.stepIcon}
-                        />
-                        <StatusIcon
-                          size={16}
-                          color={getStatusColor(step.status)}
-                          className={planStyles.statusIcon}
-                        />
+                )}
+                <div className={planStyles.stepCard}>
+                  <div className={planStyles.stepHeader}>
+                    <div className={planStyles.stepIconGroup}>
+                      <div
+                        className={planStyles.stepIcon}
+                        style={{ color: getStatusColor(step.status) }}
+                      >
+                        {step.icon}
                       </div>
-                      <div className={planStyles.stepInfo}>
-                        <h4 className={planStyles.stepTitle}>{step.title}</h4>
-                        <p className={planStyles.stepSubtitle}>
-                          {step.subtitle}
-                        </p>
-                      </div>
-                      <div className={planStyles.stepPriority}>
-                        #{step.priority}
+                      <div
+                        className={planStyles.statusIcon}
+                        style={{ color: getStatusColor(step.status) }}
+                      >
+                        {getStatusIcon(step.status)}
                       </div>
                     </div>
+                    <div className={planStyles.stepInfo}>
+                      <div className={planStyles.stepTitle}>{step.title}</div>
+                      <div className={planStyles.stepSubtitle}>
+                        {step.subtitle}
+                      </div>
+                      <div
+                        className={planStyles.stepPriority}
+                        style={{
+                          color:
+                            step.priority === "Critical"
+                              ? "var(--status-danger)"
+                              : step.priority === "High"
+                              ? "var(--status-warning)"
+                              : step.priority === "Medium"
+                              ? "var(--color-primary)"
+                              : "var(--text-secondary)",
+                        }}
+                      >
+                        {step.priority} Priority
+                      </div>
+                    </div>
+                  </div>
 
-                    {step.progress !== null && (
-                      <div className={planStyles.stepProgress}>
-                        <div className={planStyles.progressBar}>
-                          <div
-                            className={planStyles.progressFill}
-                            style={{
-                              width: `${Math.min(step.progress, 100)}%`,
-                              backgroundColor: getStatusColor(step.status),
-                            }}
-                          />
-                        </div>
-                        <span className={planStyles.progressText}>
-                          {step.progress.toFixed(1)}% Complete
-                        </span>
+                  <div className={planStyles.stepProgress}>
+                    <div className={planStyles.progressBar}>
+                      <div
+                        className={planStyles.progressFill}
+                        style={{
+                          width: `${step.progress}%`,
+                          background: getStatusColor(step.status),
+                        }}
+                      ></div>
+                    </div>
+                    <div className={planStyles.progressText}>
+                      {step.progress.toFixed(0)}% Complete
+                    </div>
+                  </div>
+
+                  <div className={planStyles.stepDetails}>
+                    <div className={planStyles.stepAction}>
+                      <strong>Action:</strong> {step.action}
+                    </div>
+                    {step.allocation > 0 && (
+                      <div className={planStyles.stepAmount}>
+                        <strong>Monthly Allocation:</strong> $
+                        {step.allocation.toLocaleString()}
                       </div>
                     )}
-
-                    <div className={planStyles.stepDetails}>
-                      <div className={planStyles.stepAction}>
-                        <strong>Action: </strong>
-                        {step.action}
-                      </div>
-
-                      {step.amount !== null && step.amount > 0 && (
-                        <div className={planStyles.stepAmount}>
-                          <strong>Amount: </strong>$
-                          {step.amount.toLocaleString()}
-                        </div>
-                      )}
-
-                      {step.allocation > 0 && (
-                        <div className={planStyles.stepAllocation}>
-                          <strong>Suggested Monthly Allocation: </strong>$
-                          {step.allocation.toLocaleString()}
-                        </div>
-                      )}
-
-                      <div className={planStyles.stepExplanation}>
-                        {step.explanation}
-                      </div>
+                    <div className={planStyles.stepExplanation}>
+                      {step.explanation}
                     </div>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
