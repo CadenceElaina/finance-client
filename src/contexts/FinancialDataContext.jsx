@@ -256,81 +256,122 @@ export const FinancialDataProvider = ({ children }) => {
     )
   ).current;
 
-  // Save function with debt sync
-  const saveData = useCallback(
-    async (newData) => {
-      if (!newData || !isInitialized) return;
+  // FIXED: Add goal budget sync utility
+  const syncGoalBudgetExpenses = (data) => {
+    const goals = data.goals || [];
+    const currentExpenses = data.budget?.monthlyExpenses || [];
 
-      try {
-        // Always enrich budget
-        const dataToSave = {
-          ...newData,
-          budget: newData.budget
-            ? enrichBudgetWithCalculations(newData.budget)
-            : data?.budget,
+    // Remove existing goal expenses
+    let updatedExpenses = currentExpenses.filter((exp) => !exp.isGoalPayment);
+
+    // Add current goal expenses
+    goals.forEach((goal) => {
+      if (
+        goal.linkedToBudget &&
+        goal.budgetMonthlyAmount > 0 &&
+        goal.status === "active"
+      ) {
+        const goalExpenseId = `exp-goal-${goal.id}`;
+        const goalExpense = {
+          id: goalExpenseId,
+          name: `${goal.name}`,
+          cost: goal.budgetMonthlyAmount,
+          category: "required",
+          linkedToGoalId: goal.id,
+          isGoalPayment: true,
         };
 
-        // ENHANCED BIDIRECTIONAL SYNC
-        const originalExpenses = data?.budget?.monthlyExpenses || [];
-        const originalAccounts = data?.accounts || [];
+        updatedExpenses.push(goalExpense);
+      }
+    });
 
-        // Check if accounts changed (debt payments)
+    return {
+      ...data,
+      budget: {
+        ...data.budget,
+        monthlyExpenses: updatedExpenses,
+      },
+    };
+  };
+
+  // Save function with goal budget sync
+  const saveData = useCallback(
+    async (newData) => {
+      if (!isInitialized) return;
+
+      try {
+        // FIXED: Check if goals changed and sync with budget
+        const goalsChanged =
+          JSON.stringify(data?.goals) !== JSON.stringify(newData?.goals);
+
+        let finalData = newData;
+        if (goalsChanged) {
+          // Sync goal budget allocations with budget expenses
+          finalData = syncGoalBudgetExpenses(newData);
+        }
+
+        // Continue with existing debt sync logic...
         const accountsChanged =
-          JSON.stringify(originalAccounts) !==
-          JSON.stringify(dataToSave.accounts);
-
-        // Check if budget expenses changed
-        const expensesChanged =
-          JSON.stringify(originalExpenses) !==
-          JSON.stringify(dataToSave.budget?.monthlyExpenses);
-
-        let finalData = { ...dataToSave };
+          JSON.stringify(data?.accounts) !==
+          JSON.stringify(finalData?.accounts);
 
         if (accountsChanged) {
-          // Accounts changed - sync debt payments TO expenses
-          const syncedExpenses = syncDebtPaymentsToExpenses(
-            dataToSave.accounts || [],
-            dataToSave.budget?.monthlyExpenses || []
-          );
+          const debtAccounts =
+            finalData.accounts?.filter(
+              (acc) => acc.category === "Debt" && (acc.monthlyPayment || 0) > 0
+            ) || [];
 
-          finalData.budget = {
-            ...finalData.budget,
-            monthlyExpenses: syncedExpenses,
-          };
-        } else if (expensesChanged) {
-          // Budget expenses changed - sync debt payments TO accounts
-          const syncedAccounts = syncExpensesToDebtAccounts(
-            dataToSave.accounts || [],
-            dataToSave.budget?.monthlyExpenses || []
-          );
+          if (debtAccounts.length > 0) {
+            const existingExpenses = finalData.budget?.monthlyExpenses || [];
+            const updatedExpenses = syncDebtPaymentsToExpenses(
+              finalData.accounts,
+              existingExpenses
+            );
 
-          finalData.accounts = syncedAccounts;
+            finalData = {
+              ...finalData,
+              budget: {
+                ...finalData.budget,
+                monthlyExpenses: updatedExpenses,
+              },
+            };
+          }
         }
 
-        // Re-enrich after syncing
-        finalData.budget = enrichBudgetWithCalculations(finalData.budget);
+        // Enrich budget with calculations
+        const enrichedBudget = enrichBudgetWithCalculations(finalData.budget);
+        const dataWithEnrichedBudget = {
+          ...finalData,
+          budget: enrichedBudget,
+        };
 
-        // Check for account changes that affect goals
-        const goals = finalData.goals || [];
-        if (goals.length > 0) {
+        // Update state first for immediate UI feedback
+        setData(dataWithEnrichedBudget);
+
+        // Check for account value changes that affect goals
+        if (accountsChanged && finalData.accounts) {
           checkAccountChangesForGoals(
             finalData.accounts,
-            goals,
+            finalData.goals || [],
             previousAccountValues
           );
+          updatePreviousAccountValues(finalData.accounts);
         }
 
-        setData(finalData);
-        updatePreviousAccountValues(finalData.accounts || []);
-
-        // Save to persistence using the debounced function
-        debouncedSave(finalData, user, token, persistence, showNotification);
+        // Save to persistence layer
+        await debouncedSave(
+          dataWithEnrichedBudget,
+          user,
+          token,
+          persistence,
+          showNotification
+        );
       } catch (error) {
-        console.error("Failed to save data:", error);
+        console.error("Error saving data:", error);
         showNotification({
           type: "error",
           title: "Save Failed",
-          message: "Failed to save data. Please try again.",
+          message: "Failed to save your data. Please try again.",
         });
       }
     },

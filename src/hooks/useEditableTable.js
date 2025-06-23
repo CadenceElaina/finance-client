@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export const useEditableTable = (initialData = []) => {
   const [editMode, setEditMode] = useState(false);
@@ -29,30 +29,45 @@ export const useEditableTable = (initialData = []) => {
     }
   }, []); // Only run on mount
 
-  const enterEditMode = () => {
+  const enterEditMode = useCallback(() => {
     setOriginalOrder([...initialData]); // Capture current order when entering edit mode
     setEditRows([...initialData]); // Create a copy to avoid mutations
     setEditMode(true);
-  };
+  }, [initialData]);
 
-  const cancelEdit = () => {
-    setEditRows([...originalOrder]); // Reset to original order, not current sorted order
+  const exitEditMode = useCallback(() => {
     setEditMode(false);
-  };
+    setEditRows([]);
+  }, []);
 
-  const updateEditRow = (index, field, value) => {
-    setEditRows(prev => prev.map((row, i) => 
-      i === index ? { ...row, [field]: value } : row
-    ));
-  };
+  const cancelEdit = useCallback(() => {
+    setEditMode(false);
+    setEditRows([]);
+  }, []);
 
-  const addEditRow = (newRow) => {
+  const updateEditRow = useCallback((index, field, value) => {
+    setEditRows(prev => 
+      prev.map((row, i) => 
+        i === index ? { ...row, [field]: value } : row
+      )
+    );
+  }, []);
+
+  const addEditRow = useCallback((newRow) => {
     setEditRows(prev => [...prev, newRow]);
-  };
+  }, []);
 
-  const removeEditRow = (index) => {
-    setEditRows(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeEditRow = useCallback((idOrIndex) => {
+    setEditRows(prev => {
+      // If it's a number, treat as index
+      if (typeof idOrIndex === 'number') {
+        return prev.filter((_, index) => index !== idOrIndex);
+      }
+      
+      // Otherwise, treat as ID
+      return prev.filter(row => row.id !== idOrIndex);
+    });
+  }, []);
 
   return {
     editMode,

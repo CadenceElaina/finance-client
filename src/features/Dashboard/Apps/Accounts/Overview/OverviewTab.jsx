@@ -15,6 +15,7 @@ import { detectAccountDebtChanges } from "../../../../../utils/debtPaymentSync";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
 import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 import accountsStyles from "../Accounts.module.css";
+import { Plus } from "lucide-react"; // Remove Trash2 import
 
 const EMPTY_ACCOUNT = {
   name: "",
@@ -32,6 +33,13 @@ const CATEGORIES = [
   { value: "Cash", label: "Cash" },
   { value: "Investments", label: "Investments" },
   { value: "Debt", label: "Debt" },
+];
+
+const TAX_STATUS_OPTIONS = [
+  { value: "Taxable", label: "Taxable" },
+  { value: "Tax-deferred", label: "Tax-deferred" },
+  { value: "Tax-free", label: "Tax-free" },
+  { value: "N/A", label: "N/A" },
 ];
 
 const ACCOUNT_SUBTYPES = {
@@ -66,17 +74,44 @@ const ACCOUNT_SUBTYPES = {
   ],
 };
 
+const viewColumns = [
+  { key: "name", label: "Account Name" },
+  { key: "accountProvider", label: "Provider" },
+  { key: "value", label: "Balance" },
+  { key: "interestRate", label: "Interest Rate" },
+  { key: "monthlyPayment", label: "Monthly Payment" },
+  { key: "category", label: "Category" },
+  { key: "subType", label: "Type" },
+  { key: "taxStatus", label: "Tax Status" },
+  { key: "portfolioName", label: "Portfolio" },
+];
+
+const editColumns = [
+  { key: "name", label: "Account Name" },
+  { key: "accountProvider", label: "Provider" },
+  { key: "value", label: "Balance" },
+  { key: "interestRate", label: "Interest Rate" },
+  { key: "monthlyPayment", label: "Monthly Payment" },
+  { key: "category", label: "Category" },
+  { key: "subType", label: "Type" },
+  { key: "taxStatus", label: "Tax Status" },
+  { key: "portfolioName", label: "Portfolio" },
+  { key: "actions", label: "Actions" },
+];
+
 const OverviewTab = ({ smallApp }) => {
   // SAFETY CHECK: Add early return if financial data context is not ready
   const financialDataResult = useFinancialData();
-  
+
   if (!financialDataResult) {
     return (
-      <div style={{ 
-        padding: "var(--space-md)", 
-        textAlign: "center", 
-        color: "var(--text-secondary)" 
-      }}>
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
         Loading financial data...
       </div>
     );
@@ -96,11 +131,13 @@ const OverviewTab = ({ smallApp }) => {
   // SAFETY CHECK: Ensure data exists
   if (!data) {
     return (
-      <div style={{ 
-        padding: "var(--space-md)", 
-        textAlign: "center", 
-        color: "var(--text-secondary)" 
-      }}>
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
         Initializing accounts...
       </div>
     );
@@ -122,7 +159,7 @@ const OverviewTab = ({ smallApp }) => {
     exitEditMode,
     updateEditRow,
     addEditRow,
-    removeEditRow,
+    removeEditRow, // FIXED: Now properly imported
   } = useEditableTable(accounts);
 
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -132,7 +169,11 @@ const OverviewTab = ({ smallApp }) => {
 
   // Auto-open notification modal when new notifications arrive
   useEffect(() => {
-    if (accountChangeNotifications && accountChangeNotifications.length > 0 && !activeNotification) {
+    if (
+      accountChangeNotifications &&
+      accountChangeNotifications.length > 0 &&
+      !activeNotification
+    ) {
       setActiveNotification(accountChangeNotifications[0]);
     }
   }, [accountChangeNotifications, activeNotification]);
@@ -153,30 +194,37 @@ const OverviewTab = ({ smallApp }) => {
   const handleSave = () => {
     // Detect debt payment changes in accounts
     const debtChanges = detectAccountDebtChanges(originalAccounts, editRows);
-    
+
     const updatedData = {
       ...data,
       accounts: editRows,
     };
-    
+
     saveData(updatedData);
     exitEditMode();
     setOriginalAccounts([]);
     showSuccess("Accounts saved successfully!");
-    
+
     // Show debt sync notification if there were changes
     if (debtChanges.length > 0) {
-      const changesSummary = debtChanges.map(change => 
-        `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
-      ).join('\n');
-      
+      const changesSummary = debtChanges
+        .map(
+          (change) =>
+            `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
+        )
+        .join("\n");
+
       showInfo(`Debt payments will be updated in budget:\n${changesSummary}`);
     }
   };
 
   // Handle reset to demo accounts
   const handleResetToDemo = () => {
-    if (window.confirm("Reset accounts to demo data? This will overwrite all current account data.")) {
+    if (
+      window.confirm(
+        "Reset accounts to demo data? This will overwrite all current account data."
+      )
+    ) {
       resetAccountsToDemo();
       exitEditMode();
       showSuccess("Accounts reset to demo data!");
@@ -195,19 +243,22 @@ const OverviewTab = ({ smallApp }) => {
   // Update filtering for display - by category instead of portfolio
   const displayAccounts = useMemo(() => {
     const sourceAccounts = editMode ? editRows : accounts;
-    
-    const enrichedAccounts = sourceAccounts.map(account => ({
+
+    const enrichedAccounts = sourceAccounts.map((account) => ({
       ...account,
-      portfolioName: account.portfolioId 
-        ? portfolios.find(p => p.id === account.portfolioId)?.name || "Unknown"
-        : "N/A"
+      portfolioName: account.portfolioId
+        ? portfolios.find((p) => p.id === account.portfolioId)?.name ||
+          "Unknown"
+        : "N/A",
     }));
 
     if (categoryFilter === "all") {
       return enrichedAccounts;
     }
-    
-    return enrichedAccounts.filter(account => account.category === categoryFilter);
+
+    return enrichedAccounts.filter(
+      (account) => account.category === categoryFilter
+    );
   }, [editMode, editRows, accounts, portfolios, categoryFilter]);
 
   // Category select menu (use consistent styling)
@@ -262,13 +313,13 @@ const OverviewTab = ({ smallApp }) => {
     {
       label: "Debt",
       value: `$${Math.abs(totalDebt).toLocaleString()}`,
-      valueClass: "negative",
+      valueClass: totalDebt < 0 ? "negative" : "neutral",
     },
   ];
 
   const handleNewAccountChange = (e) => {
     const { name, value } = e.target;
-    setNewAccount(prev => ({ ...prev, [name]: value }));
+    setNewAccount((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddAccount = () => {
@@ -278,7 +329,7 @@ const OverviewTab = ({ smallApp }) => {
     }
 
     let accountValue = parseFloat(newAccount.value) || 0;
-    
+
     // AUTOMATIC NEGATIVE CONVERSION: Make debt values negative
     if (newAccount.category === "Debt" && accountValue > 0) {
       accountValue = -accountValue;
@@ -288,13 +339,17 @@ const OverviewTab = ({ smallApp }) => {
       ...newAccount,
       id: `acc-${Date.now()}`,
       value: accountValue,
-      interestRate: newAccount.interestRate ? parseFloat(newAccount.interestRate) : null,
-      monthlyPayment: newAccount.monthlyPayment ? parseFloat(newAccount.monthlyPayment) : null,
+      interestRate: newAccount.interestRate
+        ? parseFloat(newAccount.interestRate)
+        : null,
+      monthlyPayment: newAccount.monthlyPayment
+        ? parseFloat(newAccount.monthlyPayment)
+        : null,
     };
 
     addEditRow(accountWithId);
     setNewAccount({ ...EMPTY_ACCOUNT });
-    
+
     if (newAccountNameRef.current) {
       newAccountNameRef.current.focus();
     }
@@ -306,13 +361,13 @@ const OverviewTab = ({ smallApp }) => {
     }
   };
 
+  // FIXED: Enhanced account row renderer with correct remove button
   const renderAccountRow = (account, index) => {
+    const isInvestmentAccount = account.category === "Investments";
     const isDebtAccount = account.category === "Debt";
-    const displayValue = isDebtAccount ? Math.abs(account.value || 0) : (account.value || 0);
 
     return (
       <tr key={account.id || index}>
-        {/* Account Name */}
         <td>
           {editMode ? (
             <BudgetFormInput
@@ -324,175 +379,158 @@ const OverviewTab = ({ smallApp }) => {
             account.name
           )}
         </td>
-        
-        {/* Provider */}
         <td>
           {editMode ? (
             <BudgetFormInput
               column={{ type: "text", placeholder: "Provider" }}
               value={account.accountProvider}
-              onChange={(value) => updateEditRow(index, "accountProvider", value)}
+              onChange={(value) =>
+                updateEditRow(index, "accountProvider", value)
+              }
             />
           ) : (
-            account.accountProvider
+            account.accountProvider || "N/A"
           )}
         </td>
-        
-        {/* Balance */}
         <td className={tableStyles.alignRight}>
           {editMode ? (
             <BudgetFormInput
-              column={{ 
-                type: "number", 
-                placeholder: isDebtAccount ? "Amount owed" : "0.00", 
+              column={{
+                type: "number",
+                placeholder: "0.00",
                 step: "0.01",
-                min: "0" // Always positive input for debt
               }}
-              value={displayValue}
+              value={Math.abs(account.value)}
               onChange={(value) => {
-                const numericValue = parseFloat(value) || 0;
-                // AUTOMATIC NEGATIVE CONVERSION: Always store debt as negative
-                const finalValue = isDebtAccount ? -Math.abs(numericValue) : numericValue;
+                const numValue = parseFloat(value) || 0;
+                const finalValue = isDebtAccount ? -numValue : numValue;
                 updateEditRow(index, "value", finalValue);
               }}
             />
           ) : (
-            <span className={account.category === "Debt" ? tableStyles.negative : ""}>
-              {isDebtAccount ? "($" : "$"}
-              {displayValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-              {isDebtAccount ? ")" : ""}
+            <span
+              className={
+                account.value >= 0 ? tableStyles.positive : tableStyles.negative
+              }
+            >
+              $
+              {Math.abs(account.value || 0).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+              })}
             </span>
           )}
         </td>
-        
-        {/* Interest Rate */}
         <td className={tableStyles.alignRight}>
           {editMode ? (
             isDebtAccount ? (
               <BudgetFormInput
-                column={{ 
-                  type: "number", 
-                  placeholder: "0.00", 
+                column={{
+                  type: "number",
+                  placeholder: "0.00",
                   step: "0.01",
                   min: "0",
-                  max: "100"
                 }}
-                value={account.interestRate || ""}
-                onChange={(value) => updateEditRow(index, "interestRate", parseFloat(value) || null)}
+                value={account.interestRate}
+                onChange={(value) =>
+                  updateEditRow(index, "interestRate", value)
+                }
               />
-            ) : "N/A"
+            ) : (
+              <span className={tableStyles.mutedText}>N/A</span>
+            )
+          ) : isDebtAccount && account.interestRate ? (
+            `${account.interestRate}%`
           ) : (
-            account.interestRate ? `${account.interestRate}%` : "N/A"
+            <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
-        
-        {/* Monthly Payment */}
         <td className={tableStyles.alignRight}>
           {editMode ? (
             isDebtAccount ? (
               <BudgetFormInput
-                column={{ 
-                  type: "number", 
-                  placeholder: "0.00", 
+                column={{
+                  type: "number",
+                  placeholder: "0.00",
                   step: "0.01",
-                  min: "0"
+                  min: "0",
                 }}
-                value={account.monthlyPayment || ""}
-                onChange={(value) => updateEditRow(index, "monthlyPayment", parseFloat(value) || null)}
+                value={account.monthlyPayment}
+                onChange={(value) =>
+                  updateEditRow(index, "monthlyPayment", value)
+                }
               />
-            ) : "N/A"
+            ) : (
+              <span className={tableStyles.mutedText}>N/A</span>
+            )
+          ) : isDebtAccount && account.monthlyPayment ? (
+            `$${account.monthlyPayment.toLocaleString()}`
           ) : (
-            account.monthlyPayment ? `$${account.monthlyPayment.toLocaleString()}` : "N/A"
+            <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
-        
-        {/* Category */}
         <td>
           {editMode ? (
             <BudgetFormSelect
-              options={CATEGORIES}
               value={account.category}
-              onChange={(value) => {
-                updateEditRow(index, "category", value);
-                // Reset subType when category changes
-                updateEditRow(index, "subType", ACCOUNT_SUBTYPES[value]?.[0]?.value || "");
-                // Clear debt-specific fields when switching away from debt
-                if (value !== "Debt") {
-                  updateEditRow(index, "interestRate", null);
-                  updateEditRow(index, "monthlyPayment", null);
-                }
-              }}
+              onChange={(value) => updateEditRow(index, "category", value)}
+              options={CATEGORIES}
             />
           ) : (
             account.category
           )}
         </td>
-        
-        {/* Type (subType) */}
         <td>
           {editMode ? (
             <BudgetFormSelect
-              options={ACCOUNT_SUBTYPES[account.category] || []}
               value={account.subType}
               onChange={(value) => updateEditRow(index, "subType", value)}
-              className={tableStyles.compactSelect}
+              options={ACCOUNT_SUBTYPES[account.category] || []}
             />
           ) : (
-            <span className={tableStyles.wrappedText}>{account.subType}</span>
+            account.subType
           )}
         </td>
-        
-        {/* Tax Status */}
         <td>
           {editMode ? (
             <BudgetFormSelect
-              options={[
-                { value: "Taxable", label: "Taxable" },
-                { value: "Tax-deferred", label: "Tax-deferred" },
-                { value: "Tax-free", label: "Tax-free" },
-                { value: "N/A", label: "N/A" },
-              ]}
               value={account.taxStatus}
               onChange={(value) => updateEditRow(index, "taxStatus", value)}
-              className={tableStyles.compactSelect}
+              options={TAX_STATUS_OPTIONS}
             />
           ) : (
-            <span className={tableStyles.wrappedText}>{account.taxStatus}</span>
+            account.taxStatus
           )}
         </td>
-        
-        {/* Portfolio */}
         <td>
           {editMode ? (
-            account.category === "Investments" ? (
+            isInvestmentAccount ? (
               <BudgetFormSelect
-                options={[
-                  { value: "", label: "Select Portfolio" },
-                  ...portfolios.map(p => ({ value: p.id, label: p.name }))
-                ]}
                 value={account.portfolioId || ""}
-                onChange={(value) => updateEditRow(index, "portfolioId", value || null)}
-                className={tableStyles.compactSelect}
+                onChange={(value) =>
+                  updateEditRow(index, "portfolioId", value || null)
+                }
+                options={[
+                  { value: "", label: "No Portfolio" },
+                  ...portfolios.map((p) => ({ value: p.id, label: p.name })),
+                ]}
               />
             ) : (
               <span className={tableStyles.mutedText}>N/A</span>
             )
+          ) : isInvestmentAccount ? (
+            account.portfolioName || "No Portfolio"
           ) : (
-            <span className={tableStyles.wrappedText}>
-              {account.portfolioName || "N/A"}
-            </span>
+            <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
-        
-        {/* Actions - Only show in edit mode */}
         {editMode && (
           <td className={tableStyles.alignCenter}>
             <button
-              onClick={() => handleRemoveAccount(account.id)}
-              className="btn-danger-sm"
+              onClick={() => removeEditRow(account.id)} // FIXED: Use removeEditRow directly
+              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
               title="Remove account"
             >
-              ✕
+              <span className={tableStyles.removeIcon}>×</span>
             </button>
           </td>
         )}
@@ -500,228 +538,234 @@ const OverviewTab = ({ smallApp }) => {
     );
   };
 
-  // FIXED: Define columns in correct order with proper labels
-  const getColumns = () => {
-    const baseColumns = [
-      { key: "name", label: "Account Name" },
-      { key: "accountProvider", label: "Provider" },
-      { key: "value", label: "Balance" },
-      { key: "interestRate", label: "Interest Rate" },
-      { key: "monthlyPayment", label: "Monthly Payment" },
-      { key: "category", label: "Category" },
-      { key: "subType", label: "Type" },
-      { key: "taxStatus", label: "Tax Status" },
-      { key: "portfolioId", label: "Portfolio" }
-    ];
-
-    if (editMode) {
-      baseColumns.push({ key: "actions", label: "Actions" });
-    }
-
-    return baseColumns;
-  };
-
-  const columns = getColumns();
-
-  // ENHANCED: New account row for edit mode with correct column order
-  const newAccountRow = editMode && (
-    <tr style={{ backgroundColor: "var(--surface-secondary)" }}>
-      {/* Account Name */}
+  // FIXED: New account row with standardized add button
+  const newAccountRow = editMode ? (
+    <tr
+      style={{
+        background: "var(--surface-dark)",
+        borderTop: "2px solid var(--border-light)",
+      }}
+    >
       <td>
         <BudgetFormInput
           ref={newAccountNameRef}
-          column={{ type: "text", placeholder: "New account name" }}
+          column={{ type: "text", placeholder: "Enter account name" }}
           value={newAccount.name}
-          onChange={(value) => setNewAccount(prev => ({ ...prev, name: value }))}
+          onChange={(value) =>
+            setNewAccount((prev) => ({ ...prev, name: value }))
+          }
         />
       </td>
-      
-      {/* Provider */}
       <td>
         <BudgetFormInput
           column={{ type: "text", placeholder: "Provider" }}
           value={newAccount.accountProvider}
-          onChange={(value) => setNewAccount(prev => ({ ...prev, accountProvider: value }))}
+          onChange={(value) =>
+            setNewAccount((prev) => ({ ...prev, accountProvider: value }))
+          }
         />
       </td>
-      
-      {/* Balance */}
-      <td>
+      <td className={tableStyles.alignRight}>
         <BudgetFormInput
-          column={{ 
-            type: "number", 
-            placeholder: newAccount.category === "Debt" ? "Amount owed" : "0.00", 
+          column={{
+            type: "number",
+            placeholder: "0.00",
             step: "0.01",
-            min: "0"
           }}
           value={newAccount.value}
-          onChange={(value) => setNewAccount(prev => ({ ...prev, value }))}
+          onChange={(value) =>
+            setNewAccount((prev) => ({ ...prev, value: value }))
+          }
         />
       </td>
-      
-      {/* Interest Rate */}
-      <td>
+      <td className={tableStyles.alignRight}>
         {newAccount.category === "Debt" ? (
           <BudgetFormInput
-            column={{ 
-              type: "number", 
-              placeholder: "0.00", 
+            column={{
+              type: "number",
+              placeholder: "0.00",
               step: "0.01",
               min: "0",
-              max: "100"
             }}
             value={newAccount.interestRate}
-            onChange={(value) => setNewAccount(prev => ({ ...prev, interestRate: value }))}
+            onChange={(value) =>
+              setNewAccount((prev) => ({ ...prev, interestRate: value }))
+            }
           />
         ) : (
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      
-      {/* Monthly Payment */}
-      <td>
+      <td className={tableStyles.alignRight}>
         {newAccount.category === "Debt" ? (
           <BudgetFormInput
-            column={{ 
-              type: "number", 
-              placeholder: "0.00", 
+            column={{
+              type: "number",
+              placeholder: "0.00",
               step: "0.01",
-              min: "0"
+              min: "0",
             }}
             value={newAccount.monthlyPayment}
-            onChange={(value) => setNewAccount(prev => ({ ...prev, monthlyPayment: value }))}
+            onChange={(value) =>
+              setNewAccount((prev) => ({ ...prev, monthlyPayment: value }))
+            }
           />
         ) : (
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      
-      {/* Category */}
       <td>
         <BudgetFormSelect
-          options={CATEGORIES}
           value={newAccount.category}
-          onChange={(value) => setNewAccount(prev => ({
-            ...prev,
-            category: value,
-            subType: ACCOUNT_SUBTYPES[value]?.[0]?.value || "",
-            // Clear debt-specific fields when switching away from debt
-            interestRate: value === "Debt" ? prev.interestRate : "",
-            monthlyPayment: value === "Debt" ? prev.monthlyPayment : ""
-          }))}
+          onChange={(value) =>
+            setNewAccount((prev) => ({
+              ...prev,
+              category: value,
+              subType: ACCOUNT_SUBTYPES[value]?.[0]?.value || "",
+            }))
+          }
+          options={CATEGORIES}
         />
       </td>
-      
-      {/* Type */}
       <td>
         <BudgetFormSelect
-          options={ACCOUNT_SUBTYPES[newAccount.category] || []}
           value={newAccount.subType}
-          onChange={(value) => setNewAccount(prev => ({ ...prev, subType: value }))}
-          className={tableStyles.compactSelect}
+          onChange={(value) =>
+            setNewAccount((prev) => ({ ...prev, subType: value }))
+          }
+          options={ACCOUNT_SUBTYPES[newAccount.category] || []}
         />
       </td>
-      
-      {/* Tax Status */}
       <td>
         <BudgetFormSelect
-          options={[
-            { value: "Taxable", label: "Taxable" },
-            { value: "Tax-deferred", label: "Tax-deferred" },
-            { value: "Tax-free", label: "Tax-free" },
-            { value: "N/A", label: "N/A" },
-          ]}
           value={newAccount.taxStatus}
-          onChange={(value) => setNewAccount(prev => ({ ...prev, taxStatus: value }))}
-          className={tableStyles.compactSelect}
+          onChange={(value) =>
+            setNewAccount((prev) => ({ ...prev, taxStatus: value }))
+          }
+          options={TAX_STATUS_OPTIONS}
         />
       </td>
-      
-      {/* Portfolio */}
       <td>
         {newAccount.category === "Investments" ? (
           <BudgetFormSelect
-            options={[
-              { value: "", label: "Select Portfolio" },
-              ...portfolios.map(p => ({ value: p.id, label: p.name }))
-            ]}
             value={newAccount.portfolioId || ""}
-            onChange={(value) => setNewAccount(prev => ({ ...prev, portfolioId: value || null }))}
-            className={tableStyles.compactSelect}
+            onChange={(value) =>
+              setNewAccount((prev) => ({ ...prev, portfolioId: value || null }))
+            }
+            options={[
+              { value: "", label: "No Portfolio" },
+              ...portfolios.map((p) => ({ value: p.id, label: p.name })),
+            ]}
           />
         ) : (
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      
-      {/* Actions */}
       <td className={tableStyles.alignCenter}>
         <button
           onClick={handleAddAccount}
-          className="btn-primary-sm"
+          disabled={!newAccount.name || !newAccount.value}
+          className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
           title="Add account"
         >
-          ＋
+          <Plus className={tableStyles.buttonIcon} />
         </button>
       </td>
     </tr>
-  );
+  ) : null;
+
+  // FIXED: Define columns based on edit mode
+  const columns = editMode ? editColumns : viewColumns;
 
   return (
-    <div className={accountsStyles.overviewContentContainer}>
+    <div className={accountsStyles.accountsContentWrapper}>
       <SnapshotRow items={snapshotItems} small={smallApp} />
-      
+
       <Section
         header={
           <div className={sectionStyles.sectionHeaderRow}>
             <EditableTableHeader
-              title="Accounts"
+              title="Accounts Overview"
               editMode={editMode}
               onEnterEdit={handleEnterEditMode}
               onCancelEdit={handleCancelEdit}
+              editable={true}
             />
             {categorySelectMenu}
           </div>
         }
       >
+        {/* MOVED: Control panel now appears AFTER the table */}
         <Table
           columns={columns}
           data={displayAccounts}
           renderRow={renderAccountRow}
-          extraRow={newAccountRow}
+          extraRow={<>{newAccountRow}</>}
           smallApp={smallApp}
           editMode={editMode}
+          disableSortingInEditMode={true}
+          className={tableStyles.accountsTable}
         />
-        
+
+        {/* FIXED: Control panel moved to bottom and only shows in edit mode */}
         {editMode && (
-          <div className={sectionStyles.editActions}>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-xs)",
+              marginTop: "var(--space-sm)",
+              justifyContent: "flex-end",
+              padding: "var(--space-xs)",
+              background: "var(--surface-dark)",
+              borderRadius: "var(--border-radius-sm)",
+              border: "1px solid var(--border-light)",
+            }}
+          >
             <button onClick={handleSave} className="btn-primary">
               Save Changes
-            </button>
-            <button onClick={handleClearAll} className="btn-secondary">
-              Clear All
             </button>
             <button onClick={handleResetToDemo} className="btn-secondary">
               Reset to Demo
             </button>
+            <button onClick={handleClearAll} className="btn-danger">
+              Clear All
+            </button>
+          </div>
+        )}
+
+        {displayAccounts.length === 0 && (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "var(--space-md)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            No accounts found. Click the pencil icon to add accounts.
           </div>
         )}
       </Section>
 
-      {/* Account Goal Update Modal */}
-      <AccountGoalUpdateModal
-        notification={activeNotification}
-        isOpen={!!activeNotification}
-        onClose={() => setActiveNotification(null)}
-        onConfirm={(notificationId, amount) => {
-          applyGoalUpdateFromNotification(notificationId, amount);
-          setActiveNotification(null);
-        }}
-        onOpenPlanApp={() => {
-          console.log('Open Plan app');
-        }}
-        isPlanAppOpen={false}
-      />
+      {/* Account Change Notifications Modal */}
+      {activeNotification && (
+        <AccountGoalUpdateModal
+          notification={activeNotification}
+          isOpen={!!activeNotification}
+          onClose={() => setActiveNotification(null)}
+          onConfirm={(updateAmount, updateType) => {
+            applyGoalUpdateFromNotification(
+              activeNotification.id,
+              updateAmount,
+              updateType
+            );
+            setActiveNotification(null);
+          }}
+          onOpenPlanApp={() => {
+            // Handle opening plan app if needed
+            console.log("Open plan app requested");
+          }}
+        />
+      )}
     </div>
   );
 };

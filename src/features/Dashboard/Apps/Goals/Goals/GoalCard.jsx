@@ -1,8 +1,11 @@
 // src/features/Dashboard/Apps/Plan/Goals/GoalCard.jsx
-import React from "react";
-import Button from "../../../../../components/ui/Button/Button";
-
+import React, { useState } from "react";
+import { Edit, Trash2, Play, Pause } from "lucide-react";
 import goalsStyles from "../goals.module.css";
+import {
+  calculateProgress,
+  calculateTimeToGoal,
+} from "../../Plan/utils/calculationUtils";
 
 const GoalCard = ({
   goal,
@@ -10,20 +13,29 @@ const GoalCard = ({
   onEdit,
   onRemove,
   onStatusToggle,
-  onManualContribution,
 }) => {
-  const progress = calculateProgress(goal);
-  const timeToGoal = calculateTimeToGoal(goal);
-  const isCompleted = goal.status === "completed" || progress >= 100;
+  // FIXED: Always calculate progress if we have a target amount, regardless of target date
+  const hasTarget = goal.targetAmount && goal.targetAmount > 0;
+  const hasTargetDate = !!goal.targetDate;
+
+  // FIXED: Calculate progress based on current vs target amount (not dependent on target date)
+  const progress = hasTarget ? calculateProgress(goal) : null;
+  const timeToGoal =
+    hasTarget && hasTargetDate && goal.monthlyContribution > 0
+      ? calculateTimeToGoal(goal)
+      : null;
+
+  const isCompleted =
+    goal.status === "completed" || (progress !== null && progress >= 100);
   const canToggleStatus = !isCompleted;
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "completed":
+      case "active":
         return "var(--status-success)";
       case "paused":
         return "var(--status-warning)";
-      case "active":
+      case "completed":
         return "var(--color-primary)";
       default:
         return "var(--text-secondary)";
@@ -32,225 +44,204 @@ const GoalCard = ({
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case "completed":
-        return "✓ Complete";
-      case "paused":
-        return "⏸ Paused";
       case "active":
-        return "▶ Active";
+        return "Active";
+      case "paused":
+        return "Paused";
+      case "completed":
+        return "Completed";
       default:
-        return status;
+        return "Unknown";
     }
   };
 
+  // FIXED: Show breakdown of current amount if there's a linked account
   const getFundingTypeLabel = () => {
-    const fundingSources = [];
+    const labels = [];
 
-    if (goal.fundingAccountId && fundingAccount) {
-      if (goal.useEntireAccount) {
-        fundingSources.push("🔗 Full account balance");
-      } else {
-        fundingSources.push(
-          `🔗 Account (${goal.linkedAccountAmount?.toLocaleString() || 0})`
-        );
-      }
-    }
-
-    if (goal.linkedToBudget && goal.budgetMonthlyAmount > 0) {
-      fundingSources.push(
-        `📊 Budget ($${goal.budgetMonthlyAmount.toLocaleString()}/month)`
+    if (
+      goal.fundingAccountId &&
+      fundingAccount &&
+      goal.linkedAccountAmount > 0
+    ) {
+      labels.push(
+        `${fundingAccount.name}: $${goal.linkedAccountAmount.toLocaleString()}`
       );
     }
 
-    if (fundingSources.length === 0) {
-      return "✋ Manual tracking only";
+    if (goal.linkedToBudget && goal.budgetMonthlyAmount > 0) {
+      labels.push(
+        `Budget: $${goal.budgetMonthlyAmount.toLocaleString()}/month`
+      );
     }
 
-    return fundingSources.join(" + ");
+    if (labels.length === 0) {
+      return "Manual Contributions";
+    }
+
+    return labels.join(" • ");
   };
 
-  const handleManualAdd = () => {
-    const amount = prompt("Enter amount to add to this goal:");
-    if (amount && !isNaN(parseFloat(amount))) {
-      onManualContribution(goal.id, parseFloat(amount));
-    }
-  };
+  // FIXED: Calculate manual contributions properly
+  const manualContributions = Math.max(
+    0,
+    (goal.currentAmount || 0) - (goal.linkedAccountAmount || 0)
+  );
 
   return (
     <div className={goalsStyles.goalCard}>
       <div className={goalsStyles.goalHeader}>
-        <h4 className={goalsStyles.goalTitle}>{goal.name}</h4>
-        <span className={goalsStyles.goalType}>{goal.type}</span>
-      </div>
-
-      {/* Progress Section */}
-      <div className={goalsStyles.goalProgress}>
-        <div className={goalsStyles.progressBar}>
-          <div
-            className={goalsStyles.progressFill}
-            style={{
-              width: `${Math.min(progress, 100)}%`,
-              background: isCompleted
-                ? "var(--status-success)"
-                : goal.status === "paused"
-                ? "var(--status-warning)"
-                : "var(--gradient-primary)",
-            }}
-          />
+        <div>
+          <h4 className={goalsStyles.goalTitle}>{goal.name}</h4>
+          <span className={goalsStyles.goalType}>{goal.type}</span>
         </div>
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: "var(--font-size-xs)",
-            color: "var(--text-secondary)",
-            marginTop: "var(--space-xxs)",
-          }}
+          className={goalsStyles.goalStatus}
+          style={{ color: getStatusColor(goal.status) }}
         >
-          <span>${goal.currentAmount.toLocaleString()}</span>
-          <span>{progress.toFixed(1)}%</span>
-          <span>${goal.targetAmount.toLocaleString()}</span>
+          {getStatusLabel(goal.status)}
         </div>
       </div>
 
-      {/* Goal Stats Grid */}
+      {/* FIXED: Always show progress section if we have a target amount */}
+      {hasTarget && (
+        <div className={goalsStyles.goalProgress}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "var(--space-xs)",
+            }}
+          >
+            <span
+              style={{
+                fontSize: "var(--font-size-xs)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              Progress
+            </span>
+            <span
+              style={{
+                fontSize: "var(--font-size-xs)",
+                fontWeight: "var(--font-weight-semibold)",
+              }}
+            >
+              {progress.toFixed(1)}%
+            </span>
+          </div>
+          <div className={goalsStyles.progressBar}>
+            <div
+              className={goalsStyles.progressFill}
+              style={{ width: `${Math.min(progress, 100)}%` }}
+            />
+          </div>
+          {/* Show current vs target amounts */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginTop: "var(--space-xs)",
+              fontSize: "var(--font-size-xxs)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            <span>${(goal.currentAmount || 0).toLocaleString()}</span>
+            <span>${goal.targetAmount.toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+
       <div className={goalsStyles.goalStats}>
+        <div className={goalsStyles.goalStat}>
+          <span className={goalsStyles.statLabel}>Current Total</span>
+          <span className={goalsStyles.statValue}>
+            ${(goal.currentAmount || 0).toLocaleString()}
+          </span>
+          {/* FIXED: Show breakdown if there's a linked account */}
+          {goal.linkedAccountAmount > 0 && (
+            <div
+              style={{
+                fontSize: "var(--font-size-xxxs)",
+                color: "var(--text-secondary)",
+                marginTop: "var(--space-xxs)",
+              }}
+            >
+              Linked: ${goal.linkedAccountAmount.toLocaleString()}
+              {manualContributions > 0 && (
+                <span> • Manual: ${manualContributions.toLocaleString()}</span>
+              )}
+            </div>
+          )}
+        </div>
+        <div className={goalsStyles.goalStat}>
+          <span className={goalsStyles.statLabel}>Target</span>
+          <span className={goalsStyles.statValue}>
+            {hasTarget ? `$${goal.targetAmount.toLocaleString()}` : "Not set"}
+          </span>
+        </div>
         <div className={goalsStyles.goalStat}>
           <span className={goalsStyles.statLabel}>Monthly</span>
           <span className={goalsStyles.statValue}>
-            {goal.linkedToBudget && goal.budgetMonthlyAmount > 0 ? (
-              <span>
-                ${(goal.budgetMonthlyAmount || 0).toLocaleString()}
-                <span
-                  style={{
-                    fontSize: "0.8em",
-                    color: "var(--text-secondary)",
-                    marginLeft: "var(--space-xxs)",
-                  }}
-                >
-                  {" "}
-                  /budget
-                </span>
-              </span>
-            ) : (
-              <span style={{ color: "var(--text-secondary)" }}>
-                No monthly budget
-              </span>
-            )}
+            ${(goal.monthlyContribution || 0).toLocaleString()}
           </span>
         </div>
-
         <div className={goalsStyles.goalStat}>
           <span className={goalsStyles.statLabel}>Time to Goal</span>
-          <span className={goalsStyles.statValue}>{timeToGoal}</span>
-        </div>
-
-        <div className={goalsStyles.goalStat}>
-          <span className={goalsStyles.statLabel}>Target Date</span>
           <span className={goalsStyles.statValue}>
-            {goal.targetDate
-              ? new Date(goal.targetDate).toLocaleDateString()
-              : "Not set"}
-          </span>
-        </div>
-
-        <div className={goalsStyles.goalStat}>
-          <span className={goalsStyles.statLabel}>Status</span>
-          <span className={goalsStyles.statValue}>
-            {canToggleStatus ? (
-              <button
-                onClick={() => onStatusToggle(goal.id)}
-                style={{
-                  background: "none",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: "var(--border-radius-sm)",
-                  padding: "var(--space-xxs) var(--space-xs)",
-                  cursor: "pointer",
-                  fontSize: "var(--font-size-xxs)",
-                  color: getStatusColor(goal.status),
-                  borderColor: getStatusColor(goal.status),
-                }}
-              >
-                {getStatusLabel(goal.status)}
-              </button>
-            ) : (
-              <span
-                style={{
-                  color: getStatusColor(goal.status),
-                  fontSize: "var(--font-size-xs)",
-                  fontWeight: "600",
-                }}
-              >
-                {getStatusLabel(goal.status)}
-              </span>
-            )}
+            {timeToGoal ||
+              (!hasTargetDate
+                ? "Set target date"
+                : !goal.monthlyContribution
+                ? "Set contribution"
+                : "N/A")}
           </span>
         </div>
       </div>
 
-      {/* Funding Information */}
-      <div className={goalsStyles.goalStats}>
-        <div className={goalsStyles.goalStat} style={{ gridColumn: "1 / -1" }}>
-          <span className={goalsStyles.statLabel}>Funding Source</span>
-          <span
-            className={goalsStyles.statValue}
-            style={{ fontSize: "var(--font-size-xs)" }}
-          >
-            {getFundingTypeLabel()}
-            {goal.fundingAccountId && fundingAccount && (
-              <div
-                style={{
-                  color: "var(--text-secondary)",
-                  marginTop: "var(--space-xxs)",
-                }}
-              >
-                {fundingAccount.name}: $
-                {fundingAccount.value?.toLocaleString() || 0}
-              </div>
-            )}
-          </span>
-        </div>
+      <div
+        style={{
+          fontSize: "var(--font-size-xs)",
+          color: "var(--text-secondary)",
+          marginTop: "var(--space-xs)",
+          padding: "var(--space-xs)",
+          background: "var(--surface-dark)",
+          borderRadius: "var(--border-radius-sm)",
+        }}
+      >
+        {getFundingTypeLabel()}
       </div>
 
-      {/* Goal Actions */}
       <div className={goalsStyles.goalActions}>
-        {!goal.fundingAccountId && !goal.linkedToBudget && (
-          <Button
-            onClick={handleManualAdd}
-            variant="secondary"
-            style={{
-              fontSize: "var(--font-size-xs)",
-              padding: "var(--space-xxs) var(--space-xs)",
-              minWidth: "60px",
-            }}
+        <button
+          onClick={() => onEdit(goal)}
+          className="btn-secondary-sm"
+          title="Edit goal"
+        >
+          <Edit size={14} />
+        </button>
+
+        {canToggleStatus && (
+          <button
+            onClick={() => onStatusToggle(goal.id)}
+            className="btn-secondary-sm"
+            title={goal.status === "active" ? "Pause goal" : "Resume goal"}
           >
-            Add $
-          </Button>
+            {goal.status === "active" ? (
+              <Pause size={14} />
+            ) : (
+              <Play size={14} />
+            )}
+          </button>
         )}
 
-        <Button
-          onClick={() => onEdit(goal)}
-          variant="secondary"
-          style={{
-            fontSize: "var(--font-size-xs)",
-            padding: "var(--space-xxs) var(--space-xs)",
-            minWidth: "60px",
-          }}
-        >
-          Edit
-        </Button>
-
-        <Button
+        <button
           onClick={() => onRemove(goal.id)}
-          variant="danger"
-          style={{
-            fontSize: "var(--font-size-xs)",
-            padding: "var(--space-xxs) var(--space-xs)",
-            minWidth: "70px",
-          }}
+          className="btn-danger-sm"
+          title="Remove goal"
         >
-          Remove
-        </Button>
+          <Trash2 size={14} />
+        </button>
       </div>
     </div>
   );

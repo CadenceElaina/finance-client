@@ -106,22 +106,31 @@
 }
 
 .removeButton {
-    background-color: var(--status-danger);
-    color: var(--text-on-danger, #fff);
-    border: 1px solid var(--status-danger);
+    background: var(--status-danger);
+    color: var(--text-on-primary);
+    border: 1.5px solid var(--status-danger);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     min-width: 90px;
     box-sizing: border-box;
     transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
 
-.removeButton:hover,
-.removeButton:focus {
-    background-color: var(--status-danger-dark, #ff869a);
-    color: var(--text-on-danger, #fff);
-    border-color: var(--status-danger-dark, #ff869a);
-    box-shadow: 0 0 0 2px rgba(255,83,112,0.25);
-    filter: brightness(1.08);
+.removeButton:hover:not(:disabled) {
+    background: var(--status-danger);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.3), var(--shadow-md);
+    filter: brightness(1.1);
+}
+
+.removeButton:active {
+    transform: scale(0.98);
+    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.5), var(--shadow-sm);
 }
 
 .addButton {
@@ -286,36 +295,33 @@ select,
     background-color: var(--color-secondary);
 }
 
-/* Category-specific select borders for edit mode */
+/* FIXED: Category-specific select border colors for edit mode */
 .tableSelect.required {
-    border-color: var(--status-success);
-    box-shadow: 0 0 0 1px var(--status-success);
+  border-color: #dc3545; /* Red for required */
 }
 
 .tableSelect.flexible {
-    border-color: var(--status-warning);
-    box-shadow: 0 0 0 1px var(--status-warning);
+  border-color: #ff9800; /* Orange for flexible (unchanged) */
 }
 
 .tableSelect.nonessential {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 0 1px var(--color-secondary);
+  border-color: #28a745; /* Green for non-essential */
 }
 
-/* Ensure focus states work properly with category colors */
+/* FIXED: Ensure focus states work properly with category colors */
 .tableSelect:focus.required {
-    border-color: var(--status-success);
-    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
 }
 
 .tableSelect:focus.flexible {
-    border-color: var(--status-warning);
-    box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.25);
+  border-color: #ff9800;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
 }
 
 .tableSelect:focus.nonessential {
-    border-color: var(--color-secondary);
-    box-shadow: 0 0 0 2px rgba(255, 176, 156, 0.25);
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
 }
 
 /* Style for calculated/read-only fields in tables */
@@ -425,4 +431,152 @@ select,
   padding: var(--space-xxs);
   white-space: normal;
   word-wrap: break-word;
+}
+
+/* ADDED: Standardized action buttons for editable tables */
+.actionButton {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  transition: all var(--transition-speed-fast) var(--transition-ease);
+  position: relative;
+  outline: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid var(--border-active);
+  outline-offset: 2px;
+}
+
+/* Add button - Primary green */
+.addButton {
+  background: var(--status-success);
+  color: var(--text-on-primary);
+  border: 1.5px solid var(--status-success);
+}
+
+.addButton:hover:not(:disabled) {
+  background: var(--status-success);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3), var(--shadow-md);
+  filter: brightness(1.1);
+}
+
+.addButton:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.5), var(--shadow-sm);
+}
+
+.addButton:disabled {
+  background: var(--interactive-disabled-bg);
+  color: var(--interactive-disabled-text);
+  border-color: var(--interactive-disabled-bg);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+/* Remove button - Danger red */
+.removeButton {
+  background: var(--status-danger);
+  color: var(--text-on-primary);
+  border: 1.5px solid var(--status-danger);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.removeButton:hover:not(:disabled) {
+  background: var(--status-danger);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.3), var(--shadow-md);
+  filter: brightness(1.1);
+}
+
+.removeButton:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.5), var(--shadow-sm);
+}
+
+/* X icon styling for remove buttons */
+.removeIcon {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* Large app scaling */
+:global(.largeApp) .removeIcon {
+  font-size: var(--font-size-base);
+}
+
+/* Small app adjustments */
+:global(.smallApp) .removeIcon {
+  font-size: var(--font-size-xs);
+}
+
+/* Icon styling within action buttons */
+.actionButton .buttonIcon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.5;
+}
+
+/* Action button container for proper spacing */
+.actionButtonGroup {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+  justify-content: center;
+}
+
+/* Large app scaling */
+:global(.largeApp) .actionButton {
+  width: 32px;
+  height: 32px;
+  font-size: var(--font-size-base);
+}
+
+:global(.largeApp) .actionButton .buttonIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Small app adjustments */
+:global(.smallApp) .actionButton {
+  width: 24px;
+  height: 24px;
+  font-size: var(--font-size-xs);
+}
+
+:global(.smallApp) .actionButton .buttonIcon {
+  width: 12px;
+  height: 12px;
+}
+
+/* Update existing button styles to be consistent */
+.tableInput,
+.tableSelect {
+  border: 1.5px solid var(--border-light);
+  transition: border-color var(--transition-speed-fast) var(--transition-ease), 
+              box-shadow var(--transition-speed-fast) var(--transition-ease);
+}
+
+.tableInput:focus,
+.tableSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
 }

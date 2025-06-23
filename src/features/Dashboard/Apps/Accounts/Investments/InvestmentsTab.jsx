@@ -8,6 +8,7 @@ import sectionStyles from "../../../../../components/ui/Section/Section.module.c
 import accountsStyles from "../Accounts.module.css";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
+import { Trash2, Plus } from "lucide-react"; // Add Plus icon
 
 const EMPTY_SECURITY = {
   name: "",
@@ -83,7 +84,7 @@ const InvestmentsTab = ({
     exitEditMode,
     updateEditRow,
     addEditRow,
-    removeEditRow,
+    removeEditRow, // FIXED: Now properly imported
   } = useEditableTable(securities);
 
   const [newSecurity, setNewSecurity] = useState({ ...EMPTY_SECURITY });
@@ -323,142 +324,246 @@ const InvestmentsTab = ({
   };
 
   const renderSecurityRow = (security, index) => {
-    if (!editMode) {
-      // View mode - plain text, no action column
-      return (
-        <tr key={security.id}>
-          <td>{security.portfolioName}</td>
-          <td>{security.accountProvider}</td>
-          <td>{security.name}</td>
-          <td>{security.ticker}</td>
-          <td>{security.quantity?.toLocaleString()}</td>
-          <td>
-            $
-            {security.value?.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </td>
-          <td>
-            {security.purchasePrice
-              ? `$${security.purchasePrice.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : "-"}
-          </td>
-          <td>
-            {security.datePurchased
-              ? new Date(security.datePurchased).toLocaleDateString()
-              : "-"}
-          </td>
-        </tr>
-      );
-    }
-
-    // Edit mode - inputs
     return (
-      <tr key={security.id}>
+      <tr
+        key={
+          security.id ||
+          `${security.accountProvider}-${security.ticker}-${index}`
+        }
+      >
+        <td>{editMode ? security.portfolioName : security.portfolioName}</td>
         <td>
-          <input
-            type="text"
-            value={security.portfolioName}
-            onChange={(e) =>
-              updateEditRow(index, "portfolioName", e.target.value)
-            }
-            className={tableStyles.tableInput}
-            placeholder="Portfolio name"
-          />
+          {editMode ? security.accountProvider : security.accountProvider}
         </td>
         <td>
-          <input
-            type="text"
-            value={security.accountProvider}
-            onChange={(e) =>
-              updateEditRow(index, "accountProvider", e.target.value)
-            }
-            className={tableStyles.tableInput}
-            placeholder="Broker/Provider"
-          />
+          {editMode ? (
+            <BudgetFormInput
+              column={{ type: "text", placeholder: "Security name" }}
+              value={security.name}
+              onChange={(value) => updateEditRow(index, "name", value)}
+            />
+          ) : (
+            security.name
+          )}
         </td>
         <td>
-          <input
-            type="text"
-            value={security.name}
-            onChange={(e) => updateEditRow(index, "name", e.target.value)}
-            className={tableStyles.tableInput}
-          />
+          {editMode ? (
+            <BudgetFormInput
+              column={{ type: "text", placeholder: "TICKER" }}
+              value={security.ticker}
+              onChange={(value) => updateEditRow(index, "ticker", value)}
+            />
+          ) : (
+            security.ticker
+          )}
+        </td>
+        <td className={tableStyles.alignRight}>
+          {editMode ? (
+            <BudgetFormInput
+              column={{
+                type: "number",
+                placeholder: "0",
+                step: "0.001",
+                min: "0",
+              }}
+              value={security.quantity}
+              onChange={(value) => updateEditRow(index, "quantity", value)}
+            />
+          ) : (
+            (security.quantity || 0).toLocaleString(undefined, {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 3,
+            })
+          )}
+        </td>
+        <td className={tableStyles.alignRight}>
+          {editMode ? (
+            <BudgetFormInput
+              column={{
+                type: "number",
+                placeholder: "0.00",
+                step: "0.01",
+                min: "0",
+              }}
+              value={security.value}
+              onChange={(value) => updateEditRow(index, "value", value)}
+            />
+          ) : (
+            `$${(security.value || 0).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}`
+          )}
+        </td>
+        <td className={tableStyles.alignRight}>
+          {editMode ? (
+            <BudgetFormInput
+              column={{
+                type: "number",
+                placeholder: "0.00",
+                step: "0.01",
+                min: "0",
+              }}
+              value={security.purchasePrice}
+              onChange={(value) => updateEditRow(index, "purchasePrice", value)}
+            />
+          ) : (
+            `$${(security.purchasePrice || 0).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}`
+          )}
         </td>
         <td>
-          <input
-            type="text"
-            value={security.ticker}
-            onChange={(e) => updateEditRow(index, "ticker", e.target.value)}
-            className={tableStyles.tableInput}
-          />
+          {editMode ? (
+            <BudgetFormInput
+              column={{ type: "date" }}
+              value={security.datePurchased}
+              onChange={(value) => updateEditRow(index, "datePurchased", value)}
+            />
+          ) : security.datePurchased ? (
+            new Date(security.datePurchased).toLocaleDateString()
+          ) : (
+            "N/A"
+          )}
         </td>
-        <td>
-          <input
-            type="number"
-            value={security.quantity}
-            onChange={(e) =>
-              updateEditRow(index, "quantity", parseFloat(e.target.value) || 0)
-            }
-            className={tableStyles.tableInput}
-            min="0"
-            step="0.01"
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            value={security.value}
-            onChange={(e) =>
-              updateEditRow(index, "value", parseFloat(e.target.value) || 0)
-            }
-            className={tableStyles.tableInput}
-            min="0"
-            step="0.01"
-          />
-        </td>
-        <td>
-          <input
-            type="number"
-            value={security.purchasePrice}
-            onChange={(e) =>
-              updateEditRow(
-                index,
-                "purchasePrice",
-                parseFloat(e.target.value) || 0
-              )
-            }
-            className={tableStyles.tableInput}
-            min="0"
-            step="0.01"
-          />
-        </td>
-        <td>
-          <input
-            type="date"
-            value={security.datePurchased}
-            onChange={(e) =>
-              updateEditRow(index, "datePurchased", e.target.value)
-            }
-            className={tableStyles.tableInput}
-          />
-        </td>
-        <td>
-          <button
-            onClick={() => removeEditRow(index)}
-            className={tableStyles.removeButton}
-            title="Remove"
-          >
-            ✕
-          </button>
-        </td>
+        {editMode && (
+          <td className={tableStyles.alignCenter}>
+            <button
+              onClick={() =>
+                removeEditRow(
+                  security.id ||
+                    `${security.accountProvider}-${security.ticker}-${index}`
+                )
+              } // FIXED: Use removeEditRow directly
+              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
+              title="Remove security"
+            >
+              <span className={tableStyles.removeIcon}>×</span>
+            </button>
+          </td>
+        )}
       </tr>
     );
   };
+
+  // FIXED: New security row with standardized add button
+  const newSecurityRow = editMode ? (
+    <tr
+      style={{
+        background: "var(--surface-dark)",
+        borderTop: "2px solid var(--border-light)",
+      }}
+    >
+      <td>
+        <BudgetFormSelect
+          value={newSecurity.portfolioName}
+          onChange={(e) =>
+            handleNewSecurityChange({
+              target: { name: "portfolioName", value: e.target.value },
+            })
+          }
+          options={[
+            { value: "", label: "Select Portfolio" },
+            ...allPortfolios.map((p) => ({ value: p.name, label: p.name })),
+          ]}
+          placeholder="Select Portfolio"
+        />
+      </td>
+      <td>
+        <BudgetFormInput
+          column={{ type: "text", placeholder: "Broker" }}
+          value={newSecurity.accountProvider}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, accountProvider: value }))
+          }
+        />
+      </td>
+      <td>
+        <BudgetFormInput
+          ref={newSecurityNameRef}
+          column={{ type: "text", placeholder: "Security name" }}
+          value={newSecurity.name}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, name: value }))
+          }
+        />
+      </td>
+      <td>
+        <BudgetFormInput
+          column={{ type: "text", placeholder: "TICKER" }}
+          value={newSecurity.ticker}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, ticker: value.toUpperCase() }))
+          }
+        />
+      </td>
+      <td className={tableStyles.alignRight}>
+        <BudgetFormInput
+          column={{
+            type: "number",
+            placeholder: "0",
+            step: "0.001",
+            min: "0",
+          }}
+          value={newSecurity.quantity}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, quantity: value }))
+          }
+        />
+      </td>
+      <td className={tableStyles.alignRight}>
+        <BudgetFormInput
+          column={{
+            type: "number",
+            placeholder: "0.00",
+            step: "0.01",
+            min: "0",
+          }}
+          value={newSecurity.value}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, value: value }))
+          }
+        />
+      </td>
+      <td className={tableStyles.alignRight}>
+        <BudgetFormInput
+          column={{
+            type: "number",
+            placeholder: "0.00",
+            step: "0.01",
+            min: "0",
+          }}
+          value={newSecurity.purchasePrice}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, purchasePrice: value }))
+          }
+        />
+      </td>
+      <td>
+        <BudgetFormInput
+          column={{ type: "date" }}
+          value={newSecurity.datePurchased}
+          onChange={(value) =>
+            setNewSecurity((prev) => ({ ...prev, datePurchased: value }))
+          }
+        />
+      </td>
+      <td className={tableStyles.alignCenter}>
+        <button
+          onClick={handleAddSecurity}
+          disabled={
+            !newSecurity.name ||
+            !newSecurity.ticker ||
+            !newSecurity.quantity ||
+            !newSecurity.value
+          }
+          className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
+          title="Add security"
+        >
+          <Plus className={tableStyles.buttonIcon} />
+        </button>
+      </td>
+    </tr>
+  ) : null;
 
   // Define columns based on edit mode
   const viewColumns = [
@@ -487,140 +592,57 @@ const InvestmentsTab = ({
             onCancelEdit={cancelEdit}
             editable={true}
           />
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-sm)",
-              alignItems: "center",
-            }}
-          >
-            {/* Portfolio select menu */}
-            {showPortfolioSelectMenu && portfolioSelectMenu}
-          </div>
+          {showPortfolioSelectMenu && portfolioSelectMenu}
         </div>
       }
-      className={tableStyles.tableSection}
     >
-      <div className={tableStyles.tableContainer}>
-        <Table
-          columns={columns}
-          data={displaySecurities}
-          renderRow={renderSecurityRow}
-          extraRow={
-            editMode ? (
-              <tr>
-                <td>
-                  <input
-                    type="text"
-                    name="portfolioName"
-                    value={newSecurity.portfolioName}
-                    onChange={handleNewSecurityChange}
-                    placeholder="Portfolio name"
-                    className={tableStyles.tableInput}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="accountProvider"
-                    value={newSecurity.accountProvider}
-                    onChange={handleNewSecurityChange}
-                    placeholder="Broker/Provider"
-                    className={tableStyles.tableInput}
-                  />
-                </td>
-                <td>
-                  <input
-                    ref={newSecurityNameRef}
-                    type="text"
-                    name="name"
-                    value={newSecurity.name}
-                    onChange={handleNewSecurityChange}
-                    placeholder="Security name"
-                    className={tableStyles.tableInput}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="text"
-                    name="ticker"
-                    value={newSecurity.ticker}
-                    onChange={handleNewSecurityChange}
-                    placeholder="TICKER"
-                    className={tableStyles.tableInput}
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={newSecurity.quantity}
-                    onChange={handleNewSecurityChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    min="0"
-                    step="0.01"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    name="value"
-                    value={newSecurity.value}
-                    onChange={handleNewSecurityChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    min="0"
-                    step="0.01"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    name="purchasePrice"
-                    value={newSecurity.purchasePrice}
-                    onChange={handleNewSecurityChange}
-                    placeholder="0"
-                    className={tableStyles.tableInput}
-                    min="0"
-                    step="0.01"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="date"
-                    name="datePurchased"
-                    value={newSecurity.datePurchased}
-                    onChange={handleNewSecurityChange}
-                    className={tableStyles.tableInput}
-                  />
-                </td>
-                <td>
-                  <button
-                    onClick={handleAddSecurity}
-                    className={tableStyles.addButton}
-                    title="Add"
-                  >
-                    +
-                  </button>
-                </td>
-              </tr>
-            ) : null
-          }
-          className={tableStyles.compactTable}
-          smallApp={smallApp}
-        />
-      </div>
+      {/* MOVED: Control panel now appears AFTER the table */}
+      <Table
+        columns={columns}
+        data={displaySecurities}
+        renderRow={renderSecurityRow}
+        extraRow={newSecurityRow}
+        smallApp={smallApp}
+        editMode={editMode}
+        disableSortingInEditMode={true}
+      />
 
-      {/* Control Panel - only show in edit mode */}
+      {/* FIXED: Control panel moved to bottom and only shows in edit mode */}
       {editMode && (
-        <ControlPanel
-          onSave={handleSave}
-          saveLabel="Save Investments"
-          onReset={handleResetToDemo}
-          onClear={handleClearAll}
-          resetLabel="Reset to Demo"
-        />
+        <div
+          style={{
+            display: "flex",
+            gap: "var(--space-xs)",
+            marginTop: "var(--space-sm)",
+            justifyContent: "flex-end",
+            padding: "var(--space-xs)",
+            background: "var(--surface-dark)",
+            borderRadius: "var(--border-radius-sm)",
+            border: "1px solid var(--border-light)",
+          }}
+        >
+          <button onClick={handleSave} className="btn-primary">
+            Save Changes
+          </button>
+          <button onClick={handleResetToDemo} className="btn-secondary">
+            Reset to Demo
+          </button>
+          <button onClick={handleClearAll} className="btn-danger">
+            Clear All
+          </button>
+        </div>
+      )}
+
+      {displaySecurities.length === 0 && (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "var(--space-md)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          No securities found. Click the pencil icon to add securities.
+        </div>
       )}
     </Section>
   );

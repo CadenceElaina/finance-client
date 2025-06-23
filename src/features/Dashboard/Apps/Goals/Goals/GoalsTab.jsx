@@ -12,6 +12,7 @@ import {
 } from "../../Plan/utils/calculationUtils";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
 import goalsStyles from "../goals.module.css";
+import { useToast } from "../../../../../hooks/useToast"; // Add this import
 
 const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   // SAFETY CHECK: Add early return if financial data context is not ready
@@ -60,33 +61,95 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
+  const { showSuccess, showInfo, showWarning } = useToast(); // Add useToast hook
 
   const handleSaveGoal = (goalData) => {
+    console.log("handleSaveGoal called with:", goalData); // Debug log
+
     if (editingGoal) {
-      // Update existing goal
-      updateGoal(editingGoal.id, {
-        ...goalData,
-        lastModified: new Date().toISOString().split("T")[0],
-      });
-    } else {
-      // Add new goal
-      const newGoal = {
-        ...goalData,
-        id: `goal-${Date.now()}`,
-        status: "active",
-        currentAmount: parseFloat(goalData.currentAmount) || 0,
-        targetAmount: parseFloat(goalData.targetAmount) || 0,
-        monthlyContribution: parseFloat(goalData.monthlyContribution) || 0,
-        dateCreated: new Date().toISOString().split("T")[0],
-        lastModified: new Date().toISOString().split("T")[0],
+      // FIXED: Track what changed for better notifications
+      const oldGoal = editingGoal;
+      const budgetChanged =
+        oldGoal.budgetMonthlyAmount !== goalData.budgetMonthlyAmount;
+      const linkedToBudgetChanged =
+        oldGoal.linkedToBudget !== goalData.linkedToBudget;
+
+      const updatedGoals = (goals || []).map((g) =>
+        g.id === editingGoal.id ? { ...goalData } : g
+      );
+
+      let updatedData = {
+        ...data,
+        goals: updatedGoals,
       };
 
-      const updatedGoals = [...(goals || []), newGoal];
-      saveData({ ...data, goals: updatedGoals });
+      // If this goal is linked to budget, update budget expenses
+      if (goalData.budgetSyncNeeded || linkedToBudgetChanged) {
+        updatedData = syncGoalWithBudget(updatedData, goalData, editingGoal);
+      }
+
+      console.log(
+        "Updated goals:",
+        updatedGoals.find((g) => g.id === editingGoal.id)
+      ); // Debug log
+      saveData(updatedData);
+
+      // FIXED: The success/info notifications are now handled in GoalForm.jsx
+      // No need to duplicate them here
+    } else {
+      // New goal
+      const newGoals = [...(goals || []), goalData];
+      let updatedData = {
+        ...data,
+        goals: newGoals,
+      };
+
+      // If this goal is linked to budget, update budget expenses
+      if (goalData.budgetSyncNeeded) {
+        updatedData = syncGoalWithBudget(updatedData, goalData, null);
+      }
+
+      saveData(updatedData);
+
+      // FIXED: The success/info notifications are now handled in GoalForm.jsx
+      // No need to duplicate them here
     }
 
     setShowAddForm(false);
     setEditingGoal(null);
+  };
+
+  // FIXED: Add function to sync goal with budget
+  const syncGoalWithBudget = (dataToUpdate, newGoal, oldGoal) => {
+    const currentExpenses = dataToUpdate.budget?.monthlyExpenses || [];
+    const goalExpenseId = `exp-goal-${newGoal.id}`;
+
+    // Remove existing goal expense if it exists
+    let updatedExpenses = currentExpenses.filter(
+      (exp) => exp.id !== goalExpenseId
+    );
+
+    // Add new goal expense if goal is linked to budget
+    if (newGoal.linkedToBudget && newGoal.budgetMonthlyAmount > 0) {
+      const goalExpense = {
+        id: goalExpenseId,
+        name: `${newGoal.name} (Goal)`,
+        cost: newGoal.budgetMonthlyAmount,
+        category: "required",
+        linkedToGoalId: newGoal.id,
+        isGoalPayment: true,
+      };
+
+      updatedExpenses.push(goalExpense);
+    }
+
+    return {
+      ...dataToUpdate,
+      budget: {
+        ...dataToUpdate.budget,
+        monthlyExpenses: updatedExpenses,
+      },
+    };
   };
 
   const handleEditGoal = (goal) => {
@@ -94,14 +157,50 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     setShowAddForm(true);
   };
 
+  // FIXED: Enhanced goal removal with notifications
   const handleRemoveGoal = (goalId) => {
-    if (window.confirm("Are you sure you want to remove this goal?")) {
-      if (removeGoal) {
-        removeGoal(goalId);
-      } else {
-        // Fallback if removeGoal is not available
-        const updatedGoals = (goals || []).filter((g) => g.id !== goalId);
-        saveData({ ...data, goals: updatedGoals });
+    const goalToRemove = (goals || []).find((g) => g.id === goalId);
+
+    if (!goalToRemove) return;
+
+    let confirmMessage = `Are you sure you want to remove "${goalToRemove.name}"?`;
+    if (goalToRemove.linkedToBudget && goalToRemove.budgetMonthlyAmount > 0) {
+      confirmMessage += `\n\nThis will also remove the $${goalToRemove.budgetMonthlyAmount}/month budget allocation.`;
+    }
+
+    if (window.confirm(confirmMessage)) {
+      const updatedGoals = (goals || []).filter((g) => g.id !== goalId);
+
+      let updatedData = {
+        ...data,
+        goals: updatedGoals,
+      };
+
+      // Remove associated budget expense if it exists
+      if (goalToRemove?.linkedToBudget) {
+        const goalExpenseId = `exp-goal-${goalId}`;
+        const updatedExpenses = (data.budget?.monthlyExpenses || []).filter(
+          (exp) => exp.id !== goalExpenseId
+        );
+
+        updatedData = {
+          ...updatedData,
+          budget: {
+            ...data.budget,
+            monthlyExpenses: updatedExpenses,
+          },
+        };
+      }
+
+      saveData(updatedData);
+
+      // FIXED: Show removal notification
+      showWarning(`🗑️ Goal "${goalToRemove.name}" has been removed.`);
+
+      if (goalToRemove.linkedToBudget && goalToRemove.budgetMonthlyAmount > 0) {
+        showInfo(
+          `💰 Budget Update:\nThe $${goalToRemove.budgetMonthlyAmount}/month allocation has been removed from your budget.`
+        );
       }
     }
   };

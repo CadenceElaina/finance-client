@@ -1,19 +1,26 @@
 // src/features/Dashboard/Apps/Plan/utils/calculationUtils.js
-// Move the useful calculation functions from Goals
+
 export const calculateProgress = (goal) => {
-  if (!goal || !goal.targetAmount) return 0;
+  if (!goal || !goal.targetAmount || goal.targetAmount <= 0) {
+    return 0;
+  }
+  
   const progress = goal.targetAmount > 0 
-    ? (goal.currentAmount / goal.targetAmount) * 100 
+    ? ((goal.currentAmount || 0) / goal.targetAmount) * 100 
     : 0;
   return Math.min(progress, 100);
 };
 
 export const calculateTimeToGoal = (goal) => {
-  if (!goal || !goal.monthlyContribution || goal.monthlyContribution <= 0) {
+  if (!goal || !goal.targetAmount || !goal.targetDate) {
+    return null;
+  }
+  
+  if (!goal.monthlyContribution || goal.monthlyContribution <= 0) {
     return "Set monthly contribution";
   }
   
-  const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+  const remaining = Math.max(0, goal.targetAmount - (goal.currentAmount || 0));
   if (remaining <= 0) {
     return "Goal reached!";
   }
