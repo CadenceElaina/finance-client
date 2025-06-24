@@ -23,6 +23,7 @@ import {
   DEMO_ACCOUNTS,
   DEFAULT_DEMO_BUDGET,
   DEMO_PORTFOLIOS,
+  BASE_CASH_ACCOUNT,
 } from "../utils/constants";
 
 // Split contexts for better performance
@@ -188,6 +189,22 @@ export const FinancialDataProvider = ({ children }) => {
   );
 
   // FIXED: Stable data initialization with dependency control
+  const ensureBaseCashAccount = (accounts) => {
+    if (!accounts || !Array.isArray(accounts)) {
+      return [BASE_CASH_ACCOUNT];
+    }
+
+    // Check if base cash account exists
+    const hasBaseCash = accounts.some((acc) => acc.id === BASE_CASH_ACCOUNT.id);
+
+    if (hasBaseCash) {
+      return accounts;
+    }
+
+    // Add base cash account at the beginning
+    return [BASE_CASH_ACCOUNT, ...accounts];
+  };
+
   const initializeData = useCallback(async () => {
     // Prevent multiple simultaneous initializations
     if (isInitialized) {
@@ -213,9 +230,15 @@ export const FinancialDataProvider = ({ children }) => {
         budget: enrichBudgetWithCalculations(normalizedData.budget),
       };
 
+      // FIXED: Ensure base cash account exists
+      const accountsWithBaseCash = ensureBaseCashAccount(enrichedData.accounts);
+
       console.log("Setting enriched data:", enrichedData);
-      setData(enrichedData);
-      updatePreviousAccountValues(enrichedData.accounts);
+      setData({
+        ...enrichedData,
+        accounts: accountsWithBaseCash,
+      });
+      updatePreviousAccountValues(accountsWithBaseCash);
       setIsInitialized(true);
     } catch (error) {
       console.error("Failed to load financial data:", error);
@@ -294,32 +317,34 @@ export const FinancialDataProvider = ({ children }) => {
     )
   ).current;
 
-  // FIXED: Add goal budget sync utility
-  const syncGoalBudgetExpenses = (data) => {
-    const goals = data.goals || [];
-    const currentExpenses = data.budget?.monthlyExpenses || [];
+  // Update the goal sync functions to handle the new structure
 
-    // Remove existing goal expenses
-    let updatedExpenses = currentExpenses.filter((exp) => !exp.isGoalPayment);
+  // Update the syncGoalBudgetExpenses function
+  const syncGoalBudgetExpenses = (data) => {
+    if (!data.goals || !data.budget) return data;
+
+    const currentExpenses = data.budget.monthlyExpenses || [];
+    let updatedExpenses = [...currentExpenses];
+
+    // Remove existing goal expenses that are no longer active
+    updatedExpenses = updatedExpenses.filter(
+      (exp) =>
+        !(exp.isGoalExpense === true || (exp.id && exp.id.startsWith("exp-goal-")))
+    );
 
     // Add current goal expenses
-    goals.forEach((goal) => {
-      if (
-        goal.linkedToBudget &&
-        goal.budgetMonthlyAmount > 0 &&
-        goal.status === "active"
-      ) {
+    data.goals.forEach((goal) => {
+      if (goal.linkedToBudget && goal.budgetMonthlyAmount > 0 && goal.status === "active") {
         const goalExpenseId = `exp-goal-${goal.id}`;
-        const goalExpense = {
-          id: goalExpenseId,
-          name: `${goal.name}`,
-          cost: goal.budgetMonthlyAmount,
-          category: "required",
-          linkedToGoalId: goal.id,
-          isGoalPayment: true,
-        };
 
-        updatedExpenses.push(goalExpense);
+        updatedExpenses.push({
+          id: goalExpenseId,
+          name: `${goal.name} (Goal)`,
+          cost: parseFloat(goal.budgetMonthlyAmount) || 0,
+          category: "goal",
+          isGoalExpense: true,
+          linkedToGoalId: goal.id,
+        });
       }
     });
 
@@ -329,6 +354,33 @@ export const FinancialDataProvider = ({ children }) => {
         ...data.budget,
         monthlyExpenses: updatedExpenses,
       },
+    };
+  };
+
+  // Add function to sync goal account amounts (removed manual contributions)
+  const syncGoalAccountAmounts = (data) => {
+    if (!data.goals || !data.accounts) return data;
+
+    return {
+      ...data,
+      goals: data.goals.map((goal) => {
+        if (!goal.linkedAccounts || !Array.isArray(goal.linkedAccounts)) {
+          return { ...goal, currentAmount: 0 };
+        }
+
+        // Calculate current amount from linked accounts only
+        const currentAmount = goal.linkedAccounts.reduce(
+          (sum, linkedAcc) => {
+            return sum + (parseFloat(linkedAcc.allocatedAmount) || 0);
+          },
+          0
+        );
+
+        return {
+          ...goal,
+          currentAmount,
+        };
+      }),
     };
   };
 
@@ -342,8 +394,16 @@ export const FinancialDataProvider = ({ children }) => {
       }
 
       try {
+        // FIXED: Ensure base cash account always exists before saving
+        const accountsWithBaseCash = ensureBaseCashAccount(
+          newData.accounts?.accounts || newData.accounts
+        );
+
         // FIXED: Sync goal account amounts before saving
-        const syncedData = syncGoalAccountAmounts(newData);
+        const syncedData = syncGoalAccountAmounts({
+          ...newData,
+          accounts: accountsWithBaseCash,
+        });
 
         // Sync debt payments to budget expenses
         const finalData = syncGoalBudgetExpenses(syncedData);
@@ -395,33 +455,6 @@ export const FinancialDataProvider = ({ children }) => {
       debouncedSave,
     ]
   );
-
-  // FIXED: Add function to sync goal account amounts
-  const syncGoalAccountAmounts = (data) => {
-    if (!data.goals || !data.accounts) return data;
-
-    const updatedGoals = data.goals.map((goal) => {
-      if (goal.fundingAccountId && goal.useEntireAccount) {
-        const linkedAccount = data.accounts.find(
-          (acc) => acc.id === goal.fundingAccountId
-        );
-        if (linkedAccount) {
-          const newAccountValue = linkedAccount.value || 0;
-          return {
-            ...goal,
-            linkedAccountAmount: newAccountValue,
-            currentAmount: newAccountValue + (goal.manualContributions || 0),
-          };
-        }
-      }
-      return goal;
-    });
-
-    return {
-      ...data,
-      goals: updatedGoals,
-    };
-  };
 
   // Persist dismissed notifications
   useEffect(() => {

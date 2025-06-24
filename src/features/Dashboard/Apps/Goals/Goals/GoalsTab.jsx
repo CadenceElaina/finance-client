@@ -1,5 +1,5 @@
 // src/features/Dashboard/Apps/Plan/Goals/GoalsTab.jsx
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
@@ -32,8 +32,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     );
   }
 
-  const { data, saveData, updateGoal, addManualGoalContribution, removeGoal } =
-    financialDataResult;
+  const { data, saveData, updateGoal, removeGoal } = financialDataResult;
 
   // SAFETY CHECK: Ensure data exists
   if (!data) {
@@ -56,7 +55,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   const monthlyDiscretionary = budget?.discretionaryIncome || 0;
   const allocatedToGoals = (goals || [])
     .filter((g) => g.linkedToBudget && g.status === "active")
-    .reduce((sum, g) => sum + (parseFloat(g.monthlyContribution) || 0), 0);
+    .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
   const availableDiscretionary = monthlyDiscretionary - allocatedToGoals;
 
   const [showAddForm, setShowAddForm] = useState(false);
@@ -74,7 +73,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
       const linkedToBudgetChanged =
         oldGoal.linkedToBudget !== goalData.linkedToBudget;
 
-      const updatedGoals = (goals || []).map((g) =>
+      const updatedGoals = goals.map((g) =>
         g.id === editingGoal.id ? { ...goalData } : g
       );
 
@@ -134,10 +133,10 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
       const goalExpense = {
         id: goalExpenseId,
         name: `${newGoal.name} (Goal)`,
-        cost: newGoal.budgetMonthlyAmount,
-        category: "required",
+        cost: parseFloat(newGoal.budgetMonthlyAmount) || 0,
+        category: "goal",
+        isGoalExpense: true,
         linkedToGoalId: newGoal.id,
-        isGoalPayment: true,
       };
 
       updatedExpenses.push(goalExpense);
@@ -159,7 +158,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
   // FIXED: Enhanced goal removal with notifications
   const handleRemoveGoal = (goalId) => {
-    const goalToRemove = (goals || []).find((g) => g.id === goalId);
+    const goalToRemove = goals.find((g) => g.id === goalId);
 
     if (!goalToRemove) return;
 
@@ -169,28 +168,21 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     }
 
     if (window.confirm(confirmMessage)) {
-      const updatedGoals = (goals || []).filter((g) => g.id !== goalId);
+      // Remove goal and any associated budget expense
+      const updatedGoals = goals.filter((g) => g.id !== goalId);
+      const goalExpenseId = `exp-goal-${goalId}`;
+      const updatedExpenses = (data.budget?.monthlyExpenses || []).filter(
+        (exp) => exp.id !== goalExpenseId
+      );
 
-      let updatedData = {
+      const updatedData = {
         ...data,
         goals: updatedGoals,
+        budget: {
+          ...data.budget,
+          monthlyExpenses: updatedExpenses,
+        },
       };
-
-      // Remove associated budget expense if it exists
-      if (goalToRemove?.linkedToBudget) {
-        const goalExpenseId = `exp-goal-${goalId}`;
-        const updatedExpenses = (data.budget?.monthlyExpenses || []).filter(
-          (exp) => exp.id !== goalExpenseId
-        );
-
-        updatedData = {
-          ...updatedData,
-          budget: {
-            ...data.budget,
-            monthlyExpenses: updatedExpenses,
-          },
-        };
-      }
 
       saveData(updatedData);
 
@@ -210,28 +202,8 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     setEditingGoal(null);
   };
 
-  const handleManualContribution = (goalId, amount) => {
-    if (addManualGoalContribution) {
-      addManualGoalContribution(goalId, amount);
-    } else {
-      // Fallback if addManualGoalContribution is not available
-      const updatedGoals = (goals || []).map((goal) => {
-        if (goal.id === goalId) {
-          const newAmount = (goal.currentAmount || 0) + amount;
-          return {
-            ...goal,
-            currentAmount: Math.min(goal.targetAmount, newAmount),
-            lastModified: new Date().toISOString().split("T")[0],
-          };
-        }
-        return goal;
-      });
-      saveData({ ...data, goals: updatedGoals });
-    }
-  };
-
   const handleStatusToggle = (goalId) => {
-    const goal = (goals || []).find((g) => g.id === goalId);
+    const goal = goals.find((g) => g.id === goalId);
     if (!goal || goal.status === "completed") return;
 
     const newStatus = goal.status === "active" ? "paused" : "active";
@@ -242,7 +214,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
       });
     } else {
       // Fallback
-      const updatedGoals = (goals || []).map((g) =>
+      const updatedGoals = goals.map((g) =>
         g.id === goalId
           ? {
               ...g,
@@ -258,29 +230,37 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   // Filter goals based on active inner tab
   const filteredGoals = (goals || []).filter((goal) => {
     if (!activeInnerTabId || activeInnerTabId === "showAll") return true;
-    if (activeInnerTabId === "active") return goal.status === "active";
-    if (activeInnerTabId === "completed") return goal.status === "completed";
-    return true;
+    return goal.status === activeInnerTabId;
   });
 
-  // Add goals summary calculations
+  // UPDATED: Goals summary calculations (removed manual contributions)
   const goalsSummary = useMemo(() => {
-    const safeGoals = goals || [];
-    const activeGoals = safeGoals.filter((g) => g.status === "active");
-    const completedGoals = safeGoals.filter((g) => g.status === "completed");
+    const activeGoals = (goals || []).filter((g) => g.status === "active").length;
+    const completedGoals = (goals || []).filter((g) => g.status === "completed").length;
 
-    const totalTargetAmount = activeGoals.reduce(
-      (sum, g) => sum + (g.targetAmount || 0),
+    const totalTargetAmount = (goals || []).reduce(
+      (sum, g) => sum + (parseFloat(g.targetAmount) || 0),
       0
     );
-    const totalCurrentAmount = activeGoals.reduce(
-      (sum, g) => sum + (g.currentAmount || 0),
+    const totalCurrentAmount = (goals || []).reduce(
+      (sum, g) => {
+        // Calculate from linked accounts only
+        if (g.linkedAccounts && Array.isArray(g.linkedAccounts)) {
+          return (
+            sum +
+            g.linkedAccounts.reduce((accSum, linkedAcc) => {
+              return accSum + (parseFloat(linkedAcc.allocatedAmount) || 0);
+            }, 0)
+          );
+        }
+        return sum;
+      },
       0
     );
-    const totalMonthlyContributions = activeGoals.reduce(
-      (sum, g) => sum + (parseFloat(g.monthlyContribution) || 0),
-      0
-    );
+
+    const totalBudgetAllocations = (goals || [])
+      .filter((g) => g.linkedToBudget && g.status === "active")
+      .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
 
     const overallProgress =
       totalTargetAmount > 0
@@ -288,11 +268,11 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
         : 0;
 
     return {
-      activeGoals: activeGoals.length,
-      completedGoals: completedGoals.length,
+      activeGoals,
+      completedGoals,
       totalTargetAmount,
       totalCurrentAmount,
-      totalMonthlyContributions,
+      totalMonthlyContributions: totalBudgetAllocations, // Only budget allocations now
       overallProgress,
     };
   }, [goals]);
@@ -315,7 +295,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
           : "negative",
     },
     {
-      label: "Monthly Allocation",
+      label: "Budget Allocation",
       value: `$${goalsSummary.totalMonthlyContributions.toLocaleString()}`,
       valueClass: "positive",
     },
@@ -377,7 +357,6 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
                 onEdit={handleEditGoal}
                 onRemove={handleRemoveGoal}
                 onStatusToggle={handleStatusToggle}
-                onManualContribution={handleManualContribution}
               />
             );
           })}

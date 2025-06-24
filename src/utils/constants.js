@@ -34,9 +34,25 @@ export const DEMO_PORTFOLIOS = [
   { id: "portfolio-2", name: "Retirement Portfolio" },
 ];
 
-// Update DEMO_ACCOUNTS to include proper cash balances
+// Base cash account that cannot be removed
+export const BASE_CASH_ACCOUNT = {
+  id: "base-cash-001",
+  name: "Cash",
+  category: "Cash",
+  subType: "Other Cash",
+  value: 0,
+  accountProvider: "Self",
+  taxStatus: "N/A",
+  isBaseAccount: true, // Flag to identify this as non-removable
+  interestRate: null,
+  monthlyPayment: null,
+  portfolioId: null,
+  portfolioName: "N/A"
+};
 
+// Update DEMO_ACCOUNTS to include the base cash account
 export const DEMO_ACCOUNTS = [
+  BASE_CASH_ACCOUNT, // Always first in the list
   { 
     id: "acc-1", 
     name: "Checking Account", 
@@ -60,7 +76,7 @@ export const DEMO_ACCOUNTS = [
     name: "401(k)", 
     category: "Investments", 
     subType: "401(k)", 
-    value: 45000, // This will be calculated from securities + cash
+    value: 45000,
     accountProvider: "Fidelity", 
     taxStatus: "Tax-deferred", 
     portfolioId: "portfolio-2", 
@@ -85,14 +101,14 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-02-01" 
       }
     ], 
-    cashBalance: 0 // No cash in this account
+    cashBalance: 0
   },
   { 
     id: "acc-4", 
     name: "Roth IRA", 
     category: "Investments", 
     subType: "Roth IRA", 
-    value: 25500, // 25000 securities + 500 cash
+    value: 25500,
     accountProvider: "Vanguard", 
     taxStatus: "Tax-free", 
     portfolioId: "portfolio-1", 
@@ -108,14 +124,14 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-03-10" 
       }
     ], 
-    cashBalance: 500 // $500 cash balance
+    cashBalance: 500
   },
   { 
     id: "acc-5", 
     name: "Taxable Brokerage", 
     category: "Investments", 
     subType: "Taxable Brokerage", 
-    value: 15200, // 15000 securities + 200 cash
+    value: 15200,
     accountProvider: "Vanguard", 
     taxStatus: "Taxable", 
     portfolioId: "portfolio-1", 
@@ -131,7 +147,7 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-04-05" 
       }
     ], 
-    cashBalance: 200 // $200 cash balance
+    cashBalance: 200
   },
   { 
     id: "acc-6", 
@@ -145,7 +161,20 @@ export const DEMO_ACCOUNTS = [
     monthlyPayment: 150 
   },
   { 
-    id: "acc-7", 
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Rest of constants remain the same...];  },    monthlyPayment: 200     interestRate: 4.5,     taxStatus: "N/A",     accountProvider: "Nelnet",     value: -15000,     subType: "Student Loan",     category: "Debt",     name: "Student Loan",     id: "acc-7",     id: "acc-7", 
     name: "Student Loan", 
     category: "Debt", 
     subType: "Student Loan", 
