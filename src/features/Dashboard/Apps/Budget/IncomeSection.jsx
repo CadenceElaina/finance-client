@@ -3,8 +3,6 @@ import React, { useState, useMemo, useRef } from "react";
 import Section from "../../../../components/ui/Section/Section";
 import Table from "../../../../components/ui/Table/Table";
 import EditableTableHeader from "../../../../components/ui/Table/EditableTableHeader";
-import BudgetFormInput from "../../../../components/ui/Form/BudgetFormInput";
-import BudgetFormSelect from "../../../../components/ui/Form/BudgetFormSelect";
 import { useBudgetForm } from "../../../../hooks/useBudgetForm";
 import { useIncomeCalculations } from "../../../../hooks/useIncomeCalculations";
 import sectionStyles from "../../../../components/ui/Section/Section.module.css";
@@ -189,11 +187,14 @@ const IncomeSection = ({ budget, smallApp }) => {
         <div className={budgetStyles.incomeTypeSelector}>
           <div className={budgetStyles.formGroup}>
             <label className={budgetStyles.formLabel}>Income Type</label>
-            <BudgetFormSelect
-              options={INCOME_TYPE_OPTIONS}
-              value={currentType}
-              onChange={(value) => updateEditRow(0, "type", value)}
-            />
+            <select
+              value={row.type || "salary"}
+              onChange={(e) => updateEditRow(0, "type", e.target.value)}
+              className={budgetStyles.formInput}
+            >
+              <option value="salary">Salary</option>
+              <option value="hourly">Hourly</option>
+            </select>
           </div>
         </div>
 
@@ -205,15 +206,14 @@ const IncomeSection = ({ budget, smallApp }) => {
                 <label className={budgetStyles.formLabel}>
                   Annual Pre-Tax Salary
                 </label>
-                <BudgetFormInput
-                  column={{
-                    type: "number",
-                    placeholder: "75000",
-                    step: "1000",
-                    min: "0",
-                  }}
+                <input
+                  type="text"
                   value={row.annualPreTax || ""}
-                  onChange={(value) => updateEditRow(0, "annualPreTax", value)}
+                  onChange={(e) =>
+                    updateEditRow(0, "annualPreTax", e.target.value)
+                  }
+                  className={budgetStyles.formInput}
+                  placeholder="75000"
                 />
               </div>
             </>
@@ -221,30 +221,32 @@ const IncomeSection = ({ budget, smallApp }) => {
             <>
               <div className={budgetStyles.formGroup}>
                 <label className={budgetStyles.formLabel}>Hourly Rate</label>
-                <BudgetFormInput
-                  column={{
-                    type: "number",
-                    placeholder: "25.00",
-                    step: "0.25",
-                    min: "0",
-                  }}
+                <input
+                  type="number"
                   value={row.hourlyRate || ""}
-                  onChange={(value) => updateEditRow(0, "hourlyRate", value)}
+                  onChange={(e) =>
+                    updateEditRow(0, "hourlyRate", e.target.value)
+                  }
+                  className={budgetStyles.formInput}
+                  placeholder="25.00"
+                  step="0.25"
+                  min="0"
                 />
               </div>
               <div className={budgetStyles.formGroup}>
                 <label className={budgetStyles.formLabel}>
                   Expected Annual Hours
                 </label>
-                <BudgetFormInput
-                  column={{
-                    type: "number",
-                    placeholder: "2080",
-                    step: "40",
-                    min: "0",
-                  }}
+                <input
+                  type="number"
                   value={row.expectedHours || ""}
-                  onChange={(value) => updateEditRow(0, "expectedHours", value)}
+                  onChange={(e) =>
+                    updateEditRow(0, "expectedHours", e.target.value)
+                  }
+                  className={budgetStyles.formInput}
+                  placeholder="2080"
+                  step="40"
+                  min="0"
                 />
               </div>
             </>
@@ -254,15 +256,16 @@ const IncomeSection = ({ budget, smallApp }) => {
             <label className={budgetStyles.formLabel}>
               Monthly After-Tax Income
             </label>
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "4100",
-                step: "100",
-                min: "0",
-              }}
+            <input
+              type="number"
               value={row.monthlyAfterTax || ""}
-              onChange={(value) => updateEditRow(0, "monthlyAfterTax", value)}
+              onChange={(e) =>
+                updateEditRow(0, "monthlyAfterTax", e.target.value)
+              }
+              className={budgetStyles.formInput}
+              placeholder="4100"
+              step="100"
+              min="0"
             />
           </div>
 
@@ -270,17 +273,16 @@ const IncomeSection = ({ budget, smallApp }) => {
             <label className={budgetStyles.formLabel}>
               Additional Annual After-Tax
             </label>
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "5000",
-                step: "500",
-                min: "0",
-              }}
+            <input
+              type="number"
               value={row.additionalAnnualAT || ""}
-              onChange={(value) =>
-                updateEditRow(0, "additionalAnnualAT", value)
+              onChange={(e) =>
+                updateEditRow(0, "additionalAnnualAT", e.target.value)
               }
+              className={budgetStyles.formInput}
+              placeholder="5000"
+              step="500"
+              min="0"
             />
           </div>
         </div>

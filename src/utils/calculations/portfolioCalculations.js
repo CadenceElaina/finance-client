@@ -8,8 +8,23 @@ export function calculatePortfolioMetrics(accounts, portfolioId = 'all') {
         acc.portfolioId === portfolioId
       );
 
+  // Handle empty portfolio case
+  if (relevantAccounts.length === 0) {
+    return {
+      accounts: [],
+      totalValue: 0,
+      totalCostBasis: 0,
+      gainLoss: 0,
+      gainLossPercent: 0,
+      cashBalance: 0,
+      securitiesCount: 0
+    };
+  }
+
+  // FIXED: Calculate total value (securities + cash)
   const totalValue = relevantAccounts.reduce((sum, acc) => sum + (acc.value || 0), 0);
   
+  // FIXED: Calculate cost basis ONLY for securities (not including cash)
   const totalCostBasis = relevantAccounts.reduce((sum, acc) => {
     if (Array.isArray(acc.securities)) {
       return sum + acc.securities.reduce((secSum, sec) => 
@@ -18,19 +33,25 @@ export function calculatePortfolioMetrics(accounts, portfolioId = 'all') {
     return sum;
   }, 0);
 
-  const gainLoss = totalValue - totalCostBasis;
-  const gainLossPercent = totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
-
+  // FIXED: Calculate cash balance separately
   const cashBalance = relevantAccounts.reduce((sum, acc) => 
     sum + (acc.cashBalance || 0), 0);
 
+  // FIXED: Calculate securities value only (excluding cash)
+  const securitiesValue = totalValue - cashBalance;
+  
+  // FIXED: Gain/loss is only on securities (securities current value - securities cost basis)
+  const gainLoss = securitiesValue - totalCostBasis;
+  const gainLossPercent = totalCostBasis > 0 ? (gainLoss / totalCostBasis) * 100 : 0;
+
   return {
     accounts: relevantAccounts,
-    totalValue,
-    totalCostBasis,
-    gainLoss,
+    totalValue, // Total account value (securities + cash)
+    totalCostBasis, // Cost basis of securities only
+    gainLoss, // Gain/loss on securities only
     gainLossPercent,
     cashBalance,
+    securitiesValue, // Add this for clarity
     securitiesCount: relevantAccounts.reduce((sum, acc) => 
       sum + (acc.securities?.length || 0), 0)
   };
@@ -38,6 +59,14 @@ export function calculatePortfolioMetrics(accounts, portfolioId = 'all') {
 
 export function getPortfolioAllocation(accounts, portfolioId = 'all') {
   const metrics = calculatePortfolioMetrics(accounts, portfolioId);
+  
+  // Handle empty portfolio case
+  if (metrics.securitiesCount === 0) {
+    return {
+      pieData: [],
+      totalValue: 0
+    };
+  }
   
   const securitiesInPortfolio = [];
   metrics.accounts.forEach(acc => {
@@ -80,6 +109,11 @@ export function getPerformanceDataForPortfolio(accounts, portfolioId) {
         acc.hasSecurities &&
         acc.portfolioId === portfolioId
     );
+  }
+
+  // Handle empty portfolio case
+  if (relevantAccounts.length === 0) {
+    return [];
   }
 
   let events = [];

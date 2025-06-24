@@ -110,41 +110,79 @@ export const FinancialDataProvider = ({ children }) => {
     []
   );
 
+  // Update the checkAccountChangesForGoals function to properly sync linked account amounts
+
   const checkAccountChangesForGoals = useCallback(
     (accounts, goals, previousValues) => {
+      if (!goals || goals.length === 0) return [];
+
       const notifications = [];
 
-      goals.forEach((goal) => {
-        if (goal.fundingType === "account" && goal.fundingAccountId) {
-          const account = accounts.find(
+      // FIXED: Update linked account amounts for all goals, not just notifications
+      const updatedGoals = goals.map((goal) => {
+        if (goal.fundingAccountId && goal.useEntireAccount) {
+          const linkedAccount = accounts.find(
             (acc) => acc.id === goal.fundingAccountId
           );
-          const oldValue = previousValues[goal.fundingAccountId] || 0;
-          const newValue = account?.value || 0;
+          if (linkedAccount) {
+            const oldValue = previousValues[goal.fundingAccountId] || 0;
+            const newValue = linkedAccount.value || 0;
 
-          if (Math.abs(newValue - oldValue) > 0.01) {
-            const notificationId = createNotificationId(
-              goal.id,
-              account.id,
-              oldValue,
-              newValue
-            );
+            // FIXED: Always update linkedAccountAmount when account value changes
+            const updatedGoal = {
+              ...goal,
+              linkedAccountAmount: newValue,
+              currentAmount: newValue + (goal.manualContributions || 0),
+            };
 
-            if (!dismissedNotificationIds.includes(notificationId)) {
-              notifications.push({
-                id: notificationId,
-                goal,
+            // Only create notification if the change is significant and goal isn't complete
+            const significantChange = Math.abs(newValue - oldValue) >= 50;
+            const isComplete = updatedGoal.currentAmount >= goal.targetAmount;
+
+            if (significantChange && !isComplete && newValue !== oldValue) {
+              const notificationId = createNotificationId(
+                goal.id,
+                goal.fundingAccountId,
                 oldValue,
-                newValue,
-                accountName: account.name,
-                type: "account_change",
-              });
+                newValue
+              );
+
+              if (!dismissedNotificationIds.includes(notificationId)) {
+                notifications.push({
+                  id: notificationId,
+                  type: "accountGoalUpdate",
+                  goal: updatedGoal,
+                  accountId: goal.fundingAccountId,
+                  accountName: linkedAccount.name,
+                  oldValue,
+                  newValue,
+                  timestamp: Date.now(),
+                });
+              }
             }
+
+            return updatedGoal;
           }
         }
+        return goal;
       });
 
-      setAccountChangeNotifications(notifications);
+      // FIXED: Update the goals in data if any linked amounts changed
+      const goalsChanged = updatedGoals.some(
+        (goal, index) =>
+          goal.linkedAccountAmount !== goals[index].linkedAccountAmount ||
+          goal.currentAmount !== goals[index].currentAmount
+      );
+
+      if (goalsChanged) {
+        // Update the goals in the data immediately
+        setData((prevData) => ({
+          ...prevData,
+          goals: updatedGoals,
+        }));
+      }
+
+      return notifications;
     },
     [dismissedNotificationIds, createNotificationId]
   );
@@ -294,78 +332,47 @@ export const FinancialDataProvider = ({ children }) => {
     };
   };
 
-  // Save function with goal budget sync
+  // Update the saveData function to handle goal syncing better
+
   const saveData = useCallback(
     async (newData) => {
-      if (!isInitialized) return;
+      if (!isInitialized) {
+        console.warn("Attempted to save data before initialization");
+        return;
+      }
 
       try {
-        // FIXED: Check if goals changed and sync with budget
-        const goalsChanged =
-          JSON.stringify(data?.goals) !== JSON.stringify(newData?.goals);
+        // FIXED: Sync goal account amounts before saving
+        const syncedData = syncGoalAccountAmounts(newData);
 
-        let finalData = newData;
-        if (goalsChanged) {
-          // Sync goal budget allocations with budget expenses
-          finalData = syncGoalBudgetExpenses(newData);
+        // Sync debt payments to budget expenses
+        const finalData = syncGoalBudgetExpenses(syncedData);
+
+        // Update previous account values for goal tracking
+        if (finalData.accounts) {
+          updatePreviousAccountValues(finalData.accounts);
         }
 
-        // Continue with existing debt sync logic...
-        const accountsChanged =
-          JSON.stringify(data?.accounts) !==
-          JSON.stringify(finalData?.accounts);
-
-        if (accountsChanged) {
-          const debtAccounts =
-            finalData.accounts?.filter(
-              (acc) => acc.category === "Debt" && (acc.monthlyPayment || 0) > 0
-            ) || [];
-
-          if (debtAccounts.length > 0) {
-            const existingExpenses = finalData.budget?.monthlyExpenses || [];
-            const updatedExpenses = syncDebtPaymentsToExpenses(
-              finalData.accounts,
-              existingExpenses
-            );
-
-            finalData = {
-              ...finalData,
-              budget: {
-                ...finalData.budget,
-                monthlyExpenses: updatedExpenses,
-              },
-            };
-          }
-        }
-
-        // Enrich budget with calculations
-        const enrichedBudget = enrichBudgetWithCalculations(finalData.budget);
-        const dataWithEnrichedBudget = {
-          ...finalData,
-          budget: enrichedBudget,
-        };
-
-        // Update state first for immediate UI feedback
-        setData(dataWithEnrichedBudget);
-
-        // Check for account value changes that affect goals
-        if (accountsChanged && finalData.accounts) {
-          checkAccountChangesForGoals(
+        // Check for account changes that affect goals
+        if (finalData.accounts && data?.goals) {
+          const notifications = checkAccountChangesForGoals(
             finalData.accounts,
             finalData.goals || [],
             previousAccountValues
           );
-          updatePreviousAccountValues(finalData.accounts);
+
+          if (notifications.length > 0) {
+            setAccountChangeNotifications((prev) => [
+              ...prev,
+              ...notifications,
+            ]);
+          }
         }
 
-        // Save to persistence layer
-        await debouncedSave(
-          dataWithEnrichedBudget,
-          user,
-          token,
-          persistence,
-          showNotification
-        );
+        setData(finalData);
+
+        // Debounced save to storage/server
+        debouncedSave(finalData, user, token, persistence, showNotification);
       } catch (error) {
         console.error("Error saving data:", error);
         showNotification({
@@ -388,6 +395,33 @@ export const FinancialDataProvider = ({ children }) => {
       debouncedSave,
     ]
   );
+
+  // FIXED: Add function to sync goal account amounts
+  const syncGoalAccountAmounts = (data) => {
+    if (!data.goals || !data.accounts) return data;
+
+    const updatedGoals = data.goals.map((goal) => {
+      if (goal.fundingAccountId && goal.useEntireAccount) {
+        const linkedAccount = data.accounts.find(
+          (acc) => acc.id === goal.fundingAccountId
+        );
+        if (linkedAccount) {
+          const newAccountValue = linkedAccount.value || 0;
+          return {
+            ...goal,
+            linkedAccountAmount: newAccountValue,
+            currentAmount: newAccountValue + (goal.manualContributions || 0),
+          };
+        }
+      }
+      return goal;
+    });
+
+    return {
+      ...data,
+      goals: updatedGoals,
+    };
+  };
 
   // Persist dismissed notifications
   useEffect(() => {
@@ -476,8 +510,20 @@ export const FinancialDataProvider = ({ children }) => {
         });
       },
       resetAccountsToDemo: () => {
-        if (!data) return;
-        saveData({ ...data, accounts: DEMO_ACCOUNTS });
+        // FIXED: Use imported constants instead of require
+        const updatedData = {
+          ...data,
+          accounts: DEMO_ACCOUNTS,
+          portfolios: DEMO_PORTFOLIOS, // FIXED: Also restore demo portfolios
+        };
+
+        saveData(updatedData);
+
+        showNotification({
+          type: "warning",
+          title: "Reset Complete",
+          message: `Accounts and portfolios reset to demo data!\n• ${DEMO_ACCOUNTS.length} accounts\n• ${DEMO_PORTFOLIOS.length} portfolios`,
+        });
       },
       clearAccountsData: () => {
         if (!data) return;

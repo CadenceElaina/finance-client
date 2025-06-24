@@ -51,7 +51,7 @@
 .value, .valueSmall {
     font-weight: 700;
     color: var(--text-primary);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     line-height: 1.1;
 }
 
@@ -93,7 +93,7 @@
     background: var(--color-primary);
     color: var(--text-on-primary);
     margin-bottom: var(--space-xxs);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
 }
 
 .trendIndicator {

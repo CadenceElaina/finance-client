@@ -25,15 +25,26 @@ export const useAccountsSection = (categoryFilter = 'all', portfolioFilter = 'al
     return filtered;
   }, [enrichedData.accounts, categoryFilter, portfolioFilter]);
 
-  // Portfolio-specific calculations
+  // Portfolio-specific calculations with fallback for empty portfolios
   const portfolioMetrics = useMemo(() => {
-    if (portfolioFilter === 'all') {
-      return calculatePortfolioMetrics(enrichedData.accounts);
+    try {
+      if (portfolioFilter === 'all') {
+        return calculatePortfolioMetrics(enrichedData.accounts);
+      }
+      return calculatePortfolioMetrics(enrichedData.accounts, portfolioFilter);
+    } catch (error) {
+      console.warn('Portfolio metrics calculation failed:', error);
+      return {
+        totalValue: 0,
+        cashBalance: 0,
+        gainLoss: 0,
+        gainLossPercent: 0,
+        securitiesCount: 0
+      };
     }
-    return calculatePortfolioMetrics(enrichedData.accounts, portfolioFilter);
   }, [enrichedData.accounts, portfolioFilter]);
 
-  // Get portfolios with securities
+  // Get portfolios with securities (for special filtering where needed)
   const portfoliosWithSecurities = useMemo(() => {
     return (data.portfolios || []).filter(p => {
       const portfolioAccounts = enrichedData.accounts.filter(
@@ -56,8 +67,8 @@ export const useAccountsSection = (categoryFilter = 'all', portfolioFilter = 'al
   return {
     accounts: filteredAccounts,
     allAccounts: enrichedData.accounts,
-    portfolios: data.portfolios || [],
-    portfoliosWithSecurities,
+    portfolios: data.portfolios || [], // Return ALL portfolios
+    portfoliosWithSecurities, // Separate property for portfolios that have securities
     calculations: enrichedData,
     portfolioMetrics,
     saveAccounts,

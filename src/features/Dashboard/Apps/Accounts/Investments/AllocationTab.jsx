@@ -16,12 +16,13 @@ const AllocationTab = memo(
   }) => {
     const { data } = useFinancialData();
     const allAccounts = data.accounts || [];
+    const allPortfolios = data.portfolios || [];
     const chartRenderedRef = useRef(false);
 
     // Memoize expensive calculations with specific dependencies
     const { pieData, totalValue } = useMemo(() => {
       const result = getPortfolioAllocation(allAccounts, portfolioId);
-      chartRenderedRef.current = false; // Reset render flag when data changes
+      chartRenderedRef.current = false;
       return result;
     }, [
       allAccounts.length,
@@ -43,6 +44,16 @@ const AllocationTab = memo(
       [pieData]
     );
 
+    // Check if portfolio exists and has accounts
+    const portfolioHasAccounts =
+      portfolioId === "all" ||
+      allAccounts.some(
+        (acc) =>
+          acc.portfolioId === portfolioId && acc.category === "Investments"
+      );
+
+    const portfolioHasSecurities = sortedPieData.length > 0;
+
     // Memoize the custom label renderer
     const renderCustomLabel = useCallback(
       ({
@@ -63,34 +74,61 @@ const AllocationTab = memo(
         const x = cx + labelRadius * Math.cos(-midAngle * RADIAN);
         const y = cy + labelRadius * Math.sin(-midAngle * RADIAN);
 
-        const percentage = (percent * 100).toFixed(1);
         const textAnchor = x > cx ? "start" : "end";
+        const finalX = x + (x > cx ? 5 : -5);
 
         return (
           <text
-            x={x}
+            x={finalX}
             y={y}
             fill="var(--chart-label-text)"
             textAnchor={textAnchor}
             dominantBaseline="central"
-            fontSize={
-              smallApp ? "var(--font-size-xxxs)" : "var(--font-size-xxs)"
-            }
-            fontWeight="var(--font-weight-medium)"
+            fontSize="var(--font-size-xxs)"
           >
-            {name} ({percentage}%)
+            <tspan x={finalX} dy={0}>
+              {name}
+            </tspan>
+            <tspan x={finalX} dy={14}>
+              ({(percent * 100).toFixed(1)}%)
+            </tspan>
           </text>
         );
       },
       [smallApp]
     );
 
+    // Generate appropriate empty state message
+    const getEmptyStateMessage = () => {
+      if (portfolioId !== "all" && portfolioId) {
+        const portfolio = allPortfolios.find((p) => p.id === portfolioId);
+        const portfolioName = portfolio?.name || "selected portfolio";
+
+        if (!portfolioHasAccounts) {
+          return `No investment accounts found for ${portfolioName}. Create an investment account and assign it to this portfolio to see allocation data.`;
+        } else if (!portfolioHasSecurities) {
+          return `No securities found for ${portfolioName}. Add securities to see allocation breakdown.`;
+        }
+      }
+      return "No securities to display. Add investment accounts with securities to see allocation data.";
+    };
+
     // Memoize chart content to prevent unnecessary re-renders
     const chartContent = useMemo(() => {
-      if (sortedPieData.length === 0) {
+      if (!portfolioHasSecurities) {
         return (
-          <div className={accountsStyles.noChartData}>
-            No securities to display for this portfolio.
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              color: "var(--text-secondary)",
+              textAlign: "center",
+              padding: "var(--space-md)",
+            }}
+          >
+            {getEmptyStateMessage()}
           </div>
         );
       }
@@ -127,56 +165,42 @@ const AllocationTab = memo(
               contentStyle={{
                 background: "var(--chart-tooltip-bg)",
                 border: "1px solid var(--border-light)",
-                color: "var(--text-on-secondary)",
                 borderRadius: "var(--border-radius-md)",
                 fontSize: "var(--font-size-xs)",
               }}
-              itemStyle={{
-                color: "var(--text-on-secondary)",
-                fontSize: "var(--font-size-xs)",
-              }}
-              animationDuration={0}
-              isAnimationActive={false}
             />
           </PieChart>
         </ResponsiveContainer>
       );
-    }, [sortedPieData, smallApp, renderCustomLabel]);
+    }, [
+      sortedPieData,
+      smallApp,
+      renderCustomLabel,
+      portfolioHasSecurities,
+      getEmptyStateMessage,
+    ]);
 
     return (
       <Section
         header={
           <SectionHeader
-            title={
+            title={`Allocation${portfolioName ? ` - ${portfolioName}` : ""}`}
+            left={
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "var(--space-md)",
+                  fontSize: "var(--font-size-sm)",
+                  color: "var(--color-primary)",
+                  background: "var(--surface-dark)",
+                  padding: "var(--space-xs) var(--space-sm)",
+                  borderRadius: "var(--border-radius-md)",
+                  border: "2px solid var(--color-primary)",
                 }}
               >
-                <span>
-                  {portfolioName
-                    ? `${portfolioName}'s Allocation`
-                    : "Portfolio Allocation"}
-                </span>
-                <div
-                  style={{
-                    fontSize: "var(--font-size-lg)",
-                    fontWeight: "var(--font-weight-bold)",
-                    color: "var(--color-primary)",
-                    background: "var(--surface-dark)",
-                    padding: "var(--space-xs) var(--space-sm)",
-                    borderRadius: "var(--border-radius-md)",
-                    border: "2px solid var(--color-primary)",
-                  }}
-                >
-                  $
-                  {totalValue.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-                </div>
+                $
+                {totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </div>
             }
             right={showPortfolioSelectMenu ? portfolioSelectMenu : null}

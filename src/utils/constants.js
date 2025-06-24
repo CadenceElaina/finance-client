@@ -32,10 +32,10 @@ export const DEFAULT_DEMO_BUDGET = {
 export const DEMO_PORTFOLIOS = [
   { id: "portfolio-1", name: "Main Portfolio" },
   { id: "portfolio-2", name: "Retirement Portfolio" },
-  { id: "portfolio-3", name: "Emergency Fund" },
 ];
 
-// Update DEMO_ACCOUNTS to include portfolioId for investment accounts
+// Update DEMO_ACCOUNTS to include proper cash balances
+
 export const DEMO_ACCOUNTS = [
   { 
     id: "acc-1", 
@@ -60,13 +60,14 @@ export const DEMO_ACCOUNTS = [
     name: "401(k)", 
     category: "Investments", 
     subType: "401(k)", 
-    value: 45000, 
+    value: 45000, // This will be calculated from securities + cash
     accountProvider: "Fidelity", 
     taxStatus: "Tax-deferred", 
     portfolioId: "portfolio-2", 
     hasSecurities: true, 
     securities: [
       { 
+        id: "sec-1",
         name: "S&P 500 Index Fund", 
         ticker: "FXAIX", 
         quantity: 150, 
@@ -75,6 +76,7 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-01-15" 
       },
       { 
+        id: "sec-2",
         name: "Total Bond Market", 
         ticker: "FXNAX", 
         quantity: 100, 
@@ -83,20 +85,21 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-02-01" 
       }
     ], 
-    cashBalance: 0 
+    cashBalance: 0 // No cash in this account
   },
   { 
     id: "acc-4", 
     name: "Roth IRA", 
     category: "Investments", 
     subType: "Roth IRA", 
-    value: 25000, 
+    value: 25500, // 25000 securities + 500 cash
     accountProvider: "Vanguard", 
     taxStatus: "Tax-free", 
     portfolioId: "portfolio-1", 
     hasSecurities: true, 
     securities: [
       { 
+        id: "sec-3",
         name: "Total Stock Market", 
         ticker: "VTI", 
         quantity: 100, 
@@ -105,20 +108,21 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-03-10" 
       }
     ], 
-    cashBalance: 500 
+    cashBalance: 500 // $500 cash balance
   },
   { 
     id: "acc-5", 
     name: "Taxable Brokerage", 
     category: "Investments", 
     subType: "Taxable Brokerage", 
-    value: 15000, 
+    value: 15200, // 15000 securities + 200 cash
     accountProvider: "Vanguard", 
     taxStatus: "Taxable", 
     portfolioId: "portfolio-1", 
     hasSecurities: true, 
     securities: [
       { 
+        id: "sec-4",
         name: "Technology ETF", 
         ticker: "VGT", 
         quantity: 30, 
@@ -127,7 +131,7 @@ export const DEMO_ACCOUNTS = [
         datePurchased: "2023-04-05" 
       }
     ], 
-    cashBalance: 200 
+    cashBalance: 200 // $200 cash balance
   },
   { 
     id: "acc-6", 

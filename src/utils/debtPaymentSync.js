@@ -54,7 +54,7 @@ export const detectDebtPaymentChanges = (originalExpenses, newExpenses) => {
   const changes = [];
 
   newExpenses.forEach(expense => {
-    if (expense.isDebtPayment) {
+    if (expense.isDebtPayment === true || (expense.id && expense.id.startsWith('exp-debt-'))) {
       const originalExpense = originalExpenses.find(orig => orig.id === expense.id);
       if (originalExpense && originalExpense.cost !== expense.cost) {
         changes.push({
@@ -71,21 +71,20 @@ export const detectDebtPaymentChanges = (originalExpenses, newExpenses) => {
   return changes;
 };
 
-export const detectAccountDebtChanges = (originalAccounts, newAccounts) => {
+// FIXED: Look for debt payment expenses in the new expenses list
+export const detectAccountDebtChanges = (originalExpenses, newExpenses) => {
   const changes = [];
 
-  newAccounts.forEach(account => {
-    if (account.category === "Debt" && account.monthlyPayment) {
-      const originalAccount = originalAccounts.find(orig => orig.id === account.id);
-      const oldPayment = originalAccount?.monthlyPayment || 0;
-      const newPayment = account.monthlyPayment || 0;
-      
-      if (oldPayment !== newPayment) {
+  newExpenses.forEach(expense => {
+    if (expense.isDebtPayment === true || (expense.id && expense.id.startsWith('exp-debt-'))) {
+      const originalExpense = originalExpenses.find(orig => orig.id === expense.id);
+      if (originalExpense && originalExpense.cost !== expense.cost) {
         changes.push({
-          accountId: account.id,
-          accountName: account.name,
-          oldAmount: oldPayment,
-          newAmount: newPayment,
+          expenseId: expense.id,
+          accountId: expense.linkedToAccountId,
+          accountName: expense.name.replace(' Payment', ''),
+          oldAmount: originalExpense.cost,
+          newAmount: expense.cost,
         });
       }
     }
@@ -93,3 +92,27 @@ export const detectAccountDebtChanges = (originalAccounts, newAccounts) => {
 
   return changes;
 };
+
+// ADDED: Function to properly detect goal expenses
+export const detectGoalExpenseChanges = (originalExpenses, newExpenses) => {
+  const changes = [];
+
+  newExpenses.forEach(expense => {
+    if (expense.isGoalExpense === true || (expense.id && expense.id.startsWith('exp-goal-'))) {
+      const originalExpense = originalExpenses.find(orig => orig.id === expense.id);
+      if (originalExpense && originalExpense.cost !== expense.cost) {
+        changes.push({
+          expenseId: expense.id,
+          goalId: expense.linkedToGoalId,
+          goalName: expense.name.replace(' (Goal)', ''),
+          oldAmount: originalExpense.cost,
+          newAmount: expense.cost,
+        });
+      }
+    }
+  });
+
+  return changes;
+};
+
+// Rest of the functions remain the same...

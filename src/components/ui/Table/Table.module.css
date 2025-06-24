@@ -222,6 +222,14 @@ select,
     border-color: var(--color-secondary);
 }
 
+.tableSelect.goal {
+    border-color: var(--color-primary);
+}
+
+.tableSelect.debt {
+    border-color: var(--color-secondary);
+}
+
 .tableSelect option.required {
     background-color: var(--status-success);
     color: white;
@@ -260,14 +268,56 @@ select,
     background-color: var(--color-secondary);
 }
 
-/* Professional synced indicator - only for view mode */
-.syncedIndicator {
-    color: var(--color-primary);
-    font-style: italic;
-    font-weight: var(--font-weight-medium);
-    margin-left: var(--space-xs);
-    font-size: var(--font-size-xxs);
-    font-family: var(--font-family-base); /* Roboto for synced indicator */
+/* FIXED: Category-specific select border colors for edit mode */
+.tableSelect.required {
+    border-color: var(--status-danger) !important;
+    box-shadow: 0 0 0 1px var(--status-danger);
+}
+
+.tableSelect.flexible {
+    border-color: var(--status-warning) !important;
+    box-shadow: 0 0 0 1px var(--status-warning);
+}
+
+.tableSelect.nonessential {
+    border-color: var(--status-success) !important;
+    box-shadow: 0 0 0 1px var(--status-success);
+}
+
+.tableSelect.goal {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.tableSelect.debt {
+    border-color: var(--color-secondary) !important;
+    box-shadow: 0 0 0 1px var(--color-secondary);
+}
+
+/* FIXED: Ensure focus states work properly with category colors */
+.tableSelect:focus.required {
+    border-color: var(--status-danger) !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.tableSelect:focus.flexible {
+    border-color: var(--status-warning) !important;
+    box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.25);
+}
+
+.tableSelect:focus.nonessential {
+    border-color: var(--status-success) !important;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+
+.tableSelect:focus.goal {
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.25);
+}
+
+.tableSelect:focus.debt {
+    border-color: var(--color-secondary) !important;
+    box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.25);
 }
 
 /* Category badges for view mode - more professional looking */
@@ -277,178 +327,87 @@ select,
     border-radius: var(--border-radius-sm);
     font-size: var(--font-size-xxs);
     font-weight: var(--font-weight-medium);
-    font-family: var(--font-family-base); /* Roboto for category badges */
-    color: white;
-    text-align: center;
-    min-width: 80px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid transparent;
 }
 
 .categoryBadge.required {
-    background-color: var(--status-success);
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--status-danger);
+    border-color: var(--status-danger);
 }
 
 .categoryBadge.flexible {
-    background-color: var(--status-warning);
+    background-color: rgba(255, 152, 0, 0.1);
+    color: var(--status-warning);
+    border-color: var(--status-warning);
 }
 
 .categoryBadge.nonessential {
-    background-color: var(--color-secondary);
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--status-success);
+    border-color: var(--status-success);
 }
 
-/* FIXED: Category-specific select border colors for edit mode */
-.tableSelect.required {
-  border-color: #dc3545; /* Red for required */
+.categoryBadge.goal {
+    background-color: rgba(0, 177, 199, 0.1);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
-.tableSelect.flexible {
-  border-color: #ff9800; /* Orange for flexible (unchanged) */
+.categoryBadge.debt {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: var(--color-secondary);
+    border-color: var(--color-secondary);
 }
 
-.tableSelect.nonessential {
-  border-color: #28a745; /* Green for non-essential */
-}
-
-/* FIXED: Ensure focus states work properly with category colors */
-.tableSelect:focus.required {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
-}
-
-.tableSelect:focus.flexible {
-  border-color: #ff9800;
-  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
-}
-
-.tableSelect:focus.nonessential {
-  border-color: #28a745;
-  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
-}
-
-/* Style for calculated/read-only fields in tables */
-.calculatedField {
-    background: var(--surface-dark);
+/* Professional synced indicator - only for view mode */
+.syncedIndicator {
     color: var(--text-secondary);
-    border: 1px solid var(--border-light);
-    border-radius: var(--border-radius-sm);
-    padding: var(--space-xxs);
-    font-family: var(--font-family-base); /* Roboto for calculated fields */
-    font-weight: var(--font-weight-medium);
-    text-align: right;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xxs);
 }
 
-.calculatedField:focus {
-    outline: none;
-    border-color: var(--border-light);
+.syncedIndicator::before {
+    content: "🔗";
+    font-size: var(--font-size-xxs);
+    opacity: 0.7;
 }
 
-/* Add better spacing for income table */
-.tableInput[placeholder="25.00"],
-.tableInput[placeholder="2080"],
-.tableInput[placeholder="75000"],
-.tableInput[placeholder="4100"] {
-    text-align: right;
-    font-family: var(--font-family-base); /* Roboto for number inputs */
+/* Option styling for category selects */
+.tableSelect option.required {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--status-danger);
 }
 
-/* Compact select styling for narrow columns */
-.compactSelect {
-  min-width: 120px;
-  max-width: 150px;
-  font-size: var(--font-size-xs);
+.tableSelect option.flexible {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: var(--status-warning);
 }
 
-/* Text wrapping for longer content */
-.wrappedText {
-  display: block;
-  word-wrap: break-word;
-  hyphens: auto;
-  line-height: 1.2;
-  max-width: 120px;
+.tableSelect option.nonessential {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--status-success);
 }
 
-/* Muted text for N/A values */
-.mutedText {
-  color: var(--text-secondary);
-  font-style: italic;
-  font-size: var(--font-size-xs);
-}
-
-/* Center alignment */
-.alignCenter {
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Column width controls */
-.accountsTable {
-  table-layout: fixed;
-  width: 100%;
-}
-
-.accountsTable th:nth-child(1) { width: 15%; } /* Account Name */
-.accountsTable th:nth-child(2) { width: 12%; } /* Provider */
-.accountsTable th:nth-child(3) { width: 12%; } /* Balance */
-.accountsTable th:nth-child(4) { width: 10%; } /* Interest Rate */
-.accountsTable th:nth-child(5) { width: 10%; } /* Monthly Payment */
-.accountsTable th:nth-child(6) { width: 10%; } /* Category */
-.accountsTable th:nth-child(7) { width: 12%; } /* Type */
-.accountsTable th:nth-child(8) { width: 12%; } /* Tax Status */
-.accountsTable th:nth-child(9) { width: 12%; } /* Portfolio */
-.accountsTable th:nth-child(10) { width: 5%; }  /* Actions */
-
-/* Responsive adjustments for small apps */
-:global(.smallApp) .accountsTable th:nth-child(1) { width: 20%; }
-:global(.smallApp) .accountsTable th:nth-child(2) { width: 15%; }
-:global(.smallApp) .accountsTable th:nth-child(3) { width: 15%; }
-:global(.smallApp) .accountsTable th:nth-child(4) { width: 8%; }
-:global(.smallApp) .accountsTable th:nth-child(5) { width: 8%; }
-:global(.smallApp) .accountsTable th:nth-child(6) { width: 8%; }
-:global(.smallApp) .accountsTable th:nth-child(7) { width: 10%; }
-:global(.smallApp) .accountsTable th:nth-child(8) { width: 10%; }
-:global(.smallApp) .accountsTable th:nth-child(9) { width: 10%; }
-:global(.smallApp) .accountsTable th:nth-child(10) { width: 6%; }
-
-/* Better select dropdown styling */
-.tableSelect {
-  width: 100%;
-  padding: var(--space-xxs);
-  font-size: var(--font-size-xs);
-  border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-sm);
-  background: var(--background-light);
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.tableSelect:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 177, 199, 0.2);
-}
-
-/* Ensure dropdown options wrap properly */
-.tableSelect option {
-  padding: var(--space-xxs);
-  white-space: normal;
-  word-wrap: break-word;
-}
-
-/* ADDED: Standardized action buttons for editable tables */
+/* ENHANCED: Standardized action buttons for all editable tables */
 .actionButton {
-  width: 28px;
-  height: 28px;
-  border: none;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  padding: var(--space-xxs);
   border-radius: var(--border-radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
   transition: all var(--transition-speed-fast) var(--transition-ease);
+  min-width: 24px;
+  min-height: 24px;
   position: relative;
-  outline: none;
-  box-shadow: var(--shadow-sm);
 }
 
 .actionButton:focus-visible {
@@ -456,23 +415,25 @@ select,
   outline-offset: 2px;
 }
 
-/* Add button - Primary green */
+/* Add button - Professional green */
 .addButton {
-  background: var(--status-success);
+  background: var(--color-success);
   color: var(--text-on-primary);
-  border: 1.5px solid var(--status-success);
+  border: 1px solid var(--color-success);
+  box-shadow: var(--shadow-sm);
 }
 
 .addButton:hover:not(:disabled) {
-  background: var(--status-success);
-  transform: scale(1.05);
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3), var(--shadow-md);
+  background: var(--color-success);
   filter: brightness(1.1);
+  border-color: var(--color-success);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .addButton:active {
-  transform: scale(0.98);
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.5), var(--shadow-sm);
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 .addButton:disabled {
@@ -480,58 +441,37 @@ select,
   color: var(--interactive-disabled-text);
   border-color: var(--interactive-disabled-bg);
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  opacity: 0.6;
   filter: none;
+  transform: none;
 }
 
-/* Remove button - Danger red */
+/* Remove button - Professional red */
 .removeButton {
-  background: var(--status-danger);
+  background: var(--color-danger);
   color: var(--text-on-primary);
-  border: 1.5px solid var(--status-danger);
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid var(--color-danger);
+  box-shadow: var(--shadow-sm);
 }
 
 .removeButton:hover:not(:disabled) {
-  background: var(--status-danger);
-  transform: scale(1.05);
-  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.3), var(--shadow-md);
+  background: var(--color-danger);
   filter: brightness(1.1);
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .removeButton:active {
-  transform: scale(0.98);
-  box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.5), var(--shadow-sm);
-}
-
-/* X icon styling for remove buttons */
-.removeIcon {
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-}
-
-/* Large app scaling */
-:global(.largeApp) .removeIcon {
-  font-size: var(--font-size-base);
-}
-
-/* Small app adjustments */
-:global(.smallApp) .removeIcon {
-  font-size: var(--font-size-xs);
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Icon styling within action buttons */
 .actionButton .buttonIcon {
   width: 14px;
   height: 14px;
-  stroke-width: 2.5;
+  stroke-width: 2;
 }
 
 /* Action button container for proper spacing */
@@ -544,9 +484,9 @@ select,
 
 /* Large app scaling */
 :global(.largeApp) .actionButton {
-  width: 32px;
-  height: 32px;
-  font-size: var(--font-size-base);
+  min-width: 28px;
+  min-height: 28px;
+  padding: var(--space-xs);
 }
 
 :global(.largeApp) .actionButton .buttonIcon {
@@ -556,9 +496,9 @@ select,
 
 /* Small app adjustments */
 :global(.smallApp) .actionButton {
-  width: 24px;
-  height: 24px;
-  font-size: var(--font-size-xs);
+  min-width: 20px;
+  min-height: 20px;
+  padding: var(--space-xxxs);
 }
 
 :global(.smallApp) .actionButton .buttonIcon {

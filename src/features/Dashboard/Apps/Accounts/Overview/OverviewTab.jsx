@@ -3,8 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import Table from "../../../../../components/ui/Table/Table";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
-import BudgetFormInput from "../../../../../components/ui/Form/BudgetFormInput";
-import BudgetFormSelect from "../../../../../components/ui/Form/BudgetFormSelect";
+
 import TwoColumnLayout from "../../../../../components/ui/Section/TwoColumnLayout";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
 import AccountGoalUpdateModal from "../../../../../components/ui/Modal/AccountGoalUpdateModal";
@@ -15,7 +14,8 @@ import { detectAccountDebtChanges } from "../../../../../utils/debtPaymentSync";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
 import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 import accountsStyles from "../Accounts.module.css";
-import { Plus } from "lucide-react"; // Remove Trash2 import
+import { Plus, X } from "lucide-react";
+import { DEMO_ACCOUNTS, DEMO_PORTFOLIOS } from "../../../../../utils/constants";
 
 const EMPTY_ACCOUNT = {
   name: "",
@@ -74,28 +74,55 @@ const ACCOUNT_SUBTYPES = {
   ],
 };
 
+// Add this helper function near the top with other utility functions
+
+const findMatchingPortfolio = (inputValue, portfolios) => {
+  if (!inputValue) return null;
+
+  // Find exact match first (case insensitive)
+  const exactMatch = portfolios.find(
+    (p) => p.name.toLowerCase() === inputValue.toLowerCase()
+  );
+  if (exactMatch) return exactMatch;
+
+  // Find partial match
+  const partialMatch = portfolios.find(
+    (p) =>
+      p.name.toLowerCase().includes(inputValue.toLowerCase()) ||
+      inputValue.toLowerCase().includes(p.name.toLowerCase())
+  );
+  return partialMatch;
+};
+
+const generatePortfolioId = (name) => {
+  // Generate a simple ID based on the name
+  return `portfolio-${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+};
+
+// Update the column definitions to match the new order
+
 const viewColumns = [
   { key: "name", label: "Account Name" },
   { key: "accountProvider", label: "Provider" },
-  { key: "value", label: "Balance" },
-  { key: "interestRate", label: "Interest Rate" },
-  { key: "monthlyPayment", label: "Monthly Payment" },
   { key: "category", label: "Category" },
   { key: "subType", label: "Type" },
   { key: "taxStatus", label: "Tax Status" },
   { key: "portfolioName", label: "Portfolio" },
+  { key: "monthlyPayment", label: "Monthly Payment" },
+  { key: "interestRate", label: "Interest Rate" },
+  { key: "value", label: "Balance" },
 ];
 
 const editColumns = [
   { key: "name", label: "Account Name" },
   { key: "accountProvider", label: "Provider" },
-  { key: "value", label: "Balance" },
-  { key: "interestRate", label: "Interest Rate" },
-  { key: "monthlyPayment", label: "Monthly Payment" },
   { key: "category", label: "Category" },
   { key: "subType", label: "Type" },
   { key: "taxStatus", label: "Tax Status" },
   { key: "portfolioName", label: "Portfolio" },
+  { key: "monthlyPayment", label: "Monthly Payment" },
+  { key: "interestRate", label: "Interest Rate" },
+  { key: "value", label: "Balance" },
   { key: "actions", label: "Actions" },
 ];
 
@@ -143,7 +170,7 @@ const OverviewTab = ({ smallApp }) => {
     );
   }
 
-  const { showSuccess, showInfo } = useToast();
+  const { showSuccess, showInfo, showWarning } = useToast(); // FIXED: Added showWarning
 
   const accounts = data.accounts || [];
   const portfolios = data.portfolios || [];
@@ -190,54 +217,381 @@ const OverviewTab = ({ smallApp }) => {
     cancelEdit();
   };
 
-  // ENHANCED: Handle save with bidirectional debt sync
-  const handleSave = () => {
-    // Detect debt payment changes in accounts
-    const debtChanges = detectAccountDebtChanges(originalAccounts, editRows);
+  // Update the handleSave function to provide detailed removal notifications
 
-    const updatedData = {
+  const handleSave = () => {
+    if (!editRows || editRows.length === 0) {
+      showInfo("No changes to save");
+      return;
+    }
+
+    // FIXED: Track detailed changes for better notifications
+    let addedAccounts = 0;
+    let modifiedAccounts = 0;
+    let createdPortfolios = [];
+    let removedAccountDetails = []; // Track detailed removal info
+
+    // FIXED: Analyze removed accounts for detailed notifications
+    const editRowIds = new Set(editRows.map((acc) => acc.id));
+    const removedAccounts = originalAccounts.filter(
+      (acc) => !editRowIds.has(acc.id)
+    );
+
+    removedAccounts.forEach((removedAccount) => {
+      const details = {
+        name: removedAccount.name,
+        category: removedAccount.category,
+        impacts: [],
+      };
+
+      // Check portfolio impact
+      if (
+        removedAccount.category === "Investments" &&
+        removedAccount.portfolioName
+      ) {
+        details.impacts.push(
+          `removed from ${removedAccount.portfolioName} portfolio`
+        );
+      }
+
+      // Check debt payment impact
+      if (
+        removedAccount.category === "Debt" &&
+        removedAccount.monthlyPayment > 0
+      ) {
+        details.impacts.push(
+          `$${removedAccount.monthlyPayment}/month debt payment removed from budget`
+        );
+      }
+
+      // Check goal impact
+      const linkedGoals = (data.goals || []).filter(
+        (goal) => goal.fundingAccountId === removedAccount.id
+      );
+      if (linkedGoals.length > 0) {
+        const goalNames = linkedGoals.map((g) => g.name).join(", ");
+        details.impacts.push(
+          `unlinked from goal${linkedGoals.length > 1 ? "s" : ""}: ${goalNames}`
+        );
+      }
+
+      removedAccountDetails.push(details);
+    });
+
+    // Count new vs modified accounts by comparing IDs, not array positions
+    const originalAccountIds = new Set(originalAccounts.map((acc) => acc.id));
+
+    editRows.forEach((account) => {
+      const isNewAccount = !originalAccountIds.has(account.id);
+
+      if (isNewAccount) {
+        addedAccounts++;
+      } else {
+        // Check if the account was actually modified
+        const originalAccount = originalAccounts.find(
+          (orig) => orig.id === account.id
+        );
+        if (originalAccount) {
+          // Compare relevant fields to see if anything changed
+          const fieldsToCompare = [
+            "name",
+            "accountProvider",
+            "category",
+            "subType",
+            "taxStatus",
+            "value",
+            "interestRate",
+            "monthlyPayment",
+            "portfolioId",
+            "portfolioName",
+          ];
+
+          const hasChanges = fieldsToCompare.some((field) => {
+            const oldValue = originalAccount[field];
+            const newValue = account[field];
+
+            // Handle numeric comparisons
+            if (
+              field === "value" ||
+              field === "interestRate" ||
+              field === "monthlyPayment"
+            ) {
+              return parseFloat(oldValue || 0) !== parseFloat(newValue || 0);
+            }
+
+            return oldValue !== newValue;
+          });
+
+          if (hasChanges) {
+            modifiedAccounts++;
+          }
+        }
+      }
+    });
+
+    // Process portfolios - create new ones if needed during save
+    const updatedPortfolios = [...portfolios];
+    const processedAccounts = editRows.map((account) => {
+      // Handle accounts that need new portfolios created
+      if (account._needsNewPortfolio) {
+        // Create new portfolio
+        const newPortfolio = {
+          id: account.portfolioId, // Use the pre-generated ID
+          name: account.portfolioName,
+        };
+
+        // Check if portfolio was already added (in case of duplicates)
+        const alreadyExists = updatedPortfolios.find(
+          (p) => p.id === newPortfolio.id
+        );
+        if (!alreadyExists) {
+          updatedPortfolios.push(newPortfolio);
+          createdPortfolios.push(newPortfolio.name);
+        }
+
+        // Clean up the flag
+        const cleanAccount = { ...account };
+        delete cleanAccount._needsNewPortfolio;
+        return cleanAccount;
+      }
+
+      if (
+        account.category === "Investments" &&
+        account.portfolioName &&
+        !account.portfolioId
+      ) {
+        // Check if this portfolio name already exists
+        const existingPortfolio = updatedPortfolios.find(
+          (p) => p.name.toLowerCase() === account.portfolioName.toLowerCase()
+        );
+
+        if (existingPortfolio) {
+          // Use existing portfolio
+          return {
+            ...account,
+            portfolioId: existingPortfolio.id,
+            portfolioName: existingPortfolio.name, // Use the exact case from existing
+          };
+        } else {
+          // Create new portfolio
+          const newPortfolio = {
+            id: generatePortfolioId(account.portfolioName),
+            name: account.portfolioName.trim(),
+          };
+          updatedPortfolios.push(newPortfolio);
+          createdPortfolios.push(newPortfolio.name);
+
+          return {
+            ...account,
+            portfolioId: newPortfolio.id,
+            portfolioName: newPortfolio.name,
+          };
+        }
+      }
+
+      // For Investment accounts, ensure portfolioName is set correctly
+      if (account.category === "Investments" && account.portfolioId) {
+        const portfolio = updatedPortfolios.find(
+          (p) => p.id === account.portfolioId
+        );
+        return {
+          ...account,
+          portfolioName:
+            portfolio?.name || account.portfolioName || "Unknown Portfolio",
+        };
+      }
+
+      return account;
+    });
+
+    // FIXED: Clean up empty portfolios and track which ones were removed
+    const removedPortfolios = [];
+    const finalPortfolios = updatedPortfolios.filter((portfolio) => {
+      const hasAccounts = processedAccounts.some(
+        (account) => account.portfolioId === portfolio.id
+      );
+
+      if (!hasAccounts) {
+        // Only track as removed if it's not a newly created empty portfolio
+        if (!createdPortfolios.includes(portfolio.name)) {
+          removedPortfolios.push(portfolio.name);
+        }
+        console.log(`Removing empty portfolio: ${portfolio.name}`);
+        return false;
+      }
+      return true;
+    });
+
+    // Check for account changes that might affect debt payments
+    const accountChanges = detectAccountDebtChanges(
+      originalAccounts,
+      processedAccounts
+    );
+
+    // FIXED: Update goals to unlink removed accounts
+    const updatedGoals = (data.goals || []).map((goal) => {
+      const removedAccountIds = removedAccounts.map((acc) => acc.id);
+      if (removedAccountIds.includes(goal.fundingAccountId)) {
+        return {
+          ...goal,
+          fundingAccountId: null,
+          linkedAccountAmount: 0,
+          useEntireAccount: false,
+        };
+      }
+      return goal;
+    });
+
+    // Update the data with processed accounts and cleaned portfolios
+    const finalData = {
       ...data,
-      accounts: editRows,
+      accounts: processedAccounts,
+      portfolios: finalPortfolios,
+      goals: updatedGoals,
     };
 
-    saveData(updatedData);
+    // FIXED: Only save data once at the end
+    saveData(finalData);
     exitEditMode();
-    setOriginalAccounts([]);
-    showSuccess("Accounts saved successfully!");
 
-    // Show debt sync notification if there were changes
-    if (debtChanges.length > 0) {
-      const changesSummary = debtChanges
+    // ENHANCED: Build comprehensive success message with detailed removal info
+    let successMessage = "Accounts saved successfully!";
+    let notifications = [];
+
+    // Account changes summary
+    if (addedAccounts > 0) {
+      notifications.push(
+        `• Added ${addedAccounts} new account${addedAccounts > 1 ? "s" : ""}`
+      );
+    }
+    if (modifiedAccounts > 0) {
+      notifications.push(
+        `• Modified ${modifiedAccounts} existing account${
+          modifiedAccounts > 1 ? "s" : ""
+        }`
+      );
+    }
+
+    // FIXED: Detailed removal notifications
+    if (removedAccountDetails.length > 0) {
+      notifications.push(
+        `• Removed ${removedAccountDetails.length} account${
+          removedAccountDetails.length > 1 ? "s" : ""
+        }:`
+      );
+      removedAccountDetails.forEach((details) => {
+        let removalText = `  - ${details.name}`;
+        if (details.impacts.length > 0) {
+          removalText += ` (${details.impacts.join(", ")})`;
+        }
+        notifications.push(removalText);
+      });
+    }
+
+    // Portfolio changes
+    if (createdPortfolios.length > 0) {
+      notifications.push(
+        `• Created ${createdPortfolios.length} new portfolio${
+          createdPortfolios.length > 1 ? "s" : ""
+        }: ${createdPortfolios.join(", ")}`
+      );
+    }
+    if (removedPortfolios.length > 0) {
+      notifications.push(
+        `• Removed ${removedPortfolios.length} empty portfolio${
+          removedPortfolios.length > 1 ? "s" : ""
+        }: ${removedPortfolios.join(", ")}`
+      );
+    }
+
+    // App impacts
+    const impactedApps = [];
+    if (accountChanges.length > 0) {
+      impactedApps.push("Budget (debt payments synced)");
+    }
+    if (createdPortfolios.length > 0 || addedAccounts > 0) {
+      impactedApps.push("Goals (new accounts available for linking)");
+    }
+    if (
+      removedAccountDetails.some((d) =>
+        d.impacts.some((i) => i.includes("goal"))
+      )
+    ) {
+      impactedApps.push("Goals (accounts unlinked)");
+    }
+
+    // Build final message
+    if (notifications.length > 0) {
+      successMessage += "\n\n" + notifications.join("\n");
+    }
+
+    if (impactedApps.length > 0) {
+      successMessage += `\n\nImpacted apps: ${impactedApps.join(", ")}`;
+    }
+
+    // Debt payment changes detail
+    if (accountChanges.length > 0) {
+      const changesSummary = accountChanges
         .map(
           (change) =>
             `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
         )
         .join("\n");
 
-      showInfo(`Debt payments will be updated in budget:\n${changesSummary}`);
+      successMessage += `\n\nDebt payment updates:\n${changesSummary}`;
     }
+
+    showSuccess(successMessage);
+    setOriginalAccounts([]);
   };
 
-  // Handle reset to demo accounts
+  // Update the handleResetToDemo function to include portfolio restoration
+
   const handleResetToDemo = () => {
-    if (
-      window.confirm(
-        "Reset accounts to demo data? This will overwrite all current account data."
-      )
-    ) {
-      resetAccountsToDemo();
-      exitEditMode();
-      showSuccess("Accounts reset to demo data!");
-    }
+    const updatedData = {
+      ...data,
+      accounts: DEMO_ACCOUNTS,
+      portfolios: DEMO_PORTFOLIOS,
+    };
+
+    saveData(updatedData);
+    exitEditMode();
+    setOriginalAccounts([]);
+
+    // Show success message with portfolio details
+    const portfolioCount = DEMO_PORTFOLIOS.length;
+    const accountCount = DEMO_ACCOUNTS.length;
+
+    showWarning(
+      `Reset to demo data!\n` +
+        `• ${accountCount} accounts restored\n` +
+        `• ${portfolioCount} portfolios restored\n` +
+        `All custom data has been replaced with demo data.`
+    );
   };
 
   // Handle clear all accounts
   const handleClearAll = () => {
-    if (window.confirm("Clear all accounts? This action cannot be undone.")) {
-      clearAccountsData();
-      exitEditMode();
-      showSuccess("All accounts cleared!");
-    }
+    // Clear all accounts and unused portfolios
+    const updatedData = {
+      ...data,
+      accounts: [],
+      portfolios: [], // Clear all portfolios when clearing all accounts
+    };
+
+    saveData(updatedData);
+    exitEditMode();
+    setOriginalAccounts([]);
+
+    const clearedAccounts = accounts.length;
+    const clearedPortfolios = portfolios.length;
+
+    showWarning(
+      `Cleared all account data!\n` +
+        `• ${clearedAccounts} accounts removed\n` +
+        `• ${clearedPortfolios} portfolios removed\n` +
+        `All account and portfolio data has been cleared.`
+    );
   };
 
   // Update filtering for display - by category instead of portfolio
@@ -322,34 +676,56 @@ const OverviewTab = ({ smallApp }) => {
     setNewAccount((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Update the handleAddAccount function to remove the immediate notification
+
   const handleAddAccount = () => {
-    if (!newAccount.name.trim()) {
-      showInfo("Please enter an account name");
+    if (!newAccount.name.trim() || !newAccount.accountProvider.trim()) {
+      showInfo("Please fill in account name and provider");
       return;
     }
 
-    let accountValue = parseFloat(newAccount.value) || 0;
+    // FIXED: Process new account for portfolio creation but don't save yet
+    let accountToAdd = { ...newAccount };
 
-    // AUTOMATIC NEGATIVE CONVERSION: Make debt values negative
-    if (newAccount.category === "Debt" && accountValue > 0) {
-      accountValue = -accountValue;
+    // Handle portfolio processing for investments (but don't save portfolios yet)
+    if (
+      newAccount.category === "Investments" &&
+      newAccount.portfolioName &&
+      !newAccount.portfolioId
+    ) {
+      // Check if portfolio exists
+      const existingPortfolio = portfolios.find(
+        (p) => p.name.toLowerCase() === newAccount.portfolioName.toLowerCase()
+      );
+
+      if (existingPortfolio) {
+        accountToAdd.portfolioId = existingPortfolio.id;
+        accountToAdd.portfolioName = existingPortfolio.name;
+      } else {
+        // Mark that a new portfolio needs to be created when saving
+        accountToAdd.portfolioId = generatePortfolioId(
+          newAccount.portfolioName
+        );
+        accountToAdd.portfolioName = newAccount.portfolioName.trim();
+        accountToAdd._needsNewPortfolio = true; // Flag for later processing
+      }
     }
 
-    const accountWithId = {
-      ...newAccount,
-      id: `acc-${Date.now()}`,
-      value: accountValue,
-      interestRate: newAccount.interestRate
-        ? parseFloat(newAccount.interestRate)
-        : null,
-      monthlyPayment: newAccount.monthlyPayment
-        ? parseFloat(newAccount.monthlyPayment)
-        : null,
-    };
+    // Generate new account ID
+    accountToAdd.id = `acc-${Date.now()}`;
 
-    addEditRow(accountWithId);
+    // Convert string values to numbers where appropriate
+    accountToAdd.value = parseFloat(accountToAdd.value) || 0;
+    accountToAdd.interestRate = parseFloat(accountToAdd.interestRate) || 0;
+    accountToAdd.monthlyPayment = parseFloat(accountToAdd.monthlyPayment) || 0;
+
+    // FIXED: Only add to edit rows, don't save data yet
+    addEditRow(accountToAdd);
+
+    // Reset new account form
     setNewAccount({ ...EMPTY_ACCOUNT });
 
+    // Focus on name field for next entry
     if (newAccountNameRef.current) {
       newAccountNameRef.current.focus();
     }
@@ -361,184 +737,252 @@ const OverviewTab = ({ smallApp }) => {
     }
   };
 
-  // FIXED: Enhanced account row renderer with correct remove button
-  const renderAccountRow = (account, index) => {
-    const isInvestmentAccount = account.category === "Investments";
-    const isDebtAccount = account.category === "Debt";
+  // Update the renderAccountRow function to handle investment account balance
 
-    return (
-      <tr key={account.id || index}>
-        <td>
-          {editMode ? (
-            <BudgetFormInput
-              column={{ type: "text", placeholder: "Account name" }}
-              value={account.name}
-              onChange={(value) => updateEditRow(index, "name", value)}
+  const renderAccountRow = (account, index) => {
+    if (editMode) {
+      return (
+        <tr key={account.id || index}>
+          {/* Account Name */}
+          <td>
+            <input
+              type="text"
+              value={editRows[index]?.name || ""}
+              onChange={(e) => updateEditRow(index, "name", e.target.value)}
+              className={tableStyles.tableInput}
+              placeholder="Account name"
             />
-          ) : (
-            account.name
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormInput
-              column={{ type: "text", placeholder: "Provider" }}
-              value={account.accountProvider}
-              onChange={(value) =>
-                updateEditRow(index, "accountProvider", value)
+          </td>
+          {/* Provider */}
+          <td>
+            <input
+              type="text"
+              value={editRows[index]?.accountProvider || ""}
+              onChange={(e) =>
+                updateEditRow(index, "accountProvider", e.target.value)
               }
+              className={tableStyles.tableInput}
+              placeholder="Provider"
             />
-          ) : (
-            account.accountProvider || "N/A"
-          )}
-        </td>
-        <td className={tableStyles.alignRight}>
-          {editMode ? (
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "0.00",
-                step: "0.01",
-              }}
-              value={Math.abs(account.value)}
-              onChange={(value) => {
-                const numValue = parseFloat(value) || 0;
-                const finalValue = isDebtAccount ? -numValue : numValue;
-                updateEditRow(index, "value", finalValue);
-              }}
-            />
-          ) : (
-            <span
-              className={
-                account.value >= 0 ? tableStyles.positive : tableStyles.negative
-              }
-            >
-              $
-              {Math.abs(account.value || 0).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
-            </span>
-          )}
-        </td>
-        <td className={tableStyles.alignRight}>
-          {editMode ? (
-            isDebtAccount ? (
-              <BudgetFormInput
-                column={{
-                  type: "number",
-                  placeholder: "0.00",
-                  step: "0.01",
-                  min: "0",
-                }}
-                value={account.interestRate}
-                onChange={(value) =>
-                  updateEditRow(index, "interestRate", value)
+          </td>
+          {/* Category */}
+          <td>
+            <select
+              value={editRows[index]?.category || ""}
+              onChange={(e) => {
+                updateEditRow(index, "category", e.target.value);
+                // Reset subType when category changes
+                updateEditRow(index, "subType", "");
+                // FIXED: Clear portfolio for non-investment accounts
+                if (e.target.value !== "Investments") {
+                  updateEditRow(index, "portfolioId", null);
+                  updateEditRow(index, "portfolioName", "");
                 }
+              }}
+              className={tableStyles.tableSelect}
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </td>
+          {/* Sub Type */}
+          <td>
+            <select
+              value={editRows[index]?.subType || ""}
+              onChange={(e) => updateEditRow(index, "subType", e.target.value)}
+              className={tableStyles.tableSelect}
+            >
+              <option value="">Select Type</option>
+              {(ACCOUNT_SUBTYPES[editRows[index]?.category] || []).map(
+                (type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                )
+              )}
+            </select>
+          </td>
+          {/* Tax Status */}
+          <td>
+            <select
+              value={editRows[index]?.taxStatus || ""}
+              onChange={(e) =>
+                updateEditRow(index, "taxStatus", e.target.value)
+              }
+              className={tableStyles.tableSelect}
+            >
+              {TAX_STATUS_OPTIONS.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+          </td>
+          {/* Portfolio */}
+          <td>
+            {editRows[index]?.category === "Investments" ? (
+              <input
+                type="text"
+                value={editRows[index]?.portfolioName || ""}
+                onChange={(e) =>
+                  updateEditRow(index, "portfolioName", e.target.value)
+                }
+                className={tableStyles.tableInput}
+                placeholder="Portfolio name"
               />
             ) : (
               <span className={tableStyles.mutedText}>N/A</span>
-            )
-          ) : isDebtAccount && account.interestRate ? (
+            )}
+          </td>
+          {/* Monthly Payment */}
+          <td>
+            {editRows[index]?.category === "Debt" ? (
+              <input
+                type="number"
+                value={editRows[index]?.monthlyPayment || ""}
+                onChange={(e) =>
+                  updateEditRow(
+                    index,
+                    "monthlyPayment",
+                    parseFloat(e.target.value) || 0
+                  )
+                }
+                className={tableStyles.tableInput}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            ) : (
+              <span className={tableStyles.mutedText}>N/A</span>
+            )}
+          </td>
+          {/* Interest Rate */}
+          <td>
+            {editRows[index]?.category === "Debt" ||
+            editRows[index]?.category === "Cash" ? (
+              <input
+                type="number"
+                value={editRows[index]?.interestRate || ""}
+                onChange={(e) =>
+                  updateEditRow(
+                    index,
+                    "interestRate",
+                    parseFloat(e.target.value) || 0
+                  )
+                }
+                className={tableStyles.tableInput}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+            ) : (
+              <span className={tableStyles.mutedText}>N/A</span>
+            )}
+          </td>
+          {/* Balance - FIXED: Disable for Investment accounts */}
+          <td className={tableStyles.alignRight}>
+            {editRows[index]?.category === "Investments" ? (
+              <span
+                className={tableStyles.calculatedField}
+                title="Investment account balance is calculated from cash and securities"
+              >
+                $
+                {(
+                  (editRows[index]?.cashBalance || 0) +
+                  (editRows[index]?.securities || []).reduce(
+                    (sum, sec) => sum + (sec.value || 0),
+                    0
+                  )
+                ).toLocaleString()}
+              </span>
+            ) : (
+              <input
+                type="number"
+                value={editRows[index]?.value || ""}
+                onChange={(e) =>
+                  updateEditRow(index, "value", parseFloat(e.target.value) || 0)
+                }
+                className={tableStyles.tableInput}
+                placeholder="0.00"
+                step="0.01"
+              />
+            )}
+          </td>
+          {/* Actions */}
+          <td className={tableStyles.alignCenter}>
+            <button
+              onClick={() => handleRemoveAccount(index)}
+              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
+              title="Remove account"
+              aria-label={`Remove ${account.name}`}
+            >
+              <X className={tableStyles.buttonIcon} />
+            </button>
+          </td>
+        </tr>
+      );
+    }
+
+    // View mode - show calculated balance for investments
+    return (
+      <tr key={account.id || index}>
+        {/* Account Name */}
+        <td>{account.name}</td>
+        {/* Provider */}
+        <td>{account.accountProvider}</td>
+        {/* Category */}
+        <td>{account.category}</td>
+        {/* Type */}
+        <td>{account.subType}</td>
+        {/* Tax Status */}
+        <td>{account.taxStatus}</td>
+        {/* Portfolio */}
+        <td className={tableStyles.mutedText}>
+          {account.category === "Investments"
+            ? account.portfolioName || "None"
+            : "N/A"}
+        </td>
+        {/* Monthly Payment - FIXED: Only show for debt accounts */}
+        <td className={tableStyles.alignRight}>
+          {account.category === "Debt" && account.monthlyPayment ? (
+            `$${account.monthlyPayment.toLocaleString()}`
+          ) : account.category === "Debt" ? (
+            "$0"
+          ) : (
+            <span className={tableStyles.mutedText}>N/A</span>
+          )}
+        </td>
+        {/* Interest Rate - FIXED: Only show for applicable account types */}
+        <td className={tableStyles.alignRight}>
+          {(account.category === "Debt" ||
+            (account.category === "Cash" &&
+              ["Savings", "Money Market", "CD"].includes(account.subType))) &&
+          account.interestRate ? (
             `${account.interestRate}%`
           ) : (
             <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
+        {/* Balance */}
         <td className={tableStyles.alignRight}>
-          {editMode ? (
-            isDebtAccount ? (
-              <BudgetFormInput
-                column={{
-                  type: "number",
-                  placeholder: "0.00",
-                  step: "0.01",
-                  min: "0",
-                }}
-                value={account.monthlyPayment}
-                onChange={(value) =>
-                  updateEditRow(index, "monthlyPayment", value)
-                }
-              />
-            ) : (
-              <span className={tableStyles.mutedText}>N/A</span>
-            )
-          ) : isDebtAccount && account.monthlyPayment ? (
-            `$${account.monthlyPayment.toLocaleString()}`
-          ) : (
-            <span className={tableStyles.mutedText}>N/A</span>
-          )}
+          <span
+            className={
+              account.value >= 0 ? tableStyles.positive : tableStyles.negative
+            }
+          >
+            {account.value >= 0 ? "$" : "($"}
+            {Math.abs(account.value).toLocaleString()}
+            {account.value < 0 ? ")" : ""}
+          </span>
         </td>
-        <td>
-          {editMode ? (
-            <BudgetFormSelect
-              value={account.category}
-              onChange={(value) => updateEditRow(index, "category", value)}
-              options={CATEGORIES}
-            />
-          ) : (
-            account.category
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormSelect
-              value={account.subType}
-              onChange={(value) => updateEditRow(index, "subType", value)}
-              options={ACCOUNT_SUBTYPES[account.category] || []}
-            />
-          ) : (
-            account.subType
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormSelect
-              value={account.taxStatus}
-              onChange={(value) => updateEditRow(index, "taxStatus", value)}
-              options={TAX_STATUS_OPTIONS}
-            />
-          ) : (
-            account.taxStatus
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            isInvestmentAccount ? (
-              <BudgetFormSelect
-                value={account.portfolioId || ""}
-                onChange={(value) =>
-                  updateEditRow(index, "portfolioId", value || null)
-                }
-                options={[
-                  { value: "", label: "No Portfolio" },
-                  ...portfolios.map((p) => ({ value: p.id, label: p.name })),
-                ]}
-              />
-            ) : (
-              <span className={tableStyles.mutedText}>N/A</span>
-            )
-          ) : isInvestmentAccount ? (
-            account.portfolioName || "No Portfolio"
-          ) : (
-            <span className={tableStyles.mutedText}>N/A</span>
-          )}
-        </td>
-        {editMode && (
-          <td className={tableStyles.alignCenter}>
-            <button
-              onClick={() => removeEditRow(account.id)} // FIXED: Use removeEditRow directly
-              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
-              title="Remove account"
-            >
-              <span className={tableStyles.removeIcon}>×</span>
-            </button>
-          </td>
-        )}
       </tr>
     );
   };
 
-  // FIXED: New account row with standardized add button
+  // FIXED: Update new account row to also follow the same conditional logic
   const newAccountRow = editMode ? (
     <tr
       style={{
@@ -546,127 +990,186 @@ const OverviewTab = ({ smallApp }) => {
         borderTop: "2px solid var(--border-light)",
       }}
     >
+      {/* Account Name */}
       <td>
-        <BudgetFormInput
+        <input
           ref={newAccountNameRef}
-          column={{ type: "text", placeholder: "Enter account name" }}
+          type="text"
           value={newAccount.name}
-          onChange={(value) =>
-            setNewAccount((prev) => ({ ...prev, name: value }))
+          onChange={(e) =>
+            setNewAccount((prev) => ({ ...prev, name: e.target.value }))
           }
+          className={tableStyles.tableInput}
+          placeholder="Account name"
         />
       </td>
+      {/* Provider */}
       <td>
-        <BudgetFormInput
-          column={{ type: "text", placeholder: "Provider" }}
+        <input
+          type="text"
           value={newAccount.accountProvider}
-          onChange={(value) =>
-            setNewAccount((prev) => ({ ...prev, accountProvider: value }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignRight}>
-        <BudgetFormInput
-          column={{
-            type: "number",
-            placeholder: "0.00",
-            step: "0.01",
-          }}
-          value={newAccount.value}
-          onChange={(value) =>
-            setNewAccount((prev) => ({ ...prev, value: value }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignRight}>
-        {newAccount.category === "Debt" ? (
-          <BudgetFormInput
-            column={{
-              type: "number",
-              placeholder: "0.00",
-              step: "0.01",
-              min: "0",
-            }}
-            value={newAccount.interestRate}
-            onChange={(value) =>
-              setNewAccount((prev) => ({ ...prev, interestRate: value }))
-            }
-          />
-        ) : (
-          <span className={tableStyles.mutedText}>N/A</span>
-        )}
-      </td>
-      <td className={tableStyles.alignRight}>
-        {newAccount.category === "Debt" ? (
-          <BudgetFormInput
-            column={{
-              type: "number",
-              placeholder: "0.00",
-              step: "0.01",
-              min: "0",
-            }}
-            value={newAccount.monthlyPayment}
-            onChange={(value) =>
-              setNewAccount((prev) => ({ ...prev, monthlyPayment: value }))
-            }
-          />
-        ) : (
-          <span className={tableStyles.mutedText}>N/A</span>
-        )}
-      </td>
-      <td>
-        <BudgetFormSelect
-          value={newAccount.category}
-          onChange={(value) =>
+          onChange={(e) =>
             setNewAccount((prev) => ({
               ...prev,
-              category: value,
-              subType: ACCOUNT_SUBTYPES[value]?.[0]?.value || "",
+              accountProvider: e.target.value,
             }))
           }
-          options={CATEGORIES}
+          className={tableStyles.tableInput}
+          placeholder="Provider"
         />
       </td>
+      {/* Category */}
       <td>
-        <BudgetFormSelect
+        <select
+          value={newAccount.category}
+          onChange={(e) => {
+            setNewAccount((prev) => ({
+              ...prev,
+              category: e.target.value,
+              subType: "", // Reset subType when category changes
+              portfolioId: e.target.value === "Investments" ? null : null,
+              portfolioName: e.target.value === "Investments" ? "" : "",
+              value: e.target.value === "Investments" ? 0 : "", // Set value to 0 for investments
+            }));
+          }}
+          className={tableStyles.tableSelect}
+        >
+          {CATEGORIES.map((cat) => (
+            <option key={cat.value} value={cat.value}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+      </td>
+      {/* Sub Type */}
+      <td>
+        <select
           value={newAccount.subType}
-          onChange={(value) =>
-            setNewAccount((prev) => ({ ...prev, subType: value }))
+          onChange={(e) =>
+            setNewAccount((prev) => ({ ...prev, subType: e.target.value }))
           }
-          options={ACCOUNT_SUBTYPES[newAccount.category] || []}
-        />
+          className={tableStyles.tableSelect}
+        >
+          <option value="">Select Type</option>
+          {(ACCOUNT_SUBTYPES[newAccount.category] || []).map((type) => (
+            <option key={type.value} value={type.value}>
+              {type.label}
+            </option>
+          ))}
+        </select>
       </td>
+      {/* Tax Status */}
       <td>
-        <BudgetFormSelect
+        <select
           value={newAccount.taxStatus}
-          onChange={(value) =>
-            setNewAccount((prev) => ({ ...prev, taxStatus: value }))
+          onChange={(e) =>
+            setNewAccount((prev) => ({ ...prev, taxStatus: e.target.value }))
           }
-          options={TAX_STATUS_OPTIONS}
-        />
+          className={tableStyles.tableSelect}
+        >
+          {TAX_STATUS_OPTIONS.map((status) => (
+            <option key={status.value} value={status.value}>
+              {status.label}
+            </option>
+          ))}
+        </select>
       </td>
+      {/* Portfolio */}
       <td>
         {newAccount.category === "Investments" ? (
-          <BudgetFormSelect
-            value={newAccount.portfolioId || ""}
-            onChange={(value) =>
-              setNewAccount((prev) => ({ ...prev, portfolioId: value || null }))
+          <input
+            type="text"
+            value={newAccount.portfolioName}
+            onChange={(e) =>
+              setNewAccount((prev) => ({
+                ...prev,
+                portfolioName: e.target.value,
+              }))
             }
-            options={[
-              { value: "", label: "No Portfolio" },
-              ...portfolios.map((p) => ({ value: p.id, label: p.name })),
-            ]}
+            className={tableStyles.tableInput}
+            placeholder="Portfolio name"
           />
         ) : (
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
+      {/* Monthly Payment */}
+      <td>
+        {newAccount.category === "Debt" ? (
+          <input
+            type="number"
+            value={newAccount.monthlyPayment}
+            onChange={(e) =>
+              setNewAccount((prev) => ({
+                ...prev,
+                monthlyPayment: e.target.value,
+              }))
+            }
+            className={tableStyles.tableInput}
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+          />
+        ) : (
+          <span className={tableStyles.mutedText}>N/A</span>
+        )}
+      </td>
+      {/* Interest Rate */}
+      <td>
+        {newAccount.category === "Debt" || newAccount.category === "Cash" ? (
+          <input
+            type="number"
+            value={newAccount.interestRate}
+            onChange={(e) =>
+              setNewAccount((prev) => ({
+                ...prev,
+                interestRate: e.target.value,
+              }))
+            }
+            className={tableStyles.tableInput}
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+          />
+        ) : (
+          <span className={tableStyles.mutedText}>N/A</span>
+        )}
+      </td>
+      {/* Balance - FIXED: Disable for Investment accounts */}
+      <td className={tableStyles.alignRight}>
+        {newAccount.category === "Investments" ? (
+          <span
+            className={tableStyles.calculatedField}
+            title="Investment account balance is calculated from cash and securities"
+          >
+            $0.00
+          </span>
+        ) : (
+          <input
+            type="number"
+            value={newAccount.value}
+            onChange={(e) =>
+              setNewAccount((prev) => ({ ...prev, value: e.target.value }))
+            }
+            className={tableStyles.tableInput}
+            placeholder="0.00"
+            step="0.01"
+          />
+        )}
+      </td>
+      {/* Actions */}
       <td className={tableStyles.alignCenter}>
         <button
           onClick={handleAddAccount}
-          disabled={!newAccount.name || !newAccount.value}
+          disabled={
+            !newAccount.name ||
+            !newAccount.accountProvider ||
+            (newAccount.category !== "Investments" &&
+              (!newAccount.value || newAccount.value === ""))
+          }
           className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
           title="Add account"
+          aria-label="Add new account"
         >
           <Plus className={tableStyles.buttonIcon} />
         </button>

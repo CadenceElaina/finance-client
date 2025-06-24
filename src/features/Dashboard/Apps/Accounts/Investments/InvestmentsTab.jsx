@@ -1,14 +1,14 @@
 import React, { useState, useRef, useMemo } from "react";
-import Table from "../../../../../components/ui/Table/Table";
-import tableStyles from "../../../../../components/ui/Table/Table.module.css";
-import Section from "../../../../../components/ui/Section/Section";
-import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
-import ControlPanel from "../../../../../components/ui/ControlPanel/ControlPanel";
-import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
-import accountsStyles from "../Accounts.module.css";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
-import { Trash2, Plus } from "lucide-react"; // Add Plus icon
+import { useToast } from "../../../../../hooks/useToast";
+import { DEMO_ACCOUNTS, DEMO_PORTFOLIOS } from "../../../../../utils/constants";
+import Section from "../../../../../components/ui/Section/Section";
+import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
+import Table from "../../../../../components/ui/Table/Table";
+import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
+import tableStyles from "../../../../../components/ui/Table/Table.module.css";
+import { X, Plus } from "lucide-react";
 
 const EMPTY_SECURITY = {
   name: "",
@@ -17,8 +17,23 @@ const EMPTY_SECURITY = {
   value: "",
   purchasePrice: "",
   datePurchased: "",
-  portfolioName: "",
+  accountId: "",
+  accountName: "",
   accountProvider: "",
+  type: "security", // ADDED: Track if this is cash or security
+};
+
+const EMPTY_CASH = {
+  name: "Cash",
+  ticker: "CASH",
+  quantity: "1",
+  value: "",
+  purchasePrice: "",
+  datePurchased: "",
+  accountId: "",
+  accountName: "",
+  accountProvider: "",
+  type: "cash", // ADDED: Mark as cash type
 };
 
 const InvestmentsTab = ({
@@ -27,54 +42,95 @@ const InvestmentsTab = ({
   portfolios = [],
   setSelectedPortfolioId,
   selectedPortfolioId,
-  holdingsHeaderTitle = "Investments",
+  investmentsHeaderTitle = "Investments",
   showPortfolioSelectMenu = false,
   portfolioSelectMenu,
 }) => {
-  const { data, saveData, resetAccountsToDemo, clearAccountsData } =
-    useFinancialData();
+  const { data, saveData } = useFinancialData();
+  const { showSuccess, showInfo, showWarning } = useToast();
   const allAccounts = data.accounts || [];
   const allPortfolios = data.portfolios || [];
 
-  // Get all securities from investment accounts
+  // FIXED: Get all securities AND cash from investment accounts
   const securities = useMemo(() => {
-    let relevantAccounts = [];
-    if (portfolioId === "all") {
-      relevantAccounts = allAccounts.filter(
-        (acc) => acc.category === "Investments" && acc.hasSecurities
-      );
-    } else {
-      relevantAccounts = allAccounts.filter(
-        (acc) =>
-          acc.category === "Investments" &&
-          acc.hasSecurities &&
-          acc.portfolioId === portfolioId
+    console.log("Recalculating securities with:", {
+      allAccountsLength: allAccounts.length,
+      portfolioId,
+      allPortfoliosLength: allPortfolios.length,
+    });
+
+    let investmentAccounts = allAccounts.filter(
+      (acc) => acc.category === "Investments"
+    );
+
+    // Filter by portfolio if specific portfolio is selected
+    if (portfolioId && portfolioId !== "all") {
+      investmentAccounts = investmentAccounts.filter(
+        (acc) => acc.portfolioId === portfolioId
       );
     }
 
-    let rows = [];
-    relevantAccounts.forEach((acc) => {
-      if (Array.isArray(acc.securities)) {
-        acc.securities.forEach((sec, secIndex) => {
-          // Find the portfolio name properly
-          const portfolio = allPortfolios.find((p) => p.id === acc.portfolioId);
-          const portfolioName = portfolio ? portfolio.name : "Unassigned";
+    console.log("Filtered investment accounts:", investmentAccounts);
 
-          rows.push({
-            id: `${acc.id}-${sec.ticker || sec.name}-${secIndex}`,
-            accountId: acc.id,
-            accountName: acc.name,
-            accountProvider: acc.accountProvider,
-            portfolioId: acc.portfolioId,
-            portfolioName: portfolioName,
-            securityIndex: secIndex,
-            ...sec,
+    // Extract all securities AND cash from filtered accounts
+    const allSecurities = [];
+    investmentAccounts.forEach((account) => {
+      // Add securities
+      if (account.hasSecurities && Array.isArray(account.securities)) {
+        account.securities.forEach((security) => {
+          allSecurities.push({
+            ...security,
+            id: security.id || `${account.id}-${security.ticker}`,
+            accountId: account.id,
+            accountName: account.name,
+            accountProvider: account.accountProvider,
+            portfolioName:
+              account.portfolioName ||
+              allPortfolios.find((p) => p.id === account.portfolioId)?.name ||
+              "Unknown Portfolio",
+            type: "security",
           });
         });
       }
+
+      // FIXED: Add cash position if it exists
+      if ((account.cashBalance || 0) > 0) {
+        allSecurities.push({
+          id: `${account.id}-cash`,
+          name: "Cash",
+          ticker: "CASH",
+          quantity: 1, // FIXED: Added missing value
+          value: account.cashBalance,
+          purchasePrice: account.cashBalance,
+          datePurchased: "", // Cash doesn't have purchase date
+          accountId: account.id,
+          accountName: account.name,
+          accountProvider: account.accountProvider,
+          portfolioName:
+            account.portfolioName ||
+            allPortfolios.find((p) => p.id === account.portfolioId)?.name ||
+            "Unknown Portfolio",
+          type: "cash",
+        });
+      }
     });
-    return rows;
-  }, [allAccounts, portfolioId, allPortfolios]);
+
+    console.log("All securities and cash:", allSecurities);
+    return allSecurities;
+  }, [
+    allAccounts,
+    portfolioId,
+    allPortfolios,
+    JSON.stringify(
+      allAccounts.map((acc) => ({
+        id: acc.id,
+        portfolioId: acc.portfolioId,
+        portfolioName: acc.portfolioName,
+        securitiesCount: acc.securities?.length || 0,
+        cashBalance: acc.cashBalance || 0,
+      }))
+    ),
+  ]);
 
   const {
     editMode,
@@ -84,509 +140,624 @@ const InvestmentsTab = ({
     exitEditMode,
     updateEditRow,
     addEditRow,
-    removeEditRow, // FIXED: Now properly imported
+    removeEditRow,
   } = useEditableTable(securities);
 
   const [newSecurity, setNewSecurity] = useState({ ...EMPTY_SECURITY });
+  const [addingType, setAddingType] = useState("security"); // ADDED: Track what we're adding
   const newSecurityNameRef = useRef(null);
 
-  // Handle saving from control panel
+  // FIXED: Updated column order - Account, Security, Ticker, Date Purchased, Quantity, Purchase Price, Value
+  const columns = [
+    { key: "accountName", label: "Account" },
+    { key: "name", label: "Security" },
+    { key: "ticker", label: "Ticker" },
+    { key: "datePurchased", label: "Date Purchased" },
+    { key: "quantity", label: "Quantity" },
+    { key: "purchasePrice", label: "Purchase Price" },
+    { key: "value", label: "Value" },
+    ...(editMode ? [{ key: "actions", label: "Actions" }] : []),
+  ];
+
+  // Helper function to format date
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const renderSecurityRow = (security, index) => {
+    if (editMode) {
+      const isCash = security.type === "cash";
+
+      return (
+        <tr key={security.id || index}>
+          {/* Account Name - Display only, not editable */}
+          <td className={tableStyles.mutedText}>{security.accountName}</td>
+          {/* Security Name */}
+          <td>
+            {isCash ? (
+              <span className={tableStyles.mutedText}>Cash</span>
+            ) : (
+              <input
+                type="text"
+                value={editRows[index]?.name || ""}
+                onChange={(e) => updateEditRow(index, "name", e.target.value)}
+                className={tableStyles.tableInput}
+                placeholder="Security name"
+              />
+            )}
+          </td>
+          {/* Ticker */}
+          <td>
+            {isCash ? (
+              <span className={tableStyles.mutedText}>CASH</span>
+            ) : (
+              <input
+                type="text"
+                value={editRows[index]?.ticker || ""}
+                onChange={(e) => updateEditRow(index, "ticker", e.target.value)}
+                className={tableStyles.tableInput}
+                placeholder="AAPL"
+              />
+            )}
+          </td>
+          {/* Date Purchased */}
+          <td>
+            {isCash ? (
+              <span className={tableStyles.mutedText}>N/A</span>
+            ) : (
+              <input
+                type="date"
+                value={editRows[index]?.datePurchased || ""}
+                onChange={(e) =>
+                  updateEditRow(index, "datePurchased", e.target.value)
+                }
+                className={tableStyles.tableInput}
+              />
+            )}
+          </td>
+          {/* Quantity */}
+          <td>
+            {isCash ? (
+              <span className={tableStyles.mutedText}>1</span>
+            ) : (
+              <input
+                type="number"
+                value={editRows[index]?.quantity || ""}
+                onChange={(e) =>
+                  updateEditRow(
+                    index,
+                    "quantity",
+                    parseFloat(e.target.value) || 0
+                  )
+                }
+                className={tableStyles.tableInput}
+                placeholder="100"
+                step="0.001"
+                min="0"
+              />
+            )}
+          </td>
+          {/* Purchase Price */}
+          <td className={tableStyles.alignRight}>
+            {isCash ? (
+              <span className={tableStyles.mutedText}>N/A</span>
+            ) : (
+              <input
+                type="number"
+                value={editRows[index]?.purchasePrice || ""}
+                onChange={(e) =>
+                  updateEditRow(
+                    index,
+                    "purchasePrice",
+                    parseFloat(e.target.value) || 0
+                  )
+                }
+                className={tableStyles.tableInput}
+                placeholder="150.00"
+                step="0.01"
+                min="0"
+              />
+            )}
+          </td>
+          {/* Current Value */}
+          <td className={tableStyles.alignRight}>
+            <input
+              type="number"
+              value={editRows[index]?.value || ""}
+              onChange={(e) =>
+                updateEditRow(index, "value", parseFloat(e.target.value) || 0)
+              }
+              className={tableStyles.tableInput}
+              placeholder={isCash ? "1000.00" : "15000.00"}
+              step="0.01"
+              min="0"
+            />
+          </td>
+          {/* Actions */}
+          <td className={tableStyles.alignCenter}>
+            <button
+              onClick={() => removeEditRow(index)}
+              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
+              title={`Remove ${isCash ? "cash position" : "security"}`}
+              aria-label={`Remove ${security.name}`}
+            >
+              <X className={tableStyles.buttonIcon} />
+            </button>
+          </td>
+        </tr>
+      );
+    }
+
+    // View mode - FIXED: Updated column order and handle cash display
+    const isCash = security.type === "cash";
+
+    return (
+      <tr key={security.id || index}>
+        <td>{security.accountName}</td> {/* Account */}
+        <td>{security.name}</td> {/* Security */}
+        <td>{security.ticker}</td> {/* Ticker */}
+        <td>{isCash ? "N/A" : formatDate(security.datePurchased)}</td>{" "}
+        {/* Date Purchased */}
+        <td className={tableStyles.alignRight}>
+          {isCash ? "1" : security.quantity?.toLocaleString()}
+        </td>{" "}
+        {/* Quantity */}
+        <td className={tableStyles.alignRight}>
+          {isCash ? "N/A" : `$${security.purchasePrice?.toLocaleString()}`}
+        </td>{" "}
+        {/* Purchase Price */}
+        <td className={tableStyles.alignRight}>
+          ${security.value?.toLocaleString()}
+        </td>{" "}
+        {/* Value */}
+      </tr>
+    );
+  };
+
+  const handleNewSecurityChange = (e) => {
+    const { name, value } = e.target;
+    setNewSecurity((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleAddSecurity = () => {
+    const isCash = addingType === "cash";
+
+    // FIXED: Check if account already has cash position when adding cash
+    if (isCash) {
+      const accountAlreadyHasCash = editRows.some(
+        (row) => row.accountId === newSecurity.accountId && row.type === "cash"
+      );
+
+      if (accountAlreadyHasCash) {
+        showInfo(
+          "This account already has a cash position. You can only have one cash position per account."
+        );
+        return;
+      }
+    }
+
+    // Validation based on type
+    if (!newSecurity.accountId || !newSecurity.value) {
+      showInfo("Please select an account and enter a value");
+      return;
+    }
+
+    if (
+      !isCash &&
+      (!newSecurity.name?.trim() ||
+        !newSecurity.ticker?.trim() ||
+        !newSecurity.quantity)
+    ) {
+      showInfo("Please fill in all required fields for the security");
+      return;
+    }
+
+    const securityToAdd = {
+      id: `${isCash ? "cash" : "sec"}-${Date.now()}`,
+      name: isCash ? "Cash" : newSecurity.name,
+      ticker: isCash ? "CASH" : newSecurity.ticker,
+      quantity: isCash ? 1 : parseFloat(newSecurity.quantity) || 0,
+      purchasePrice: isCash
+        ? parseFloat(newSecurity.value) || 0
+        : parseFloat(newSecurity.purchasePrice) || 0,
+      value: parseFloat(newSecurity.value) || 0,
+      datePurchased: isCash ? "" : newSecurity.datePurchased,
+      accountId: newSecurity.accountId,
+      accountName: newSecurity.accountName,
+      accountProvider: newSecurity.accountProvider,
+      type: addingType,
+    };
+
+    addEditRow(securityToAdd);
+    setNewSecurity({ ...EMPTY_SECURITY });
+
+    if (newSecurityNameRef.current) {
+      newSecurityNameRef.current.focus();
+    }
+  };
+
+  // FIXED: Update new security row with type selection
+  const newSecurityRow = editMode ? (
+    <>
+      {/* Type selection row */}
+      <tr
+        style={{
+          background: "var(--surface-dark)",
+          borderTop: "2px solid var(--border-light)",
+        }}
+      >
+        <td colSpan={columns.length}>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--space-sm)",
+              alignItems: "center",
+              padding: "var(--space-xs)",
+            }}
+          >
+            <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>
+              Add:
+            </span>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-xxs)",
+              }}
+            >
+              <input
+                type="radio"
+                name="addingType"
+                value="security"
+                checked={addingType === "security"}
+                onChange={(e) => {
+                  setAddingType(e.target.value);
+                  setNewSecurity({ ...EMPTY_SECURITY });
+                }}
+              />
+              Security
+            </label>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "var(--space-xxs)",
+              }}
+            >
+              <input
+                type="radio"
+                name="addingType"
+                value="cash"
+                checked={addingType === "cash"}
+                onChange={(e) => {
+                  setAddingType(e.target.value);
+                  setNewSecurity({ ...EMPTY_CASH });
+                }}
+              />
+              Cash
+            </label>
+          </div>
+        </td>
+      </tr>
+      {/* Input row */}
+      <tr style={{ background: "var(--surface-dark)" }}>
+        {/* Account Selection */}
+        <td>
+          <select
+            value={newSecurity.accountId || ""}
+            onChange={(e) => {
+              const selectedAccount = allAccounts.find(
+                (acc) => acc.id === e.target.value
+              );
+              setNewSecurity((prev) => ({
+                ...prev,
+                accountId: e.target.value,
+                accountName: selectedAccount?.name || "",
+                accountProvider: selectedAccount?.accountProvider || "",
+              }));
+            }}
+            className={tableStyles.tableSelect}
+          >
+            <option value="">Select Account</option>
+            {allAccounts
+              .filter(
+                (acc) =>
+                  acc.category === "Investments" &&
+                  (portfolioId === "all" || acc.portfolioId === portfolioId)
+              )
+              .map((acc) => (
+                <option key={acc.id} value={acc.id}>
+                  {acc.name}
+                </option>
+              ))}
+          </select>
+        </td>
+        {/* Security Name */}
+        <td>
+          {addingType === "cash" ? (
+            <span className={tableStyles.mutedText}>Cash</span>
+          ) : (
+            <input
+              ref={newSecurityNameRef}
+              type="text"
+              value={newSecurity.name}
+              onChange={handleNewSecurityChange}
+              name="name"
+              className={tableStyles.tableInput}
+              placeholder="Security name"
+            />
+          )}
+        </td>
+        {/* Ticker */}
+        <td>
+          {addingType === "cash" ? (
+            <span className={tableStyles.mutedText}>CASH</span>
+          ) : (
+            <input
+              type="text"
+              value={newSecurity.ticker}
+              onChange={handleNewSecurityChange}
+              name="ticker"
+              className={tableStyles.tableInput}
+              placeholder="AAPL"
+            />
+          )}
+        </td>
+        {/* Date Purchased */}
+        <td>
+          {addingType === "cash" ? (
+            <span className={tableStyles.mutedText}>N/A</span>
+          ) : (
+            <input
+              type="date"
+              value={newSecurity.datePurchased}
+              onChange={handleNewSecurityChange}
+              name="datePurchased"
+              className={tableStyles.tableInput}
+            />
+          )}
+        </td>
+        {/* Quantity */}
+        <td>
+          {addingType === "cash" ? (
+            <span className={tableStyles.mutedText}>1</span>
+          ) : (
+            <input
+              type="number"
+              value={newSecurity.quantity}
+              onChange={handleNewSecurityChange}
+              name="quantity"
+              className={tableStyles.tableInput}
+              placeholder="100"
+              step="0.001"
+              min="0"
+            />
+          )}
+        </td>
+        {/* Purchase Price */}
+        <td className={tableStyles.alignRight}>
+          {addingType === "cash" ? (
+            <span className={tableStyles.mutedText}>N/A</span>
+          ) : (
+            <input
+              type="number"
+              value={newSecurity.purchasePrice}
+              onChange={handleNewSecurityChange}
+              name="purchasePrice"
+              className={tableStyles.tableInput}
+              placeholder="150.00"
+              step="0.01"
+              min="0"
+            />
+          )}
+        </td>
+        {/* Current Value */}
+        <td className={tableStyles.alignRight}>
+          <input
+            type="number"
+            value={newSecurity.value}
+            onChange={handleNewSecurityChange}
+            name="value"
+            className={tableStyles.tableInput}
+            placeholder={addingType === "cash" ? "1000.00" : "15000.00"}
+            step="0.01"
+            min="0"
+          />
+        </td>
+        {/* Actions */}
+        <td className={tableStyles.alignCenter}>
+          <button
+            onClick={handleAddSecurity}
+            disabled={
+              !newSecurity.accountId ||
+              !newSecurity.value ||
+              (addingType === "security" &&
+                (!newSecurity.name ||
+                  !newSecurity.ticker ||
+                  !newSecurity.quantity))
+            }
+            className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
+            title={`Add ${addingType}`}
+            aria-label={`Add new ${addingType}`}
+          >
+            <Plus className={tableStyles.buttonIcon} />
+          </button>
+        </td>
+      </tr>
+    </>
+  ) : null;
+
+  // FIXED: Update handleSave to properly handle cash vs securities
   const handleSave = () => {
-    // Group securities by account, but also track portfolio changes
-    const securityByAccount = editRows.reduce((acc, security) => {
-      if (!acc[security.accountId]) {
-        acc[security.accountId] = {
+    if (!editRows || editRows.length === 0) {
+      showInfo("No changes to save");
+      return;
+    }
+
+    // Group by account and separate cash from securities
+    const accountUpdates = {};
+    editRows.forEach((item) => {
+      if (!item.accountId) return;
+
+      if (!accountUpdates[item.accountId]) {
+        accountUpdates[item.accountId] = {
           securities: [],
-          portfolioName: security.portfolioName,
-          accountProvider: security.accountProvider,
+          cashBalance: 0,
         };
       }
-      acc[security.accountId].securities.push({
-        name: security.name,
-        ticker: security.ticker,
-        quantity: parseFloat(security.quantity) || 0,
-        value: parseFloat(security.value) || 0,
-        purchasePrice: parseFloat(security.purchasePrice) || 0,
-        datePurchased: security.datePurchased,
-      });
-      return acc;
-    }, {});
 
-    // Check for new portfolios that need to be created
-    const existingPortfolioNames = allPortfolios.map((p) =>
-      p.name.toLowerCase()
-    );
-    const newPortfolios = [...allPortfolios];
-    const portfolioNameToId = {};
-
-    // Map existing portfolios
-    allPortfolios.forEach((p) => {
-      portfolioNameToId[p.name.toLowerCase()] = p.id;
-    });
-
-    // Create new portfolios if needed
-    editRows.forEach((security) => {
-      const portfolioNameLower = security.portfolioName.toLowerCase();
-      if (
-        security.portfolioName &&
-        !existingPortfolioNames.includes(portfolioNameLower)
-      ) {
-        const newPortfolioId = `portfolio-${Date.now()}-${Math.random()
-          .toString(36)
-          .substr(2, 9)}`;
-        newPortfolios.push({
-          id: newPortfolioId,
-          name: security.portfolioName,
+      if (item.type === "cash") {
+        accountUpdates[item.accountId].cashBalance =
+          parseFloat(item.value) || 0;
+      } else {
+        accountUpdates[item.accountId].securities.push({
+          id: item.id,
+          name: item.name,
+          ticker: item.ticker,
+          quantity: parseFloat(item.quantity) || 0,
+          purchasePrice: parseFloat(item.purchasePrice) || 0,
+          value: parseFloat(item.value) || 0,
+          datePurchased: item.datePurchased,
         });
-        portfolioNameToId[portfolioNameLower] = newPortfolioId;
-        existingPortfolioNames.push(portfolioNameLower);
       }
     });
 
-    // Update accounts with new securities AND portfolio assignments
+    // Update accounts with new securities and cash
     const updatedAccounts = allAccounts.map((account) => {
-      if (account.category === "Investments" && securityByAccount[account.id]) {
-        const securityData = securityByAccount[account.id];
-        const portfolioNameLower = securityData.portfolioName.toLowerCase();
-        const newPortfolioId = portfolioNameToId[portfolioNameLower];
+      if (accountUpdates[account.id]) {
+        const update = accountUpdates[account.id];
+        const totalSecuritiesValue = update.securities.reduce(
+          (sum, sec) => sum + (sec.value || 0),
+          0
+        );
+        const totalValue = totalSecuritiesValue + update.cashBalance;
 
         return {
           ...account,
-          accountProvider: securityData.accountProvider,
-          portfolioId: newPortfolioId,
-          securities: securityData.securities,
+          securities: update.securities,
+          cashBalance: update.cashBalance,
+          hasSecurities: update.securities.length > 0 || update.cashBalance > 0,
+          value: totalValue, // FIXED: This should trigger goal updates
         };
       }
       return account;
     });
 
-    // Save updated data with new portfolios
     const updatedData = {
       ...data,
       accounts: updatedAccounts,
-      portfolios: newPortfolios,
+    };
+
+    // FIXED: Save data which will trigger goal sync in context
+    saveData(updatedData);
+    exitEditMode();
+    showSuccess("Securities and cash positions saved successfully!");
+  };
+
+  // FIXED: Single handleResetToDemo function with proper imports
+  const handleResetToDemo = () => {
+    const updatedData = {
+      ...data,
+      accounts: DEMO_ACCOUNTS,
+      portfolios: DEMO_PORTFOLIOS,
     };
 
     saveData(updatedData);
     exitEditMode();
+
+    // Show success message with details
+    const portfolioCount = DEMO_PORTFOLIOS.length;
+    const accountCount = DEMO_ACCOUNTS.filter(
+      (acc) => acc.category === "Investments"
+    ).length;
+    const securitiesCount = DEMO_ACCOUNTS.filter(
+      (acc) => acc.category === "Investments" && acc.securities
+    ).reduce((total, acc) => total + acc.securities.length, 0);
+
+    showSuccess(
+      `Reset to demo data!\n` +
+        `• ${portfolioCount} portfolios restored\n` +
+        `• ${accountCount} investment accounts restored\n` +
+        `• ${securitiesCount} securities restored`
+    );
   };
 
-  // Handle reset to demo
-  const handleResetToDemo = () => {
-    if (editMode) {
-      resetAccountsToDemo();
-      exitEditMode();
-    } else {
-      resetAccountsToDemo();
-    }
-  };
-
-  // Handle clear all
   const handleClearAll = () => {
-    if (editMode) {
-      // Clear securities from all investment accounts
-      const updatedAccounts = allAccounts.map((account) => {
-        if (account.category === "Investments") {
-          return {
-            ...account,
-            securities: [],
-          };
-        }
-        return account;
-      });
+    // Clear all investment accounts and remove empty portfolios
+    const nonInvestmentAccounts = allAccounts.filter(
+      (acc) => acc.category !== "Investments"
+    );
 
-      const updatedData = {
-        ...data,
-        accounts: updatedAccounts,
-      };
+    // Keep only portfolios that have non-investment accounts
+    const remainingPortfolios = allPortfolios.filter((portfolio) => {
+      const hasNonInvestmentAccounts = nonInvestmentAccounts.some(
+        (acc) => acc.portfolioId === portfolio.id
+      );
+      return hasNonInvestmentAccounts;
+    });
 
-      saveData(updatedData);
-      exitEditMode();
-    } else {
-      // Clear securities from all investment accounts
-      const updatedAccounts = allAccounts.map((account) => {
-        if (account.category === "Investments") {
-          return {
-            ...account,
-            securities: [],
-          };
-        }
-        return account;
-      });
+    const updatedData = {
+      ...data,
+      accounts: nonInvestmentAccounts,
+      portfolios: remainingPortfolios,
+    };
 
-      const updatedData = {
-        ...data,
-        accounts: updatedAccounts,
-      };
+    saveData(updatedData);
+    exitEditMode();
 
-      saveData(updatedData);
-    }
+    const clearedPortfolios = allPortfolios.length - remainingPortfolios.length;
+    const clearedAccounts = allAccounts.length - nonInvestmentAccounts.length;
+
+    showWarning(
+      `Cleared all investment data!\n` +
+        `• ${clearedAccounts} investment accounts removed\n` +
+        `• ${clearedPortfolios} empty portfolios removed`
+    );
   };
 
   // Filtering for display
   const filteredSecurities = editMode ? editRows : securities;
   const displaySecurities = filteredSecurities;
 
-  const handleNewSecurityChange = (e) => {
-    const { name, value } = e.target;
-    setNewSecurity((prev) => ({
-      ...prev,
-      [name]:
-        name === "quantity" || name === "value" || name === "purchasePrice"
-          ? value === ""
-            ? ""
-            : parseFloat(value) || ""
-          : value,
-    }));
-  };
-
-  const handleAddSecurity = () => {
-    if (newSecurity.name && newSecurity.ticker && newSecurity.portfolioName) {
-      // Find or create account for this portfolio/provider combination
-      let targetAccount = allAccounts.find(
-        (acc) =>
-          acc.category === "Investments" &&
-          acc.accountProvider === newSecurity.accountProvider
-      );
-
-      let targetAccountId;
-      if (!targetAccount) {
-        // Create new investment account
-        targetAccountId = `acc-${Date.now()}`;
-        const newAccount = {
-          id: targetAccountId,
-          name: `${newSecurity.portfolioName} - ${newSecurity.accountProvider}`,
-          accountProvider: newSecurity.accountProvider,
-          category: "Investments",
-          subType: "Investment Account",
-          value: parseFloat(newSecurity.value) || 0,
-          taxStatus: "",
-          hasSecurities: true,
-          portfolioId: null, // Will be set when we save
-          securities: [],
-        };
-
-        const updatedAccounts = [...allAccounts, newAccount];
-        const updatedData = { ...data, accounts: updatedAccounts };
-        saveData(updatedData);
-        targetAccountId = newAccount.id;
-      } else {
-        targetAccountId = targetAccount.id;
-      }
-
-      const security = {
-        id: `${targetAccountId}-${newSecurity.ticker}-${Date.now()}`,
-        accountId: targetAccountId,
-        accountName: targetAccount
-          ? targetAccount.name
-          : `${newSecurity.portfolioName} - ${newSecurity.accountProvider}`,
-        accountProvider: newSecurity.accountProvider,
-        portfolioId: null, // Will be determined when saving
-        portfolioName: newSecurity.portfolioName,
-        securityIndex: 0,
-        ...newSecurity,
-        quantity: parseFloat(newSecurity.quantity) || 0,
-        value: parseFloat(newSecurity.value) || 0,
-        purchasePrice: parseFloat(newSecurity.purchasePrice) || 0,
-      };
-
-      if (editMode) {
-        addEditRow(security);
-      } else {
-        // Add directly to account if not in edit mode
-        const updatedAccounts = allAccounts.map((account) => {
-          if (account.id === targetAccountId) {
-            return {
-              ...account,
-              securities: [
-                ...(account.securities || []),
-                {
-                  name: security.name,
-                  ticker: security.ticker,
-                  quantity: security.quantity,
-                  value: security.value,
-                  purchasePrice: security.purchasePrice,
-                  datePurchased: security.datePurchased,
-                },
-              ],
-            };
-          }
-          return account;
-        });
-
-        const updatedData = { ...data, accounts: updatedAccounts };
-        saveData(updatedData);
-      }
-
-      setNewSecurity({ ...EMPTY_SECURITY });
-      newSecurityNameRef.current?.focus();
-    }
-  };
-
-  const renderSecurityRow = (security, index) => {
-    return (
-      <tr
-        key={
-          security.id ||
-          `${security.accountProvider}-${security.ticker}-${index}`
-        }
-      >
-        <td>{editMode ? security.portfolioName : security.portfolioName}</td>
-        <td>
-          {editMode ? security.accountProvider : security.accountProvider}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormInput
-              column={{ type: "text", placeholder: "Security name" }}
-              value={security.name}
-              onChange={(value) => updateEditRow(index, "name", value)}
-            />
-          ) : (
-            security.name
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormInput
-              column={{ type: "text", placeholder: "TICKER" }}
-              value={security.ticker}
-              onChange={(value) => updateEditRow(index, "ticker", value)}
-            />
-          ) : (
-            security.ticker
-          )}
-        </td>
-        <td className={tableStyles.alignRight}>
-          {editMode ? (
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "0",
-                step: "0.001",
-                min: "0",
-              }}
-              value={security.quantity}
-              onChange={(value) => updateEditRow(index, "quantity", value)}
-            />
-          ) : (
-            (security.quantity || 0).toLocaleString(undefined, {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 3,
-            })
-          )}
-        </td>
-        <td className={tableStyles.alignRight}>
-          {editMode ? (
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "0.00",
-                step: "0.01",
-                min: "0",
-              }}
-              value={security.value}
-              onChange={(value) => updateEditRow(index, "value", value)}
-            />
-          ) : (
-            `$${(security.value || 0).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}`
-          )}
-        </td>
-        <td className={tableStyles.alignRight}>
-          {editMode ? (
-            <BudgetFormInput
-              column={{
-                type: "number",
-                placeholder: "0.00",
-                step: "0.01",
-                min: "0",
-              }}
-              value={security.purchasePrice}
-              onChange={(value) => updateEditRow(index, "purchasePrice", value)}
-            />
-          ) : (
-            `$${(security.purchasePrice || 0).toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            })}`
-          )}
-        </td>
-        <td>
-          {editMode ? (
-            <BudgetFormInput
-              column={{ type: "date" }}
-              value={security.datePurchased}
-              onChange={(value) => updateEditRow(index, "datePurchased", value)}
-            />
-          ) : security.datePurchased ? (
-            new Date(security.datePurchased).toLocaleDateString()
-          ) : (
-            "N/A"
-          )}
-        </td>
-        {editMode && (
-          <td className={tableStyles.alignCenter}>
-            <button
-              onClick={() =>
-                removeEditRow(
-                  security.id ||
-                    `${security.accountProvider}-${security.ticker}-${index}`
-                )
-              } // FIXED: Use removeEditRow directly
-              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
-              title="Remove security"
-            >
-              <span className={tableStyles.removeIcon}>×</span>
-            </button>
-          </td>
-        )}
-      </tr>
+  // Check if selected portfolio exists and has accounts
+  const selectedPortfolio = allPortfolios.find((p) => p.id === portfolioId);
+  const portfolioHasAccounts =
+    portfolioId === "all" ||
+    allAccounts.some(
+      (acc) => acc.portfolioId === portfolioId && acc.category === "Investments"
     );
+
+  // Generate appropriate empty state message
+  const getEmptyStateMessage = () => {
+    if (portfolioId !== "all" && portfolioId) {
+      const portfolio = allPortfolios.find((p) => p.id === portfolioId);
+      const portfolioName = portfolio?.name || "selected portfolio";
+
+      if (!portfolioHasAccounts) {
+        return `No investment accounts found for ${portfolioName}. Create an investment account and assign it to this portfolio.`;
+      } else {
+        return `No securities found for ${portfolioName}. Click the pencil icon to add securities.`;
+      }
+    }
+    return "No securities found. Click the pencil icon to add securities.";
   };
-
-  // FIXED: New security row with standardized add button
-  const newSecurityRow = editMode ? (
-    <tr
-      style={{
-        background: "var(--surface-dark)",
-        borderTop: "2px solid var(--border-light)",
-      }}
-    >
-      <td>
-        <BudgetFormSelect
-          value={newSecurity.portfolioName}
-          onChange={(e) =>
-            handleNewSecurityChange({
-              target: { name: "portfolioName", value: e.target.value },
-            })
-          }
-          options={[
-            { value: "", label: "Select Portfolio" },
-            ...allPortfolios.map((p) => ({ value: p.name, label: p.name })),
-          ]}
-          placeholder="Select Portfolio"
-        />
-      </td>
-      <td>
-        <BudgetFormInput
-          column={{ type: "text", placeholder: "Broker" }}
-          value={newSecurity.accountProvider}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, accountProvider: value }))
-          }
-        />
-      </td>
-      <td>
-        <BudgetFormInput
-          ref={newSecurityNameRef}
-          column={{ type: "text", placeholder: "Security name" }}
-          value={newSecurity.name}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, name: value }))
-          }
-        />
-      </td>
-      <td>
-        <BudgetFormInput
-          column={{ type: "text", placeholder: "TICKER" }}
-          value={newSecurity.ticker}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, ticker: value.toUpperCase() }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignRight}>
-        <BudgetFormInput
-          column={{
-            type: "number",
-            placeholder: "0",
-            step: "0.001",
-            min: "0",
-          }}
-          value={newSecurity.quantity}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, quantity: value }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignRight}>
-        <BudgetFormInput
-          column={{
-            type: "number",
-            placeholder: "0.00",
-            step: "0.01",
-            min: "0",
-          }}
-          value={newSecurity.value}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, value: value }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignRight}>
-        <BudgetFormInput
-          column={{
-            type: "number",
-            placeholder: "0.00",
-            step: "0.01",
-            min: "0",
-          }}
-          value={newSecurity.purchasePrice}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, purchasePrice: value }))
-          }
-        />
-      </td>
-      <td>
-        <BudgetFormInput
-          column={{ type: "date" }}
-          value={newSecurity.datePurchased}
-          onChange={(value) =>
-            setNewSecurity((prev) => ({ ...prev, datePurchased: value }))
-          }
-        />
-      </td>
-      <td className={tableStyles.alignCenter}>
-        <button
-          onClick={handleAddSecurity}
-          disabled={
-            !newSecurity.name ||
-            !newSecurity.ticker ||
-            !newSecurity.quantity ||
-            !newSecurity.value
-          }
-          className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
-          title="Add security"
-        >
-          <Plus className={tableStyles.buttonIcon} />
-        </button>
-      </td>
-    </tr>
-  ) : null;
-
-  // Define columns based on edit mode
-  const viewColumns = [
-    { key: "portfolioName", label: "Portfolio" },
-    { key: "accountProvider", label: "Broker" },
-    { key: "name", label: "Security Name" },
-    { key: "ticker", label: "Ticker" },
-    { key: "quantity", label: "Qty" },
-    { key: "value", label: "Value" },
-    { key: "purchasePrice", label: "Avg. Cost" },
-    { key: "datePurchased", label: "Last Purchased" },
-  ];
-
-  const editColumns = [...viewColumns, { key: "actions", label: "Actions" }];
-
-  const columns = editMode ? editColumns : viewColumns;
 
   return (
     <Section
       header={
         <div className={sectionStyles.sectionHeaderRow}>
           <EditableTableHeader
-            title={holdingsHeaderTitle}
+            title={investmentsHeaderTitle}
             editMode={editMode}
             onEnterEdit={enterEditMode}
             onCancelEdit={cancelEdit}
@@ -596,7 +767,6 @@ const InvestmentsTab = ({
         </div>
       }
     >
-      {/* MOVED: Control panel now appears AFTER the table */}
       <Table
         columns={columns}
         data={displaySecurities}
@@ -607,7 +777,7 @@ const InvestmentsTab = ({
         disableSortingInEditMode={true}
       />
 
-      {/* FIXED: Control panel moved to bottom and only shows in edit mode */}
+      {/* Control panel for edit mode */}
       {editMode && (
         <div
           style={{
@@ -633,6 +803,7 @@ const InvestmentsTab = ({
         </div>
       )}
 
+      {/* Show message when no securities found */}
       {displaySecurities.length === 0 && (
         <div
           style={{
@@ -641,7 +812,7 @@ const InvestmentsTab = ({
             color: "var(--text-secondary)",
           }}
         >
-          No securities found. Click the pencil icon to add securities.
+          {getEmptyStateMessage()}
         </div>
       )}
     </Section>

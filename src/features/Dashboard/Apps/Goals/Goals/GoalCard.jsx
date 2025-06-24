@@ -1,5 +1,5 @@
 // src/features/Dashboard/Apps/Plan/Goals/GoalCard.jsx
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { Edit, Trash2, Play, Pause } from "lucide-react";
 import goalsStyles from "../goals.module.css";
 import {
@@ -14,15 +14,38 @@ const GoalCard = ({
   onRemove,
   onStatusToggle,
 }) => {
-  // FIXED: Always calculate progress if we have a target amount, regardless of target date
+  // FIXED: Always recalculate progress based on current data
   const hasTarget = goal.targetAmount && goal.targetAmount > 0;
   const hasTargetDate = !!goal.targetDate;
 
-  // FIXED: Calculate progress based on current vs target amount (not dependent on target date)
-  const progress = hasTarget ? calculateProgress(goal) : null;
+  // FIXED: Calculate current amount more robustly
+  const currentAmount = useMemo(() => {
+    let amount = 0;
+
+    // Add linked account amount (if using entire account)
+    if (goal.useEntireAccount && fundingAccount) {
+      amount += fundingAccount.value || 0;
+    } else if (goal.linkedAccountAmount) {
+      amount += goal.linkedAccountAmount || 0;
+    }
+
+    // Add manual contributions
+    amount += goal.manualContributions || 0;
+
+    return amount;
+  }, [goal, fundingAccount]);
+
+  // FIXED: Calculate progress based on recalculated current amount
+  const progress = hasTarget
+    ? Math.min((currentAmount / goal.targetAmount) * 100, 100)
+    : null;
+
   const timeToGoal =
     hasTarget && hasTargetDate && goal.monthlyContribution > 0
-      ? calculateTimeToGoal(goal)
+      ? calculateTimeToGoal({
+          ...goal,
+          currentAmount, // Use recalculated amount
+        })
       : null;
 
   const isCompleted =
@@ -91,66 +114,66 @@ const GoalCard = ({
   return (
     <div className={goalsStyles.goalCard}>
       <div className={goalsStyles.goalHeader}>
-        <div>
-          <h4 className={goalsStyles.goalTitle}>{goal.name}</h4>
-          <span className={goalsStyles.goalType}>{goal.type}</span>
-        </div>
-        <div
-          className={goalsStyles.goalStatus}
-          style={{ color: getStatusColor(goal.status) }}
-        >
-          {getStatusLabel(goal.status)}
-        </div>
+        <h4 className={goalsStyles.goalTitle}>{goal.name}</h4>
+        <span className={goalsStyles.goalType}>{goal.type}</span>
       </div>
 
-      {/* FIXED: Always show progress section if we have a target amount */}
-      {hasTarget && (
-        <div className={goalsStyles.goalProgress}>
-          <div
+      <div className={goalsStyles.goalProgress}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "var(--space-xs)",
+          }}
+        >
+          <span
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "var(--space-xs)",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "var(--font-size-xs)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              Progress
-            </span>
-            <span
-              style={{
-                fontSize: "var(--font-size-xs)",
-                fontWeight: "var(--font-weight-semibold)",
-              }}
-            >
-              {progress.toFixed(1)}%
-            </span>
-          </div>
-          <div className={goalsStyles.progressBar}>
-            <div
-              className={goalsStyles.progressFill}
-              style={{ width: `${Math.min(progress, 100)}%` }}
-            />
-          </div>
-          {/* Show current vs target amounts */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "var(--space-xs)",
-              fontSize: "var(--font-size-xxs)",
+              fontSize: "var(--font-size-xs)",
               color: "var(--text-secondary)",
             }}
           >
-            <span>${(goal.currentAmount || 0).toLocaleString()}</span>
-            <span>${goal.targetAmount.toLocaleString()}</span>
-          </div>
+            Progress
+          </span>
+          <span
+            style={{
+              fontSize: "var(--font-size-xs)",
+              fontWeight: "var(--font-weight-semibold)",
+            }}
+          >
+            {progress !== null ? `${Math.round(progress)}%` : "N/A"}
+          </span>
         </div>
-      )}
+        <div className={goalsStyles.progressBar}>
+          <div
+            className={goalsStyles.progressFill}
+            style={{ width: `${Math.min(progress || 0, 100)}%` }}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: "var(--space-xs)",
+          }}
+        >
+          <span
+            style={{
+              fontSize: "var(--font-size-xs)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            ${currentAmount.toLocaleString()}
+          </span>
+          <span
+            style={{
+              fontSize: "var(--font-size-xs)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            ${goal.targetAmount?.toLocaleString() || "N/A"}
+          </span>
+        </div>
+      </div>
 
       <div className={goalsStyles.goalStats}>
         <div className={goalsStyles.goalStat}>
