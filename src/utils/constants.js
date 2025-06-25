@@ -22,8 +22,6 @@ export const DEFAULT_DEMO_BUDGET = {
     { id: "exp-8", name: "Phone", cost: 80, category: "required" },
     { id: "exp-9", name: "Insurance", cost: 250, category: "required" },
     { id: "exp-10", name: "Gym Membership", cost: 50, category: "non-essential" },
-    // Note: Debt payments will be auto-synced from demo accounts
-    // These are just the base demo expenses without debt payments
   ],
 };
 
@@ -154,31 +152,17 @@ export const DEMO_ACCOUNTS = [
     name: "Credit Card", 
     category: "Debt", 
     subType: "Credit Card", 
-    value: -3500, 
+    value: 3500, 
     accountProvider: "Chase", 
     taxStatus: "N/A", 
     interestRate: 18.99, 
     monthlyPayment: 150 
   },
   { 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Rest of constants remain the same...];  },    monthlyPayment: 200     interestRate: 4.5,     taxStatus: "N/A",     accountProvider: "Nelnet",     value: -15000,     subType: "Student Loan",     category: "Debt",     name: "Student Loan",     id: "acc-7",     id: "acc-7", 
     name: "Student Loan", 
     category: "Debt", 
     subType: "Student Loan", 
-    value: -15000, 
+    value: 15000, 
     accountProvider: "Nelnet", 
     taxStatus: "N/A", 
     interestRate: 4.5, 

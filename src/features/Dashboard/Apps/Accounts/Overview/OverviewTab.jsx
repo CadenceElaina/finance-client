@@ -15,7 +15,7 @@ import sectionStyles from "../../../../../components/ui/Section/Section.module.c
 import tableStyles from "../../../../../components/ui/Table/Table.module.css";
 import accountsStyles from "../Accounts.module.css";
 import { Plus, X } from "lucide-react";
-import { DEMO_ACCOUNTS, DEMO_PORTFOLIOS, BASE_CASH_ACCOUNT } from "../../../../../utils/constants";
+import { DEMO_ACCOUNTS, DEMO_PORTFOLIOS } from "../../../../../utils/constants";
 
 const EMPTY_ACCOUNT = {
   name: "",
@@ -719,7 +719,6 @@ const OverviewTab = ({ smallApp }) => {
     accountToAdd.interestRate = parseFloat(accountToAdd.interestRate) || 0;
     accountToAdd.monthlyPayment = parseFloat(accountToAdd.monthlyPayment) || 0;
 
-    // FIXED: Only add to edit rows, don't save data yet
     addEditRow(accountToAdd);
 
     // Reset new account form
@@ -731,111 +730,97 @@ const OverviewTab = ({ smallApp }) => {
     }
   };
 
-  // Update the renderAccountRow function to handle investment account balance
+  const handleRemoveAccount = (accountId) => {
+    if (window.confirm("Are you sure you want to remove this account?")) {
+      removeEditRow(accountId);
+    }
+  };
 
   const renderAccountRow = (account, index) => {
-    const isBaseCashAccount = account.id === BASE_CASH_ACCOUNT.id;
-    
     if (editMode) {
       return (
         <tr key={account.id || index}>
           {/* Account Name */}
           <td>
-            {isBaseCashAccount ? (
-              <span className={tableStyles.mutedText}>
-                {account.name} (Base Account)
-              </span>
-            ) : (
-              <input
-                type="text"
-                value={editRows[index]?.name || ""}
-                onChange={(e) => updateEditRow(index, "name", e.target.value)}
-                className={tableStyles.tableInput}
-                placeholder="Account name"
-              />
-            )}
+            <input
+              type="text"
+              value={editRows[index]?.name || ""}
+              onChange={(e) => updateEditRow(index, "name", e.target.value)}
+              className={tableStyles.tableInput}
+              placeholder="Account name"
+            />
           </td>
           {/* Provider */}
           <td>
-            {isBaseCashAccount ? (
-              <span className={tableStyles.mutedText}>{account.accountProvider}</span>
-            ) : (
-              <input
-                type="text"
-                value={editRows[index]?.accountProvider || ""}
-                onChange={(e) =>
-                  updateEditRow(index, "accountProvider", e.target.value)
-                }
-                className={tableStyles.tableInput}
-                placeholder="Provider"
-              />
-            )}
+            <input
+              type="text"
+              value={editRows[index]?.accountProvider || ""}
+              onChange={(e) =>
+                updateEditRow(index, "accountProvider", e.target.value)
+              }
+              className={tableStyles.tableInput}
+              placeholder="Provider"
+            />
           </td>
           {/* Category */}
           <td>
-            {isBaseCashAccount ? (
-              <span className={tableStyles.mutedText}>{account.category}</span>
-            ) : (
-              <select
-                value={editRows[index]?.category || ""}
-                onChange={(e) => {
-                  updateEditRow(index, "category", e.target.value);
-                  updateEditRow(index, "subType", "");
-                  if (e.target.value !== "Investments") {
-                    updateEditRow(index, "portfolioId", null);
-                    updateEditRow(index, "portfolioName", "");
-                  }
-                }}
-                className={tableStyles.tableSelect}
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              value={editRows[index]?.category || ""}
+              onChange={(e) => {
+                updateEditRow(index, "category", e.target.value);
+                // Reset subType when category changes
+                updateEditRow(index, "subType", "");
+                // FIXED: Clear portfolio for non-investment accounts
+                if (e.target.value !== "Investments") {
+                  updateEditRow(index, "portfolioId", null);
+                  updateEditRow(index, "portfolioName", "");
+                }
+              }}
+              className={tableStyles.tableSelect}
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
           </td>
           {/* Sub Type */}
           <td>
-            {isBaseCashAccount ? (
-              <span className={tableStyles.mutedText}>{account.subType}</span>
-            ) : (
-              <select
-                value={editRows[index]?.subType || ""}
-                onChange={(e) => updateEditRow(index, "subType", e.target.value)}
-                className={tableStyles.tableSelect}
-              >
-                <option value="">Select Type</option>
-                {(ACCOUNT_SUBTYPES[editRows[index]?.category] || []).map((type) => (
+            <select
+              value={editRows[index]?.subType || ""}
+              onChange={(e) => updateEditRow(index, "subType", e.target.value)}
+              className={tableStyles.tableSelect}
+            >
+              <option value="">Select Type</option>
+              {(ACCOUNT_SUBTYPES[editRows[index]?.category] || []).map(
+                (type) => (
                   <option key={type.value} value={type.value}>
                     {type.label}
                   </option>
-                ))}
-              </select>
-            )}
+                )
+              )}
+            </select>
           </td>
           {/* Tax Status */}
           <td>
-            {isBaseCashAccount ? (
-              <span className={tableStyles.mutedText}>{account.taxStatus}</span>
-            ) : (
-              <select
-                value={editRows[index]?.taxStatus || ""}
-                onChange={(e) => updateEditRow(index, "taxStatus", e.target.value)}
-                className={tableStyles.tableSelect}
-              >
-                {TAX_STATUS_OPTIONS.map((status) => (
-                  <option key={status.value} value={status.value}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            )}
+            <select
+              value={editRows[index]?.taxStatus || ""}
+              onChange={(e) =>
+                updateEditRow(index, "taxStatus", e.target.value)
+              }
+              className={tableStyles.tableSelect}
+            >
+              {TAX_STATUS_OPTIONS.map((status) => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
           </td>
           {/* Portfolio */}
           <td>
-            {editRows[index]?.category === "Investments" && !isBaseCashAccount ? (
+            {editRows[index]?.category === "Investments" ? (
               <input
                 type="text"
                 value={editRows[index]?.portfolioName || ""}
@@ -851,7 +836,7 @@ const OverviewTab = ({ smallApp }) => {
           </td>
           {/* Monthly Payment */}
           <td>
-            {editRows[index]?.category === "Debt" && !isBaseCashAccount ? (
+            {editRows[index]?.category === "Debt" ? (
               <input
                 type="number"
                 value={editRows[index]?.monthlyPayment || ""}
@@ -873,7 +858,8 @@ const OverviewTab = ({ smallApp }) => {
           </td>
           {/* Interest Rate */}
           <td>
-            {(editRows[index]?.category === "Debt" || editRows[index]?.category === "Cash") && !isBaseCashAccount ? (
+            {editRows[index]?.category === "Debt" ||
+            editRows[index]?.category === "Cash" ? (
               <input
                 type="number"
                 value={editRows[index]?.interestRate || ""}
@@ -893,16 +879,20 @@ const OverviewTab = ({ smallApp }) => {
               <span className={tableStyles.mutedText}>N/A</span>
             )}
           </td>
-          {/* Balance */}
+          {/* Balance - FIXED: Disable for Investment accounts */}
           <td className={tableStyles.alignRight}>
             {editRows[index]?.category === "Investments" ? (
-              <span 
+              <span
                 className={tableStyles.calculatedField}
                 title="Investment account balance is calculated from cash and securities"
               >
-                ${(
-                  (editRows[index]?.cashBalance || 0) + 
-                  ((editRows[index]?.securities || []).reduce((sum, sec) => sum + (sec.value || 0), 0))
+                $
+                {(
+                  (editRows[index]?.cashBalance || 0) +
+                  (editRows[index]?.securities || []).reduce(
+                    (sum, sec) => sum + (sec.value || 0),
+                    0
+                  )
                 ).toLocaleString()}
               </span>
             ) : (
@@ -920,23 +910,14 @@ const OverviewTab = ({ smallApp }) => {
           </td>
           {/* Actions */}
           <td className={tableStyles.alignCenter}>
-            {isBaseCashAccount ? (
-              <span 
-                className={tableStyles.mutedText} 
-                title="Base cash account cannot be removed"
-              >
-                Protected
-              </span>
-            ) : (
-              <button
-                onClick={() => handleRemoveAccount(index)}
-                className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
-                title="Remove account"
-                aria-label={`Remove ${account.name}`}
-              >
-                <X className={tableStyles.buttonIcon} />
-              </button>
-            )}
+            <button
+              onClick={() => handleRemoveAccount(index)}
+              className={`${tableStyles.actionButton} ${tableStyles.removeButton}`}
+              title="Remove account"
+              aria-label={`Remove ${account.name}`}
+            >
+              <X className={tableStyles.buttonIcon} />
+            </button>
           </td>
         </tr>
       );
@@ -1161,15 +1142,34 @@ const OverviewTab = ({ smallApp }) => {
             $0.00
           </span>
         ) : (
-          <button
-            onClick={handleAddAccount}
-            className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
-            title="Add account"
-            aria-label="Add new account"
-          >
-            <Plus className={tableStyles.buttonIcon} />
-          </button>
+          <input
+            type="number"
+            value={newAccount.value}
+            onChange={(e) =>
+              setNewAccount((prev) => ({ ...prev, value: e.target.value }))
+            }
+            className={tableStyles.tableInput}
+            placeholder="0.00"
+            step="0.01"
+          />
         )}
+      </td>
+      {/* Actions */}
+      <td className={tableStyles.alignCenter}>
+        <button
+          onClick={handleAddAccount}
+          disabled={
+            !newAccount.name ||
+            !newAccount.accountProvider ||
+            (newAccount.category !== "Investments" &&
+              (!newAccount.value || newAccount.value === ""))
+          }
+          className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
+          title="Add account"
+          aria-label="Add new account"
+        >
+          <Plus className={tableStyles.buttonIcon} />
+        </button>
       </td>
     </tr>
   ) : null;

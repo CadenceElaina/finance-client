@@ -1,0 +1,252 @@
+.urgencyRanking {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.strategyButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.strategyInfo {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.stats {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.debtList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.debtItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.debtItem:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Urgency level styling */
+.debtItem.critical {
+  border-left: 4px solid var(--danger-color);
+}
+
+.debtItem.high {
+  border-left: 4px solid var(--warning-color);
+}
+
+.debtItem.medium {
+  border-left: 4px solid var(--info-color);
+}
+
+.debtItem.low {
+  border-left: 4px solid var(--success-color);
+}
+
+.rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+  text-align: center;
+}
+
+.rankNumber {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.score {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.debtInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.debtName {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.debtName strong {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.debtType {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: var(--surface-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.debtDetails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 0.75rem;
+}
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.value {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.priority {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 80px;
+}
+
+.priorityBadge {
+  padding: 0.375rem 0.75rem;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+}
+
+.priorityBadge.critical {
+  background: var(--danger-color);
+}
+
+.priorityBadge.high {
+  background: var(--warning-color);
+}
+
+.priorityBadge.medium {
+  background: var(--info-color);
+}
+
+.priorityBadge.low {
+  background: var(--success-color);
+}
+
+.avalancheInfo,
+.snowballInfo {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  background: var(--surface-tertiary);
+  border-radius: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .strategyButtons {
+    justify-content: center;
+  }
+  
+  .debtItem {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+  
+  .rank {
+    min-width: auto;
+  }
+  
+  .debtInfo {
+    width: 100%;
+  }
+  
+  .debtDetails {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .priority {
+    min-width: auto;
+    align-self: center;
+  }
+  
+  .stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .strategyButtons {
+    flex-direction: column;
+  }
+  
+  .debtDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .debtItem {
+    padding: 0.75rem;
+  }
+}

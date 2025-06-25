@@ -5,6 +5,7 @@ import { getAppSizeClasses } from "../../../../utils/getAppSize";
 import Tabs from "../../../../components/ui/Tabs/Tabs";
 import OverviewTab from "./Overview/OverviewTab";
 import PortfoliosWrapper from "./PortfoliosWrapper";
+import DebtTab from "./Debt/DebtTab";
 import accountsStyles from "./Accounts.module.css";
 
 const Accounts = React.memo(() => {
@@ -46,6 +47,23 @@ const Accounts = React.memo(() => {
         label: "Overview",
         component: ({ smallApp: flexTabsSmallApp }) => (
           <OverviewTab smallApp={flexTabsSmallApp} />
+        ),
+      },
+      {
+        id: "debt",
+        label: "Debt",
+        innerTabs: [
+          { id: "overviewBalance", label: "Overview" },
+          { id: "balances", label: "Balances" },
+          { id: "debtPriorities", label: "Debt Priorities" },
+          { id: "payoffTimeline", label: "Payoff Timeline" },
+          { id: "amortization", label: "Amortization" },
+        ],
+        component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
+          <DebtTab
+            smallApp={flexTabsSmallApp}
+            activeInnerTabId={activeInnerTabId}
+          />
         ),
       },
       {

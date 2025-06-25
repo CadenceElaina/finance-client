@@ -1,0 +1,234 @@
+.debtCard {
+  background: var(--surface-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.debtCard:hover {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.debtCard.selected {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+  background: var(--surface-primary);
+}
+
+/* Urgency level styling */
+.debtCard.critical {
+  border-left: 4px solid var(--danger-color);
+}
+
+.debtCard.high {
+  border-left: 4px solid var(--warning-color);
+}
+
+.debtCard.medium {
+  border-left: 4px solid var(--info-color);
+}
+
+.debtCard.low {
+  border-left: 4px solid var(--success-color);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.nameSection {
+  flex: 1;
+}
+
+.debtName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+.debtType {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--surface-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.urgencyBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 60px;
+}
+
+.urgencyScore {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.urgencyLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.balanceSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.currentBalance,
+.interestRate {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+}
+
+.amount {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.rate {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--warning-color);
+}
+
+.paymentSection {
+  margin-bottom: 1rem;
+}
+
+.monthlyPayment {
+  display: flex;
+  flex-direction: column;
+}
+
+.payment {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.timelineSection {
+  margin-bottom: 1rem;
+}
+
+.payoffInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.timeToPayoff,
+.totalInterest {
+  display: flex;
+  flex-direction: column;
+}
+
+.time {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.interest {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--danger-color);
+}
+
+.progressBar {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+  transition: width 0.3s ease;
+}
+
+.footer {
+  text-align: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.clickHint {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .debtCard {
+    padding: 1rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .urgencyBadge {
+    align-self: flex-end;
+  }
+  
+  .balanceSection {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .payoffInfo {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .debtCard {
+    padding: 0.75rem;
+  }
+  
+  .debtName {
+    font-size: 1rem;
+  }
+  
+  .amount,
+  .rate,
+  .payment {
+    font-size: 1rem;
+  }
+}
