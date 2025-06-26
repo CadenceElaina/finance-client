@@ -206,7 +206,7 @@ const Table = ({
               </tr>
             )
           )}
-          {extraRow}
+          {Array.isArray(extraRow) ? extraRow.map((row, idx) => row) : extraRow}
         </tbody>
       </table>
       {sortedData.length === 0 && (

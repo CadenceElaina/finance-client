@@ -27,11 +27,11 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  max-width: 50%; /* Prevent chart from getting too wide */
+
 }
 
 .rightColumn {
-  flex: 1 1 40%; /* Income/Expenses take up ~55% of width */
+  flex: 1 1 40%; 
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -40,9 +40,9 @@
 
 .incomeSectionWrapper {
   flex: 0 0 auto; /* Don't grow, just take what's needed */
-
   min-height: 0;
 }
+
 
 .expensesSectionWrapper {
   flex: 1 1 0; /* Take remaining space */
@@ -116,14 +116,18 @@
 .discretionaryLabel,
 .totalLabel {
   font-weight: var(--font-weight-bold);
+  text-align: right;
 }
 
 /* Amount Styles - UPDATED for consistent right alignment */
+.totalRow{
+  width: 100%;
+  border:2px solid var(--border-light);
+}
 .incomeAmount,
 .expenseAmount,
 .categoryAmount,
 .discretionaryAmount,
-.totalAmount,
 .percentAmount {
   text-align: right;
   font-weight: var(--font-weight-medium);
@@ -138,6 +142,8 @@
 
 /* Section Specific Styles */
 .incomeSection {
+  padding: 0 !important;
+  margin: 0;
   border-left: 4px solid var(--status-success);
 }
 
@@ -437,3 +443,4 @@
 .incomeSection.compactSection {
   margin-bottom: var(--space-xs); /* Reduce bottom margin */
 }
+

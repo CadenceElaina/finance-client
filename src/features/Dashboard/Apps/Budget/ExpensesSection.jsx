@@ -512,26 +512,17 @@ const ExpensesSection = ({ budget, smallApp }) => {
 
   // Total row at the bottom
   const totalRow = (
-    <tr style={{ borderTop: "2px solid var(--border-light)" }}>
-      <td style={{ fontWeight: "bold" }}></td>
-      <td style={{ fontWeight: "bold", textAlign: "right" }}>
-        Total Monthly Expenses
-      </td>
+    <tr className={budgetStyles.totalRow}>
+      <td className={budgetStyles.totalLabel}>Total Monthly Expenses</td>
+      <td></td> {/* Empty category column */}
       <td
-        className={tableStyles.alignRight}
-        style={{
-          fontWeight: "bold",
-          color: "var(--color-primary)",
-          fontSize: "var(--font-size-xs)",
-          borderTop: "2px solid var(--color-secondary)",
-        }}
+        className={`${budgetStyles.totalAmount} ${budgetStyles.expenseAmount} ${tableStyles.alignRight}`}
       >
         ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
       </td>
-      {editMode && <td></td>}
+      {editMode && <td></td>} {/* Empty actions column in edit mode */}
     </tr>
   );
-
   return (
     <Section
       header={
@@ -552,31 +543,14 @@ const ExpensesSection = ({ budget, smallApp }) => {
         columns={columns}
         data={displayExpenses}
         renderRow={renderExpenseRow}
-        extraRow={newExpenseRow}
+        extraRow={[newExpenseRow, totalRow].filter(Boolean)} // Pass both rows as array
         smallApp={smallApp}
         editMode={editMode}
         disableSortingInEditMode={true}
       />
 
-      {totalRow && (
-        <table className={tableStyles.table}>
-          <tbody>{totalRow}</tbody>
-        </table>
-      )}
-
       {editMode && (
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-xs)",
-            marginTop: "var(--space-sm)",
-            justifyContent: "flex-end",
-            padding: "var(--space-xs)",
-            background: "var(--surface-dark)",
-            borderRadius: "var(--border-radius-sm)",
-            border: "1px solid var(--border-light)",
-          }}
-        >
+        <div>
           <button onClick={handleSave} className="btn-primary">
             Save Changes
           </button>

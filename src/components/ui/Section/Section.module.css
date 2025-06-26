@@ -81,10 +81,7 @@ body[data-theme="vibrant-orange"] .section {
 .sectionContent {
     flex-grow: 1;
     overflow: auto;
-    padding-left: var(--space-xs);
-    padding-right: var(--space-xs);
-    padding-top: var(--space-xs);
-    padding-bottom: var(--space-xs);
+  
 }
 
 /* --- TwoColumnLayout specific styles --- */
@@ -182,12 +179,13 @@ body[data-theme="vibrant-orange"] .section {
   width: 100%;
 }
 
-.sectionHeaderLeft {
+.sectionHeaderLeft, .sectionHeaderCenter {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: var(--space-xs);
 }
+
 
 .sectionHeaderTitle {
   margin: 0;

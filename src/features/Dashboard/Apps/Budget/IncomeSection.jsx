@@ -137,7 +137,7 @@ const IncomeSection = ({ budget, smallApp }) => {
             onCancelEdit={cancelEdit}
           />
         }
-        className={`${budgetStyles.incomeSection} ${budgetStyles.compactSection}`}
+        className={`${budgetStyles.incomeSection}`}
       >
         <div className={budgetStyles.incomeCardsContainer}>
           <div className={budgetStyles.incomeCard}>
@@ -180,7 +180,7 @@ const IncomeSection = ({ budget, smallApp }) => {
           onCancelEdit={cancelEdit}
         />
       }
-      className={`${budgetStyles.incomeSection} ${budgetStyles.compactSection}`}
+      className={`${budgetStyles.incomeSection}`}
     >
       <div className={budgetStyles.incomeEditForm}>
         {/* Income Type Selector */}
