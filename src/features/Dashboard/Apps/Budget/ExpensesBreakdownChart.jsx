@@ -24,6 +24,28 @@ const COLORS = [
   "var(--chart-color-8)",
 ];
 
+// Helper function to truncate text smartly
+const truncateText = (text, maxLength) => {
+  if (text.length <= maxLength) return text;
+
+  // Try to break at word boundaries
+  const words = text.split(" ");
+  if (words.length > 1) {
+    let result = words[0];
+    for (let i = 1; i < words.length; i++) {
+      if ((result + " " + words[i]).length <= maxLength - 3) {
+        result += " " + words[i];
+      } else {
+        return result + "...";
+      }
+    }
+    return result;
+  }
+
+  // If single word, just truncate
+  return text.substring(0, maxLength - 3) + "...";
+};
+
 const ExpensesBreakdownChart = memo(
   ({ budget, smallApp }) => {
     const [viewMode, setViewMode] = useState("individual");
@@ -99,7 +121,7 @@ const ExpensesBreakdownChart = memo(
       return chartData;
     }, [chartData]);
 
-    // Improved custom label renderer similar to AllocationTab
+    // Improved custom label renderer with better text handling
     const renderCustomLabel = useCallback(
       ({
         cx,
@@ -113,21 +135,19 @@ const ExpensesBreakdownChart = memo(
         index,
       }) => {
         // Don't show labels for very small segments or if there are too many segments
-        if (percent < 0.05 || processedChartData.length > 6) return null;
+        if (percent < 0.05 || processedChartData.length > 5) return null;
 
         const RADIAN = Math.PI / 180;
-        const labelRadius = outerRadius + (smallApp ? 12 : 20);
+        const labelRadius = outerRadius + (smallApp ? 15 : 25);
         const x = cx + labelRadius * Math.cos(-midAngle * RADIAN);
         const y = cy + labelRadius * Math.sin(-midAngle * RADIAN);
 
         const textAnchor = x > cx ? "start" : "end";
         const finalX = x + (x > cx ? 3 : -3);
 
-        // Truncate long names for better fit
-        const displayName =
-          name.length > (smallApp ? 10 : 15)
-            ? name.substring(0, smallApp ? 10 : 15) + "..."
-            : name;
+        // Smart truncation based on app size
+        const maxLength = smallApp ? 8 : 12;
+        const displayName = truncateText(name, maxLength);
 
         return (
           <text
@@ -136,13 +156,13 @@ const ExpensesBreakdownChart = memo(
             fill="var(--chart-label-text)"
             textAnchor={textAnchor}
             dominantBaseline="central"
-            fontSize={smallApp ? "10px" : "11px"}
+            fontSize={smallApp ? "9px" : "10px"}
             fontWeight="500"
           >
             <tspan x={finalX} dy={0}>
               {displayName}
             </tspan>
-            <tspan x={finalX} dy={12}>
+            <tspan x={finalX} dy={smallApp ? 10 : 12}>
               {(percent * 100).toFixed(1)}%
             </tspan>
           </text>
@@ -151,8 +171,8 @@ const ExpensesBreakdownChart = memo(
       [smallApp, processedChartData.length]
     );
 
-    // Custom legend renderer for better control
-    const renderLegend = useCallback(
+    // Side legend renderer for horizontal layout - FIXED
+    const renderSideLegend = useCallback(
       (props) => {
         const { payload } = props;
         if (!payload || payload.length === 0) return null;
@@ -161,93 +181,155 @@ const ExpensesBreakdownChart = memo(
           (sum, item) => sum + item.value,
           0
         );
-        const itemsPerRow = smallApp ? 1 : 2;
-        const legendItems = [];
 
-        for (let i = 0; i < payload.length; i += itemsPerRow) {
-          const rowItems = payload.slice(i, i + itemsPerRow);
-          legendItems.push(
-            <div
-              key={i}
-              style={{
-                display: "flex",
-                justifyContent: smallApp ? "flex-start" : "space-between",
-                marginBottom: "4px",
-                gap: smallApp ? "0" : "16px",
-              }}
-            >
-              {rowItems.map((entry, index) => {
-                const percentage = (
-                  (entry.payload.value / totalValue) *
-                  100
-                ).toFixed(1);
-                return (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      flex: smallApp ? "1" : "0 0 48%",
-                      fontSize: smallApp ? "10px" : "11px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "12px",
-                        height: "12px",
-                        backgroundColor: entry.color,
-                        marginRight: "6px",
-                        borderRadius: "2px",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span
-                      style={{
-                        color: "var(--text-primary)",
-                        fontWeight: "500",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {entry.value} ({percentage}%)
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          );
+        // Split payload into rows of two items each
+        const rows = [];
+        for (let i = 0; i < payload.length; i += 2) {
+          rows.push(payload.slice(i, i + 2));
         }
 
         return (
           <div
             style={{
-              padding: smallApp ? "8px 12px" : "12px 16px",
+              width: "100%",
+              height: "100%",
+              padding: smallApp ? "6px" : "8px",
               backgroundColor: "var(--surface-light)",
               borderRadius: "var(--border-radius-md)",
               border: "1px solid var(--border-light)",
-              margin: smallApp ? "8px 0 0 0" : "12px 0 0 0",
+              display: "flex",
+              flexDirection: "column",
+              gap: smallApp ? "4px" : "6px",
+              overflowY: "auto",
+              boxSizing: "border-box",
             }}
           >
-            {legendItems}
+            {rows.map((row, rowIndex) => (
+              <div
+                key={rowIndex}
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: smallApp ? "4px" : "6px",
+                  width: "100%",
+                }}
+              >
+                {row.map((entry, colIndex) => {
+                  const percentage = (
+                    (entry.payload.value / totalValue) *
+                    100
+                  ).toFixed(1);
+
+                  // Adjust text length based on container size
+                  const maxNameLength = smallApp ? 10 : 14;
+                  const displayName = truncateText(entry.value, maxNameLength);
+
+                  return (
+                    <div
+                      key={colIndex}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: smallApp ? "4px" : "6px",
+                        fontSize: smallApp ? "9px" : "10px",
+                        padding: smallApp ? "3px 4px" : "4px 6px",
+                        borderRadius: "3px",
+                        backgroundColor: "var(--surface-primary)",
+                        border: "1px solid var(--border-light)",
+                        transition: "background-color 0.2s ease",
+                        minHeight: "35px", // <-- updated
+                        minWidth: "100px", // <-- updated
+                        boxSizing: "border-box",
+                        flex: 1,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "var(--surface-dark)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "var(--surface-primary)";
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: smallApp ? "10px" : "12px",
+                          height: smallApp ? "10px" : "12px",
+                          backgroundColor: entry.color,
+                          borderRadius: "2px",
+                          flexShrink: 0,
+                          border: "1px solid var(--border-light)",
+                        }}
+                      />
+                      <div
+                        style={{
+                          flex: 1,
+                          minWidth: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "1px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            color: "var(--text-primary)",
+                            fontWeight: "500",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            lineHeight: 1.2,
+                            fontSize: smallApp ? "9px" : "10px",
+                          }}
+                          title={entry.value}
+                        >
+                          {displayName}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            fontSize: smallApp ? "8px" : "9px",
+                            color: "var(--text-secondary)",
+                            lineHeight: 1.1,
+                          }}
+                        >
+                          <span>{percentage}%</span>
+                          <span>
+                            $
+                            {entry.payload.value.toLocaleString(undefined, {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                {/* If odd number of items, fill the last cell to keep grid aligned */}
+                {row.length < 2 && <div style={{ flex: 1, minWidth: 0 }} />}
+              </div>
+            ))}
           </div>
         );
       },
       [smallApp, processedChartData]
     );
 
-    // Determine chart dimensions based on app size and data
+    // Chart dimensions for horizontal layout - FIXED
     const chartDimensions = useMemo(() => {
-      const hasLegend = processedChartData.length > 6;
-      const baseHeight = smallApp ? 180 : 220;
-      const legendHeight = hasLegend ? (smallApp ? 80 : 100) : 0;
+      const hasLegend = processedChartData.length > 0;
+      const baseHeight = smallApp ? 180 : 300;
 
       return {
         chartHeight: baseHeight,
-        totalHeight: baseHeight + legendHeight,
-        pieRadius: smallApp ? 65 : 85,
-        showLabels: processedChartData.length <= 6,
+        totalHeight: baseHeight,
+        pieRadius: smallApp ? 50 : 70, // Reduced to give more space to legend
+        showLabels: processedChartData.length <= 3, // Even fewer labels since we have side legend
         showLegend: hasLegend,
+        legendWidth: smallApp ? "30%" : "50%", // Increased legend width
+        chartWidth: smallApp ? "70%" : "50%", // Reduced chart width
       };
     }, [smallApp, processedChartData.length]);
 
@@ -304,7 +386,7 @@ const ExpensesBreakdownChart = memo(
       },
     ];
 
-    // Memoize chart content to prevent unnecessary re-renders
+    // Memoize chart content with horizontal layout - FIXED
     const chartContent = useMemo(() => {
       if (processedChartData.length === 0) {
         return (
@@ -333,26 +415,62 @@ const ExpensesBreakdownChart = memo(
           style={{
             width: "100%",
             height: chartDimensions.totalHeight,
-            minWidth: "200px",
+            minWidth: "280px", // Increased minimum width
             minHeight: "200px",
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
+            gap: smallApp ? "6px" : "8px",
+            alignItems: "stretch",
+            boxSizing: "border-box",
           }}
         >
+          {/* Legend on the left - FIXED */}
+          {chartDimensions.showLegend && (
+            <div
+              style={{
+                width: chartDimensions.legendWidth,
+                minWidth: smallApp ? "130px" : "160px",
+                maxWidth: smallApp ? "180px" : "220px",
+                flex: "0 0 auto",
+                height: "100%",
+                boxSizing: "border-box",
+                display: "flex", // Add this
+                alignItems: "center", // Center vertically
+                justifyContent: "center", // Center horizontally
+              }}
+            >
+              <Legend
+                content={renderSideLegend}
+                payload={processedChartData.map((entry, index) => ({
+                  value: entry.name,
+                  type: "square",
+                  color: entry.isOther
+                    ? "var(--chart-color-8)"
+                    : COLORS[index % COLORS.length],
+                  payload: entry,
+                }))}
+              />
+            </div>
+          )}
+
+          {/* Chart on the right - FIXED */}
           <div
             style={{
-              width: "100%",
+              width: chartDimensions.showLegend
+                ? chartDimensions.chartWidth
+                : "100%",
               height: chartDimensions.chartHeight,
-              minWidth: "200px",
-              minHeight: "180px",
-              flex: "0 0 auto",
+              minWidth: "140px", // Reduced minimum width
+              minHeight: "140px",
+              flex: chartDimensions.showLegend ? "1 1 0" : "1", // Allow chart to grow
+              boxSizing: "border-box",
             }}
           >
             <ResponsiveContainer
               width="100%"
               height="100%"
-              minWidth={200}
-              minHeight={180}
+              minWidth={140}
+              minHeight={140}
             >
               <PieChart>
                 <Pie
@@ -362,7 +480,7 @@ const ExpensesBreakdownChart = memo(
                   cx="50%"
                   cy="50%"
                   outerRadius={chartDimensions.pieRadius}
-                  innerRadius={smallApp ? 15 : 20}
+                  innerRadius={smallApp ? 12 : 15}
                   labelLine={false}
                   label={chartDimensions.showLabels ? renderCustomLabel : false}
                   animationBegin={0}
@@ -405,29 +523,13 @@ const ExpensesBreakdownChart = memo(
               </PieChart>
             </ResponsiveContainer>
           </div>
-
-          {chartDimensions.showLegend && (
-            <div style={{ flex: "0 0 auto", marginTop: "8px" }}>
-              <Legend
-                content={renderLegend}
-                payload={processedChartData.map((entry, index) => ({
-                  value: entry.name,
-                  type: "square",
-                  color: entry.isOther
-                    ? "var(--chart-color-8)"
-                    : COLORS[index % COLORS.length],
-                  payload: entry,
-                }))}
-              />
-            </div>
-          )}
         </div>
       );
     }, [
       processedChartData,
       smallApp,
       renderCustomLabel,
-      renderLegend,
+      renderSideLegend,
       chartDimensions,
     ]);
 
@@ -442,16 +544,16 @@ const ExpensesBreakdownChart = memo(
         <div
           className={budgetStyles.chartContainer}
           style={{
-            height: chartDimensions.totalHeight + 40, // Add padding
-            minHeight: "240px",
+            height: chartDimensions.totalHeight + 10,
+            minHeight: "220px",
             width: "100%",
-            minWidth: "240px",
+            minWidth: "320px", // Increased for better legend visibility
             contain: "layout style paint",
-            padding: smallApp ? "var(--space-xs)" : "var(--space-sm)",
+            padding: smallApp ? "var(--space-xs)" : "var(--space-xs)",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: "flex-start",
+            alignItems: "stretch",
             boxSizing: "border-box",
           }}
         >
