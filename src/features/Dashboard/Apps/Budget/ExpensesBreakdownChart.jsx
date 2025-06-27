@@ -171,7 +171,6 @@ const ExpensesBreakdownChart = memo(
       [smallApp, processedChartData.length]
     );
 
-    // Side legend renderer for horizontal layout - FIXED
     const renderSideLegend = useCallback(
       (props) => {
         const { payload } = props;
@@ -198,6 +197,9 @@ const ExpensesBreakdownChart = memo(
               borderRadius: "var(--border-radius-md)",
               border: "1px solid var(--border-light)",
               display: "flex",
+              alignContent: "center",
+              justifyContent: "center",
+
               flexDirection: "column",
               gap: smallApp ? "4px" : "6px",
               overflowY: "auto",
@@ -424,7 +426,6 @@ const ExpensesBreakdownChart = memo(
             boxSizing: "border-box",
           }}
         >
-          {/* Legend on the left - FIXED */}
           {chartDimensions.showLegend && (
             <div
               style={{

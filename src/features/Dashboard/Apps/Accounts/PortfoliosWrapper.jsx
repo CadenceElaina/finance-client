@@ -133,21 +133,23 @@ const PortfoliosWrapper = ({ smallApp, activeInnerTabId }) => {
       <SnapshotRow items={snapshotItems} small={smallApp} />
 
       {/* Use visibility instead of conditional rendering to prevent chart re-creation */}
-      <div style={{ display: showInvestments ? "block" : "none" }}>
-        <InvestmentsTab
-          key={`investments-${allAccounts.length}-${selectedPortfolioId}-${portfolios.length}`}
-          {...commonTabProps}
-          investmentsHeaderTitle={investmentsHeaderTitle} // FIXED: Pass correct prop name
-        />
-      </div>
+      {showInvestments && (
+        <div>
+          <InvestmentsTab
+            key={`investments-${allAccounts.length}-${selectedPortfolioId}-${portfolios.length}`}
+            {...commonTabProps}
+            investmentsHeaderTitle={investmentsHeaderTitle} // FIXED: Pass correct prop name
+          />
+        </div>
+      )}
 
-      <div style={{ display: showAllocation ? "block" : "none" }}>
-        <AllocationTab {...commonTabProps} />
-      </div>
+      {showAllocation && (
+        <div>
+          <AllocationTab {...commonTabProps} />
+        </div>
+      )}
 
-      <div style={{ display: showPerformance ? "block" : "none" }}>
-        <PerformanceTab {...commonTabProps} />
-      </div>
+      {showPerformance && <PerformanceTab {...commonTabProps} />}
     </div>
   );
 };

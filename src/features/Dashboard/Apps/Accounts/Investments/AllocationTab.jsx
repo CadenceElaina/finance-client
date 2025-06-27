@@ -264,7 +264,7 @@ const AllocationTab = memo(
           style={{
             width: "100%",
             height: chartDimensions.totalHeight,
-            minWidth: "200px",
+            minWidth: "240px", // Increased from 200px
             minHeight: "200px",
             display: "flex",
             flexDirection: "column",
@@ -274,16 +274,16 @@ const AllocationTab = memo(
             style={{
               width: "100%",
               height: chartDimensions.chartHeight,
-              minWidth: "200px",
-              minHeight: "180px",
+              minWidth: "240px", // Increased from 200px
+              minHeight: "200px", // Increased from 180px
               flex: "0 0 auto",
             }}
           >
             <ResponsiveContainer
               width="100%"
               height="100%"
-              minWidth={200}
-              minHeight={180}
+              minWidth={240} // Increased from 200
+              minHeight={200} // Increased from 180
             >
               <PieChart>
                 <Pie
@@ -398,10 +398,10 @@ const AllocationTab = memo(
         <div
           className={accountsStyles.chartContainer}
           style={{
-            height: chartDimensions.totalHeight + 40, // Add padding
+            height: chartDimensions.totalHeight + 40,
             minHeight: "240px",
             width: "100%",
-            minWidth: "240px",
+            minWidth: "280px",
             contain: "layout style paint",
             padding: smallApp ? "var(--space-xs)" : "var(--space-sm)",
             display: "flex",
@@ -411,7 +411,23 @@ const AllocationTab = memo(
             boxSizing: "border-box",
           }}
         >
-          {chartContent}
+          <div
+            style={{
+              width: "100%",
+              minWidth: 280,
+              height: chartDimensions.totalHeight,
+              minHeight: 200,
+            }}
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={280}
+              minHeight={200}
+            >
+              {chartContent}
+            </ResponsiveContainer>
+          </div>
         </div>
       </Section>
     );

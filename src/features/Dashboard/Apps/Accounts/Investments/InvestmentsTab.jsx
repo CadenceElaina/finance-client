@@ -53,12 +53,6 @@ const InvestmentsTab = ({
 
   // FIXED: Get all securities AND cash from investment accounts
   const securities = useMemo(() => {
-    console.log("Recalculating securities with:", {
-      allAccountsLength: allAccounts.length,
-      portfolioId,
-      allPortfoliosLength: allPortfolios.length,
-    });
-
     let investmentAccounts = allAccounts.filter(
       (acc) => acc.category === "Investments"
     );
@@ -69,8 +63,6 @@ const InvestmentsTab = ({
         (acc) => acc.portfolioId === portfolioId
       );
     }
-
-    console.log("Filtered investment accounts:", investmentAccounts);
 
     // Extract all securities AND cash from filtered accounts
     const allSecurities = [];
@@ -115,7 +107,7 @@ const InvestmentsTab = ({
       }
     });
 
-    console.log("All securities and cash:", allSecurities);
+    // console.log("All securities and cash:", allSecurities);
     return allSecurities;
   }, [
     allAccounts,
@@ -177,9 +169,7 @@ const InvestmentsTab = ({
 
       return (
         <tr key={security.id || index}>
-          {/* Account Name - Display only, not editable */}
           <td className={tableStyles.mutedText}>{security.accountName}</td>
-          {/* Security Name */}
           <td>
             {isCash ? (
               <span className={tableStyles.mutedText}>Cash</span>
@@ -193,7 +183,6 @@ const InvestmentsTab = ({
               />
             )}
           </td>
-          {/* Ticker */}
           <td>
             {isCash ? (
               <span className={tableStyles.mutedText}>CASH</span>
@@ -207,7 +196,6 @@ const InvestmentsTab = ({
               />
             )}
           </td>
-          {/* Date Purchased */}
           <td>
             {isCash ? (
               <span className={tableStyles.mutedText}>N/A</span>
@@ -222,7 +210,6 @@ const InvestmentsTab = ({
               />
             )}
           </td>
-          {/* Quantity */}
           <td>
             {isCash ? (
               <span className={tableStyles.mutedText}>1</span>
@@ -244,7 +231,6 @@ const InvestmentsTab = ({
               />
             )}
           </td>
-          {/* Purchase Price */}
           <td className={tableStyles.alignRight}>
             {isCash ? (
               <span className={tableStyles.mutedText}>N/A</span>
@@ -266,7 +252,6 @@ const InvestmentsTab = ({
               />
             )}
           </td>
-          {/* Current Value */}
           <td className={tableStyles.alignRight}>
             <input
               type="number"
@@ -280,7 +265,6 @@ const InvestmentsTab = ({
               min="0"
             />
           </td>
-          {/* Actions */}
           <td className={tableStyles.alignCenter}>
             <button
               onClick={() => removeEditRow(index)}
@@ -300,23 +284,19 @@ const InvestmentsTab = ({
 
     return (
       <tr key={security.id || index}>
-        <td>{security.accountName}</td> {/* Account */}
-        <td>{security.name}</td> {/* Security */}
-        <td>{security.ticker}</td> {/* Ticker */}
-        <td>{isCash ? "N/A" : formatDate(security.datePurchased)}</td>{" "}
-        {/* Date Purchased */}
+        <td>{security.accountName}</td>
+        <td>{security.name}</td>
+        <td>{security.ticker}</td>
+        <td>{isCash ? "N/A" : formatDate(security.datePurchased)}</td>
         <td className={tableStyles.alignRight}>
           {isCash ? "1" : security.quantity?.toLocaleString()}
-        </td>{" "}
-        {/* Quantity */}
+        </td>
         <td className={tableStyles.alignRight}>
           {isCash ? "N/A" : `$${security.purchasePrice?.toLocaleString()}`}
-        </td>{" "}
-        {/* Purchase Price */}
+        </td>
         <td className={tableStyles.alignRight}>
           ${security.value?.toLocaleString()}
-        </td>{" "}
-        {/* Value */}
+        </td>
       </tr>
     );
   };
@@ -386,216 +366,212 @@ const InvestmentsTab = ({
     }
   };
 
-  // FIXED: Update new security row with type selection
-  const newSecurityRow = editMode ? (
-    <>
-      {/* Type selection row */}
-      <tr
-        style={{
-          background: "var(--surface-dark)",
-          borderTop: "2px solid var(--border-light)",
-        }}
-      >
-        <td colSpan={columns.length}>
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-sm)",
-              alignItems: "center",
-              padding: "var(--space-xs)",
-            }}
-          >
-            <span style={{ fontWeight: "bold", color: "var(--text-primary)" }}>
-              Add:
-            </span>
-            <label
+  // FIXED: Update new security row with type selection - REMOVED WHITESPACE
+  const newSecurityRow = editMode
+    ? [
+        <tr
+          key="type-row"
+          style={{
+            background: "var(--surface-dark)",
+            borderTop: "2px solid var(--border-light)",
+          }}
+        >
+          <td colSpan={columns.length}>
+            <div
               style={{
                 display: "flex",
+                gap: "var(--space-sm)",
                 alignItems: "center",
-                gap: "var(--space-xxs)",
+                padding: "var(--space-xs)",
               }}
             >
-              <input
-                type="radio"
-                name="addingType"
-                value="security"
-                checked={addingType === "security"}
-                onChange={(e) => {
-                  setAddingType(e.target.value);
-                  setNewSecurity({ ...EMPTY_SECURITY });
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color: "var(--text-primary)",
                 }}
-              />
-              Security
-            </label>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "var(--space-xxs)",
+              >
+                Add:
+              </span>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-xxs)",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="addingType"
+                  value="security"
+                  checked={addingType === "security"}
+                  onChange={(e) => {
+                    setAddingType(e.target.value);
+                    setNewSecurity({ ...EMPTY_SECURITY });
+                  }}
+                />
+                Security
+              </label>
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "var(--space-xxs)",
+                }}
+              >
+                <input
+                  type="radio"
+                  name="addingType"
+                  value="cash"
+                  checked={addingType === "cash"}
+                  onChange={(e) => {
+                    setAddingType(e.target.value);
+                    setNewSecurity({ ...EMPTY_CASH });
+                  }}
+                />
+                Cash
+              </label>
+            </div>
+          </td>
+        </tr>,
+        <tr key="input-row" style={{ background: "var(--surface-dark)" }}>
+          <td>
+            <select
+              value={newSecurity.accountId || ""}
+              onChange={(e) => {
+                const selectedAccount = allAccounts.find(
+                  (acc) => acc.id === e.target.value
+                );
+                setNewSecurity((prev) => ({
+                  ...prev,
+                  accountId: e.target.value,
+                  accountName: selectedAccount?.name || "",
+                  accountProvider: selectedAccount?.accountProvider || "",
+                }));
               }}
+              className={tableStyles.tableSelect}
             >
+              <option value="">Select Account</option>
+              {allAccounts
+                .filter(
+                  (acc) =>
+                    acc.category === "Investments" &&
+                    (portfolioId === "all" || acc.portfolioId === portfolioId)
+                )
+                .map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {acc.name}
+                  </option>
+                ))}
+            </select>
+          </td>
+          <td>
+            {addingType === "cash" ? (
+              <span className={tableStyles.mutedText}>Cash</span>
+            ) : (
               <input
-                type="radio"
-                name="addingType"
-                value="cash"
-                checked={addingType === "cash"}
-                onChange={(e) => {
-                  setAddingType(e.target.value);
-                  setNewSecurity({ ...EMPTY_CASH });
-                }}
+                ref={newSecurityNameRef}
+                type="text"
+                value={newSecurity.name}
+                onChange={handleNewSecurityChange}
+                name="name"
+                className={tableStyles.tableInput}
+                placeholder="Security name"
               />
-              Cash
-            </label>
-          </div>
-        </td>
-      </tr>
-      {/* Input row */}
-      <tr style={{ background: "var(--surface-dark)" }}>
-        {/* Account Selection */}
-        <td>
-          <select
-            value={newSecurity.accountId || ""}
-            onChange={(e) => {
-              const selectedAccount = allAccounts.find(
-                (acc) => acc.id === e.target.value
-              );
-              setNewSecurity((prev) => ({
-                ...prev,
-                accountId: e.target.value,
-                accountName: selectedAccount?.name || "",
-                accountProvider: selectedAccount?.accountProvider || "",
-              }));
-            }}
-            className={tableStyles.tableSelect}
-          >
-            <option value="">Select Account</option>
-            {allAccounts
-              .filter(
-                (acc) =>
-                  acc.category === "Investments" &&
-                  (portfolioId === "all" || acc.portfolioId === portfolioId)
-              )
-              .map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {acc.name}
-                </option>
-              ))}
-          </select>
-        </td>
-        {/* Security Name */}
-        <td>
-          {addingType === "cash" ? (
-            <span className={tableStyles.mutedText}>Cash</span>
-          ) : (
-            <input
-              ref={newSecurityNameRef}
-              type="text"
-              value={newSecurity.name}
-              onChange={handleNewSecurityChange}
-              name="name"
-              className={tableStyles.tableInput}
-              placeholder="Security name"
-            />
-          )}
-        </td>
-        {/* Ticker */}
-        <td>
-          {addingType === "cash" ? (
-            <span className={tableStyles.mutedText}>CASH</span>
-          ) : (
-            <input
-              type="text"
-              value={newSecurity.ticker}
-              onChange={handleNewSecurityChange}
-              name="ticker"
-              className={tableStyles.tableInput}
-              placeholder="AAPL"
-            />
-          )}
-        </td>
-        {/* Date Purchased */}
-        <td>
-          {addingType === "cash" ? (
-            <span className={tableStyles.mutedText}>N/A</span>
-          ) : (
-            <input
-              type="date"
-              value={newSecurity.datePurchased}
-              onChange={handleNewSecurityChange}
-              name="datePurchased"
-              className={tableStyles.tableInput}
-            />
-          )}
-        </td>
-        {/* Quantity */}
-        <td>
-          {addingType === "cash" ? (
-            <span className={tableStyles.mutedText}>1</span>
-          ) : (
+            )}
+          </td>
+          <td>
+            {addingType === "cash" ? (
+              <span className={tableStyles.mutedText}>CASH</span>
+            ) : (
+              <input
+                type="text"
+                value={newSecurity.ticker}
+                onChange={handleNewSecurityChange}
+                name="ticker"
+                className={tableStyles.tableInput}
+                placeholder="AAPL"
+              />
+            )}
+          </td>
+          <td>
+            {addingType === "cash" ? (
+              <span className={tableStyles.mutedText}>N/A</span>
+            ) : (
+              <input
+                type="date"
+                value={newSecurity.datePurchased}
+                onChange={handleNewSecurityChange}
+                name="datePurchased"
+                className={tableStyles.tableInput}
+              />
+            )}
+          </td>
+          <td>
+            {addingType === "cash" ? (
+              <span className={tableStyles.mutedText}>1</span>
+            ) : (
+              <input
+                type="number"
+                value={newSecurity.quantity}
+                onChange={handleNewSecurityChange}
+                name="quantity"
+                className={tableStyles.tableInput}
+                placeholder="100"
+                step="0.001"
+                min="0"
+              />
+            )}
+          </td>
+          <td className={tableStyles.alignRight}>
+            {addingType === "cash" ? (
+              <span className={tableStyles.mutedText}>N/A</span>
+            ) : (
+              <input
+                type="number"
+                value={newSecurity.purchasePrice}
+                onChange={handleNewSecurityChange}
+                name="purchasePrice"
+                className={tableStyles.tableInput}
+                placeholder="150.00"
+                step="0.01"
+                min="0"
+              />
+            )}
+          </td>
+          <td className={tableStyles.alignRight}>
             <input
               type="number"
-              value={newSecurity.quantity}
+              value={newSecurity.value}
               onChange={handleNewSecurityChange}
-              name="quantity"
+              name="value"
               className={tableStyles.tableInput}
-              placeholder="100"
-              step="0.001"
-              min="0"
-            />
-          )}
-        </td>
-        {/* Purchase Price */}
-        <td className={tableStyles.alignRight}>
-          {addingType === "cash" ? (
-            <span className={tableStyles.mutedText}>N/A</span>
-          ) : (
-            <input
-              type="number"
-              value={newSecurity.purchasePrice}
-              onChange={handleNewSecurityChange}
-              name="purchasePrice"
-              className={tableStyles.tableInput}
-              placeholder="150.00"
+              placeholder={addingType === "cash" ? "1000.00" : "15000.00"}
               step="0.01"
               min="0"
             />
-          )}
-        </td>
-        {/* Current Value */}
-        <td className={tableStyles.alignRight}>
-          <input
-            type="number"
-            value={newSecurity.value}
-            onChange={handleNewSecurityChange}
-            name="value"
-            className={tableStyles.tableInput}
-            placeholder={addingType === "cash" ? "1000.00" : "15000.00"}
-            step="0.01"
-            min="0"
-          />
-        </td>
-        {/* Actions */}
-        <td className={tableStyles.alignCenter}>
-          <button
-            onClick={handleAddSecurity}
-            disabled={
-              !newSecurity.accountId ||
-              !newSecurity.value ||
-              (addingType === "security" &&
-                (!newSecurity.name ||
-                  !newSecurity.ticker ||
-                  !newSecurity.quantity))
-            }
-            className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
-            title={`Add ${addingType}`}
-            aria-label={`Add new ${addingType}`}
-          >
-            <Plus className={tableStyles.buttonIcon} />
-          </button>
-        </td>
-      </tr>
-    </>
-  ) : null;
+          </td>
+          <td className={tableStyles.alignCenter}>
+            <button
+              onClick={handleAddSecurity}
+              disabled={
+                !newSecurity.accountId ||
+                !newSecurity.value ||
+                (addingType === "security" &&
+                  (!newSecurity.name ||
+                    !newSecurity.ticker ||
+                    !newSecurity.quantity))
+              }
+              className={`${tableStyles.actionButton} ${tableStyles.addButton}`}
+              title={`Add ${addingType}`}
+              aria-label={`Add new ${addingType}`}
+            >
+              <Plus className={tableStyles.buttonIcon} />
+            </button>
+          </td>
+        </tr>,
+      ]
+    : null;
 
   // FIXED: Update handleSave to properly handle cash vs securities
   const handleSave = () => {
@@ -777,7 +753,6 @@ const InvestmentsTab = ({
         disableSortingInEditMode={true}
       />
 
-      {/* Control panel for edit mode */}
       {editMode && (
         <div
           style={{
@@ -803,7 +778,6 @@ const InvestmentsTab = ({
         </div>
       )}
 
-      {/* Show message when no securities found */}
       {displaySecurities.length === 0 && (
         <div
           style={{
