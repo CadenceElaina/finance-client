@@ -1,3 +1,4 @@
+// src/utils/calculations/financialCalculations.js
 export const getNetWorth = (accounts) =>
   accounts.reduce(
     (sum, acc) => sum + (typeof acc.value === "number" ? acc.value : 0),

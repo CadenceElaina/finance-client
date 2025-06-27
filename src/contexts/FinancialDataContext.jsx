@@ -17,7 +17,7 @@ import {
 } from "../utils/dataPersistence";
 import {
   syncDebtPaymentsToExpenses,
-  syncExpensesToDebtAccounts,
+  syncExpensesToDebtAccounts, // Although syncExpensesToDebtAccounts is not used directly here, it's good to keep track.
 } from "../utils/debtPaymentSync";
 import {
   DEMO_ACCOUNTS,
@@ -95,7 +95,7 @@ export const FinancialDataProvider = ({ children }) => {
     }
   );
 
-  // FIXED: Define stable callback functions with proper dependencies
+  // Define stable callback functions with proper dependencies
   const updatePreviousAccountValues = useCallback((accounts) => {
     const accountValues = {};
     accounts.forEach((account) => {
@@ -119,7 +119,7 @@ export const FinancialDataProvider = ({ children }) => {
 
       const notifications = [];
 
-      // FIXED: Update linked account amounts for all goals, not just notifications
+      // Update linked account amounts for all goals, not just notifications
       const updatedGoals = goals.map((goal) => {
         if (goal.fundingAccountId && goal.useEntireAccount) {
           const linkedAccount = accounts.find(
@@ -129,7 +129,7 @@ export const FinancialDataProvider = ({ children }) => {
             const oldValue = previousValues[goal.fundingAccountId] || 0;
             const newValue = linkedAccount.value || 0;
 
-            // FIXED: Always update linkedAccountAmount when account value changes
+            // Always update linkedAccountAmount when account value changes
             const updatedGoal = {
               ...goal,
               linkedAccountAmount: newValue,
@@ -168,7 +168,7 @@ export const FinancialDataProvider = ({ children }) => {
         return goal;
       });
 
-      // FIXED: Update the goals in data if any linked amounts changed
+      // Update the goals in data if any linked amounts changed
       const goalsChanged = updatedGoals.some(
         (goal, index) =>
           goal.linkedAccountAmount !== goals[index].linkedAccountAmount ||
@@ -188,7 +188,7 @@ export const FinancialDataProvider = ({ children }) => {
     [dismissedNotificationIds, createNotificationId]
   );
 
-  // FIXED: Stable data initialization with dependency control
+  // Stable data initialization with dependency control
   const ensureBaseCashAccount = (accounts) => {
     if (!accounts || !Array.isArray(accounts)) {
       return [BASE_CASH_ACCOUNT];
@@ -224,19 +224,31 @@ export const FinancialDataProvider = ({ children }) => {
         goals: loadedData.goals || [],
       };
 
-      // Enrich budget with calculations
-      const enrichedData = {
+      const accountsWithBaseCash = ensureBaseCashAccount(
+        normalizedData.accounts
+      );
+
+      // FIXED: Initial enrichment of budget
+      const enrichedBudget = enrichBudgetWithCalculations(
+        normalizedData.budget
+      );
+
+      // Ensure initial expenses include debt payments
+      const initialExpenses = syncDebtPaymentsToExpenses(
+        accountsWithBaseCash,
+        enrichedBudget.monthlyExpenses
+      );
+
+      const enrichedAndSyncedData = {
         ...normalizedData,
-        budget: enrichBudgetWithCalculations(normalizedData.budget),
+        accounts: accountsWithBaseCash,
+        budget: {
+          ...enrichedBudget,
+          monthlyExpenses: initialExpenses,
+        },
       };
 
-      const accountsWithBaseCash = ensureBaseCashAccount(enrichedData.accounts);
-
-      //  console.log("Setting enriched data:", enrichedData);
-      setData({
-        ...enrichedData,
-        accounts: accountsWithBaseCash,
-      });
+      setData(enrichedAndSyncedData);
       updatePreviousAccountValues(accountsWithBaseCash);
       setIsInitialized(true);
     } catch (error) {
@@ -249,6 +261,14 @@ export const FinancialDataProvider = ({ children }) => {
         portfolios: DEMO_PORTFOLIOS,
         goals: [],
       };
+
+      // Ensure fallback expenses include debt payments from demo accounts
+      const fallbackExpenses = syncDebtPaymentsToExpenses(
+        DEMO_ACCOUNTS,
+        fallbackData.budget.monthlyExpenses
+      );
+      fallbackData.budget.monthlyExpenses = fallbackExpenses;
+      fallbackData.budget = enrichBudgetWithCalculations(fallbackData.budget); // Re-enrich after adding debt expenses
 
       setData(fallbackData);
       updatePreviousAccountValues(fallbackData.accounts);
@@ -269,7 +289,7 @@ export const FinancialDataProvider = ({ children }) => {
     showNotification,
   ]);
 
-  // FIXED: Only initialize once and when critical dependencies change
+  // Only initialize once and when critical dependencies change
   useEffect(() => {
     let mounted = true;
 
@@ -284,9 +304,9 @@ export const FinancialDataProvider = ({ children }) => {
     return () => {
       mounted = false;
     };
-  }, [user?.id, persistence]); // FIXED: Only depend on user ID and persistence, not the function itself
+  }, [user?.id, persistence, initializeData]); // Added initializeData to deps to trigger re-init if the function itself changes, though it's memoized.
 
-  // FIXED: Stable debounced save function
+  // Stable debounced save function
   const debouncedSave = useRef(
     debounce(
       async (
@@ -397,30 +417,54 @@ export const FinancialDataProvider = ({ children }) => {
       }
 
       try {
-        // FIXED: Ensure base cash account always exists before saving
+        // Ensure base cash account always exists before saving
         const accountsWithBaseCash = ensureBaseCashAccount(
           newData.accounts?.accounts || newData.accounts
         );
 
-        // FIXED: Sync goal account amounts before saving
-        const syncedData = syncGoalAccountAmounts({
+        // Step 1: Sync goal account amounts within the new data
+        let currentData = syncGoalAccountAmounts({
           ...newData,
           accounts: accountsWithBaseCash,
         });
 
-        // Sync debt payments to budget expenses
-        const finalData = syncGoalBudgetExpenses(syncedData);
+        // Step 2: Sync debt payments from accounts into expenses
+        const expensesFromDebtSync = syncDebtPaymentsToExpenses(
+          currentData.accounts,
+          currentData.budget.monthlyExpenses
+        );
+
+        currentData = {
+          ...currentData,
+          budget: {
+            ...currentData.budget,
+            monthlyExpenses: expensesFromDebtSync,
+          },
+        };
+
+        // Step 3: Sync goal budget expenses into the monthly expenses
+        const finalSyncedData = syncGoalBudgetExpenses(currentData);
+
+        // FIXED: Step 4: Re-enrich the budget with calculations after all modifications
+        const enrichedBudget = enrichBudgetWithCalculations(
+          finalSyncedData.budget
+        );
+        const dataToSet = {
+          ...finalSyncedData,
+          budget: enrichedBudget,
+        };
 
         // Update previous account values for goal tracking
-        if (finalData.accounts) {
-          updatePreviousAccountValues(finalData.accounts);
+        if (dataToSet.accounts) {
+          updatePreviousAccountValues(dataToSet.accounts);
         }
 
         // Check for account changes that affect goals
-        if (finalData.accounts && data?.goals) {
+        if (dataToSet.accounts && data?.goals) {
+          // Keep `data?.goals` for checking against previous state if needed for notifications
           const notifications = checkAccountChangesForGoals(
-            finalData.accounts,
-            finalData.goals || [],
+            dataToSet.accounts,
+            dataToSet.goals || [],
             previousAccountValues
           );
 
@@ -432,10 +476,11 @@ export const FinancialDataProvider = ({ children }) => {
           }
         }
 
-        setData(finalData);
+        // Final update of the state
+        setData(dataToSet);
 
         // Debounced save to storage/server
-        debouncedSave(finalData, user, token, persistence, showNotification);
+        debouncedSave(dataToSet, user, token, persistence, showNotification);
       } catch (error) {
         console.error("Error saving data:", error);
         showNotification({
@@ -446,7 +491,7 @@ export const FinancialDataProvider = ({ children }) => {
       }
     },
     [
-      data,
+      data, // This dependency is needed to access data.goals for notifications
       user,
       token,
       persistence,
@@ -456,6 +501,8 @@ export const FinancialDataProvider = ({ children }) => {
       checkAccountChangesForGoals,
       isInitialized,
       debouncedSave,
+      syncGoalBudgetExpenses, // Add as dependency
+      syncGoalAccountAmounts, // Add as dependency
     ]
   );
 
@@ -467,7 +514,7 @@ export const FinancialDataProvider = ({ children }) => {
     );
   }, [dismissedNotificationIds]);
 
-  // FIXED: Stable data with better memoization
+  // Stable data with better memoization
   const stableData = useMemo(() => {
     if (!data) return null;
 
@@ -479,7 +526,7 @@ export const FinancialDataProvider = ({ children }) => {
     };
   }, [data, accountChangeNotifications, dismissedNotificationIds, persistence]);
 
-  // FIXED: Stable actions with better memoization
+  // Stable actions with better memoization
   const actions = useMemo(
     () => ({
       saveData,
@@ -546,19 +593,31 @@ export const FinancialDataProvider = ({ children }) => {
         });
       },
       resetAccountsToDemo: () => {
-        // FIXED: Use imported constants instead of require
         const updatedData = {
           ...data,
           accounts: DEMO_ACCOUNTS,
-          portfolios: DEMO_PORTFOLIOS, // FIXED: Also restore demo portfolios
+          portfolios: DEMO_PORTFOLIOS,
+          goals: [], // Also reset goals to empty
         };
 
-        saveData(updatedData);
+        // Ensure the budget reflects the debt payments from demo accounts
+        const budgetWithDemoExpenses = {
+          ...updatedData.budget,
+          monthlyExpenses: syncDebtPaymentsToExpenses(
+            DEMO_ACCOUNTS,
+            DEFAULT_DEMO_BUDGET.monthlyExpenses
+          ),
+        };
+
+        saveData({
+          ...updatedData,
+          budget: enrichBudgetWithCalculations(budgetWithDemoExpenses),
+        });
 
         showNotification({
           type: "warning",
           title: "Reset Complete",
-          message: `Accounts and portfolios reset to demo data!\n• ${DEMO_ACCOUNTS.length} accounts\n• ${DEMO_PORTFOLIOS.length} portfolios`,
+          message: `Accounts, portfolios, and budget reset to demo data!\n• ${DEMO_ACCOUNTS.length} accounts\n• ${DEMO_PORTFOLIOS.length} portfolios`,
         });
       },
       clearAccountsData: () => {
@@ -634,7 +693,13 @@ export const FinancialDataProvider = ({ children }) => {
       },
       showNotification,
     }),
-    [data, saveData, accountChangeNotifications, showNotification]
+    [
+      data,
+      saveData,
+      accountChangeNotifications,
+      showNotification,
+      syncDebtPaymentsToExpenses,
+    ]
   );
 
   // Don't render until initialized

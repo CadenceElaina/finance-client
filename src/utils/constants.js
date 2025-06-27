@@ -1,3 +1,4 @@
+// src/utils/constants.js
 // Budget persistence preference key
 export const LOCAL_PERSISTENCE_PREF_KEY = 'budgetPersistencePreference';
 
