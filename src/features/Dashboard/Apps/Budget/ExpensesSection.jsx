@@ -439,9 +439,10 @@ const ExpensesSection = ({ budget, smallApp }) => {
     );
   };
 
-  // FIXED: New expense row with category-specific styling
+  // New expense row with category-specific styling
   const newExpenseRow = editMode ? (
     <tr
+      key="new-expense-row" // Added key
       style={{
         background: "var(--surface-dark)",
         borderTop: "2px solid var(--border-light)",
@@ -512,17 +513,18 @@ const ExpensesSection = ({ budget, smallApp }) => {
 
   // Total row at the bottom
   const totalRow = (
-    <tr className={budgetStyles.totalRow}>
+    <tr key="total-expenses-row" className={budgetStyles.totalRow}>
       <td className={budgetStyles.totalLabel}>Total Monthly Expenses</td>
-      <td></td> {/* Empty category column */}
+      <td>{/* This td is intentionally left empty */}</td>
       <td
         className={`${budgetStyles.totalAmount} ${budgetStyles.expenseAmount} ${tableStyles.alignRight}`}
       >
         ${totalExpenses.toLocaleString(undefined, { minimumFractionDigits: 2 })}
       </td>
-      {editMode && <td></td>} {/* Empty actions column in edit mode */}
+      {editMode && <td>{/* This td is intentionally left empty */}</td>}
     </tr>
   );
+
   return (
     <Section
       header={

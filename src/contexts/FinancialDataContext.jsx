@@ -208,12 +208,12 @@ export const FinancialDataProvider = ({ children }) => {
   const initializeData = useCallback(async () => {
     // Prevent multiple simultaneous initializations
     if (isInitialized) {
-      console.log("Data already initialized, skipping...");
+      //    console.log("Data already initialized, skipping...");
       return;
     }
 
     try {
-      console.log("Loading financial data...");
+      //    console.log("Loading financial data...");
       const loadedData = await loadFinancialData({ user, token, persistence });
 
       // Ensure proper structure
@@ -230,10 +230,9 @@ export const FinancialDataProvider = ({ children }) => {
         budget: enrichBudgetWithCalculations(normalizedData.budget),
       };
 
-      // FIXED: Ensure base cash account exists
       const accountsWithBaseCash = ensureBaseCashAccount(enrichedData.accounts);
 
-      console.log("Setting enriched data:", enrichedData);
+      //  console.log("Setting enriched data:", enrichedData);
       setData({
         ...enrichedData,
         accounts: accountsWithBaseCash,
@@ -329,12 +328,19 @@ export const FinancialDataProvider = ({ children }) => {
     // Remove existing goal expenses that are no longer active
     updatedExpenses = updatedExpenses.filter(
       (exp) =>
-        !(exp.isGoalExpense === true || (exp.id && exp.id.startsWith("exp-goal-")))
+        !(
+          exp.isGoalExpense === true ||
+          (exp.id && exp.id.startsWith("exp-goal-"))
+        )
     );
 
     // Add current goal expenses
     data.goals.forEach((goal) => {
-      if (goal.linkedToBudget && goal.budgetMonthlyAmount > 0 && goal.status === "active") {
+      if (
+        goal.linkedToBudget &&
+        goal.budgetMonthlyAmount > 0 &&
+        goal.status === "active"
+      ) {
         const goalExpenseId = `exp-goal-${goal.id}`;
 
         updatedExpenses.push({
@@ -369,12 +375,9 @@ export const FinancialDataProvider = ({ children }) => {
         }
 
         // Calculate current amount from linked accounts only
-        const currentAmount = goal.linkedAccounts.reduce(
-          (sum, linkedAcc) => {
-            return sum + (parseFloat(linkedAcc.allocatedAmount) || 0);
-          },
-          0
-        );
+        const currentAmount = goal.linkedAccounts.reduce((sum, linkedAcc) => {
+          return sum + (parseFloat(linkedAcc.allocatedAmount) || 0);
+        }, 0);
 
         return {
           ...goal,

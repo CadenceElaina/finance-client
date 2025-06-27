@@ -23,7 +23,7 @@
 }
 
 .leftColumn {
-  flex: 1 1 60%; /* Chart takes up ~45% of width */
+  flex: 1 1 55%; /* Chart takes up ~45% of width */
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -31,7 +31,7 @@
 }
 
 .rightColumn {
-  flex: 1 1 40%; 
+  flex: 1 1 45%; 
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -444,3 +444,100 @@
   margin-bottom: var(--space-xs); /* Reduce bottom margin */
 }
 
+/* Enhanced legend styling */
+.chart-legend {
+  background: var(--chart-legend-bg);
+  border: 1px solid var(--chart-legend-border);
+  border-radius: 6px;
+  padding: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: var(--chart-hover-transition);
+  cursor: pointer;
+}
+
+.chart-legend-item:hover {
+  background: var(--chart-legend-hover-bg);
+  transform: translateY(-1px);
+}
+
+.chart-legend-item:focus {
+  outline: var(--chart-focus-ring);
+  outline-offset: 1px;
+}
+
+.chart-legend-color-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.chart-legend-text {
+  color: var(--chart-legend-text);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-legend-value {
+  color: var(--chart-legend-text-secondary);
+  font-size: 10px;
+  margin-left: auto;
+}
+
+/* Pie chart specific enhancements */
+.recharts-pie-sector {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transition: var(--chart-hover-transition);
+}
+
+.recharts-pie-sector:hover {
+  filter: brightness(var(--chart-hover-brightness)) 
+          drop-shadow(var(--chart-hover-shadow));
+  transform: scale(1.02);
+}
+
+.recharts-pie-sector:focus {
+  outline: var(--chart-selection-outline);
+  outline-offset: 2px;
+}
+
+/* Label styling improvements */
+.recharts-pie-label-text {
+  fill: var(--chart-label-text) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-tooltip {
+    font-size: 11px !important;
+    padding: 8px !important;
+  }
+  
+  .chart-legend-item {
+    padding: 3px 4px;
+  }
+  
+  .chart-legend-text {
+    font-size: 10px;
+  }
+  
+  .chart-legend-color-box {
+    width: 10px;
+    height: 10px;
+  }
+}
