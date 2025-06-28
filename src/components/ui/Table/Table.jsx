@@ -206,7 +206,11 @@ const Table = ({
               </tr>
             )
           )}
-          {Array.isArray(extraRow) ? extraRow.map((row, idx) => row) : extraRow}
+          {Array.isArray(extraRow)
+            ? extraRow.map((row, idx) =>
+                React.cloneElement(row, { key: `extra-${idx}` })
+              )
+            : extraRow}
         </tbody>
       </table>
       {sortedData.length === 0 && (

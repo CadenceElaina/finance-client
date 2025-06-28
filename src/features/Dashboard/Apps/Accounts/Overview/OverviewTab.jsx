@@ -4,7 +4,6 @@ import Table from "../../../../../components/ui/Table/Table";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 
-import TwoColumnLayout from "../../../../../components/ui/Section/TwoColumnLayout";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
 import AccountGoalUpdateModal from "../../../../../components/ui/Modal/AccountGoalUpdateModal";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
@@ -74,32 +73,9 @@ const ACCOUNT_SUBTYPES = {
   ],
 };
 
-// Add this helper function near the top with other utility functions
-
-const findMatchingPortfolio = (inputValue, portfolios) => {
-  if (!inputValue) return null;
-
-  // Find exact match first (case insensitive)
-  const exactMatch = portfolios.find(
-    (p) => p.name.toLowerCase() === inputValue.toLowerCase()
-  );
-  if (exactMatch) return exactMatch;
-
-  // Find partial match
-  const partialMatch = portfolios.find(
-    (p) =>
-      p.name.toLowerCase().includes(inputValue.toLowerCase()) ||
-      inputValue.toLowerCase().includes(p.name.toLowerCase())
-  );
-  return partialMatch;
-};
-
 const generatePortfolioId = (name) => {
-  // Generate a simple ID based on the name
   return `portfolio-${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
 };
-
-// Update the column definitions to match the new order
 
 const viewColumns = [
   { key: "name", label: "Account Name" },
@@ -126,57 +102,27 @@ const editColumns = [
   { key: "actions", label: "Actions" },
 ];
 
-const OverviewTab = ({ smallApp }) => {
-  // SAFETY CHECK: Add early return if financial data context is not ready
+const OverviewTab = ({ smallApp, onAccountClick }) => {
   const financialDataResult = useFinancialData();
+  const { showSuccess, showInfo, showWarning } = useToast();
 
-  if (!financialDataResult) {
-    return (
-      <div
-        style={{
-          padding: "var(--space-md)",
-          textAlign: "center",
-          color: "var(--text-secondary)",
-        }}
-      >
-        Loading financial data...
-      </div>
-    );
-  }
+  const [activeNotification, setActiveNotification] = useState(null);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
+  const newAccountNameRef = useRef(null);
+  const [originalAccounts, setOriginalAccounts] = useState([]);
 
   const {
     data,
     saveData,
-    clearAccountsData,
-    resetAccountsToDemo,
     accountChangeNotifications,
     applyGoalUpdateFromNotification,
-    dismissAccountChangeNotification,
-    clearAllAccountChangeNotifications,
-  } = financialDataResult;
+    resetAccountsToDemo,
+    clearAccountsData,
+  } = financialDataResult || {};
 
-  // SAFETY CHECK: Ensure data exists
-  if (!data) {
-    return (
-      <div
-        style={{
-          padding: "var(--space-md)",
-          textAlign: "center",
-          color: "var(--text-secondary)",
-        }}
-      >
-        Initializing accounts...
-      </div>
-    );
-  }
-
-  const { showSuccess, showInfo, showWarning } = useToast(); // FIXED: Added showWarning
-
-  const accounts = data.accounts || [];
-  const portfolios = data.portfolios || [];
-
-  // Modal state for account change notifications
-  const [activeNotification, setActiveNotification] = useState(null);
+  const accounts = data?.accounts || [];
+  const portfolios = data?.portfolios || [];
 
   const {
     editMode,
@@ -186,15 +132,9 @@ const OverviewTab = ({ smallApp }) => {
     exitEditMode,
     updateEditRow,
     addEditRow,
-    removeEditRow, // FIXED: Now properly imported
+    removeEditRow,
   } = useEditableTable(accounts);
 
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [newAccount, setNewAccount] = useState({ ...EMPTY_ACCOUNT });
-  const newAccountNameRef = useRef(null);
-  const [originalAccounts, setOriginalAccounts] = useState([]);
-
-  // Auto-open notification modal when new notifications arrive
   useEffect(() => {
     if (
       accountChangeNotifications &&
@@ -205,396 +145,6 @@ const OverviewTab = ({ smallApp }) => {
     }
   }, [accountChangeNotifications, activeNotification]);
 
-  // Update enterEditMode to track original accounts
-  const handleEnterEditMode = () => {
-    setOriginalAccounts([...accounts]);
-    enterEditMode();
-  };
-
-  // Update cancelEdit to clear tracking
-  const handleCancelEdit = () => {
-    setOriginalAccounts([]);
-    cancelEdit();
-  };
-
-  // Update the handleSave function to provide detailed removal notifications
-
-  const handleSave = () => {
-    if (!editRows || editRows.length === 0) {
-      showInfo("No changes to save");
-      return;
-    }
-
-    // FIXED: Track detailed changes for better notifications
-    let addedAccounts = 0;
-    let modifiedAccounts = 0;
-    let createdPortfolios = [];
-    let removedAccountDetails = []; // Track detailed removal info
-
-    // FIXED: Analyze removed accounts for detailed notifications
-    const editRowIds = new Set(editRows.map((acc) => acc.id));
-    const removedAccounts = originalAccounts.filter(
-      (acc) => !editRowIds.has(acc.id)
-    );
-
-    removedAccounts.forEach((removedAccount) => {
-      const details = {
-        name: removedAccount.name,
-        category: removedAccount.category,
-        impacts: [],
-      };
-
-      // Check portfolio impact
-      if (
-        removedAccount.category === "Investments" &&
-        removedAccount.portfolioName
-      ) {
-        details.impacts.push(
-          `removed from ${removedAccount.portfolioName} portfolio`
-        );
-      }
-
-      // Check debt payment impact
-      if (
-        removedAccount.category === "Debt" &&
-        removedAccount.monthlyPayment > 0
-      ) {
-        details.impacts.push(
-          `$${removedAccount.monthlyPayment}/month debt payment removed from budget`
-        );
-      }
-
-      // Check goal impact
-      const linkedGoals = (data.goals || []).filter(
-        (goal) => goal.fundingAccountId === removedAccount.id
-      );
-      if (linkedGoals.length > 0) {
-        const goalNames = linkedGoals.map((g) => g.name).join(", ");
-        details.impacts.push(
-          `unlinked from goal${linkedGoals.length > 1 ? "s" : ""}: ${goalNames}`
-        );
-      }
-
-      removedAccountDetails.push(details);
-    });
-
-    // Count new vs modified accounts by comparing IDs, not array positions
-    const originalAccountIds = new Set(originalAccounts.map((acc) => acc.id));
-
-    editRows.forEach((account) => {
-      const isNewAccount = !originalAccountIds.has(account.id);
-
-      if (isNewAccount) {
-        addedAccounts++;
-      } else {
-        // Check if the account was actually modified
-        const originalAccount = originalAccounts.find(
-          (orig) => orig.id === account.id
-        );
-        if (originalAccount) {
-          // Compare relevant fields to see if anything changed
-          const fieldsToCompare = [
-            "name",
-            "accountProvider",
-            "category",
-            "subType",
-            "taxStatus",
-            "value",
-            "interestRate",
-            "monthlyPayment",
-            "portfolioId",
-            "portfolioName",
-          ];
-
-          const hasChanges = fieldsToCompare.some((field) => {
-            const oldValue = originalAccount[field];
-            const newValue = account[field];
-
-            // Handle numeric comparisons
-            if (
-              field === "value" ||
-              field === "interestRate" ||
-              field === "monthlyPayment"
-            ) {
-              return parseFloat(oldValue || 0) !== parseFloat(newValue || 0);
-            }
-
-            return oldValue !== newValue;
-          });
-
-          if (hasChanges) {
-            modifiedAccounts++;
-          }
-        }
-      }
-    });
-
-    // Process portfolios - create new ones if needed during save
-    const updatedPortfolios = [...portfolios];
-    const processedAccounts = editRows.map((account) => {
-      // Handle accounts that need new portfolios created
-      if (account._needsNewPortfolio) {
-        // Create new portfolio
-        const newPortfolio = {
-          id: account.portfolioId, // Use the pre-generated ID
-          name: account.portfolioName,
-        };
-
-        // Check if portfolio was already added (in case of duplicates)
-        const alreadyExists = updatedPortfolios.find(
-          (p) => p.id === newPortfolio.id
-        );
-        if (!alreadyExists) {
-          updatedPortfolios.push(newPortfolio);
-          createdPortfolios.push(newPortfolio.name);
-        }
-
-        // Clean up the flag
-        const cleanAccount = { ...account };
-        delete cleanAccount._needsNewPortfolio;
-        return cleanAccount;
-      }
-
-      if (
-        account.category === "Investments" &&
-        account.portfolioName &&
-        !account.portfolioId
-      ) {
-        // Check if this portfolio name already exists
-        const existingPortfolio = updatedPortfolios.find(
-          (p) => p.name.toLowerCase() === account.portfolioName.toLowerCase()
-        );
-
-        if (existingPortfolio) {
-          // Use existing portfolio
-          return {
-            ...account,
-            portfolioId: existingPortfolio.id,
-            portfolioName: existingPortfolio.name, // Use the exact case from existing
-          };
-        } else {
-          // Create new portfolio
-          const newPortfolio = {
-            id: generatePortfolioId(account.portfolioName),
-            name: account.portfolioName.trim(),
-          };
-          updatedPortfolios.push(newPortfolio);
-          createdPortfolios.push(newPortfolio.name);
-
-          return {
-            ...account,
-            portfolioId: newPortfolio.id,
-            portfolioName: newPortfolio.name,
-          };
-        }
-      }
-
-      // For Investment accounts, ensure portfolioName is set correctly
-      if (account.category === "Investments" && account.portfolioId) {
-        const portfolio = updatedPortfolios.find(
-          (p) => p.id === account.portfolioId
-        );
-        return {
-          ...account,
-          portfolioName:
-            portfolio?.name || account.portfolioName || "Unknown Portfolio",
-        };
-      }
-
-      return account;
-    });
-
-    // FIXED: Clean up empty portfolios and track which ones were removed
-    const removedPortfolios = [];
-    const finalPortfolios = updatedPortfolios.filter((portfolio) => {
-      const hasAccounts = processedAccounts.some(
-        (account) => account.portfolioId === portfolio.id
-      );
-
-      if (!hasAccounts) {
-        // Only track as removed if it's not a newly created empty portfolio
-        if (!createdPortfolios.includes(portfolio.name)) {
-          removedPortfolios.push(portfolio.name);
-        }
-        console.log(`Removing empty portfolio: ${portfolio.name}`);
-        return false;
-      }
-      return true;
-    });
-
-    // Check for account changes that might affect debt payments
-    const accountChanges = detectAccountDebtChanges(
-      originalAccounts,
-      processedAccounts
-    );
-
-    // FIXED: Update goals to unlink removed accounts
-    const updatedGoals = (data.goals || []).map((goal) => {
-      const removedAccountIds = removedAccounts.map((acc) => acc.id);
-      if (removedAccountIds.includes(goal.fundingAccountId)) {
-        return {
-          ...goal,
-          fundingAccountId: null,
-          linkedAccountAmount: 0,
-          useEntireAccount: false,
-        };
-      }
-      return goal;
-    });
-
-    // Update the data with processed accounts and cleaned portfolios
-    const finalData = {
-      ...data,
-      accounts: processedAccounts,
-      portfolios: finalPortfolios,
-      goals: updatedGoals,
-    };
-
-    // FIXED: Only save data once at the end
-    saveData(finalData);
-    exitEditMode();
-
-    // ENHANCED: Build comprehensive success message with detailed removal info
-    let successMessage = "Accounts saved successfully!";
-    let notifications = [];
-
-    // Account changes summary
-    if (addedAccounts > 0) {
-      notifications.push(
-        `• Added ${addedAccounts} new account${addedAccounts > 1 ? "s" : ""}`
-      );
-    }
-    if (modifiedAccounts > 0) {
-      notifications.push(
-        `• Modified ${modifiedAccounts} existing account${
-          modifiedAccounts > 1 ? "s" : ""
-        }`
-      );
-    }
-
-    // FIXED: Detailed removal notifications
-    if (removedAccountDetails.length > 0) {
-      notifications.push(
-        `• Removed ${removedAccountDetails.length} account${
-          removedAccountDetails.length > 1 ? "s" : ""
-        }:`
-      );
-      removedAccountDetails.forEach((details) => {
-        let removalText = `  - ${details.name}`;
-        if (details.impacts.length > 0) {
-          removalText += ` (${details.impacts.join(", ")})`;
-        }
-        notifications.push(removalText);
-      });
-    }
-
-    // Portfolio changes
-    if (createdPortfolios.length > 0) {
-      notifications.push(
-        `• Created ${createdPortfolios.length} new portfolio${
-          createdPortfolios.length > 1 ? "s" : ""
-        }: ${createdPortfolios.join(", ")}`
-      );
-    }
-    if (removedPortfolios.length > 0) {
-      notifications.push(
-        `• Removed ${removedPortfolios.length} empty portfolio${
-          removedPortfolios.length > 1 ? "s" : ""
-        }: ${removedPortfolios.join(", ")}`
-      );
-    }
-
-    // App impacts
-    const impactedApps = [];
-    if (accountChanges.length > 0) {
-      impactedApps.push("Budget (debt payments synced)");
-    }
-    if (createdPortfolios.length > 0 || addedAccounts > 0) {
-      impactedApps.push("Goals (new accounts available for linking)");
-    }
-    if (
-      removedAccountDetails.some((d) =>
-        d.impacts.some((i) => i.includes("goal"))
-      )
-    ) {
-      impactedApps.push("Goals (accounts unlinked)");
-    }
-
-    // Build final message
-    if (notifications.length > 0) {
-      successMessage += "\n\n" + notifications.join("\n");
-    }
-
-    if (impactedApps.length > 0) {
-      successMessage += `\n\nImpacted apps: ${impactedApps.join(", ")}`;
-    }
-
-    // Debt payment changes detail
-    if (accountChanges.length > 0) {
-      const changesSummary = accountChanges
-        .map(
-          (change) =>
-            `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
-        )
-        .join("\n");
-
-      successMessage += `\n\nDebt payment updates:\n${changesSummary}`;
-    }
-
-    showSuccess(successMessage);
-    setOriginalAccounts([]);
-  };
-
-  // Update the handleResetToDemo function to include portfolio restoration
-
-  const handleResetToDemo = () => {
-    const updatedData = {
-      ...data,
-      accounts: DEMO_ACCOUNTS,
-      portfolios: DEMO_PORTFOLIOS,
-    };
-
-    saveData(updatedData);
-    exitEditMode();
-    setOriginalAccounts([]);
-
-    // Show success message with portfolio details
-    const portfolioCount = DEMO_PORTFOLIOS.length;
-    const accountCount = DEMO_ACCOUNTS.length;
-
-    showWarning(
-      `Reset to demo data!\n` +
-        `• ${accountCount} accounts restored\n` +
-        `• ${portfolioCount} portfolios restored\n` +
-        `All custom data has been replaced with demo data.`
-    );
-  };
-
-  // Handle clear all accounts
-  const handleClearAll = () => {
-    // Clear all accounts and unused portfolios
-    const updatedData = {
-      ...data,
-      accounts: [],
-      portfolios: [], // Clear all portfolios when clearing all accounts
-    };
-
-    saveData(updatedData);
-    exitEditMode();
-    setOriginalAccounts([]);
-
-    const clearedAccounts = accounts.length;
-    const clearedPortfolios = portfolios.length;
-
-    showWarning(
-      `Cleared all account data!\n` +
-        `• ${clearedAccounts} accounts removed\n` +
-        `• ${clearedPortfolios} portfolios removed\n` +
-        `All account and portfolio data has been cleared.`
-    );
-  };
-
-  // Update filtering for display - by category instead of portfolio
   const displayAccounts = useMemo(() => {
     const sourceAccounts = editMode ? editRows : accounts;
 
@@ -615,7 +165,351 @@ const OverviewTab = ({ smallApp }) => {
     );
   }, [editMode, editRows, accounts, portfolios, categoryFilter]);
 
-  // Category select menu (use consistent styling)
+  if (!financialDataResult || !data) {
+    return (
+      <div
+        style={{
+          padding: "var(--space-md)",
+          textAlign: "center",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Loading financial data...
+      </div>
+    );
+  }
+
+  const handleEnterEditMode = () => {
+    setOriginalAccounts([...accounts]);
+    enterEditMode();
+  };
+
+  const handleCancelEdit = () => {
+    setOriginalAccounts([]);
+    cancelEdit();
+  };
+
+  const handleSave = () => {
+    if (!editRows || editRows.length === 0) {
+      showInfo("No changes to save");
+      return;
+    }
+
+    let addedAccounts = 0;
+    let modifiedAccounts = 0;
+    let createdPortfolios = [];
+    let removedAccountDetails = [];
+
+    const editRowIds = new Set(editRows.map((acc) => acc.id));
+    const removedAccounts = originalAccounts.filter(
+      (acc) => !editRowIds.has(acc.id)
+    );
+
+    removedAccounts.forEach((removedAccount) => {
+      const details = {
+        name: removedAccount.name,
+        category: removedAccount.category,
+        impacts: [],
+      };
+
+      if (
+        removedAccount.category === "Investments" &&
+        removedAccount.portfolioName
+      ) {
+        details.impacts.push(
+          `removed from ${removedAccount.portfolioName} portfolio`
+        );
+      }
+
+      if (
+        removedAccount.category === "Debt" &&
+        removedAccount.monthlyPayment > 0
+      ) {
+        details.impacts.push(
+          `$${removedAccount.monthlyPayment}/month debt payment removed from budget`
+        );
+      }
+
+      const linkedGoals = (data.goals || []).filter(
+        (goal) => goal.fundingAccountId === removedAccount.id
+      );
+      if (linkedGoals.length > 0) {
+        const goalNames = linkedGoals.map((g) => g.name).join(", ");
+        details.impacts.push(
+          `unlinked from goal${linkedGoals.length > 1 ? "s" : ""}: ${goalNames}`
+        );
+      }
+
+      removedAccountDetails.push(details);
+    });
+
+    const originalAccountIds = new Set(originalAccounts.map((acc) => acc.id));
+
+    editRows.forEach((account) => {
+      const isNewAccount = !originalAccountIds.has(account.id);
+
+      if (isNewAccount) {
+        addedAccounts++;
+      } else {
+        const originalAccount = originalAccounts.find(
+          (orig) => orig.id === account.id
+        );
+        if (originalAccount) {
+          const fieldsToCompare = [
+            "name",
+            "accountProvider",
+            "category",
+            "subType",
+            "taxStatus",
+            "value",
+            "interestRate",
+            "monthlyPayment",
+            "portfolioId",
+            "portfolioName",
+          ];
+
+          const hasChanges = fieldsToCompare.some((field) => {
+            const oldValue = originalAccount[field];
+            const newValue = account[field];
+
+            if (
+              field === "value" ||
+              field === "interestRate" ||
+              field === "monthlyPayment"
+            ) {
+              return parseFloat(oldValue || 0) !== parseFloat(newValue || 0);
+            }
+
+            return oldValue !== newValue;
+          });
+
+          if (hasChanges) {
+            modifiedAccounts++;
+          }
+        }
+      }
+    });
+
+    const updatedPortfolios = [...portfolios];
+    const processedAccounts = editRows.map((account) => {
+      if (account._needsNewPortfolio) {
+        const newPortfolio = {
+          id: account.portfolioId,
+          name: account.portfolioName,
+        };
+
+        const alreadyExists = updatedPortfolios.find(
+          (p) => p.id === newPortfolio.id
+        );
+        if (!alreadyExists) {
+          updatedPortfolios.push(newPortfolio);
+          createdPortfolios.push(newPortfolio.name);
+        }
+
+        const cleanAccount = { ...account };
+        delete cleanAccount._needsNewPortfolio;
+        return cleanAccount;
+      }
+
+      if (
+        account.category === "Investments" &&
+        account.portfolioName &&
+        !account.portfolioId
+      ) {
+        const existingPortfolio = updatedPortfolios.find(
+          (p) => p.name.toLowerCase() === account.portfolioName.toLowerCase()
+        );
+
+        if (existingPortfolio) {
+          return {
+            ...account,
+            portfolioId: existingPortfolio.id,
+            portfolioName: existingPortfolio.name,
+          };
+        } else {
+          const newPortfolio = {
+            id: generatePortfolioId(account.portfolioName),
+            name: account.portfolioName.trim(),
+          };
+          updatedPortfolios.push(newPortfolio);
+          createdPortfolios.push(newPortfolio.name);
+
+          return {
+            ...account,
+            portfolioId: newPortfolio.id,
+            portfolioName: newPortfolio.name,
+          };
+        }
+      }
+
+      if (account.category === "Investments" && account.portfolioId) {
+        const portfolio = updatedPortfolios.find(
+          (p) => p.id === account.portfolioId
+        );
+        return {
+          ...account,
+          portfolioName:
+            portfolio?.name || account.portfolioName || "Unknown Portfolio",
+        };
+      }
+
+      return account;
+    });
+
+    const removedPortfolios = [];
+    const finalPortfolios = updatedPortfolios.filter((portfolio) => {
+      const hasAccounts = processedAccounts.some(
+        (account) => account.portfolioId === portfolio.id
+      );
+
+      if (!hasAccounts) {
+        if (!createdPortfolios.includes(portfolio.name)) {
+          removedPortfolios.push(portfolio.name);
+        }
+        console.log(`Removing empty portfolio: ${portfolio.name}`);
+        return false;
+      }
+      return true;
+    });
+
+    const accountChanges = detectAccountDebtChanges(
+      originalAccounts,
+      processedAccounts
+    );
+
+    const updatedGoals = (data.goals || []).map((goal) => {
+      const removedAccountIds = removedAccounts.map((acc) => acc.id);
+      if (removedAccountIds.includes(goal.fundingAccountId)) {
+        return {
+          ...goal,
+          fundingAccountId: null,
+          linkedAccountAmount: 0,
+          useEntireAccount: false,
+        };
+      }
+      return goal;
+    });
+
+    const finalData = {
+      ...data,
+      accounts: processedAccounts,
+      portfolios: finalPortfolios,
+      goals: updatedGoals,
+    };
+
+    saveData(finalData);
+    exitEditMode();
+
+    let successMessage = "Accounts saved successfully!";
+    let notifications = [];
+
+    if (addedAccounts > 0) {
+      notifications.push(
+        `• Added ${addedAccounts} new account${addedAccounts > 1 ? "s" : ""}`
+      );
+    }
+    if (modifiedAccounts > 0) {
+      notifications.push(
+        `• Modified ${modifiedAccounts} existing account${
+          modifiedAccounts > 1 ? "s" : ""
+        }`
+      );
+    }
+
+    if (removedAccountDetails.length > 0) {
+      notifications.push(
+        `• Removed ${removedAccountDetails.length} account${
+          removedAccountDetails.length > 1 ? "s" : ""
+        }:`
+      );
+      removedAccountDetails.forEach((details) => {
+        let removalText = `  - ${details.name}`;
+        if (details.impacts.length > 0) {
+          removalText += ` (${details.impacts.join(", ")})`;
+        }
+        notifications.push(removalText);
+      });
+    }
+
+    if (createdPortfolios.length > 0) {
+      notifications.push(
+        `• Created ${createdPortfolios.length} new portfolio${
+          createdPortfolios.length > 1 ? "s" : ""
+        }: ${createdPortfolios.join(", ")}`
+      );
+    }
+    if (removedPortfolios.length > 0) {
+      notifications.push(
+        `• Removed ${removedPortfolios.length} empty portfolio${
+          removedPortfolios.length > 1 ? "s" : ""
+        }: ${removedPortfolios.join(", ")}`
+      );
+    }
+
+    const impactedApps = [];
+    if (accountChanges.length > 0) {
+      impactedApps.push("Budget (debt payments synced)");
+    }
+    if (createdPortfolios.length > 0 || addedAccounts > 0) {
+      impactedApps.push("Goals (new accounts available for linking)");
+    }
+    if (
+      removedAccountDetails.some((d) =>
+        d.impacts.some((i) => i.includes("goal"))
+      )
+    ) {
+      impactedApps.push("Goals (accounts unlinked)");
+    }
+
+    if (notifications.length > 0) {
+      successMessage += "\n\n" + notifications.join("\n");
+    }
+
+    if (impactedApps.length > 0) {
+      successMessage += `\n\nImpacted apps: ${impactedApps.join(", ")}`;
+    }
+
+    if (accountChanges.length > 0) {
+      const changesSummary = accountChanges
+        .map(
+          (change) =>
+            `${change.accountName}: $${change.oldAmount} → $${change.newAmount}`
+        )
+        .join("\n");
+
+      successMessage += `\n\nDebt payment updates:\n${changesSummary}`;
+    }
+
+    showSuccess(successMessage);
+    setOriginalAccounts([]);
+  };
+
+  const handleResetToDemo = () => {
+    resetAccountsToDemo();
+    exitEditMode();
+    setOriginalAccounts([]);
+    showWarning(
+      `Reset to demo data!\n` +
+        `• ${DEMO_ACCOUNTS.length} accounts restored\n` +
+        `• ${DEMO_PORTFOLIOS.length} portfolios restored\n` +
+        `All custom data has been replaced with demo data.`
+    );
+  };
+
+  const handleClearAll = () => {
+    const clearedAccounts = accounts.length;
+    const clearedPortfolios = portfolios.length;
+    clearAccountsData();
+    exitEditMode();
+    setOriginalAccounts([]);
+    showWarning(
+      `Cleared all account data!\n` +
+        `• ${clearedAccounts} accounts removed\n` +
+        `• ${clearedPortfolios} portfolios removed\n` +
+        `All account and portfolio data has been cleared.`
+    );
+  };
+
   const categorySelectMenu = (
     <div className={sectionStyles.selectGroup}>
       <label htmlFor="category-select" className={sectionStyles.selectLabel}>
@@ -635,7 +529,6 @@ const OverviewTab = ({ smallApp }) => {
     </div>
   );
 
-  // Calculations for snapshot
   const totalCash = accounts
     .filter((acc) => acc.category === "Cash")
     .reduce((sum, acc) => sum + (acc.value || 0), 0);
@@ -646,7 +539,7 @@ const OverviewTab = ({ smallApp }) => {
     .filter((acc) => acc.category === "Debt")
     .reduce((sum, acc) => sum + (acc.value || 0), 0);
 
-  const netWorth = totalCash + totalInvestments + totalDebt; // debt is negative
+  const netWorth = totalCash + totalInvestments + totalDebt;
 
   const snapshotItems = [
     {
@@ -671,29 +564,19 @@ const OverviewTab = ({ smallApp }) => {
     },
   ];
 
-  const handleNewAccountChange = (e) => {
-    const { name, value } = e.target;
-    setNewAccount((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Update the handleAddAccount function to remove the immediate notification
-
   const handleAddAccount = () => {
     if (!newAccount.name.trim() || !newAccount.accountProvider.trim()) {
       showInfo("Please fill in account name and provider");
       return;
     }
 
-    // FIXED: Process new account for portfolio creation but don't save yet
     let accountToAdd = { ...newAccount };
 
-    // Handle portfolio processing for investments (but don't save portfolios yet)
     if (
       newAccount.category === "Investments" &&
       newAccount.portfolioName &&
       !newAccount.portfolioId
     ) {
-      // Check if portfolio exists
       const existingPortfolio = portfolios.find(
         (p) => p.name.toLowerCase() === newAccount.portfolioName.toLowerCase()
       );
@@ -702,29 +585,22 @@ const OverviewTab = ({ smallApp }) => {
         accountToAdd.portfolioId = existingPortfolio.id;
         accountToAdd.portfolioName = existingPortfolio.name;
       } else {
-        // Mark that a new portfolio needs to be created when saving
         accountToAdd.portfolioId = generatePortfolioId(
           newAccount.portfolioName
         );
         accountToAdd.portfolioName = newAccount.portfolioName.trim();
-        accountToAdd._needsNewPortfolio = true; // Flag for later processing
+        accountToAdd._needsNewPortfolio = true;
       }
     }
 
-    // Generate new account ID
     accountToAdd.id = `acc-${Date.now()}`;
-
-    // Convert string values to numbers where appropriate
     accountToAdd.value = parseFloat(accountToAdd.value) || 0;
     accountToAdd.interestRate = parseFloat(accountToAdd.interestRate) || 0;
     accountToAdd.monthlyPayment = parseFloat(accountToAdd.monthlyPayment) || 0;
 
     addEditRow(accountToAdd);
-
-    // Reset new account form
     setNewAccount({ ...EMPTY_ACCOUNT });
 
-    // Focus on name field for next entry
     if (newAccountNameRef.current) {
       newAccountNameRef.current.focus();
     }
@@ -740,7 +616,6 @@ const OverviewTab = ({ smallApp }) => {
     if (editMode) {
       return (
         <tr key={account.id || index}>
-          {/* Account Name */}
           <td>
             <input
               type="text"
@@ -750,7 +625,6 @@ const OverviewTab = ({ smallApp }) => {
               placeholder="Account name"
             />
           </td>
-          {/* Provider */}
           <td>
             <input
               type="text"
@@ -762,15 +636,12 @@ const OverviewTab = ({ smallApp }) => {
               placeholder="Provider"
             />
           </td>
-          {/* Category */}
           <td>
             <select
               value={editRows[index]?.category || ""}
               onChange={(e) => {
                 updateEditRow(index, "category", e.target.value);
-                // Reset subType when category changes
                 updateEditRow(index, "subType", "");
-                // FIXED: Clear portfolio for non-investment accounts
                 if (e.target.value !== "Investments") {
                   updateEditRow(index, "portfolioId", null);
                   updateEditRow(index, "portfolioName", "");
@@ -785,7 +656,6 @@ const OverviewTab = ({ smallApp }) => {
               ))}
             </select>
           </td>
-          {/* Sub Type */}
           <td>
             <select
               value={editRows[index]?.subType || ""}
@@ -802,7 +672,6 @@ const OverviewTab = ({ smallApp }) => {
               )}
             </select>
           </td>
-          {/* Tax Status */}
           <td>
             <select
               value={editRows[index]?.taxStatus || ""}
@@ -818,7 +687,6 @@ const OverviewTab = ({ smallApp }) => {
               ))}
             </select>
           </td>
-          {/* Portfolio */}
           <td>
             {editRows[index]?.category === "Investments" ? (
               <input
@@ -834,7 +702,6 @@ const OverviewTab = ({ smallApp }) => {
               <span className={tableStyles.mutedText}>N/A</span>
             )}
           </td>
-          {/* Monthly Payment */}
           <td>
             {editRows[index]?.category === "Debt" ? (
               <input
@@ -856,7 +723,6 @@ const OverviewTab = ({ smallApp }) => {
               <span className={tableStyles.mutedText}>N/A</span>
             )}
           </td>
-          {/* Interest Rate */}
           <td>
             {editRows[index]?.category === "Debt" ||
             editRows[index]?.category === "Cash" ? (
@@ -879,7 +745,6 @@ const OverviewTab = ({ smallApp }) => {
               <span className={tableStyles.mutedText}>N/A</span>
             )}
           </td>
-          {/* Balance - FIXED: Disable for Investment accounts */}
           <td className={tableStyles.alignRight}>
             {editRows[index]?.category === "Investments" ? (
               <span
@@ -908,7 +773,6 @@ const OverviewTab = ({ smallApp }) => {
               />
             )}
           </td>
-          {/* Actions */}
           <td className={tableStyles.alignCenter}>
             <button
               onClick={() => handleRemoveAccount(index)}
@@ -923,26 +787,22 @@ const OverviewTab = ({ smallApp }) => {
       );
     }
 
-    // View mode - show calculated balance for investments
     return (
-      <tr key={account.id || index}>
-        {/* Account Name */}
+      <tr
+        key={account.id || index}
+        onClick={() => onAccountClick(account.id)}
+        style={{ cursor: "pointer" }}
+      >
         <td>{account.name}</td>
-        {/* Provider */}
         <td>{account.accountProvider}</td>
-        {/* Category */}
         <td>{account.category}</td>
-        {/* Type */}
         <td>{account.subType}</td>
-        {/* Tax Status */}
         <td>{account.taxStatus}</td>
-        {/* Portfolio */}
         <td className={tableStyles.mutedText}>
           {account.category === "Investments"
             ? account.portfolioName || "None"
             : "N/A"}
         </td>
-        {/* Monthly Payment - FIXED: Only show for debt accounts */}
         <td className={tableStyles.alignRight}>
           {account.category === "Debt" && account.monthlyPayment ? (
             `$${account.monthlyPayment.toLocaleString()}`
@@ -952,7 +812,6 @@ const OverviewTab = ({ smallApp }) => {
             <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
-        {/* Interest Rate - FIXED: Only show for applicable account types */}
         <td className={tableStyles.alignRight}>
           {(account.category === "Debt" ||
             (account.category === "Cash" &&
@@ -963,7 +822,6 @@ const OverviewTab = ({ smallApp }) => {
             <span className={tableStyles.mutedText}>N/A</span>
           )}
         </td>
-        {/* Balance */}
         <td className={tableStyles.alignRight}>
           <span
             className={
@@ -979,7 +837,6 @@ const OverviewTab = ({ smallApp }) => {
     );
   };
 
-  // FIXED: Update new account row to also follow the same conditional logic
   const newAccountRow = editMode ? (
     <tr
       style={{
@@ -987,7 +844,6 @@ const OverviewTab = ({ smallApp }) => {
         borderTop: "2px solid var(--border-light)",
       }}
     >
-      {/* Account Name */}
       <td>
         <input
           ref={newAccountNameRef}
@@ -1000,7 +856,6 @@ const OverviewTab = ({ smallApp }) => {
           placeholder="Account name"
         />
       </td>
-      {/* Provider */}
       <td>
         <input
           type="text"
@@ -1015,7 +870,6 @@ const OverviewTab = ({ smallApp }) => {
           placeholder="Provider"
         />
       </td>
-      {/* Category */}
       <td>
         <select
           value={newAccount.category}
@@ -1023,10 +877,10 @@ const OverviewTab = ({ smallApp }) => {
             setNewAccount((prev) => ({
               ...prev,
               category: e.target.value,
-              subType: "", // Reset subType when category changes
+              subType: "",
               portfolioId: e.target.value === "Investments" ? null : null,
               portfolioName: e.target.value === "Investments" ? "" : "",
-              value: e.target.value === "Investments" ? 0 : "", // Set value to 0 for investments
+              value: e.target.value === "Investments" ? 0 : "",
             }));
           }}
           className={tableStyles.tableSelect}
@@ -1038,7 +892,6 @@ const OverviewTab = ({ smallApp }) => {
           ))}
         </select>
       </td>
-      {/* Sub Type */}
       <td>
         <select
           value={newAccount.subType}
@@ -1055,7 +908,6 @@ const OverviewTab = ({ smallApp }) => {
           ))}
         </select>
       </td>
-      {/* Tax Status */}
       <td>
         <select
           value={newAccount.taxStatus}
@@ -1071,7 +923,6 @@ const OverviewTab = ({ smallApp }) => {
           ))}
         </select>
       </td>
-      {/* Portfolio */}
       <td>
         {newAccount.category === "Investments" ? (
           <input
@@ -1090,7 +941,6 @@ const OverviewTab = ({ smallApp }) => {
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      {/* Monthly Payment */}
       <td>
         {newAccount.category === "Debt" ? (
           <input
@@ -1111,7 +961,6 @@ const OverviewTab = ({ smallApp }) => {
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      {/* Interest Rate */}
       <td>
         {newAccount.category === "Debt" || newAccount.category === "Cash" ? (
           <input
@@ -1132,7 +981,6 @@ const OverviewTab = ({ smallApp }) => {
           <span className={tableStyles.mutedText}>N/A</span>
         )}
       </td>
-      {/* Balance - FIXED: Disable for Investment accounts */}
       <td className={tableStyles.alignRight}>
         {newAccount.category === "Investments" ? (
           <span
@@ -1154,7 +1002,6 @@ const OverviewTab = ({ smallApp }) => {
           />
         )}
       </td>
-      {/* Actions */}
       <td className={tableStyles.alignCenter}>
         <button
           onClick={handleAddAccount}
@@ -1174,7 +1021,6 @@ const OverviewTab = ({ smallApp }) => {
     </tr>
   ) : null;
 
-  // FIXED: Define columns based on edit mode
   const columns = editMode ? editColumns : viewColumns;
 
   return (
@@ -1195,7 +1041,6 @@ const OverviewTab = ({ smallApp }) => {
           </div>
         }
       >
-        {/* MOVED: Control panel now appears AFTER the table */}
         <Table
           columns={columns}
           data={displayAccounts}
@@ -1207,7 +1052,6 @@ const OverviewTab = ({ smallApp }) => {
           className={tableStyles.accountsTable}
         />
 
-        {/* FIXED: Control panel moved to bottom and only shows in edit mode */}
         {editMode && (
           <div
             style={{
@@ -1246,7 +1090,6 @@ const OverviewTab = ({ smallApp }) => {
         )}
       </Section>
 
-      {/* Account Change Notifications Modal */}
       {activeNotification && (
         <AccountGoalUpdateModal
           notification={activeNotification}
@@ -1261,7 +1104,6 @@ const OverviewTab = ({ smallApp }) => {
             setActiveNotification(null);
           }}
           onOpenPlanApp={() => {
-            // Handle opening plan app if needed
             console.log("Open plan app requested");
           }}
         />

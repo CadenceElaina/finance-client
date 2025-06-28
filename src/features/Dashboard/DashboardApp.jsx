@@ -1,13 +1,9 @@
 import React, { Suspense } from "react";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-
-// Import components directly (not lazy for now to fix the immediate issue)
 import Accounts from "./Apps/Accounts/Accounts";
 import Assistant from "./Apps/Assistant";
 import Budget from "./Apps/Budget/Budget";
-import Debt from "./Apps/Debt";
-import Education from "./Apps/Education";
 import Goals from "./Apps/Goals/Goals";
 import Plan from "./Apps/Plan/Plan";
 import Settings from "./Apps/Settings";
@@ -30,8 +26,6 @@ const components = {
   accounts: Accounts,
   assistant: Assistant,
   budget: Budget,
-  debt: Debt,
-  education: Education,
   goals: Goals,
   plan: Plan,
   settings: Settings,

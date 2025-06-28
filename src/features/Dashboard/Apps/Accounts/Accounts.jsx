@@ -6,6 +6,7 @@ import Tabs from "../../../../components/ui/Tabs/Tabs";
 import OverviewTab from "./Overview/OverviewTab";
 import PortfoliosWrapper from "./PortfoliosWrapper";
 import DebtTab from "./Debt/DebtTab";
+import TransactionsTab from "./Transactions/TransactionsTab";
 import accountsStyles from "./Accounts.module.css";
 
 const Accounts = React.memo(() => {
@@ -13,6 +14,7 @@ const Accounts = React.memo(() => {
   const containerRef = useAppSizeRef(appId);
   const appSize = useAppSize(appId);
   const [activeTabId, setActiveTabId] = useState("overview");
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
 
   // Memoize size-dependent values
   const sizeClasses = useMemo(() => getAppSizeClasses(appSize), [appSize]);
@@ -46,7 +48,13 @@ const Accounts = React.memo(() => {
         id: "overview",
         label: "Overview",
         component: ({ smallApp: flexTabsSmallApp }) => (
-          <OverviewTab smallApp={flexTabsSmallApp} />
+          <OverviewTab
+            smallApp={flexTabsSmallApp}
+            onAccountClick={(accountId) => {
+              setSelectedAccountId(accountId);
+              setActiveTabId("transactions");
+            }}
+          />
         ),
       },
       {
@@ -81,8 +89,18 @@ const Accounts = React.memo(() => {
           />
         ),
       },
+      {
+        id: "transactions",
+        label: "Transactions",
+        component: ({ smallApp: flexTabsSmallApp }) => (
+          <TransactionsTab
+            smallApp={flexTabsSmallApp}
+            accountId={selectedAccountId}
+          />
+        ),
+      },
     ],
-    []
+    [selectedAccountId]
   );
 
   return (

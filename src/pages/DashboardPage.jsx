@@ -16,8 +16,6 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 const appsList = [
   { id: "accounts", name: "My Accounts" },
   { id: "budget", name: "Budget" },
-  { id: "debt", name: "Debt" },
-  { id: "education", name: "Education Center" },
   { id: "settings", name: "Settings" },
   { id: "plan", name: "Plan" },
   { id: "goals", name: "Goals" },
