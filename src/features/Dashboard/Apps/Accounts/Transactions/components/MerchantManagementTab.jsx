@@ -1,34 +1,38 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
   getAllCustomMerchantNames,
   setCustomMerchantName,
   removeCustomMerchantName,
   getMerchantNameSuggestions,
-} from '../utils/customMerchantNames';
+} from "../utils/customMerchantNames";
 import {
   getAllMerchantsWithDefaults,
   createNamedDefault,
   removeNamedDefault,
-} from '../utils/merchantHistory';
-import Section from '../../../../../../components/ui/Section/Section';
-import Button from '../../../../../../components/ui/Button/Button';
-import styles from './MerchantManagementTab.module.css';
+} from "../utils/merchantHistory";
+import Section from "../../../../../../components/ui/Section/Section";
+import Button from "../../../../../../components/ui/Button/Button";
+import styles from "./MerchantManagementTab.module.css";
 
 const MerchantManagementTab = () => {
-  const [customMerchants, setCustomMerchants] = useState(() => getAllCustomMerchantNames());
-  const [merchantsWithDefaults, setMerchantsWithDefaults] = useState(() => getAllMerchantsWithDefaults());
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('custom-names');
-  
+  const [customMerchants, setCustomMerchants] = useState(() =>
+    getAllCustomMerchantNames()
+  );
+  const [merchantsWithDefaults, setMerchantsWithDefaults] = useState(() =>
+    getAllMerchantsWithDefaults()
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("custom-names");
+
   // New merchant creation
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newMerchant, setNewMerchant] = useState({
-    rawMerchant: '',
-    location: '',
-    customName: '',
-    category: '',
-    subcategory: '',
-    notes: ''
+    rawMerchant: "",
+    location: "",
+    customName: "",
+    category: "",
+    subcategory: "",
+    notes: "",
   });
 
   const refreshData = () => {
@@ -38,47 +42,57 @@ const MerchantManagementTab = () => {
 
   const handleCreateMerchant = () => {
     if (!newMerchant.rawMerchant.trim() || !newMerchant.customName.trim()) {
-      alert('Please provide both a raw merchant name and custom name');
+      alert("Please provide both a raw merchant name and custom name");
       return;
     }
 
     // Set custom merchant name
-    setCustomMerchantName(newMerchant.rawMerchant, newMerchant.location, newMerchant.customName);
+    setCustomMerchantName(
+      newMerchant.rawMerchant,
+      newMerchant.location,
+      newMerchant.customName
+    );
 
     // If category is provided, create a default
     if (newMerchant.category) {
       createNamedDefault(
-        newMerchant.customName, 
-        'Default', 
+        newMerchant.customName,
+        "Default",
         newMerchant.category,
-        newMerchant.subcategory || '',
-        newMerchant.notes || '',
-        'expense'
+        newMerchant.subcategory || "",
+        newMerchant.notes || "",
+        "expense"
       );
     }
 
     // Reset form
     setNewMerchant({
-      rawMerchant: '',
-      location: '',
-      customName: '',
-      category: '',
-      subcategory: '',
-      notes: ''
+      rawMerchant: "",
+      location: "",
+      customName: "",
+      category: "",
+      subcategory: "",
+      notes: "",
     });
     setShowCreateForm(false);
     refreshData();
   };
 
   const handleRemoveCustomName = (merchant) => {
-    if (window.confirm(`Remove custom name "${merchant.customName}" for this merchant?`)) {
+    if (
+      window.confirm(
+        `Remove custom name "${merchant.customName}" for this merchant?`
+      )
+    ) {
       removeCustomMerchantName(merchant.rawMerchant, merchant.location);
       refreshData();
     }
   };
 
   const handleRemoveDefault = (merchantName, defaultName) => {
-    if (window.confirm(`Remove default "${defaultName}" for ${merchantName}?`)) {
+    if (
+      window.confirm(`Remove default "${defaultName}" for ${merchantName}?`)
+    ) {
       removeNamedDefault(merchantName, defaultName);
       refreshData();
     }
@@ -87,16 +101,17 @@ const MerchantManagementTab = () => {
   const filteredCustomMerchants = useMemo(() => {
     if (!searchTerm) return customMerchants;
     const term = searchTerm.toLowerCase();
-    return customMerchants.filter(merchant =>
-      merchant.customName.toLowerCase().includes(term) ||
-      merchant.rawMerchant.toLowerCase().includes(term)
+    return customMerchants.filter(
+      (merchant) =>
+        merchant.customName.toLowerCase().includes(term) ||
+        merchant.rawMerchant.toLowerCase().includes(term)
     );
   }, [customMerchants, searchTerm]);
 
   const filteredMerchantsWithDefaults = useMemo(() => {
     if (!searchTerm) return merchantsWithDefaults;
     const term = searchTerm.toLowerCase();
-    return merchantsWithDefaults.filter(merchant =>
+    return merchantsWithDefaults.filter((merchant) =>
       merchant.merchantName.toLowerCase().includes(term)
     );
   }, [merchantsWithDefaults, searchTerm]);
@@ -138,23 +153,35 @@ const MerchantManagementTab = () => {
                 <input
                   type="text"
                   value={newMerchant.rawMerchant}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, rawMerchant: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      rawMerchant: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., WALMART SUPERCENTER #1234 CHARLOTTE NC"
                   className={styles.input}
                 />
                 {newMerchant.rawMerchant && (
                   <div className={styles.suggestions}>
                     <span>Suggestions: </span>
-                    {getSuggestions(newMerchant.rawMerchant).map((suggestion, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setNewMerchant(prev => ({ ...prev, customName: suggestion }))}
-                        className={styles.suggestionButton}
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
+                    {getSuggestions(newMerchant.rawMerchant).map(
+                      (suggestion, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() =>
+                            setNewMerchant((prev) => ({
+                              ...prev,
+                              customName: suggestion,
+                            }))
+                          }
+                          className={styles.suggestionButton}
+                        >
+                          {suggestion}
+                        </button>
+                      )
+                    )}
                   </div>
                 )}
               </div>
@@ -164,7 +191,12 @@ const MerchantManagementTab = () => {
                 <input
                   type="text"
                   value={newMerchant.location}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, location: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      location: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., Charlotte, NC"
                   className={styles.input}
                 />
@@ -175,7 +207,12 @@ const MerchantManagementTab = () => {
                 <input
                   type="text"
                   value={newMerchant.customName}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, customName: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      customName: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., Walmart"
                   className={styles.input}
                 />
@@ -185,7 +222,12 @@ const MerchantManagementTab = () => {
                 <label>Default Category (optional):</label>
                 <select
                   value={newMerchant.category}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, category: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
                   className={styles.select}
                 >
                   <option value="">-- Select Category --</option>
@@ -208,7 +250,12 @@ const MerchantManagementTab = () => {
                 <input
                   type="text"
                   value={newMerchant.subcategory}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, subcategory: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      subcategory: e.target.value,
+                    }))
+                  }
                   placeholder="e.g., Groceries, Fast Food, etc."
                   className={styles.input}
                 />
@@ -219,7 +266,12 @@ const MerchantManagementTab = () => {
                 <input
                   type="text"
                   value={newMerchant.notes}
-                  onChange={(e) => setNewMerchant(prev => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) =>
+                    setNewMerchant((prev) => ({
+                      ...prev,
+                      notes: e.target.value,
+                    }))
+                  }
                   placeholder="Any additional notes"
                   className={styles.input}
                 />
@@ -230,7 +282,10 @@ const MerchantManagementTab = () => {
               <Button variant="primary" onClick={handleCreateMerchant}>
                 Create Merchant
               </Button>
-              <Button variant="secondary" onClick={() => setShowCreateForm(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowCreateForm(false)}
+              >
                 Cancel
               </Button>
             </div>
@@ -240,14 +295,18 @@ const MerchantManagementTab = () => {
         {/* Tabs for Different Views */}
         <div className={styles.tabs}>
           <button
-            className={`${styles.tab} ${activeTab === 'custom-names' ? styles.active : ''}`}
-            onClick={() => setActiveTab('custom-names')}
+            className={`${styles.tab} ${
+              activeTab === "custom-names" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("custom-names")}
           >
             Custom Names ({filteredCustomMerchants.length})
           </button>
           <button
-            className={`${styles.tab} ${activeTab === 'defaults' ? styles.active : ''}`}
-            onClick={() => setActiveTab('defaults')}
+            className={`${styles.tab} ${
+              activeTab === "defaults" ? styles.active : ""
+            }`}
+            onClick={() => setActiveTab("defaults")}
           >
             Named Defaults ({filteredMerchantsWithDefaults.length})
           </button>
@@ -255,11 +314,12 @@ const MerchantManagementTab = () => {
 
         {/* Tab Content */}
         <div className={styles.tabContent}>
-          {activeTab === 'custom-names' && (
+          {activeTab === "custom-names" && (
             <div className={styles.merchantsList}>
               <h4>Custom Merchant Names</h4>
               <p className={styles.description}>
-                These are custom names you've assigned to raw merchant data from CSV imports.
+                These are custom names you've assigned to raw merchant data from
+                CSV imports.
               </p>
               {filteredCustomMerchants.length === 0 ? (
                 <div className={styles.emptyState}>
@@ -270,7 +330,9 @@ const MerchantManagementTab = () => {
                 filteredCustomMerchants.map((merchant) => (
                   <div key={merchant.key} className={styles.merchantItem}>
                     <div className={styles.merchantInfo}>
-                      <div className={styles.customName}>{merchant.customName}</div>
+                      <div className={styles.customName}>
+                        {merchant.customName}
+                      </div>
                       <div className={styles.rawMerchant}>
                         Raw: {merchant.rawMerchant}
                         {merchant.location && ` (${merchant.location})`}
@@ -278,7 +340,11 @@ const MerchantManagementTab = () => {
                       <div className={styles.stats}>
                         Used {merchant.usageCount || 0} times
                         {merchant.lastUsed && (
-                          <span> • Last used: {new Date(merchant.lastUsed).toLocaleDateString()}</span>
+                          <span>
+                            {" "}
+                            • Last used:{" "}
+                            {new Date(merchant.lastUsed).toLocaleDateString()}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -297,33 +363,54 @@ const MerchantManagementTab = () => {
             </div>
           )}
 
-          {activeTab === 'defaults' && (
+          {activeTab === "defaults" && (
             <div className={styles.merchantsList}>
               <h4>Named Defaults</h4>
               <p className={styles.description}>
-                Merchants with saved categorization defaults for faster transaction processing.
+                Merchants with saved categorization defaults for faster
+                transaction processing.
               </p>
               {filteredMerchantsWithDefaults.length === 0 ? (
                 <div className={styles.emptyState}>
                   <p>No merchant defaults found.</p>
-                  <p>Defaults are created when you categorize transactions during import.</p>
+                  <p>
+                    Defaults are created when you categorize transactions during
+                    import.
+                  </p>
                 </div>
               ) : (
                 filteredMerchantsWithDefaults.map((merchant) => (
-                  <div key={merchant.merchantName} className={styles.merchantItem}>
+                  <div
+                    key={merchant.merchantName}
+                    className={styles.merchantItem}
+                  >
                     <div className={styles.merchantInfo}>
-                      <div className={styles.merchantName}>{merchant.merchantName}</div>
+                      <div className={styles.merchantName}>
+                        {merchant.merchantName}
+                      </div>
                       <div className={styles.defaults}>
                         {merchant.defaults.map((defaultItem) => (
-                          <div key={defaultItem.name} className={styles.defaultItem}>
-                            <strong>{defaultItem.name}:</strong> {defaultItem.category}
-                            {defaultItem.subcategory && ` > ${defaultItem.subcategory}`}
+                          <div
+                            key={defaultItem.name}
+                            className={styles.defaultItem}
+                          >
+                            <strong>{defaultItem.name}:</strong>{" "}
+                            {defaultItem.category}
+                            {defaultItem.subcategory &&
+                              ` > ${defaultItem.subcategory}`}
                             {defaultItem.notes && (
-                              <div className={styles.notes}>Notes: {defaultItem.notes}</div>
+                              <div className={styles.notes}>
+                                Notes: {defaultItem.notes}
+                              </div>
                             )}
                             <Button
                               variant="danger"
-                              onClick={() => handleRemoveDefault(merchant.merchantName, defaultItem.name)}
+                              onClick={() =>
+                                handleRemoveDefault(
+                                  merchant.merchantName,
+                                  defaultItem.name
+                                )
+                              }
                               className={styles.removeDefaultButton}
                             >
                               Remove
