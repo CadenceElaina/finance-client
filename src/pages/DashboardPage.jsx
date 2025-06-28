@@ -10,6 +10,8 @@ import DashboardApp from "../features/Dashboard/DashboardApp";
 import GridItemWrapper from "../features/Dashboard/GridItemWrapper";
 import AppOrbLauncher from "../features/Dashboard/AppMenu/AppOrbLauncher";
 import { AppSizeProvider } from "../contexts/AppSizeContext";
+import TransactionImportModal from "../features/Dashboard/Apps/Accounts/Transactions/TransactionImportModal";
+import { useFinancialData } from "../contexts/FinancialDataContext";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -61,6 +63,9 @@ const DashboardPage = ({ userData }) => {
   const [openAppIds, setOpenAppIds] = useState([...initialAppIds]);
   const [selectedAppId, setSelectedAppId] = useState(null);
   const appRefs = useRef({});
+  const { data, saveData } = useFinancialData();
+  const [isTransactionImportModalOpen, setIsTransactionImportModalOpen] =
+    useState(false);
 
   const closeApp = (id) => {
     setOpenAppIds((prevIds) => prevIds.filter((appId) => appId !== id));
@@ -105,6 +110,15 @@ const DashboardPage = ({ userData }) => {
 
   const onLayoutChange = (currentLayout, allLayouts) => {
     setLayouts(allLayouts);
+  };
+
+  const openTransactionImportModal = () =>
+    setIsTransactionImportModalOpen(true);
+
+  const handleImportTransactions = (importedTransactions) => {
+    const updated = [...(data.transactions || []), ...importedTransactions];
+    saveData({ ...data, transactions: updated });
+    setIsTransactionImportModalOpen(false);
   };
 
   //Handle keyboard shortcuts for app management
@@ -254,6 +268,7 @@ const DashboardPage = ({ userData }) => {
                   userData={userData}
                   closeApp={closeApp}
                   isSelected={isSelected}
+                  openTransactionImportModal={openTransactionImportModal}
                 />
               </GridItemWrapper>
             );
@@ -264,6 +279,11 @@ const DashboardPage = ({ userData }) => {
         appsList={appsList}
         openApp={openApp}
         openAppIds={openAppIds}
+      />
+      <TransactionImportModal
+        isOpen={isTransactionImportModalOpen}
+        onClose={() => setIsTransactionImportModalOpen(false)}
+        onImport={handleImportTransactions}
       />
     </AppSizeProvider>
   );

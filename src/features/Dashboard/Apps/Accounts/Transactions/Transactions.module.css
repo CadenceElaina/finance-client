@@ -56,3 +56,188 @@
   gap: 10px;
   margin-top: 20px;
 }
+
+.reviewContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 700px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.reviewHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.reviewProgress {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.progressBar {
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progressFill {
+  height: 8px;
+  background: var(--primary, #4caf50);
+  transition: width 0.3s;
+}
+.progressText {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.reviewActions {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.reviewGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 400px) minmax(0, 180px);
+  gap: 32px;
+  max-height: 520px;
+  overflow-y: auto;
+  background: var(--surface-dark, #f0f2f5);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
+  padding: 18px;
+}
+
+.toReviewPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reviewSectionTitle {
+  margin: 8px 0;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.reviewEmptyText {
+  color: #888;
+  font-style: italic;
+  margin-top: 32px;
+}
+
+.transactionReviewItem {
+  margin-bottom: 18px;
+  border: 1px solid var(--surface-dark, #e0e4ea);
+  border-radius: 10px;
+  padding: 0;
+  background: var(--surface-light, #f8fafc);
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.transactionReviewItem.approved {
+  border: 1px solid var(--surface-dark, #e0f7e9);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: var(--surface-light, #f6fffa);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  min-width: 0;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);
+  width: 160px;
+}
+
+.reviewTablesRow {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+}
+
+.reviewTableTitle {
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.reviewTable {
+  font-size: 13px;
+  width: 100%;
+  background: none;
+}
+
+.reviewArrow {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0 8px;
+  font-size: 28px;
+  color: var(--primary, #4caf50);
+  font-weight: 700;
+  text-align: center;
+}
+
+.reviewApproveBtnRow {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 10px 0;
+}
+
+.approvedPanel {
+  min-width: 0;
+}
+
+.approvedList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.approvedText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.approvedAmount {
+  color: #888;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+.reviewFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .reviewContainer, .reviewGrid {
+    min-width: 0;
+    width: 98vw;
+    max-width: 100vw;
+    padding: 8px 2px;
+  }
+  .transactionReviewItem {
+    width: 98vw;
+    min-width: 0;
+  }
+}

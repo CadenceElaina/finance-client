@@ -5,7 +5,10 @@ import TransactionsTable from "./TransactionsTable";
 import { getColumnDefinitions } from "./utils/columnDefinitions";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 
-const TransactionsTab = ({ accountId: initialAccountId }) => {
+const TransactionsTab = ({
+  accountId: initialAccountId,
+  openTransactionImportModal,
+}) => {
   const { data, saveData } = useFinancialData();
   const { accounts, transactions = [] } = data;
   const [selectedAccountId, setSelectedAccountId] = useState(
@@ -40,27 +43,19 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
       <div className={styles.header}>
         <h2>Transactions</h2>
         <div className={styles.controls}>
-          <select
-            value={selectedAccountId}
-            onChange={(e) => setSelectedAccountId(e.target.value)}
-            className={styles.accountSelector}
-          >
-            <option value="all">All Accounts</option>
-            {accounts?.map((acc) => (
-              <option key={acc.id} value={acc.id}>
-                {acc.name}
-              </option>
-            ))}
-          </select>
           <TransactionForm
             onSubmit={handleAddTransaction}
             initialAccountId={selectedAccountId}
+            openTransactionImportModal={openTransactionImportModal}
           />
         </div>
       </div>
       <TransactionsTable
         transactions={filteredTransactions}
         columns={columns}
+        accounts={accounts}
+        selectedAccountId={selectedAccountId}
+        onAccountChange={setSelectedAccountId}
       />
     </div>
   );

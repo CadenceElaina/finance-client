@@ -5,7 +5,11 @@ import Modal from "../../../../../components/ui/Modal/Modal";
 import Button from "../../../../../components/ui/Button/Button";
 import styles from "./Transactions.module.css";
 
-const TransactionForm = ({ onSubmit, initialAccountId }) => {
+const TransactionForm = ({
+  onSubmit,
+  initialAccountId,
+  openTransactionImportModal,
+}) => {
   const { data } = useFinancialData();
   const accounts = data?.accounts || [];
 
@@ -59,6 +63,13 @@ const TransactionForm = ({ onSubmit, initialAccountId }) => {
   return (
     <>
       <Button onClick={() => setIsModalOpen(true)}>Add Transaction</Button>
+      <Button
+        onClick={openTransactionImportModal}
+        variant="secondary"
+        style={{ marginLeft: 8 }}
+      >
+        Import Transactions
+      </Button>
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

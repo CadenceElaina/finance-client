@@ -7,6 +7,7 @@ import Budget from "./Apps/Budget/Budget";
 import Goals from "./Apps/Goals/Goals";
 import Plan from "./Apps/Plan/Plan";
 import Settings from "./Apps/Settings";
+import { useFinancialData } from "../../contexts/FinancialDataContext";
 
 const LoadingSpinner = () => (
   <div

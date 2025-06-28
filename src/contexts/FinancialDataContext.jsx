@@ -65,6 +65,29 @@ const LoadingComponent = () => (
   </div>
 );
 
+// Utility: normalize a transaction to full schema
+const normalizeTransaction = (tx) => ({
+  transaction_id: tx.transaction_id || tx.id || Date.now(),
+  account_id: tx.account_id || tx.accountId || "",
+  transaction_date: tx.transaction_date || tx.date || "",
+  amount:
+    typeof tx.amount === "number" ? tx.amount : parseFloat(tx.amount) || 0,
+  description: tx.description || "",
+  category_id: tx.category_id || tx.category || "",
+  type: tx.type || "",
+  merchant_name: tx.merchant_name || "",
+  original_description: tx.original_description || "",
+  is_recurring: typeof tx.is_recurring === "boolean" ? tx.is_recurring : false,
+  notes: tx.notes || "",
+  tags: Array.isArray(tx.tags) ? tx.tags : [],
+  created_at: tx.created_at || new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+});
+
+// Utility: normalize all transactions in a list
+const normalizeTransactions = (txs) =>
+  Array.isArray(txs) ? txs.map(normalizeTransaction) : [];
+
 export const FinancialDataProvider = ({ children }) => {
   const { user, token } = useAuth();
   const { showNotification } = useToast();
@@ -222,6 +245,7 @@ export const FinancialDataProvider = ({ children }) => {
         budget: loadedData.budget || DEFAULT_DEMO_BUDGET,
         portfolios: loadedData.portfolios || DEMO_PORTFOLIOS,
         goals: loadedData.goals || [],
+        transactions: normalizeTransactions(loadedData.transactions),
       };
 
       const accountsWithBaseCash = ensureBaseCashAccount(
@@ -246,6 +270,7 @@ export const FinancialDataProvider = ({ children }) => {
           ...enrichedBudget,
           monthlyExpenses: initialExpenses,
         },
+        transactions: normalizeTransactions(normalizedData.transactions),
       };
 
       setData(enrichedAndSyncedData);
@@ -260,6 +285,7 @@ export const FinancialDataProvider = ({ children }) => {
         budget: enrichBudgetWithCalculations(DEFAULT_DEMO_BUDGET),
         portfolios: DEMO_PORTFOLIOS,
         goals: [],
+        transactions: [],
       };
 
       // Ensure fallback expenses include debt payments from demo accounts
@@ -452,6 +478,7 @@ export const FinancialDataProvider = ({ children }) => {
         const dataToSet = {
           ...finalSyncedData,
           budget: enrichedBudget,
+          transactions: normalizeTransactions(newData.transactions),
         };
 
         // Update previous account values for goal tracking

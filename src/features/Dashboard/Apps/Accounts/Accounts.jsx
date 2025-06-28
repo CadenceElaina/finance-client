@@ -7,14 +7,19 @@ import OverviewTab from "./Overview/OverviewTab";
 import PortfoliosWrapper from "./PortfoliosWrapper";
 import DebtTab from "./Debt/DebtTab";
 import TransactionsTab from "./Transactions/TransactionsTab";
+import TransactionImportModal from "./Transactions/TransactionImportModal";
 import accountsStyles from "./Accounts.module.css";
+
+import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 
 const Accounts = React.memo(() => {
   const appId = "accounts";
+  const { data, saveData } = useFinancialData();
   const containerRef = useAppSizeRef(appId);
   const appSize = useAppSize(appId);
   const [activeTabId, setActiveTabId] = useState("overview");
   const [selectedAccountId, setSelectedAccountId] = useState(null);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   // Memoize size-dependent values
   const sizeClasses = useMemo(() => getAppSizeClasses(appSize), [appSize]);
@@ -96,6 +101,7 @@ const Accounts = React.memo(() => {
           <TransactionsTab
             smallApp={flexTabsSmallApp}
             accountId={selectedAccountId}
+            openTransactionImportModal={() => setImportModalOpen(true)}
           />
         ),
       },
@@ -114,6 +120,19 @@ const Accounts = React.memo(() => {
         className={tabsClassName}
         contentClassName={accountsStyles.accountsTabContent}
         alwaysShowInnerTabsAsRow={true}
+      />
+      <TransactionImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onImport={(importedTransactions) => {
+          const newTransactions = [
+            ...(data.transactions || []),
+            ...importedTransactions,
+          ];
+          saveData({ ...data, transactions: newTransactions });
+          setImportModalOpen(false);
+        }}
+        accounts={data?.accounts}
       />
     </div>
   );

@@ -1,11 +1,12 @@
 import React from "react";
+import ReactDOM from "react-dom";
 import styles from "./Modal.module.css";
 import Button from "../Button/Button";
 
 const Modal = ({ isOpen, onClose, title, children, footer }) => {
   if (!isOpen) return null;
 
-  return (
+  return ReactDOM.createPortal(
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
@@ -21,7 +22,8 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
         <div className={styles.modalContent}>{children}</div>
         {footer && <div className={styles.modalFooter}>{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
