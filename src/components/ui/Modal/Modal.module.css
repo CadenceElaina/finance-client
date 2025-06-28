@@ -17,16 +17,14 @@
   background: var(--surface-light, #f5f7fa);
   padding: 32px 24px;
   border-radius: 16px;
-  min-width: 700px;
-  max-width: 960px;
-  width: 90vw;
+  width: 75%;
+  height: 90%;
+  max-height: 95vh;
   box-shadow: 0 2px 24px 0 rgba(0,0,0,0.10);
   transition: background 0.2s;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  overflow: auto;
+  overflow-y: auto;
 }
 
 @media (max-width: 900px) {

@@ -1,224 +1,590 @@
 .transactionsContainer {
-  padding: 20px;
+  padding: var(--space-lg);
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius-md);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-md);
+}
+
+.header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
 }
 
 .controls {
   display: flex;
-  gap: 10px;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.storageIndicator {
+  display: flex;
+  align-items: center;
+  margin-right: var(--space-xs);
+}
+
+.storageStatus {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.storageStatus.server {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+}
+
+.storageStatus.local {
+  background-color: var(--warning-light);
+  color: var(--warning-dark);
+}
+
+/* Filter Section */
+.filterSection {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-md);
+  background-color: var(--surface-dark);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  margin-bottom: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 120px;
+}
+
+/* Make the first filter group (account selector) more prominent */
+.filterGroup:first-child {
+  min-width: 160px;
+}
+
+.filterGroup:first-child label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filterGroup label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.filterSelect {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--transition-speed-normal);
+}
+
+/* Make the account selector more prominent */
+.filterGroup:first-child .filterSelect {
+  font-weight: 500;
+  border-width: 2px;
+  border-color: var(--primary-color-light);
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+/* Table Container and Controls */
+.tableContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  flex: 1;
+  min-height: 0;
+}
+
+.tableControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+}
+
+.controlsLeft {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.controlsRight {
+  display: flex;
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .accountSelector {
-  padding: 8px 12px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--transition-speed-normal);
 }
 
-.transactionForm {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.accountSelector:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
 }
 
-.formField {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.transactionCount {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.formField label {
+/* Table Wrapper and Styles */
+.tableWrapper {
+  flex: 1;
+  overflow: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--surface-color);
+}
+
+.transactionsTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.transactionsTable th {
+  background-color: var(--surface-dark);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: var(--space-sm);
+  text-align: left;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.transactionRow {
+  transition: background-color var(--transition-speed-fast);
+}
+
+.transactionRow:hover {
+  background-color: var(--surface-light);
+}
+
+.transactionRow:nth-child(even) {
+  background-color: var(--surface-light);
+}
+
+.tableCell {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-color-light);
+  vertical-align: top;
+}
+
+/* Specific Cell Types */
+.cell_date {
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.cell_merchant_name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cell_location {
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.cell_description {
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.cell_amount {
+  font-weight: 600;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cell_category,
+.cell_subCategory {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.cell_notes {
+  font-style: italic;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* Amount and Type Styling */
+.amount {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.amount.income {
+  color: var(--success-color);
+}
+
+.amount.expense {
+  color: var(--danger-color);
+}
+
+.transactionType {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: var(--border-radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.transactionType.income {
+  background-color: var(--success-light);
+  color: var(--success-dark);
+}
+
+.transactionType.expense {
+  background-color: var(--danger-light);
+  color: var(--danger-dark);
+}
+
+.recurringBadge {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: var(--info-color);
+  color: white;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 16px;
+  font-size: 10px;
   font-weight: bold;
 }
 
-.formField input,
-.formField select {
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: var(--space-xl);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--surface-light);
+}
+
+.emptyState p {
+  margin: var(--space-xs) 0;
+}
+
+.emptyState p:first-child {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Import Modal Step 1 */
+.importStepOneContainer {
+  padding: 20px;
+  text-align: center;
+}
+
+.importStepOneText {
+  margin: 15px 0;
+  color: var(--text-secondary-color);
+}
+
+.accountTypeInfo {
+  margin-top: 8px;
   padding: 8px 12px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  background-color: var(--info-light, #e3f2fd);
+  color: var(--info-dark, #0d47a1);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  border-left: 3px solid var(--info-color, #2196f3);
 }
 
-.radioGroup {
-  display: flex;
-  gap: 15px;
+.importFileInput {
+  display: block;
+  margin: 20px auto;
 }
 
-.formActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;
+.importError {
+  color: var(--danger-color, #f44336);
+  margin-top: 10px;
 }
 
+/* Review Container */
 .reviewContainer {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-width: 700px;
-  max-width: 900px;
+  width: 95vw;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 16px;
 }
 
-.reviewHeader {
+.reviewHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reviewTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary-color);
+}
+
+.reviewProgressWrapper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 10px;
+  flex-grow: 1;
+  margin: 0 20px;
 }
 
-.reviewProgress {
-  flex: 1;
-  margin-left: 16px;
-}
-
-.progressBar {
+.reviewProgressBarBg {
+  width: 100%;
   height: 8px;
-  background: #eee;
+  background-color: var(--surface-dark);
   border-radius: 4px;
-  overflow: hidden;
-}
-.progressFill {
-  height: 8px;
-  background: var(--primary, #4caf50);
-  transition: width 0.3s;
-}
-.progressText {
-  font-size: 12px;
-  color: #888;
-  margin-top: 2px;
 }
 
-.reviewActions {
+.reviewProgressBarFill {
+  height: 100%;
+  background-color: var(--primary-color);
+  border-radius: 4px;
+  transition: width 0.3s ease-in-out;
+}
+
+.reviewProgressText {
+  font-size: 0.9rem;
+  color: var(--text-secondary-color);
+  white-space: nowrap;
+}
+
+.reviewHeaderActions {
   display: flex;
   gap: 8px;
-  margin-left: 16px;
 }
 
 .reviewGrid {
   display: grid;
-  grid-template-columns: minmax(0, 400px) minmax(0, 180px);
-  gap: 32px;
-  max-height: 520px;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  max-height: 65vh;
+  overflow: hidden;
+}
+
+.reviewPanelToReview {
   overflow-y: auto;
-  background: var(--surface-dark, #f0f2f5);
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);
-  padding: 18px;
+  padding-right: 10px;
 }
 
-.toReviewPanel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.reviewSectionTitle {
-  margin: 8px 0;
-  text-align: center;
+.reviewPanelTitle {
+  font-size: 1.1rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  position: sticky;
+  top: 0;
+  background: var(--surface-color);
+  padding: 8px 0;
+  z-index: 1;
 }
 
-.reviewEmptyText {
-  color: #888;
-  font-style: italic;
-  margin-top: 32px;
+.reviewPanelEmpty {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary-color);
 }
 
 .transactionReviewItem {
-  margin-bottom: 18px;
-  border: 1px solid var(--surface-dark, #e0e4ea);
-  border-radius: 10px;
-  padding: 0;
-  background: var(--surface-light, #f8fafc);
-  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
-  width: 380px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.transactionReviewItem.approved {
-  border: 1px solid var(--surface-dark, #e0f7e9);
+  background: var(--surface-light);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  padding: 6px 10px;
-  background: var(--surface-light, #f6fffa);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  min-width: 0;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02);
-  width: 160px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .reviewTablesRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1.5fr;
+  gap: 16px;
+  padding: 16px;
+  align-items: start;
+}
+
+.reviewTableCol {
   display: flex;
-  width: 100%;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px;
+  flex-direction: column;
 }
 
 .reviewTableTitle {
-  text-align: center;
-  font-weight: 500;
-  margin-bottom: 2px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-primary-color);
 }
 
 .reviewTable {
-  font-size: 13px;
   width: 100%;
-  background: none;
+  border-collapse: collapse;
+}
+
+.reviewTable td {
+  padding: 4px 0;
+  font-size: 0.9rem;
+}
+
+.reviewTable td:first-child {
+  font-weight: 500;
+  color: var(--text-secondary-color);
+  padding-right: 8px;
+}
+
+.reviewArrowCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .reviewArrow {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  margin: 0 8px;
-  font-size: 28px;
-  color: var(--primary, #4caf50);
-  font-weight: 700;
-  text-align: center;
+  font-size: 24px;
+  color: var(--primary-color);
+}
+
+/* Required field styling */
+.required {
+  color: var(--danger-color, #f44336);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.reviewInput.invalid {
+  border-color: var(--danger-color, #f44336);
+  background-color: var(--danger-light, #ffebee);
+}
+
+.reviewInput,
+.reviewTextarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--surface-color);
+  color: var(--text-primary) !important;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.reviewInput:focus,
+.reviewTextarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+.reviewInput option {
+  color: var(--text-primary) !important;
+  background-color: var(--surface-color) !important;
+}
+
+/* Ensure select elements have consistent colors */
+.reviewInput select,
+.reviewInput select option {
+  color: var(--text-primary) !important;
+  background-color: var(--surface-color) !important;
+}
+
+.reviewInput:focus,
+.reviewTextarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+.reviewInput option {
+  color: var(--text-primary);
+  background-color: var(--surface-color);
 }
 
 .reviewApproveBtnRow {
   display: flex;
-  justify-content: center;
-  margin: 8px 0 10px 0;
+  justify-content: flex-end;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border-color-light);
+  margin-top: 10px;
+  padding-top: 10px;
 }
 
-.approvedPanel {
-  min-width: 0;
+.reviewPanelApproved {
+  border-left: 1px solid var(--border-color);
+  padding-left: 20px;
+  overflow-y: auto;
 }
 
 .approvedList {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.transactionReviewItemApproved {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 8px 12px;
+  background-color: var(--success-light-color);
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
 .approvedText {
+  font-weight: 500;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
 }
 
 .approvedAmount {
-  color: #888;
-  font-size: 12px;
-  margin-left: 6px;
+  font-weight: 600;
+  color: var(--success-dark-color);
+}
+
+.reviewPanelEmptyApproved {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary-color);
 }
 
 .reviewFooter {
@@ -226,18 +592,97 @@
   justify-content: flex-end;
   gap: 12px;
   margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
 }
 
-/* Responsive tweaks */
-@media (max-width: 900px) {
-  .reviewContainer, .reviewGrid {
-    min-width: 0;
-    width: 98vw;
-    max-width: 100vw;
-    padding: 8px 2px;
-  }
-  .transactionReviewItem {
-    width: 98vw;
-    min-width: 0;
-  }
+/* Transaction Form Styles */
+.transactionForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 500px;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.formField label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  transition: border-color var(--transition-speed-normal);
+}
+
+.formField input:focus,
+.formField select:focus,
+.formField textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+.radioGroup {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.radioGroup label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.radioGroup input[type="radio"] {
+  margin: 0;
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-color);
+}
+
+/* Ensure all form inputs and selects have consistent styling */
+.formField select,
+.formField input {
+  color: var(--text-primary) !important;
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.formField select:focus,
+.formField input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+}
+
+/* Merchant Button */
+.merchantButton {
+  white-space: nowrap;
 }

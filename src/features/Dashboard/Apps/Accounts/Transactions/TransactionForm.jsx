@@ -9,6 +9,7 @@ const TransactionForm = ({
   onSubmit,
   initialAccountId,
   openTransactionImportModal,
+  isLoading = false,
 }) => {
   const { data } = useFinancialData();
   const accounts = data?.accounts || [];
@@ -19,9 +20,13 @@ const TransactionForm = ({
   const [toAccountId, setToAccountId] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [amount, setAmount] = useState("");
-  const [parentCategory, setParentCategory] = useState("");
+  const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
   const [description, setDescription] = useState("");
+  const [merchantName, setMerchantName] = useState("");
+  const [location, setLocation] = useState("");
+  const [notes, setNotes] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
 
   useEffect(() => {
     if (initialAccountId && initialAccountId !== "all") {
@@ -35,28 +40,37 @@ const TransactionForm = ({
     setToAccountId("");
     setDate(new Date().toISOString().split("T")[0]);
     setAmount("");
-    setParentCategory("");
+    setCategory("");
     setSubCategory("");
     setDescription("");
+    setMerchantName("");
+    setLocation("");
+    setNotes("");
+    setIsRecurring(false);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit({
-      accountId,
+      account_id: accountId,
       toAccountId: type === "transfer" ? toAccountId : undefined,
-      date,
+      transaction_date: date,
       amount: parseFloat(amount),
-      category: subCategory || parentCategory,
+      category_id: subCategory || category,
+      subCategory: type === "expense" ? subCategory : "",
       description,
+      merchant_name: merchantName,
+      location,
+      notes,
       type,
+      is_recurring: isRecurring,
     });
     resetForm();
     setIsModalOpen(false);
   };
 
-  const handleParentCategoryChange = (e) => {
-    setParentCategory(e.target.value);
+  const handleCategoryChange = (e) => {
+    setCategory(e.target.value);
     setSubCategory("");
   };
 
@@ -110,7 +124,9 @@ const TransactionForm = ({
           </div>
 
           <div className={styles.formField}>
-            <label htmlFor="account">Account</label>
+            <label htmlFor="account">
+              {type === "transfer" ? "From Account" : "Account"}
+            </label>
             <select
               id="account"
               value={accountId}
@@ -159,6 +175,28 @@ const TransactionForm = ({
           </div>
 
           <div className={styles.formField}>
+            <label htmlFor="merchantName">Merchant</label>
+            <input
+              id="merchantName"
+              type="text"
+              value={merchantName}
+              onChange={(e) => setMerchantName(e.target.value)}
+              placeholder="e.g., Starbucks"
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label htmlFor="location">Location</label>
+            <input
+              id="location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g., 123 Main St, City, State"
+            />
+          </div>
+
+          <div className={styles.formField}>
             <label htmlFor="amount">Amount</label>
             <input
               id="amount"
@@ -175,16 +213,16 @@ const TransactionForm = ({
           {type !== "transfer" && (
             <>
               <div className={styles.formField}>
-                <label htmlFor="parentCategory">Category</label>
+                <label htmlFor="category">Category</label>
                 <select
-                  id="parentCategory"
-                  value={parentCategory}
-                  onChange={handleParentCategoryChange}
+                  id="category"
+                  value={category}
+                  onChange={handleCategoryChange}
                   required
                 >
                   <option value="">Select Category</option>
                   {(type === "income"
-                    ? incomeCategories.map((c) => c.name)
+                    ? incomeCategories
                     : Object.keys(expenseCategories)
                   ).map((cat) => (
                     <option key={cat} value={cat}>
@@ -195,18 +233,17 @@ const TransactionForm = ({
               </div>
 
               {type === "expense" &&
-                parentCategory &&
-                expenseCategories[parentCategory] && (
+                category &&
+                expenseCategories[category] && (
                   <div className={styles.formField}>
                     <label htmlFor="subCategory">Sub-Category</label>
                     <select
                       id="subCategory"
                       value={subCategory}
                       onChange={(e) => setSubCategory(e.target.value)}
-                      required
                     >
                       <option value="">Select Sub-Category</option>
-                      {expenseCategories[parentCategory].map((subCat) => (
+                      {expenseCategories[category].map((subCat) => (
                         <option key={subCat} value={subCat}>
                           {subCat}
                         </option>
@@ -226,6 +263,28 @@ const TransactionForm = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g., Weekly grocery shopping"
             />
+          </div>
+
+          <div className={styles.formField}>
+            <label htmlFor="notes">Notes</label>
+            <input
+              id="notes"
+              type="text"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Additional notes..."
+            />
+          </div>
+
+          <div className={styles.formField}>
+            <label>
+              <input
+                type="checkbox"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+              />
+              This is a recurring transaction
+            </label>
           </div>
 
           <div className={styles.formActions}>

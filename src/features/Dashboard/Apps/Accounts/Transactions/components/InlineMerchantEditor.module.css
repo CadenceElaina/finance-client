@@ -1,0 +1,108 @@
+.container {
+  background: white;
+  border: 2px solid #007bff;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 300px;
+}
+
+.inputSection {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nameInput {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+}
+
+.saveButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.saveButton:hover {
+  background: #1e7e34;
+}
+
+.cancelButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cancelButton:hover {
+  background: #c82333;
+}
+
+.suggestions {
+  margin-bottom: 8px;
+}
+
+.suggestionsLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.suggestionButton {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 3px 6px;
+  font-size: 11px;
+  cursor: pointer;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.suggestionButton:hover {
+  background: #e9ecef;
+  border-color: #007bff;
+}
+
+.originalInfo {
+  font-size: 10px;
+  color: #868e96;
+  font-style: italic;
+  border-top: 1px solid #e9ecef;
+  padding-top: 6px;
+}

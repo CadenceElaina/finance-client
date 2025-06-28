@@ -74,14 +74,21 @@ const normalizeTransaction = (tx) => ({
     typeof tx.amount === "number" ? tx.amount : parseFloat(tx.amount) || 0,
   description: tx.description || "",
   category_id: tx.category_id || tx.category || "",
+  subCategory: tx.subCategory || "",
   type: tx.type || "",
   merchant_name: tx.merchant_name || "",
+  location: tx.location || "",
   original_description: tx.original_description || "",
-  is_recurring: typeof tx.is_recurring === "boolean" ? tx.is_recurring : false,
+  is_recurring:
+    typeof tx.is_recurring === "boolean"
+      ? tx.is_recurring
+      : typeof tx.isRecurring === "boolean"
+      ? tx.isRecurring
+      : false,
   notes: tx.notes || "",
   tags: Array.isArray(tx.tags) ? tx.tags : [],
-  created_at: tx.created_at || new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  created_at: tx.created_at || tx.createdAt || new Date().toISOString(),
+  updated_at: tx.updated_at || tx.updatedAt || new Date().toISOString(),
 });
 
 // Utility: normalize all transactions in a list

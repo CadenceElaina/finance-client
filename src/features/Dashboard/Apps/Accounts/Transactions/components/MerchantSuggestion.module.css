@@ -1,0 +1,152 @@
+.container {
+  background: linear-gradient(135deg, #fff9e6, #fff3cd);
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #856404;
+  flex: 1;
+}
+
+.dismissButton {
+  background: none;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dismissButton:hover {
+  background: rgba(133, 100, 4, 0.1);
+  border-radius: 3px;
+}
+
+.info {
+  font-size: 11px;
+  color: #6c5ce7;
+  margin-bottom: 8px;
+}
+
+.info code {
+  background: rgba(108, 92, 231, 0.1);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.suggestions {
+  margin-bottom: 8px;
+}
+
+.suggestionsLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.suggestionButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.suggestionButton {
+  background: white;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #856404;
+}
+
+.suggestionButton:hover {
+  background: #fff3cd;
+  border-color: #ffdf7e;
+  transform: translateY(-1px);
+}
+
+.customSection {
+  margin-bottom: 8px;
+}
+
+.customLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.customInput {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.input {
+  flex: 1;
+  padding: 4px 6px;
+  border: 1px solid #ffeaa7;
+  border-radius: 3px;
+  font-size: 11px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #ffdf7e;
+  box-shadow: 0 0 0 2px rgba(255, 223, 126, 0.3);
+}
+
+.saveButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.saveButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.note {
+  font-size: 10px;
+  color: #6c5b2f;
+  font-style: italic;
+  text-align: center;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 234, 167, 0.5);
+}
