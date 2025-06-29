@@ -7,7 +7,7 @@ const Tooltip = ({ data, position }) => {
 
   return (
     <div
-      className={styles.tooltip}
+      className={`${styles.tooltip} ${data ? styles.visible : ""}`}
       style={{
         left: position.x,
         top: position.y,
@@ -18,13 +18,23 @@ const Tooltip = ({ data, position }) => {
         <span>Balance:</span>
         <span>{formatCurrency(data.balance)}</span>
       </div>
+      <div className={styles.tooltipSeparator} />
       <div className={styles.tooltipItem}>
-        <span>Principal Paid:</span>
+        <span>Principal Paid (Month):</span>
         <span>{formatCurrency(data.principal)}</span>
       </div>
       <div className={styles.tooltipItem}>
-        <span>Interest Paid:</span>
+        <span>Interest Paid (Month):</span>
         <span>{formatCurrency(data.interest)}</span>
+      </div>
+      <div className={styles.tooltipSeparator} />
+      <div className={styles.tooltipItem}>
+        <span>Cumulative Principal:</span>
+        <span>{formatCurrency(data.cumulativePrincipal)}</span>
+      </div>
+      <div className={styles.tooltipItem}>
+        <span>Cumulative Interest:</span>
+        <span>{formatCurrency(data.cumulativeInterest)}</span>
       </div>
     </div>
   );

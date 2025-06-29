@@ -133,7 +133,9 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
   // Get the selected debt object for timeline tab
   const timelineSelectedDebt = useMemo(
     () =>
-      enrichedDebts.find((debt) => debt.id === timelineSelectedDebtId) || null,
+      enrichedDebts.find(
+        (debt) => debt.uniqueRenderKey === timelineSelectedDebtId
+      ) || null,
     [timelineSelectedDebtId, enrichedDebts]
   );
 
@@ -142,15 +144,15 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
   useEffect(() => {
     // Initialize timeline selection when debts first load
     if (enrichedDebts.length > 0 && timelineSelectedDebtId === null) {
-      setTimelineSelectedDebtId(enrichedDebts[0].id);
+      setTimelineSelectedDebtId(enrichedDebts[0].uniqueRenderKey);
     }
     // If selected debt no longer exists, fallback to first debt
     else if (enrichedDebts.length > 0 && timelineSelectedDebtId) {
       const selectionStillExists = enrichedDebts.some(
-        (d) => d.id === timelineSelectedDebtId
+        (d) => d.uniqueRenderKey === timelineSelectedDebtId
       );
       if (!selectionStillExists) {
-        setTimelineSelectedDebtId(enrichedDebts[0].id);
+        setTimelineSelectedDebtId(enrichedDebts[0].uniqueRenderKey);
       }
     }
     // If no debts exist, clear the selection
@@ -326,7 +328,10 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
                   className={styles.debtSelect}
                 >
                   {enrichedDebts.map((debt) => (
-                    <option key={debt.uniqueRenderKey} value={debt.id}>
+                    <option
+                      key={debt.uniqueRenderKey}
+                      value={debt.uniqueRenderKey}
+                    >
                       {debt.name}
                     </option>
                   ))}
@@ -337,6 +342,7 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
         >
           {timelineSelectedDebt ? (
             <PayoffTimeline
+              key={timelineSelectedDebt.uniqueRenderKey}
               debt={timelineSelectedDebt}
               compoundingFrequency={compoundingFrequency}
             />

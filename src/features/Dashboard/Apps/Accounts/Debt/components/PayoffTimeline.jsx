@@ -79,9 +79,18 @@ const PayoffTimeline = ({ debt, compoundingFrequency = 12 }) => {
     for (let month = 1; month <= maxDisplayMonths; month++) {
       const payment = timeline.paymentHistory[month - 1];
       if (payment) {
+        const cumulativePrincipal = timeline.paymentHistory
+          .slice(0, month)
+          .reduce((sum, p) => sum + p.principal, 0);
+        const cumulativeInterest = timeline.paymentHistory
+          .slice(0, month)
+          .reduce((sum, p) => sum + p.interest, 0);
+
         points.push({
           month: payment.month,
           ...payment,
+          cumulativePrincipal,
+          cumulativeInterest,
         });
       }
     }
@@ -283,12 +292,7 @@ const PayoffTimeline = ({ debt, compoundingFrequency = 12 }) => {
                 };
 
                 return (
-                  <div
-                    key={`bar-${index}`}
-                    className={styles.chartBar}
-                    onMouseMove={handleMouseMove}
-                    onMouseLeave={handleMouseLeave}
-                  >
+                  <div key={`bar-${index}`} className={styles.chartBar}>
                     <div
                       className={`${styles.barSingle} ${
                         isEnd ? styles.barComplete : ""
@@ -299,6 +303,8 @@ const PayoffTimeline = ({ debt, compoundingFrequency = 12 }) => {
                           ? "var(--success-color)"
                           : `hsl(${hue}, ${saturation}%, ${lightness}%)`,
                       }}
+                      onMouseMove={handleMouseMove}
+                      onMouseLeave={handleMouseLeave}
                     />
                     <div className={styles.chartLabel}>
                       {(dataPoint.month === 1 ||

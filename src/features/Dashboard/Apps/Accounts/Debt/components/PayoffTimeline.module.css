@@ -387,16 +387,30 @@
   border-radius: var(--border-radius);
   padding: 0.75rem;
   font-size: 0.875rem;
-  z-index: 10;
+  z-index: 1000;
   pointer-events: none;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  min-width: 200px;
+  min-width: 220px;
+  transform: translate(-50%, -110%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -120%);
 }
 
 .tooltipTitle {
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: var(--text-primary);
+}
+
+.tooltipSeparator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.5rem 0;
 }
 
 .tooltipItem {
