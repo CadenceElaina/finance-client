@@ -1,5 +1,6 @@
 // src/features/Dashboard/Apps/Budget/IncomeSection.jsx
-import React, { useState, useMemo, useRef } from "react";
+import React from "react";
+import Button from "../../../../components/ui/Button/Button";
 import Section from "../../../../components/ui/Section/Section";
 import Table from "../../../../components/ui/Table/Table";
 import EditableTableHeader from "../../../../components/ui/Table/EditableTableHeader";
@@ -13,24 +14,7 @@ const INCOME_TYPE_OPTIONS = [
   { value: "hourly", label: "Hourly" },
 ];
 
-const IncomeSection = ({ budget, smallApp }) => {
-  // Add safety check for budget
-  if (!budget) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "var(--space-lg)",
-          color: "var(--text-secondary)",
-        }}
-      >
-        Initializing income data...
-      </div>
-    );
-  }
-
+const IncomeSection = ({ budget }) => {
   const incomeData = budget?.income || {};
   const calculations = useIncomeCalculations(incomeData);
 
@@ -49,6 +33,23 @@ const IncomeSection = ({ budget, smallApp }) => {
   ];
 
   const formHook = useBudgetForm("income", tableData[0]);
+
+  // Add safety check for budget and formHook
+  if (!budget || !formHook || formHook.sectionData.length === 0) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "var(--space-lg)",
+          color: "var(--text-secondary)",
+        }}
+      >
+        Initializing income data...
+      </div>
+    );
+  }
 
   // Check if the form hook is still loading
   if (!formHook || formHook.sectionData.length === 0) {
@@ -289,15 +290,15 @@ const IncomeSection = ({ budget, smallApp }) => {
 
         {/* Action Buttons */}
         <div className={sectionStyles.editActions}>
-          <button onClick={handleSave} className="btn-primary">
-            Save Income
-          </button>
-          <button onClick={handleClear} className="btn-secondary">
-            Clear
-          </button>
-          <button onClick={handleReset} className="btn-secondary">
+          <Button onClick={handleSave} variant="primary" size="small">
+            Save
+          </Button>
+          <Button onClick={handleReset} variant="warning" size="small">
             Reset to Demo
-          </button>
+          </Button>
+          <Button onClick={handleClear} variant="danger" size="small">
+            Clear
+          </Button>
         </div>
       </div>
     </Section>

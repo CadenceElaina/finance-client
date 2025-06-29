@@ -6,19 +6,85 @@ import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
 import GoalForm from "./GoalForm";
 import GoalCard from "./GoalCard";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
-import {
-  calculateProgress,
-  calculateTimeToGoal,
-} from "../../Plan/utils/calculationUtils";
+import Button from "../../../../../components/ui/Button/Button";
 import sectionStyles from "../../../../../components/ui/Section/Section.module.css";
 import goalsStyles from "../goals.module.css";
 import { useToast } from "../../../../../hooks/useToast"; // Add this import
 
 const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   // SAFETY CHECK: Add early return if financial data context is not ready
-  const financialDataResult = useFinancialData();
+  const {
+    data,
+    saveData,
+    updateGoal,
+    removeGoal,
+    resetGoalsToDemo,
+    clearGoals,
+  } = useFinancialData();
+  const { showInfo, showWarning } = useToast();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingGoal, setEditingGoal] = useState(null);
 
-  if (!financialDataResult) {
+  const { goals, accounts, budget } = data || {};
+
+  const goalsSummary = useMemo(() => {
+    if (!goals) {
+      return {
+        activeGoals: 0,
+        completedGoals: 0,
+        totalTargetAmount: 0,
+        totalCurrentAmount: 0,
+        totalMonthlyContributions: 0,
+        overallProgress: 0,
+      };
+    }
+    const activeGoals = goals.filter((g) => g.status === "active").length;
+    const completedGoals = goals.filter((g) => g.status === "completed").length;
+
+    const totalTargetAmount = goals.reduce(
+      (sum, g) => sum + (parseFloat(g.targetAmount) || 0),
+      0
+    );
+    const totalCurrentAmount = goals.reduce((sum, g) => {
+      // Calculate from linked accounts only
+      if (g.linkedAccounts && Array.isArray(g.linkedAccounts)) {
+        return (
+          sum +
+          g.linkedAccounts.reduce((accSum, linkedAcc) => {
+            return accSum + (parseFloat(linkedAcc.allocatedAmount) || 0);
+          }, 0)
+        );
+      }
+      return sum;
+    }, 0);
+
+    const totalBudgetAllocations = goals
+      .filter((g) => g.linkedToBudget && g.status === "active")
+      .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
+
+    const overallProgress =
+      totalTargetAmount > 0
+        ? (totalCurrentAmount / totalTargetAmount) * 100
+        : 0;
+
+    return {
+      activeGoals,
+      completedGoals,
+      totalTargetAmount,
+      totalCurrentAmount,
+      totalMonthlyContributions: totalBudgetAllocations, // Only budget allocations now
+      overallProgress,
+    };
+  }, [goals]);
+
+  // Calculate available discretionary income
+  const monthlyDiscretionary = budget?.discretionaryIncome || 0;
+  const allocatedToGoals = (goals || [])
+    .filter((g) => g.linkedToBudget && g.status === "active")
+    .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
+  const availableDiscretionary = monthlyDiscretionary - allocatedToGoals;
+
+  if (!data) {
     return (
       <div
         style={{
@@ -32,44 +98,12 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     );
   }
 
-  const { data, saveData, updateGoal, removeGoal } = financialDataResult;
-
-  // SAFETY CHECK: Ensure data exists
-  if (!data) {
-    return (
-      <div
-        style={{
-          padding: "var(--space-md)",
-          textAlign: "center",
-          color: "var(--text-secondary)",
-        }}
-      >
-        Initializing goals...
-      </div>
-    );
-  }
-
-  const { goals, accounts, budget } = data;
-
-  // Calculate available discretionary income
-  const monthlyDiscretionary = budget?.discretionaryIncome || 0;
-  const allocatedToGoals = (goals || [])
-    .filter((g) => g.linkedToBudget && g.status === "active")
-    .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
-  const availableDiscretionary = monthlyDiscretionary - allocatedToGoals;
-
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingGoal, setEditingGoal] = useState(null);
-  const { showSuccess, showInfo, showWarning } = useToast(); // Add useToast hook
-
   const handleSaveGoal = (goalData) => {
     console.log("handleSaveGoal called with:", goalData); // Debug log
 
     if (editingGoal) {
       // FIXED: Track what changed for better notifications
       const oldGoal = editingGoal;
-      const budgetChanged =
-        oldGoal.budgetMonthlyAmount !== goalData.budgetMonthlyAmount;
       const linkedToBudgetChanged =
         oldGoal.linkedToBudget !== goalData.linkedToBudget;
 
@@ -84,7 +118,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
       // If this goal is linked to budget, update budget expenses
       if (goalData.budgetSyncNeeded || linkedToBudgetChanged) {
-        updatedData = syncGoalWithBudget(updatedData, goalData, editingGoal);
+        updatedData = syncGoalWithBudget(updatedData, goalData);
       }
 
       console.log(
@@ -105,7 +139,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
 
       // If this goal is linked to budget, update budget expenses
       if (goalData.budgetSyncNeeded) {
-        updatedData = syncGoalWithBudget(updatedData, goalData, null);
+        updatedData = syncGoalWithBudget(updatedData, goalData);
       }
 
       saveData(updatedData);
@@ -119,7 +153,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   };
 
   // FIXED: Add function to sync goal with budget
-  const syncGoalWithBudget = (dataToUpdate, newGoal, oldGoal) => {
+  const syncGoalWithBudget = (dataToUpdate, newGoal) => {
     const currentExpenses = dataToUpdate.budget?.monthlyExpenses || [];
     const goalExpenseId = `exp-goal-${newGoal.id}`;
 
@@ -168,25 +202,7 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
     }
 
     if (window.confirm(confirmMessage)) {
-      // Remove goal and any associated budget expense
-      const updatedGoals = goals.filter((g) => g.id !== goalId);
-      const goalExpenseId = `exp-goal-${goalId}`;
-      const updatedExpenses = (data.budget?.monthlyExpenses || []).filter(
-        (exp) => exp.id !== goalExpenseId
-      );
-
-      const updatedData = {
-        ...data,
-        goals: updatedGoals,
-        budget: {
-          ...data.budget,
-          monthlyExpenses: updatedExpenses,
-        },
-      };
-
-      saveData(updatedData);
-
-      // FIXED: Show removal notification
+      removeGoal(goalId);
       showWarning(`🗑️ Goal "${goalToRemove.name}" has been removed.`);
 
       if (goalToRemove.linkedToBudget && goalToRemove.budgetMonthlyAmount > 0) {
@@ -234,48 +250,6 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
   });
 
   // UPDATED: Goals summary calculations (removed manual contributions)
-  const goalsSummary = useMemo(() => {
-    const activeGoals = (goals || []).filter((g) => g.status === "active").length;
-    const completedGoals = (goals || []).filter((g) => g.status === "completed").length;
-
-    const totalTargetAmount = (goals || []).reduce(
-      (sum, g) => sum + (parseFloat(g.targetAmount) || 0),
-      0
-    );
-    const totalCurrentAmount = (goals || []).reduce(
-      (sum, g) => {
-        // Calculate from linked accounts only
-        if (g.linkedAccounts && Array.isArray(g.linkedAccounts)) {
-          return (
-            sum +
-            g.linkedAccounts.reduce((accSum, linkedAcc) => {
-              return accSum + (parseFloat(linkedAcc.allocatedAmount) || 0);
-            }, 0)
-          );
-        }
-        return sum;
-      },
-      0
-    );
-
-    const totalBudgetAllocations = (goals || [])
-      .filter((g) => g.linkedToBudget && g.status === "active")
-      .reduce((sum, g) => sum + (parseFloat(g.budgetMonthlyAmount) || 0), 0);
-
-    const overallProgress =
-      totalTargetAmount > 0
-        ? (totalCurrentAmount / totalTargetAmount) * 100
-        : 0;
-
-    return {
-      activeGoals,
-      completedGoals,
-      totalTargetAmount,
-      totalCurrentAmount,
-      totalMonthlyContributions: totalBudgetAllocations, // Only budget allocations now
-      overallProgress,
-    };
-  }, [goals]);
 
   // Goals snapshot items
   const goalsSnapshotItems = [
@@ -374,6 +348,14 @@ const GoalsTab = ({ smallApp, activeInnerTabId }) => {
             goal!
           </div>
         )}
+        <div className={sectionStyles.editActions}>
+          <Button onClick={resetGoalsToDemo} variant="warning" size="small">
+            Reset to Demo
+          </Button>
+          <Button onClick={clearGoals} variant="danger" size="small">
+            Clear All
+          </Button>
+        </div>
       </Section>
     </div>
   );

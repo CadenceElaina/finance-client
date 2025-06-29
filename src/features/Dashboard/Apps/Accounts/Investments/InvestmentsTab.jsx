@@ -3,6 +3,7 @@ import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
 import { useToast } from "../../../../../hooks/useToast";
 import { DEMO_ACCOUNTS, DEMO_PORTFOLIOS } from "../../../../../utils/constants";
+import Button from "../../../../../components/ui/Button/Button";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 import Table from "../../../../../components/ui/Table/Table";
@@ -39,9 +40,6 @@ const EMPTY_CASH = {
 const InvestmentsTab = ({
   portfolioId,
   smallApp,
-  portfolios = [],
-  setSelectedPortfolioId,
-  selectedPortfolioId,
   investmentsHeaderTitle = "Investments",
   showPortfolioSelectMenu = false,
   portfolioSelectMenu,
@@ -706,7 +704,6 @@ const InvestmentsTab = ({
   const displaySecurities = filteredSecurities;
 
   // Check if selected portfolio exists and has accounts
-  const selectedPortfolio = allPortfolios.find((p) => p.id === portfolioId);
   const portfolioHasAccounts =
     portfolioId === "all" ||
     allAccounts.some(
@@ -754,27 +751,16 @@ const InvestmentsTab = ({
       />
 
       {editMode && (
-        <div
-          style={{
-            display: "flex",
-            gap: "var(--space-xs)",
-            marginTop: "var(--space-sm)",
-            justifyContent: "flex-end",
-            padding: "var(--space-xs)",
-            background: "var(--surface-dark)",
-            borderRadius: "var(--border-radius-sm)",
-            border: "1px solid var(--border-light)",
-          }}
-        >
-          <button onClick={handleSave} className="btn-primary">
-            Save Changes
-          </button>
-          <button onClick={handleResetToDemo} className="btn-secondary">
+        <div className={sectionStyles.editActions}>
+          <Button onClick={handleSave} variant="primary" size="small">
+            Save
+          </Button>
+          <Button onClick={handleResetToDemo} variant="warning" size="small">
             Reset to Demo
-          </button>
-          <button onClick={handleClearAll} className="btn-danger">
-            Clear All
-          </button>
+          </Button>
+          <Button onClick={handleClearAll} variant="danger" size="small">
+            Clear
+          </Button>
         </div>
       )}
 

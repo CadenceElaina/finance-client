@@ -11,13 +11,18 @@ const ControlPanel = ({
   disabled = false,
 }) => (
   <div className={styles.controlPanel}>
-    <Button onClick={onSave} variant="primary" disabled={disabled}>
+    <Button onClick={onSave} variant="primary" size="small" disabled={disabled}>
       {saveLabel}
     </Button>
-    <Button onClick={onReset} variant="warning" disabled={disabled}>
+    <Button
+      onClick={onReset}
+      variant="warning"
+      size="small"
+      disabled={disabled}
+    >
       {resetLabel}
     </Button>
-    <Button onClick={onClear} variant="danger" disabled={disabled}>
+    <Button onClick={onClear} variant="danger" size="small" disabled={disabled}>
       Clear All
     </Button>
   </div>

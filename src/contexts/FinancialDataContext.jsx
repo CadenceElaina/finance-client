@@ -24,6 +24,7 @@ import {
   DEFAULT_DEMO_BUDGET,
   DEMO_PORTFOLIOS,
   BASE_CASH_ACCOUNT,
+  DEMO_GOALS,
 } from "../utils/constants";
 
 // Split contexts for better performance
@@ -251,7 +252,7 @@ export const FinancialDataProvider = ({ children }) => {
         accounts: loadedData.accounts || DEMO_ACCOUNTS,
         budget: loadedData.budget || DEFAULT_DEMO_BUDGET,
         portfolios: loadedData.portfolios || DEMO_PORTFOLIOS,
-        goals: loadedData.goals || [],
+        goals: loadedData.goals || DEMO_GOALS,
         transactions: normalizeTransactions(loadedData.transactions),
       };
 
@@ -291,7 +292,7 @@ export const FinancialDataProvider = ({ children }) => {
         accounts: DEMO_ACCOUNTS,
         budget: enrichBudgetWithCalculations(DEFAULT_DEMO_BUDGET),
         portfolios: DEMO_PORTFOLIOS,
-        goals: [],
+        goals: DEMO_GOALS,
         transactions: [],
       };
 
@@ -398,7 +399,7 @@ export const FinancialDataProvider = ({ children }) => {
 
         updatedExpenses.push({
           id: goalExpenseId,
-          name: `${goal.name} (Goal)`,
+          name: goal.name,
           cost: parseFloat(goal.budgetMonthlyAmount) || 0,
           category: "goal",
           isGoalExpense: true,
@@ -462,13 +463,20 @@ export const FinancialDataProvider = ({ children }) => {
         });
 
         // Step 2: Sync debt payments from accounts into expenses
-        const expensesFromDebtSync = syncDebtPaymentsToExpenses(
+        let expensesFromDebtSync = syncDebtPaymentsToExpenses(
           currentData.accounts,
           currentData.budget.monthlyExpenses
         );
 
+        // Step 2a: Sync expense changes back to debt accounts
+        const accountsFromExpenseSync = syncExpensesToDebtAccounts(
+          currentData.accounts,
+          expensesFromDebtSync
+        );
+
         currentData = {
           ...currentData,
+          accounts: accountsFromExpenseSync,
           budget: {
             ...currentData.budget,
             monthlyExpenses: expensesFromDebtSync,
@@ -631,7 +639,7 @@ export const FinancialDataProvider = ({ children }) => {
           ...data,
           accounts: DEMO_ACCOUNTS,
           portfolios: DEMO_PORTFOLIOS,
-          goals: [], // Also reset goals to empty
+          goals: DEMO_GOALS,
         };
 
         // Ensure the budget reflects the debt payments from demo accounts
@@ -672,6 +680,20 @@ export const FinancialDataProvider = ({ children }) => {
         saveData({
           ...data,
           goals: goals.filter((goal) => goal.id !== goalId),
+        });
+      },
+      resetGoalsToDemo: () => {
+        if (!data) return;
+        saveData({
+          ...data,
+          goals: DEMO_GOALS,
+        });
+      },
+      clearGoals: () => {
+        if (!data) return;
+        saveData({
+          ...data,
+          goals: [],
         });
       },
       addManualGoalContribution: (goalId, amount) => {

@@ -541,7 +541,9 @@ const ExpensesBreakdownChart = memo(
         }
         className={budgetStyles.chartSection}
       >
-        <ChartSummary items={summaryItems} />
+        <div className={budgetStyles.chartSummaryWrapper}>
+          <ChartSummary items={summaryItems} />
+        </div>
         <div
           className={budgetStyles.chartContainer}
           style={{

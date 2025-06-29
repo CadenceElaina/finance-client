@@ -1,6 +1,7 @@
 // src/features/Dashboard/Apps/Budget/ExpensesSection.jsx
 import { Plus, X } from "lucide-react"; // Add X import for remove button
 import React, { useMemo, useRef, useState } from "react";
+import Button from "../../../../components/ui/Button/Button";
 import Section from "../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../components/ui/Table/EditableTableHeader";
 import Table from "../../../../components/ui/Table/Table";
@@ -10,8 +11,8 @@ import { useEditableTable } from "../../../../hooks/useEditableTable";
 import { useFinancialData } from "../../../../contexts/FinancialDataContext";
 import { useToast } from "../../../../hooks/useToast";
 import {
-  syncDebtPaymentsToExpenses,
   detectDebtPaymentChanges,
+  detectGoalExpenseChanges,
 } from "../../../../utils/debtPaymentSync";
 import { DEFAULT_DEMO_BUDGET } from "../../../../utils/constants";
 import budgetStyles from "./budget.module.css";
@@ -77,50 +78,37 @@ const ExpensesSection = ({ budget, smallApp }) => {
     }
 
     // Detect goal expense changes for syncing back to goals
-    const goalExpenseChanges = [];
-    editRows.forEach((expense) => {
-      if (
-        expense.isGoalExpense === true ||
-        (expense.id && expense.id.startsWith("exp-goal-"))
-      ) {
-        const originalExpense = expenses.find((orig) => orig.id === expense.id);
-        if (originalExpense && originalExpense.cost !== expense.cost) {
-          goalExpenseChanges.push({
-            goalId: expense.linkedToGoalId,
-            newAmount: parseFloat(expense.cost) || 0,
-            oldAmount: originalExpense.cost || 0,
-          });
-        }
-      }
-    });
+    const goalExpenseChanges = detectGoalExpenseChanges(expenses, editRows);
+    const debtPaymentChanges = detectDebtPaymentChanges(expenses, editRows);
 
     // Update budget with new expenses
-    let updatedData = {
-      ...data,
-      budget: {
-        ...data.budget,
-        monthlyExpenses: editRows.map((exp) => ({
-          ...exp,
-          cost: parseFloat(exp.cost) || 0,
-        })),
-      },
-    };
+    let updatedData = { ...data };
 
     // FIXED: Sync goal budget amounts back to goals
-    if (goalExpenseChanges.length > 0 && updatedData.goals) {
+    if (goalExpenseChanges.length > 0) {
       updatedData.goals = updatedData.goals.map((goal) => {
-        const goalChange = goalExpenseChanges.find(
-          (change) => change.goalId === goal.id
-        );
-        if (goalChange) {
-          return {
-            ...goal,
-            budgetMonthlyAmount: goalChange.newAmount,
-          };
-        }
-        return goal;
+        const change = goalExpenseChanges.find((c) => c.goalId === goal.id);
+        return change
+          ? { ...goal, budgetMonthlyAmount: change.newAmount }
+          : goal;
       });
     }
+
+    if (debtPaymentChanges.length > 0) {
+      updatedData.accounts = updatedData.accounts.map((account) => {
+        const change = debtPaymentChanges.find(
+          (c) => c.accountId === account.id
+        );
+        return change
+          ? { ...account, monthlyPayment: change.newAmount }
+          : account;
+      });
+    }
+
+    updatedData.budget.monthlyExpenses = editRows.map((exp) => ({
+      ...exp,
+      cost: parseFloat(exp.cost) || 0,
+    }));
 
     // FIXED: Check for debt payment changes - now properly imported
     const debtChanges = detectDebtPaymentChanges(expenses, editRows);
@@ -340,8 +328,6 @@ const ExpensesSection = ({ budget, smallApp }) => {
             {isGoalExpense || isDebtPayment ? (
               <span className={tableStyles.syncedIndicator}>
                 {expense.name}
-                {isGoalExpense && " (Goal)"}
-                {isDebtPayment && " (Debt)"}
               </span>
             ) : (
               <input
@@ -364,31 +350,24 @@ const ExpensesSection = ({ budget, smallApp }) => {
           </td>
           {/* Cost - FIXED: Allow editing for goal expenses but with special styling */}
           <td className={tableStyles.alignRight}>
-            {isDebtPayment ? (
-              <span className={tableStyles.syncedIndicator}>
-                $
-                {(parseFloat(expense.cost) || 0).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })}
-              </span>
-            ) : (
-              <input
-                type="number"
-                value={editRows[index]?.cost || ""}
-                onChange={(e) => updateEditRow(index, "cost", e.target.value)}
-                className={`${tableStyles.tableInput} ${
-                  isGoalExpense ? tableStyles.goal : ""
-                }`}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-                title={
-                  isGoalExpense
-                    ? "Editing this will update the goal's budget allocation"
-                    : "Monthly cost"
-                }
-              />
-            )}
+            <input
+              type="number"
+              value={editRows[index]?.cost || ""}
+              onChange={(e) => updateEditRow(index, "cost", e.target.value)}
+              className={`${tableStyles.tableInput} ${
+                isGoalExpense ? tableStyles.goal : ""
+              } ${isDebtPayment ? tableStyles.debt : ""}`}
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+              title={
+                isGoalExpense
+                  ? "Editing this will update the goal's budget allocation"
+                  : isDebtPayment
+                  ? "Editing this will update the debt's monthly payment"
+                  : "Monthly cost"
+              }
+            />
           </td>
           {/* Actions */}
           <td className={tableStyles.alignCenter}>
@@ -552,16 +531,16 @@ const ExpensesSection = ({ budget, smallApp }) => {
       />
 
       {editMode && (
-        <div>
-          <button onClick={handleSave} className="btn-primary">
-            Save Changes
-          </button>
-          <button onClick={handleResetToDemo} className="btn-secondary">
+        <div className={sectionStyles.editActions}>
+          <Button onClick={handleSave} variant="primary" size="small">
+            Save
+          </Button>
+          <Button onClick={handleResetToDemo} variant="warning" size="small">
             Reset to Demo
-          </button>
-          <button onClick={handleClearAll} className="btn-danger">
-            Clear All
-          </button>
+          </Button>
+          <Button onClick={handleClearAll} variant="danger" size="small">
+            Clear
+          </Button>
         </div>
       )}
     </Section>

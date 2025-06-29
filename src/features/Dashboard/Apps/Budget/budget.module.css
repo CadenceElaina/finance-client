@@ -183,15 +183,22 @@
 }
 
 /* Chart Summary ABOVE chart */
+.chartSummaryWrapper {
+  /* Full bleed effect */
+  margin-left: calc(-1 * var(--space-xxs));
+  margin-right: calc(-1 * var(--space-xxs));
+  margin-top: calc(-1 * var(--space-xxs));
+  margin-bottom: var(--space-xs);
+}
+
 .chartSummaryTop {
   display: flex;
   justify-content: space-around;
   padding: var(--space-xs);
   background: var(--surface-dark);
-  border: 1px solid var(--border-light);
-  border-radius: var(--border-radius-sm);
-  margin-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border-light);
   gap: var(--space-xs);
+  width: 100%;
 }
 
 .chartSummaryTop .summaryItem {

@@ -4,6 +4,7 @@ import Table from "../../../../../components/ui/Table/Table";
 import Section from "../../../../../components/ui/Section/Section";
 import EditableTableHeader from "../../../../../components/ui/Table/EditableTableHeader";
 
+import Button from "../../../../../components/ui/Button/Button";
 import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
 import AccountGoalUpdateModal from "../../../../../components/ui/Modal/AccountGoalUpdateModal";
 import { useEditableTable } from "../../../../../hooks/useEditableTable";
@@ -1053,27 +1054,16 @@ const OverviewTab = ({ smallApp, onAccountClick }) => {
         />
 
         {editMode && (
-          <div
-            style={{
-              display: "flex",
-              gap: "var(--space-xs)",
-              marginTop: "var(--space-sm)",
-              justifyContent: "flex-end",
-              padding: "var(--space-xs)",
-              background: "var(--surface-dark)",
-              borderRadius: "var(--border-radius-sm)",
-              border: "1px solid var(--border-light)",
-            }}
-          >
-            <button onClick={handleSave} className="btn-primary">
-              Save Changes
-            </button>
-            <button onClick={handleResetToDemo} className="btn-secondary">
+          <div className={sectionStyles.editActions}>
+            <Button onClick={handleSave} variant="primary" size="small">
+              Save
+            </Button>
+            <Button onClick={handleResetToDemo} variant="warning" size="small">
               Reset to Demo
-            </button>
-            <button onClick={handleClearAll} className="btn-danger">
-              Clear All
-            </button>
+            </Button>
+            <Button onClick={handleClearAll} variant="danger" size="small">
+              Clear
+            </Button>
           </div>
         )}
 

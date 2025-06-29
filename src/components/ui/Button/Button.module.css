@@ -85,6 +85,12 @@
     filter: brightness(1.1);
     box-shadow: 0 0 0 2px var(--color-warning), 0 2px 8px rgba(255, 152, 0, 0.2);
 }
+/* --- Size Variants --- */
+.button.small {
+    padding: var(--space-xxs) var(--space-sm);
+    font-size: var(--font-size-sm);
+    min-width: 80px;
+}
 
 /* --- Small App Tab Button Variant --- */
 .button.tab {

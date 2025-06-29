@@ -17,7 +17,7 @@ export const syncDebtPaymentsToExpenses = (accounts, existingExpenses) => {
     
     const debtExpense = {
       id: expenseId,
-      name: `${debtAccount.name} Payment`,
+      name: debtAccount.name,
       cost: debtAccount.monthlyPayment,
       category: "required",
       linkedToAccountId: debtAccount.id,
@@ -114,5 +114,3 @@ export const detectGoalExpenseChanges = (originalExpenses, newExpenses) => {
 
   return changes;
 };
-
-// Rest of the functions remain the same...

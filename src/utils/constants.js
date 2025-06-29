@@ -26,7 +26,6 @@ export const DEFAULT_DEMO_BUDGET = {
   ],
 };
 
-
 // Demo portfolios
 export const DEMO_PORTFOLIOS = [
   { id: "portfolio-1", name: "Main Portfolio" },
@@ -57,7 +56,7 @@ export const DEMO_ACCOUNTS = [
     name: "Checking Account", 
     category: "Cash", 
     subType: "Checking", 
-    value: 2500, 
+    value: 1250, 
     accountProvider: "Chase Bank", 
     taxStatus: "Taxable" 
   },
@@ -66,7 +65,7 @@ export const DEMO_ACCOUNTS = [
     name: "Savings Account", 
     category: "Cash", 
     subType: "Savings", 
-    value: 10000, 
+    value: 5000, 
     accountProvider: "Chase Bank", 
     taxStatus: "Taxable" 
   },
@@ -169,5 +168,44 @@ export const DEMO_ACCOUNTS = [
     taxStatus: "N/A", 
     interestRate: 4.5, 
     monthlyPayment: 200 
+  },
+];
+
+export const DEMO_GOALS = [
+  {
+    id: "goal-1",
+    name: "Emergency Fund",
+    targetAmount: 17700,
+    currentAmount: 5000,
+    targetDate: "2025-12-31",
+    linkedToBudget: true,
+    budgetMonthlyAmount: 500,
+    status: "active",
+    type: "savings",
+    linkedAccounts: [{ accountId: "acc-2", allocatedAmount: 5000 }],
+  },
+  {
+    id: "goal-2",
+    name: "Vacation",
+    targetAmount: 3000,
+    currentAmount: 500,
+    targetDate: "2024-12-31",
+    linkedToBudget: true,
+    budgetMonthlyAmount: 100,
+    status: "active",
+    type: "savings",
+    linkedAccounts: [],
+  },
+  {
+    id: "goal-3",
+    name: "Max Out Roth IRA",
+    targetAmount: 7000,
+    currentAmount: 2500,
+    targetDate: "2024-12-31",
+    linkedToBudget: true,
+    budgetMonthlyAmount: 583.33,
+    status: "active",
+    type: "investment",
+    linkedAccounts: [{ accountId: "acc-4", allocatedAmount: 2500 }],
   },
 ];
