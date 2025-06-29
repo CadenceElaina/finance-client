@@ -1,26 +1,28 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useFinancialData } from "../../../../../contexts/FinancialDataContext";
 import Section from "../../../../../components/ui/Section/Section";
-import Button from "../../../../../components/ui/Button/Button";
+import SnapshotRow from "../../../../../components/ui/Snapshot/SnapshotRow";
 import DebtCard from "./components/DebtCard";
 import PayoffTimeline from "./components/PayoffTimeline";
-import PaymentScenarios from "./components/PaymentScenarios";
-import DebtMetrics from "./components/DebtMetrics";
-import AmortizationTable from "./components/AmortizationTable";
-import DebtUrgencyRanking from "./components/DebtUrgencyRanking";
 import {
   calculatePayoffTimeline,
   calculateDebtUrgency,
-  calculatePayoffStrategies,
   calculateDebtToIncomeRatio,
 } from "./utils/debtCalculations";
+import {
+  formatCurrency,
+  formatPercentage,
+  formatMonthsToYears,
+} from "./utils/formatting";
 import styles from "./DebtTab.module.css";
 
 const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
   const { data } = useFinancialData();
-  const [selectedDebt, setSelectedDebt] = useState(null);
-  const [compoundingFrequency, setCompoundingFrequency] = useState(12);
-  const [showAmortization, setShowAmortization] = useState(false);
+  const [timelineSelectedDebtId, setTimelineSelectedDebtId] = useState(null);
+  const [sortBy, setSortBy] = useState("urgency");
+
+  // Fixed compounding frequency - most debts compound monthly
+  const compoundingFrequency = 12;
 
   // Memoize accounts and income to prevent unnecessary re-renders
   const accounts = useMemo(() => data?.accounts || [], [data?.accounts]);
@@ -39,7 +41,7 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
   // Enrich debt accounts with calculations
   const enrichedDebts = useMemo(() => {
     return debtAccounts
-      .map((debt) => {
+      .map((debt, index) => {
         const balance = Math.abs(debt.value); // Convert negative debt to positive balance
         const timeline = calculatePayoffTimeline(
           balance,
@@ -58,10 +60,12 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
           value: balance, // Store as positive balance for display
           timeline,
           urgencyScore,
+          // Create a stable, unique key for rendering that doesn't rely on a potentially non-unique ID
+          uniqueRenderKey: `${debt.id}-${index}`,
         };
       })
       .filter((debt) => debt.timeline); // Only include debts with valid timelines
-  }, [debtAccounts, compoundingFrequency]);
+  }, [debtAccounts]);
 
   // Calculate total metrics
   const totalMetrics = useMemo(() => {
@@ -106,10 +110,114 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
     };
   }, [enrichedDebts, budget]);
 
-  // Calculate payoff strategies
-  const payoffStrategies = useMemo(() => {
-    return calculatePayoffStrategies(enrichedDebts);
-  }, [enrichedDebts]);
+  // Sort debts based on selected strategy
+  const sortedDebts = useMemo(() => {
+    const debtsCopy = [...enrichedDebts];
+
+    switch (sortBy) {
+      case "urgency":
+        return debtsCopy.sort((a, b) => b.urgencyScore - a.urgencyScore);
+      case "avalanche":
+        return debtsCopy.sort((a, b) => b.interestRate - a.interestRate);
+      case "snowball":
+        return debtsCopy.sort((a, b) => a.value - b.value);
+      case "balance":
+        return debtsCopy.sort((a, b) => b.value - a.value);
+      case "payment":
+        return debtsCopy.sort((a, b) => b.monthlyPayment - a.monthlyPayment);
+      default:
+        return debtsCopy;
+    }
+  }, [enrichedDebts, sortBy]);
+
+  // Get the selected debt object for timeline tab
+  const timelineSelectedDebt = useMemo(
+    () =>
+      enrichedDebts.find((debt) => debt.id === timelineSelectedDebtId) || null,
+    [timelineSelectedDebtId, enrichedDebts]
+  );
+
+  // **IMPORTANT: Timeline selection logic**
+
+  useEffect(() => {
+    // Initialize timeline selection when debts first load
+    if (enrichedDebts.length > 0 && timelineSelectedDebtId === null) {
+      setTimelineSelectedDebtId(enrichedDebts[0].id);
+    }
+    // If selected debt no longer exists, fallback to first debt
+    else if (enrichedDebts.length > 0 && timelineSelectedDebtId) {
+      const selectionStillExists = enrichedDebts.some(
+        (d) => d.id === timelineSelectedDebtId
+      );
+      if (!selectionStillExists) {
+        setTimelineSelectedDebtId(enrichedDebts[0].id);
+      }
+    }
+    // If no debts exist, clear the selection
+    else if (enrichedDebts.length === 0 && timelineSelectedDebtId !== null) {
+      setTimelineSelectedDebtId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enrichedDebts]); // Intentionally omitting timelineSelectedDebtId to prevent infinite loops
+
+  // Create snapshot items for debt overview
+  const debtSnapshotItems = useMemo(() => {
+    const getDebtRatioStatus = (ratio) => {
+      if (ratio > 40) return "critical";
+      if (ratio > 28) return "warning";
+      if (ratio > 20) return "caution";
+      return "good";
+    };
+
+    const ratioStatus = getDebtRatioStatus(totalMetrics.debtToIncomeRatio);
+
+    return [
+      {
+        label: "Total Debt Balance",
+        value: formatCurrency(totalMetrics.totalBalance),
+        valueClass: "negative",
+        subtext: `Across ${enrichedDebts.length} debt account${
+          enrichedDebts.length !== 1 ? "s" : ""
+        }`,
+      },
+      {
+        label: "Monthly Payments",
+        value: formatCurrency(totalMetrics.totalMonthlyPayments),
+        valueClass: "neutral",
+        subtext: "Combined minimum payments",
+      },
+      {
+        label: "Total Interest Cost",
+        value: formatCurrency(totalMetrics.totalInterest),
+        valueClass: "warning",
+        subtext: "If paid as scheduled",
+      },
+      {
+        label: "Debt-Free Timeline",
+        value: formatMonthsToYears(totalMetrics.payoffMonths),
+        valueClass: "neutral",
+        subtext: "Last debt payoff date",
+      },
+      {
+        label: "Debt-to-Income Ratio",
+        value: formatPercentage(totalMetrics.debtToIncomeRatio, 1),
+        valueClass:
+          ratioStatus === "good"
+            ? "positive"
+            : ratioStatus === "caution"
+            ? "warning"
+            : "negative",
+        subtext:
+          ratioStatus === "good"
+            ? "Healthy ratio"
+            : ratioStatus === "caution"
+            ? "Monitor closely"
+            : ratioStatus === "warning"
+            ? "Consider reduction"
+            : "Immediate attention needed",
+      },
+    ];
+  }, [totalMetrics, enrichedDebts.length]);
 
   // Safety check for data - moved after all hooks
   if (!data) {
@@ -121,16 +229,7 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
     );
   }
 
-  const handleDebtSelect = (debt) => {
-    setSelectedDebt(debt);
-    setShowAmortization(false);
-  };
-
-  const handleShowAmortization = () => {
-    setShowAmortization(true);
-  };
-
-  // --- UI rendering based on inner tab ---
+  // Handle no debt accounts scenario
   if (debtAccounts.length === 0) {
     return (
       <div className={styles.emptyState}>
@@ -147,110 +246,107 @@ const DebtTab = ({ activeInnerTabId = "overviewBalance" }) => {
     );
   }
 
-  // Default to first debt if none selected and needed for timeline/amortization
-  const currentDebt = selectedDebt || enrichedDebts[0];
-
   return (
     <div className={styles.debtTab}>
-      {/* Overview tab: Only show Debt Overview metrics */}
-      {activeInnerTabId === "overviewBalance" && (
-        <Section title="Debt Overview" className={styles.overviewSection}>
-          <DebtMetrics
-            metrics={totalMetrics}
-            debtCount={enrichedDebts.length}
-            compoundingFrequency={compoundingFrequency}
-            onCompoundingChange={setCompoundingFrequency}
-          />
-        </Section>
-      )}
+      {/* Always show snapshot row above content */}
+      <SnapshotRow items={debtSnapshotItems} small={true} columns={5} />
 
-      {/* Balances tab: Show debts grid only, no click/select */}
-      {activeInnerTabId === "balances" && (
-        <Section title="Your Debts" className={styles.debtsSection}>
+      {/* Overview tab */}
+      <div
+        className={styles.tabContent}
+        style={{
+          display: activeInnerTabId === "overviewBalance" ? "block" : "none",
+        }}
+      >
+        <Section
+          key="overviewSection" // STATIC and UNIQUE key
+          header={
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Your Debts</h3>
+              <div className={styles.sortControls}>
+                <label htmlFor="debt-sort" className={styles.sortLabel}>
+                  Sort by:
+                </label>
+                <select
+                  id="debt-sort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className={styles.sortSelect}
+                >
+                  <option value="urgency">Urgency Score</option>
+                  <option value="avalanche">Interest Rate (Highest)</option>
+                  <option value="snowball">Balance (Lowest)</option>
+                  <option value="balance">Balance (Highest)</option>
+                  <option value="payment">Monthly Payment</option>
+                </select>
+              </div>
+            </div>
+          }
+        >
           <div className={styles.debtGrid}>
-            {enrichedDebts.map((debt) => (
+            {/* The DebtCard has its own unique key prop: debt.id */}
+            {sortedDebts.map((debt, index) => (
               <DebtCard
-                key={debt.id}
+                key={debt.uniqueRenderKey}
                 debt={debt}
-                isSelected={false}
-                onSelect={undefined}
                 compoundingFrequency={compoundingFrequency}
+                rank={index + 1}
+                sortBy={sortBy}
               />
             ))}
           </div>
         </Section>
-      )}
+      </div>
 
-      {/* Debt Priorities Tab: Only show priority ranking */}
-      {activeInnerTabId === "debtPriorities" && (
+      {/* Payoff Timeline Tab */}
+      <div
+        className={styles.tabContent}
+        style={{
+          display: activeInnerTabId === "payoffTimeline" ? "block" : "none",
+        }}
+      >
         <Section
-          title="Debt Priority Ranking"
-          className={styles.urgencySection}
+          key="payoffTimelineSection" // STATIC and UNIQUE key
+          header={
+            <div className={styles.sectionHeader}>
+              <h3 className={styles.sectionTitle}>Payoff Timeline</h3>
+              <div className={styles.selectWrapper}>
+                <label
+                  htmlFor="timeline-debt-select"
+                  className={styles.selectLabel}
+                >
+                  Select Debt:
+                </label>
+                <select
+                  id="timeline-debt-select"
+                  value={timelineSelectedDebtId || ""}
+                  onChange={(e) => {
+                    setTimelineSelectedDebtId(e.target.value);
+                  }}
+                  className={styles.debtSelect}
+                >
+                  {enrichedDebts.map((debt) => (
+                    <option key={debt.uniqueRenderKey} value={debt.id}>
+                      {debt.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          }
         >
-          <DebtUrgencyRanking
-            debts={enrichedDebts}
-            strategies={payoffStrategies}
-          />
+          {timelineSelectedDebt ? (
+            <PayoffTimeline
+              debt={timelineSelectedDebt}
+              compoundingFrequency={compoundingFrequency}
+            />
+          ) : (
+            <div className={styles.emptyState}>
+              <p>Please select a debt to view the payoff timeline.</p>
+            </div>
+          )}
         </Section>
-      )}
-
-      {/* Payoff Timeline Tab: Only show timeline for selected debt, allow switching */}
-      {activeInnerTabId === "payoffTimeline" && currentDebt && (
-        <Section title="Payoff Timeline" className={styles.timelineSection}>
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="timeline-debt-select">Select Debt: </label>
-            <select
-              id="timeline-debt-select"
-              value={currentDebt.id}
-              onChange={(e) => {
-                const debt = enrichedDebts.find((d) => d.id === e.target.value);
-                setSelectedDebt(debt);
-              }}
-            >
-              {enrichedDebts.map((debt) => (
-                <option key={debt.id} value={debt.id}>
-                  {debt.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <PayoffTimeline
-            debt={currentDebt}
-            compoundingFrequency={compoundingFrequency}
-          />
-        </Section>
-      )}
-
-      {/* Amortization Tab: Only show amortization for selected debt, allow switching */}
-      {activeInnerTabId === "amortization" && currentDebt && (
-        <Section
-          title="Amortization Schedule"
-          className={styles.amortizationSection}
-        >
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="amortization-debt-select">Select Debt: </label>
-            <select
-              id="amortization-debt-select"
-              value={currentDebt.id}
-              onChange={(e) => {
-                const debt = enrichedDebts.find((d) => d.id === e.target.value);
-                setSelectedDebt(debt);
-              }}
-            >
-              {enrichedDebts.map((debt) => (
-                <option key={debt.id} value={debt.id}>
-                  {debt.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <AmortizationTable
-            debt={currentDebt}
-            compoundingFrequency={compoundingFrequency}
-            onClose={() => {}}
-          />
-        </Section>
-      )}
+      </div>
     </div>
   );
 };

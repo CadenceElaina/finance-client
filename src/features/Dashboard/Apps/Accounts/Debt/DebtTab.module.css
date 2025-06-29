@@ -1,95 +1,151 @@
 .debtTab {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1rem;
+  gap: var(--space-sm);
+  padding: var(--space-sm);
 }
 
 .emptyState {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: var(--space-sm) var(--space-sm);
   color: var(--text-secondary);
 }
 
 .emptyState h3 {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-sm);
   color: var(--text-primary);
 }
 
 .emptyState p {
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-xs);
   line-height: 1.5;
-}
-
-.overviewSection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.debtsSection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
 }
 
 .debtGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  justify-content: center;
+  place-items: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.urgencySection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  width: 100%;
 }
 
-.timelineSection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
+.sectionTitle {
+  margin: 0;
+  flex-grow: 1;
+}
+
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sortLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sortSelect {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-speed-normal) ease;
+  min-width: 200px;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.sortSelect:hover {
+  border-color: var(--color-primary);
+}
+
+.selectWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.selectLabel {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.debtSelect {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-speed-normal) ease;
+  min-width: 200px;
+}
+
+.debtSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.debtSelect:hover {
+  border-color: var(--color-primary);
 }
 
 .timelineActions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 1rem;
-  gap: 0.5rem;
-}
-
-.scenariosSection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.amortizationSection {
-  background: var(--surface-primary);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
+  margin-top: var(--space-sm);
+  gap: var(--space-xs);
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .debtTab {
-    padding: 0.5rem;
-    gap: 1rem;
+    padding: var(--space-xs);
+    gap: var(--space-sm);
   }
   
   .debtGrid {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: var(--space-sm);
+    max-width: 100%;
   }
   
-  .overviewSection,
-  .debtsSection,
-  .urgencySection,
-  .timelineSection,
-  .scenariosSection,
-  .amortizationSection {
-    padding: 1rem;
+  .sortControls,
+  .selectWrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-xs);
+  }
+  
+  .sortSelect,
+  .debtSelect {
+    min-width: auto;
   }
   
   .timelineActions {
@@ -99,10 +155,15 @@
 
 @media (max-width: 480px) {
   .debtTab {
-    padding: 0.25rem;
+    padding: var(--space-xxs);
   }
   
   .timelineActions {
     flex-direction: column;
+  }
+  
+  .sortControls,
+  .selectWrapper {
+    padding: var(--space-xs);
   }
 }

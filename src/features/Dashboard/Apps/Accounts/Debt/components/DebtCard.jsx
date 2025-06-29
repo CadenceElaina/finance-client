@@ -2,7 +2,7 @@ import React from "react";
 import { formatCurrency, formatPercentage } from "../utils/formatting";
 import styles from "./DebtCard.module.css";
 
-const DebtCard = ({ debt, isSelected, onSelect }) => {
+const DebtCard = ({ debt }) => {
   const {
     name,
     subType,
@@ -33,12 +33,7 @@ const DebtCard = ({ debt, isSelected, onSelect }) => {
     : 0;
 
   return (
-    <div
-      className={`${styles.debtCard} ${isSelected ? styles.selected : ""} ${
-        styles[urgencyLevel]
-      }`}
-      onClick={onSelect}
-    >
+    <div className={`${styles.debtCard} ${styles[urgencyLevel]}`}>
       <div className={styles.header}>
         <div className={styles.nameSection}>
           <h3 className={styles.debtName}>{name}</h3>
@@ -98,9 +93,7 @@ const DebtCard = ({ debt, isSelected, onSelect }) => {
         </div>
       )}
 
-      <div className={styles.footer}>
-        <span className={styles.clickHint}>Click for detailed analysis</span>
-      </div>
+      <div className={styles.footer}></div>
     </div>
   );
 };

@@ -160,6 +160,7 @@ export const DEMO_ACCOUNTS = [
     monthlyPayment: 150 
   },
   { 
+    id: "acc-7",
     name: "Student Loan", 
     category: "Debt", 
     subType: "Student Loan", 

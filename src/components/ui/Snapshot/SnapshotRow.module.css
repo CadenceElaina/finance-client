@@ -106,12 +106,41 @@
 .trendIndicator.down { color: var(--status-danger); }
 .trendIndicator.stable { color: var(--text-tertiary); }
 
+/* Fixed column layouts for more compact layouts */
+.columns5 {
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-xs);
+}
+
+.columns5 .snapshotItem {
+    padding: var(--space-xs) var(--space-xs);
+    min-width: 0;
+}
+
+.columns5 .snapshotLabel {
+    font-size: var(--font-size-xxs);
+}
+
+.columns5 .value,
+.columns5 .valueSmall {
+    font-size: var(--font-size-sm);
+}
+
+.columns5 .snapshotSubtext {
+    font-size: var(--font-size-xxxs);
+}
+
 /* Responsive tweaks */
 @media (max-width: 768px) {
     .snapshotRow {
         grid-template-columns: repeat(2, 1fr);
         gap: var(--space-xs);
     }
+    
+    .columns5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
     .snapshotItem {
         padding: var(--space-sm);
     }
@@ -119,5 +148,9 @@
 @media (max-width: 480px) {
     .snapshotRow {
         grid-template-columns: 1fr;
+    }
+    
+    .columns5 {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

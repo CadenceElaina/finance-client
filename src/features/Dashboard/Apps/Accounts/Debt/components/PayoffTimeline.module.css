@@ -24,6 +24,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .summaryItem {
@@ -46,113 +47,40 @@
   letter-spacing: 0.5px;
 }
 
-.progressSection {
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.progressHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.progressHeader h4 {
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.progressPercentage {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.progressBar {
-  width: 100%;
-  height: 12px;
-  background: var(--surface-primary);
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 0.5rem;
-  border: 1px solid var(--border-color);
-}
-
-.progress {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-  transition: width 0.3s ease;
-}
-
-.progressLabels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.milestonesSection {
-  background: var(--surface-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-}
-
-.milestonesSection h4 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
-}
-
-.milestonesGrid {
+/* Compact Insights Grid */
+.insightsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.milestone {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  padding: 1rem;
-  text-align: center;
-  transition: all 0.2s ease;
-}
-
-.milestone:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.milestoneMonth {
-  font-size: 0.875rem;
-  color: var(--primary-color);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.milestoneBalance {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.milestoneProgress {
-  font-size: 0.875rem;
-  color: var(--success-color);
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-}
-
-.milestoneBreakdown {
+.compactInsight {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.75rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--surface-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.insightIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.insightText {
+  font-size: 0.875rem;
   color: var(--text-secondary);
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.insightText strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .chartSection {
@@ -180,31 +108,89 @@
   gap: 0.5rem;
   height: 200px;
   padding: 1rem 0;
+}
+
+.chartYAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 200px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  padding-right: 0.5rem;
+  writing-mode: horizontal-tb;
+}
+
+.chartBars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 200px;
+  flex: 1;
+  padding: 0;
   border-bottom: 2px solid var(--border-color);
   border-left: 2px solid var(--border-color);
+  position: relative;
+  background: 
+    linear-gradient(to right, rgba(var(--border-color-rgb), 0.1) 1px, transparent 1px),
+    linear-gradient(to top, rgba(var(--border-color-rgb), 0.1) 1px, transparent 1px);
+  background-size: 10% 20%;
 }
 
 .chartBar {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   align-items: center;
   height: 100%;
   position: relative;
+  min-width: 8px;
+  max-width: 40px;
 }
 
-.bar {
+.barPaidOff {
   width: 100%;
-  background: linear-gradient(180deg, var(--danger-color), var(--warning-color), var(--success-color));
-  border-radius: 2px 2px 0 0;
-  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  min-height: 2px;
   transition: all 0.3s ease;
   cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.bar:hover {
+.barRemaining {
+  width: 100%;
+  border-radius: 0 0 4px 4px;
+  min-height: 2px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barSingle {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 2px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.barPaidOff:hover,
+.barRemaining:hover,
+.barSingle:hover {
   opacity: 0.8;
-  transform: scaleX(1.1);
+  transform: scaleX(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.barComplete {
+  background: linear-gradient(180deg, var(--success-color), var(--primary-color)) !important;
+  box-shadow: 0 0 12px rgba(var(--success-color-rgb), 0.4);
+  border-color: var(--success-color);
 }
 
 .chartLabel {
@@ -215,33 +201,134 @@
   white-space: nowrap;
 }
 
-.chartAxis {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 200px;
-  padding: 1rem 0;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
+/* Payment Milestones */
+.milestonesSection {
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
 }
 
-/* Responsive design */
+.milestonesSection h4 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.milestonesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.milestone {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.milestone:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-color);
+}
+
+.milestoneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.milestoneMonth {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(var(--primary-color-rgb), 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--primary-color-rgb), 0.2);
+}
+
+.milestoneProgress {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+}
+
+.milestoneBalance {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.milestoneBreakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.breakdownItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breakdownLabel {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.breakdownValue {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .summaryGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
   
-  .progressHeader {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: center;
+  .insightsGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .compactInsight {
+    padding: 0.75rem;
+  }
+  
+  .insightIcon {
+    font-size: 1.25rem;
   }
   
   .milestonesGrid {
     grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .milestone {
+    padding: 0.75rem;
+  }
+  
+  .milestoneHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
   }
   
   .chartContainer {
@@ -253,13 +340,14 @@
     height: 150px;
   }
   
-  .chartAxis {
-    height: auto;
-    flex-direction: row;
-    writing-mode: horizontal-tb;
-    text-orientation: upright;
-    justify-content: space-between;
-    padding: 0.5rem 0;
+  .chartYAxis {
+    font-size: 0.6rem;
+    padding-right: 0.25rem;
+  }
+  
+  .chartBars {
+    gap: 0.25rem;
+    height: 150px;
   }
 }
 
@@ -269,7 +357,6 @@
   }
   
   .summaryCard,
-  .progressSection,
   .milestonesSection,
   .chartSection {
     padding: 1rem;
@@ -277,6 +364,7 @@
   
   .summaryGrid {
     grid-template-columns: 1fr;
+    margin-bottom: 1rem;
   }
   
   .summaryValue {
@@ -286,4 +374,42 @@
   .chart {
     height: 120px;
   }
+  
+  .chartBars {
+    height: 120px;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+}
+
+.tooltipTitle {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.tooltipItem {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tooltipItem span:first-child {
+  color: var(--text-secondary);
+}
+
+.tooltipItem span:last-child {
+  font-weight: 600;
+  color: var(--text-primary);
 }

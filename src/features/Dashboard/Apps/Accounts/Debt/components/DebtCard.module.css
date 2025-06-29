@@ -2,11 +2,14 @@
   background: var(--surface-secondary);
   border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  padding: 1.25rem;
+  padding: var(--space-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .debtCard:hover {
@@ -21,47 +24,80 @@
   background: var(--surface-primary);
 }
 
-/* Urgency level styling */
+/* Urgency level styling with stronger emphasis */
 .debtCard.critical {
-  border-left: 4px solid var(--danger-color);
+  border: 2px solid #dc2626;
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.05), var(--surface-secondary));
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.15);
+}
+
+.debtCard.critical:hover {
+  border-color: #dc2626;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25);
+  transform: translateY(-3px);
 }
 
 .debtCard.high {
-  border-left: 4px solid var(--warning-color);
+  border: 2px solid #ea580c;
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.04), var(--surface-secondary));
+  box-shadow: 0 3px 12px rgba(234, 88, 12, 0.12);
+}
+
+.debtCard.high:hover {
+  border-color: #ea580c;
+  box-shadow: 0 5px 16px rgba(234, 88, 12, 0.2);
+  transform: translateY(-2px);
 }
 
 .debtCard.medium {
-  border-left: 4px solid var(--info-color);
+  border: 2px solid #f59e0b;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03), var(--surface-secondary));
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.1);
+}
+
+.debtCard.medium:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+  transform: translateY(-2px);
 }
 
 .debtCard.low {
-  border-left: 4px solid var(--success-color);
+  border: 2px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.02), var(--surface-secondary));
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+}
+
+.debtCard.low:hover {
+  border-color: #10b981;
+  box-shadow: 0 3px 12px rgba(16, 185, 129, 0.12);
+  transform: translateY(-1px);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-sm);
 }
 
 .nameSection {
   flex: 1;
+  margin-right: var(--space-sm);
 }
 
 .debtName {
-  font-size: 1.1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 0.25rem 0;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .debtType {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   background: var(--surface-tertiary);
-  padding: 0.25rem 0.5rem;
+  padding: var(--space-xxs) var(--space-xs);
   border-radius: 4px;
   display: inline-block;
 }
@@ -71,18 +107,58 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-width: 60px;
+  min-width: 50px;
+  padding: var(--space-xs);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+}
+
+.debtCard.critical .urgencyBadge {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.debtCard.high .urgencyBadge {
+  background: rgba(234, 88, 12, 0.1);
+  border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+.debtCard.medium .urgencyBadge {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.debtCard.low .urgencyBadge {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .urgencyScore {
-  font-size: 1.25rem;
+  font-size: var(--font-size-base);
   font-weight: 700;
-  color: var(--text-primary);
   line-height: 1;
+  margin-bottom: var(--space-xxs);
+}
+
+.debtCard.critical .urgencyScore {
+  color: #dc2626;
+}
+
+.debtCard.high .urgencyScore {
+  color: #ea580c;
+}
+
+.debtCard.medium .urgencyScore {
+  color: #f59e0b;
+}
+
+.debtCard.low .urgencyScore {
+  color: #10b981;
 }
 
 .urgencyLabel {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -91,8 +167,8 @@
 .balanceSection {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .currentBalance,
@@ -102,27 +178,27 @@
 }
 
 .label {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 0.25rem;
+  margin-bottom: var(--space-xxs);
 }
 
 .amount {
-  font-size: 1.25rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .rate {
-  font-size: 1.1rem;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--warning-color);
 }
 
 .paymentSection {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-sm);
 }
 
 .monthlyPayment {
@@ -131,20 +207,20 @@
 }
 
 .payment {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--primary-color);
 }
 
 .timelineSection {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-sm);
 }
 
 .payoffInfo {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .timeToPayoff,
@@ -154,13 +230,13 @@
 }
 
 .time {
-  font-size: 1rem;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .interest {
-  font-size: 1rem;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--danger-color);
 }
@@ -181,12 +257,12 @@
 
 .footer {
   text-align: center;
-  padding-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--border-color);
 }
 
 .clickHint {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-secondary);
   font-style: italic;
 }
@@ -194,41 +270,54 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .debtCard {
-    padding: 1rem;
+    padding: 0.75rem;
+    max-width: 100%;
   }
   
   .header {
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .nameSection {
+    margin-right: 0;
   }
   
   .urgencyBadge {
-    align-self: flex-end;
+    align-self: flex-start;
+    min-width: 45px;
+    padding: 0.375rem;
   }
   
   .balanceSection {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
   
   .payoffInfo {
     grid-template-columns: 1fr;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .debtCard {
-    padding: 0.75rem;
+    padding: 0.6rem;
   }
   
   .debtName {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   .amount,
   .rate,
   .payment {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .time,
+  .interest {
+    font-size: 0.85rem;
   }
 }

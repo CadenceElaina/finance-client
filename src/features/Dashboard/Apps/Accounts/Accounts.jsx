@@ -67,10 +67,7 @@ const Accounts = React.memo(() => {
         label: "Debt",
         innerTabs: [
           { id: "overviewBalance", label: "Overview" },
-          { id: "balances", label: "Balances" },
-          { id: "debtPriorities", label: "Debt Priorities" },
           { id: "payoffTimeline", label: "Payoff Timeline" },
-          { id: "amortization", label: "Amortization" },
         ],
         component: ({ smallApp: flexTabsSmallApp, activeInnerTabId }) => (
           <DebtTab
