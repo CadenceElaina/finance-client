@@ -4,14 +4,16 @@ import {
   setCustomMerchantName,
   removeCustomMerchantName,
   getMerchantNameSuggestions,
+  clearAllCustomMerchantNames,
 } from "../utils/customMerchantNames";
 import {
   getAllMerchantsWithDefaults,
   createNamedDefault,
-  removeNamedDefault,
+  clearAllNamedDefaults,
+  clearAllMerchantHistory,
 } from "../utils/merchantHistory";
-import Section from "../../../../../../components/ui/Section/Section";
 import Button from "../../../../../../components/ui/Button/Button";
+import MerchantDefaultManager from "./MerchantDefaultManager";
 import styles from "./MerchantManagementTab.module.css";
 
 const MerchantManagementTab = () => {
@@ -22,14 +24,8 @@ const MerchantManagementTab = () => {
     getAllMerchantsWithDefaults()
   );
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("custom-names");
-  const [editingDefault, setEditingDefault] = useState(null); // Track which default is being edited
-  const [editingDefaultData, setEditingDefaultData] = useState({
-    name: "",
-    category: "",
-    subcategory: "",
-    notes: "",
-  });
+  const [activeTab, setActiveTab] = useState("merchants");
+  const [selectedMerchant, setSelectedMerchant] = useState(null); // For editing merchant defaults
 
   // New merchant creation
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -64,7 +60,7 @@ const MerchantManagementTab = () => {
     if (newMerchant.category) {
       createNamedDefault(
         newMerchant.customName,
-        "Default",
+        "Main Default",
         newMerchant.category,
         newMerchant.subcategory || "",
         newMerchant.notes || "",
@@ -85,96 +81,90 @@ const MerchantManagementTab = () => {
     refreshData();
   };
 
-  const handleRemoveCustomName = (merchant) => {
-    if (
-      window.confirm(
-        `Remove custom name "${merchant.customName}" for this merchant?`
-      )
-    ) {
-      removeCustomMerchantName(merchant.rawMerchant, merchant.location);
-      refreshData();
-    }
-  };
+  // Combined search for merchants and defaults - FIXED to consolidate properly
+  const allMerchants = useMemo(() => {
+    const merchantMap = new Map();
 
-  const handleRemoveDefault = (merchantName, defaultName) => {
-    if (
-      window.confirm(`Remove default "${defaultName}" for ${merchantName}?`)
-    ) {
-      removeNamedDefault(merchantName, defaultName);
-      refreshData();
-    }
-  };
+    // First, process all custom merchants and group by final merchant name
+    customMerchants.forEach((customMapping) => {
+      const merchantName = customMapping.customName.toLowerCase();
 
-  const handleEditDefault = (merchantName, defaultName, defaultData) => {
-    setEditingDefault(`${merchantName}-${defaultName}`);
-    setEditingDefaultData({
-      name: defaultName,
-      category: defaultData.category,
-      subcategory: defaultData.subCategory || defaultData.subcategory,
-      notes: defaultData.notes || "",
+      if (!merchantMap.has(merchantName)) {
+        merchantMap.set(merchantName, {
+          name: customMapping.customName,
+          rawMappings: [],
+          defaults: [],
+          type: "custom",
+        });
+      }
+
+      const merchant = merchantMap.get(merchantName);
+      merchant.rawMappings.push({
+        rawMerchant: customMapping.rawMerchant,
+        location: customMapping.location,
+        key: customMapping.key,
+      });
     });
-  };
 
-  const handleSaveDefaultEdit = (merchantName, originalDefaultName) => {
-    if (
-      !editingDefaultData.name.trim() ||
-      !editingDefaultData.category.trim()
-    ) {
-      alert("Please provide both a name and category for the default");
-      return;
-    }
+    // Then, add defaults to corresponding merchants
+    merchantsWithDefaults.forEach((merchantWithDefaults) => {
+      const merchantName = (
+        merchantWithDefaults.originalName || merchantWithDefaults.normalizedName
+      ).toLowerCase();
 
-    // If the name changed, remove the old default
-    if (originalDefaultName !== editingDefaultData.name.trim()) {
-      removeNamedDefault(merchantName, originalDefaultName);
-    }
+      if (!merchantMap.has(merchantName)) {
+        merchantMap.set(merchantName, {
+          name:
+            merchantWithDefaults.originalName ||
+            merchantWithDefaults.normalizedName,
+          rawMappings: [],
+          defaults: [],
+          type: "defaults-only",
+        });
+      }
 
-    // Create/update the default
-    createNamedDefault(
-      merchantName,
-      editingDefaultData.name.trim(),
-      editingDefaultData.category,
-      editingDefaultData.subcategory,
-      editingDefaultData.notes
-    );
-
-    setEditingDefault(null);
-    setEditingDefaultData({
-      name: "",
-      category: "",
-      subcategory: "",
-      notes: "",
+      const merchant = merchantMap.get(merchantName);
+      merchant.defaults = merchantWithDefaults.defaults
+        ? merchantWithDefaults.defaults.map((d) => d.name)
+        : [];
+      merchant.merchantData = merchantWithDefaults;
     });
-    refreshData();
-  };
 
-  const handleCancelDefaultEdit = () => {
-    setEditingDefault(null);
-    setEditingDefaultData({
-      name: "",
-      category: "",
-      subcategory: "",
-      notes: "",
-    });
-  };
+    return Array.from(merchantMap.values());
+  }, [customMerchants, merchantsWithDefaults]);
 
-  const filteredCustomMerchants = useMemo(() => {
-    if (!searchTerm) return customMerchants;
+  const filteredMerchants = useMemo(() => {
+    if (!searchTerm) return allMerchants;
     const term = searchTerm.toLowerCase();
-    return customMerchants.filter(
+    return allMerchants.filter(
       (merchant) =>
-        merchant.customName.toLowerCase().includes(term) ||
-        merchant.rawMerchant.toLowerCase().includes(term)
+        merchant.name.toLowerCase().includes(term) ||
+        merchant.rawMappings.some(
+          (mapping) =>
+            mapping.rawMerchant.toLowerCase().includes(term) ||
+            (mapping.location && mapping.location.toLowerCase().includes(term))
+        ) ||
+        merchant.defaults.some((defaultName) =>
+          defaultName.toLowerCase().includes(term)
+        )
     );
-  }, [customMerchants, searchTerm]);
+  }, [allMerchants, searchTerm]);
 
-  const filteredMerchantsWithDefaults = useMemo(() => {
-    if (!searchTerm) return merchantsWithDefaults;
-    const term = searchTerm.toLowerCase();
-    return merchantsWithDefaults.filter((merchant) =>
-      merchant.merchantName.toLowerCase().includes(term)
-    );
-  }, [merchantsWithDefaults, searchTerm]);
+  const handleDeleteAll = () => {
+    const confirmMessage = `This will delete ALL merchant data including:
+- ${customMerchants.length} custom merchant names
+- ${merchantsWithDefaults.length} merchants with defaults
+- All merchant history and preferences
+
+This action cannot be undone. Are you sure?`;
+
+    if (window.confirm(confirmMessage)) {
+      clearAllCustomMerchantNames();
+      clearAllNamedDefaults();
+      clearAllMerchantHistory();
+      refreshData();
+    }
+  };
 
   const getSuggestions = (rawMerchant) => {
     return getMerchantNameSuggestions(rawMerchant);
@@ -187,19 +177,31 @@ const MerchantManagementTab = () => {
         <div className={styles.searchContainer}>
           <input
             type="text"
-            placeholder="Search merchants..."
+            placeholder="Search merchants and defaults..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
           />
         </div>
-        <Button
-          variant="primary"
-          onClick={() => setShowCreateForm(true)}
-          className={styles.createButton}
-        >
-          New Merchant
-        </Button>
+        <div className={styles.buttonGroup}>
+          <Button
+            variant="primary"
+            onClick={() => setShowCreateForm(true)}
+            className={styles.createButton}
+          >
+            New Merchant
+          </Button>
+          {(customMerchants.length > 0 || merchantsWithDefaults.length > 0) && (
+            <Button
+              variant="danger"
+              onClick={handleDeleteAll}
+              className={styles.deleteAllButton}
+              title="Delete all merchant data"
+            >
+              Delete All
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Create New Merchant Form */}
@@ -298,27 +300,16 @@ const MerchantManagementTab = () => {
                   <option value="Entertainment">Entertainment</option>
                   <option value="Bills & Utilities">Bills & Utilities</option>
                   <option value="Healthcare">Healthcare</option>
-                  <option value="Education">Education</option>
                   <option value="Personal Care">Personal Care</option>
+                  <option value="Education">Education</option>
+                  <option value="Travel">Travel</option>
                   <option value="Home">Home</option>
+                  <option value="Gifts & Donations">Gifts & Donations</option>
+                  <option value="Business">Business</option>
+                  <option value="Fees & Charges">Fees & Charges</option>
+                  <option value="Taxes">Taxes</option>
                   <option value="Other">Other</option>
                 </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Subcategory (optional):</label>
-                <input
-                  type="text"
-                  value={newMerchant.subcategory}
-                  onChange={(e) =>
-                    setNewMerchant((prev) => ({
-                      ...prev,
-                      subcategory: e.target.value,
-                    }))
-                  }
-                  placeholder="e.g., Groceries, Fast Food, etc."
-                  className={styles.input}
-                />
               </div>
 
               <div className={styles.formGroup}>
@@ -332,16 +323,15 @@ const MerchantManagementTab = () => {
                       notes: e.target.value,
                     }))
                   }
-                  placeholder="Any additional notes"
+                  placeholder="e.g., Gas station purchases"
                   className={styles.input}
                 />
               </div>
             </div>
           </div>
-
           <div className={styles.formActions}>
             <Button variant="primary" onClick={handleCreateMerchant}>
-              Create Merchant
+              Create
             </Button>
             <Button
               variant="secondary"
@@ -357,241 +347,179 @@ const MerchantManagementTab = () => {
       <div className={styles.tabs}>
         <button
           className={`${styles.tab} ${
-            activeTab === "custom-names" ? styles.active : ""
+            activeTab === "merchants" ? styles.active : ""
           }`}
-          onClick={() => setActiveTab("custom-names")}
+          onClick={() => setActiveTab("merchants")}
         >
-          Custom Names ({filteredCustomMerchants.length})
+          All Merchants ({filteredMerchants.length})
         </button>
         <button
           className={`${styles.tab} ${
-            activeTab === "defaults" ? styles.active : ""
+            activeTab === "stats" ? styles.active : ""
           }`}
-          onClick={() => setActiveTab("defaults")}
+          onClick={() => setActiveTab("stats")}
         >
-          Named Defaults ({filteredMerchantsWithDefaults.length})
+          Statistics
         </button>
       </div>
 
       {/* Tab Content */}
       <div className={styles.tabContent}>
-        {activeTab === "custom-names" && (
+        {activeTab === "merchants" && (
           <div className={styles.merchantsList}>
-            <h4>Custom Merchant Names</h4>
-            <p className={styles.description}>
-              These are custom names you've assigned to raw merchant data from
-              CSV imports.
-            </p>
-            {filteredCustomMerchants.length === 0 ? (
+            <div className={styles.sectionHeader}>
+              <h4>Your Merchants & Defaults</h4>
+              <p>
+                Click a merchant to manage its defaults. Create multiple named
+                defaults for different purposes.
+              </p>
+            </div>
+            {filteredMerchants.length === 0 ? (
               <div className={styles.emptyState}>
-                <p>No custom merchant names found.</p>
-                <p>Create one above to get started!</p>
-              </div>
-            ) : (
-              filteredCustomMerchants.map((merchant) => (
-                <div key={merchant.key} className={styles.merchantItem}>
-                  <div className={styles.merchantInfo}>
-                    <div className={styles.customName}>
-                      {merchant.customName}
-                    </div>
-                    <div className={styles.rawMerchant}>
-                      Raw: {merchant.rawMerchant}
-                      {merchant.location && ` (${merchant.location})`}
-                    </div>
-                    <div className={styles.stats}>
-                      Used {merchant.usageCount || 0} times
-                      {merchant.lastUsed && (
-                        <span>
-                          {" "}
-                          • Last used:{" "}
-                          {new Date(merchant.lastUsed).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className={styles.actions}>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleRemoveCustomName(merchant)}
-                      className={styles.removeButton}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-
-        {activeTab === "defaults" && (
-          <div className={styles.merchantsList}>
-            <h4>Named Defaults</h4>
-            <p className={styles.description}>
-              Merchants with saved categorization defaults for faster
-              transaction processing.
-            </p>
-            {filteredMerchantsWithDefaults.length === 0 ? (
-              <div className={styles.emptyState}>
-                <p>No merchant defaults found.</p>
+                <p>No merchants found.</p>
                 <p>
-                  Defaults are created when you categorize transactions during
-                  import.
+                  Import transactions or create a merchant mapping to get
+                  started!
                 </p>
               </div>
             ) : (
-              filteredMerchantsWithDefaults.map((merchant) => (
+              filteredMerchants.map((merchant) => (
                 <div
-                  key={merchant.merchantName}
-                  className={styles.merchantItem}
+                  key={merchant.name}
+                  className={`${styles.merchantItem} ${styles.clickable}`}
+                  onClick={() => setSelectedMerchant(merchant)}
                 >
                   <div className={styles.merchantInfo}>
-                    <div className={styles.merchantName}>
-                      {merchant.merchantName}
+                    <div className={styles.merchantHeader}>
+                      <div className={styles.merchantName}>
+                        {merchant.name}
+                        {merchant.type === "custom" && (
+                          <span className={styles.customBadge}>Custom</span>
+                        )}
+                      </div>
+                      <div className={styles.defaultsCount}>
+                        {merchant.defaults.length} default
+                        {merchant.defaults.length !== 1 ? "s" : ""} •{" "}
+                        {merchant.rawMappings.length} mapping
+                        {merchant.rawMappings.length !== 1 ? "s" : ""}
+                      </div>
                     </div>
-                    <div className={styles.defaults}>
-                      {merchant.defaults.map((defaultItem) => {
-                        const editKey = `${merchant.merchantName}-${defaultItem.name}`;
-                        const isEditing = editingDefault === editKey;
-
-                        return (
-                          <div
-                            key={defaultItem.name}
-                            className={styles.defaultItem}
-                          >
-                            {isEditing ? (
-                              <div className={styles.editingDefault}>
-                                <div className={styles.editField}>
-                                  <label>Name:</label>
-                                  <input
-                                    type="text"
-                                    value={editingDefaultData.name}
-                                    onChange={(e) =>
-                                      setEditingDefaultData((prev) => ({
-                                        ...prev,
-                                        name: e.target.value,
-                                      }))
-                                    }
-                                    className={styles.editInput}
-                                  />
-                                </div>
-                                <div className={styles.editField}>
-                                  <label>Category:</label>
-                                  <input
-                                    type="text"
-                                    value={editingDefaultData.category}
-                                    onChange={(e) =>
-                                      setEditingDefaultData((prev) => ({
-                                        ...prev,
-                                        category: e.target.value,
-                                      }))
-                                    }
-                                    className={styles.editInput}
-                                  />
-                                </div>
-                                <div className={styles.editField}>
-                                  <label>Subcategory:</label>
-                                  <input
-                                    type="text"
-                                    value={editingDefaultData.subcategory}
-                                    onChange={(e) =>
-                                      setEditingDefaultData((prev) => ({
-                                        ...prev,
-                                        subcategory: e.target.value,
-                                      }))
-                                    }
-                                    className={styles.editInput}
-                                  />
-                                </div>
-                                <div className={styles.editField}>
-                                  <label>Notes:</label>
-                                  <input
-                                    type="text"
-                                    value={editingDefaultData.notes}
-                                    onChange={(e) =>
-                                      setEditingDefaultData((prev) => ({
-                                        ...prev,
-                                        notes: e.target.value,
-                                      }))
-                                    }
-                                    className={styles.editInput}
-                                  />
-                                </div>
-                                <div className={styles.editActions}>
-                                  <Button
-                                    variant="primary"
-                                    onClick={() =>
-                                      handleSaveDefaultEdit(
-                                        merchant.merchantName,
-                                        defaultItem.name
-                                      )
-                                    }
-                                    className={styles.saveButton}
-                                  >
-                                    Save
-                                  </Button>
-                                  <Button
-                                    variant="secondary"
-                                    onClick={handleCancelDefaultEdit}
-                                    className={styles.cancelButton}
-                                  >
-                                    Cancel
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <div className={styles.defaultText}>
-                                  <strong>{defaultItem.name}:</strong>{" "}
-                                  {defaultItem.category}
-                                  {defaultItem.subcategory &&
-                                    ` → ${defaultItem.subcategory}`}
-                                  {defaultItem.notes && (
-                                    <div className={styles.notes}>
-                                      Notes: {defaultItem.notes}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className={styles.defaultActions}>
-                                  <Button
-                                    variant="secondary"
-                                    onClick={() =>
-                                      handleEditDefault(
-                                        merchant.merchantName,
-                                        defaultItem.name,
-                                        defaultItem
-                                      )
-                                    }
-                                    className={styles.editButton}
-                                  >
-                                    Edit
-                                  </Button>
-                                  <Button
-                                    variant="danger"
-                                    onClick={() =>
-                                      handleRemoveDefault(
-                                        merchant.merchantName,
-                                        defaultItem.name
-                                      )
-                                    }
-                                    className={styles.removeDefaultButton}
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              </>
-                            )}
+                    {merchant.rawMappings.length > 0 && (
+                      <div className={styles.rawMappings}>
+                        <span className={styles.rawMappingsLabel}>
+                          📋 Raw data mappings:
+                        </span>
+                        {merchant.rawMappings
+                          .slice(0, 2)
+                          .map((mapping, idx) => (
+                            <div key={idx} className={styles.rawMappingItem}>
+                              {mapping.rawMerchant}
+                              {mapping.location && ` (${mapping.location})`}
+                            </div>
+                          ))}
+                        {merchant.rawMappings.length > 2 && (
+                          <div className={styles.moreRawMappings}>
+                            +{merchant.rawMappings.length - 2} more mappings
                           </div>
-                        );
-                      })}
-                    </div>
+                        )}
+                      </div>
+                    )}
+                    {merchant.defaults.length > 0 && (
+                      <div className={styles.defaultsList}>
+                        <span className={styles.defaultsLabel}>
+                          ⚙️ Defaults:
+                        </span>
+                        {merchant.defaults.slice(0, 3).map((defaultName) => (
+                          <span key={defaultName} className={styles.defaultTag}>
+                            {defaultName}
+                          </span>
+                        ))}
+                        {merchant.defaults.length > 3 && (
+                          <span className={styles.moreDefaults}>
+                            +{merchant.defaults.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.merchantActions}>
+                    <button
+                      className={styles.editButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedMerchant(merchant);
+                      }}
+                      title="Manage merchant"
+                    >
+                      ⚙️
+                    </button>
+                    {merchant.type === "custom" &&
+                      merchant.rawMappings.length > 0 && (
+                        <button
+                          className={styles.removeButton}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (
+                              window.confirm(
+                                `Remove all custom mappings for ${merchant.name}?`
+                              )
+                            ) {
+                              merchant.rawMappings.forEach((mapping) => {
+                                removeCustomMerchantName(
+                                  mapping.rawMerchant,
+                                  mapping.location
+                                );
+                              });
+                              refreshData();
+                            }
+                          }}
+                          title="Remove all custom mappings"
+                        >
+                          🗑️
+                        </button>
+                      )}
                   </div>
                 </div>
               ))
             )}
           </div>
         )}
+
+        {activeTab === "stats" && (
+          <div className={styles.statsView}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statValue}>{customMerchants.length}</div>
+                <div className={styles.statLabel}>Custom Merchants</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statValue}>
+                  {merchantsWithDefaults.length}
+                </div>
+                <div className={styles.statLabel}>Merchants with Defaults</div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statValue}>
+                  {merchantsWithDefaults.reduce(
+                    (total, m) => total + Object.keys(m.defaults).length,
+                    0
+                  )}
+                </div>
+                <div className={styles.statLabel}>Total Defaults</div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Selected Merchant Modal for editing defaults */}
+      {selectedMerchant && (
+        <MerchantDefaultManager
+          merchantName={selectedMerchant.name}
+          onClose={() => setSelectedMerchant(null)}
+          onUpdate={refreshData}
+        />
+      )}
     </div>
   );
 };

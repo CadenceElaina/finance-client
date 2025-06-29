@@ -98,55 +98,112 @@ export const formatLocation = (address, cityState, zipCode) => {
  * @param {object} original - The original transaction data from CSV.
  * @returns {string} - The formatted description.
  */
+/**
+ * Formats the transaction description by combining and cleaning fields.
+ * Removes redundant information, deduplicates data from Extended Details and Description,
+ * and removes information already found in location.
+ * @param {object} original - The original transaction data from CSV.
+ * @returns {string} - The formatted description.
+ */
 export const formatDescription = (original) => {
-  const { description = "", extended_details = "", merchant = "" } = original;
+  const { description = "", extended_details = "", merchant = "", address = "", cityState = "" } = original;
 
-  // Start with the most descriptive field, preferring extended_details
-  let baseDescription = (extended_details || description || "").trim();
-  let cleanedMerchant = cleanMerchantName(merchant)
-    .replace(/UNKNOWN MERCHANT/i, "")
-    .trim();
+  // Collect all available text sources
+  let sources = [extended_details.trim(), description.trim()].filter(Boolean);
+  
+  if (sources.length === 0) {
+    return "Transaction"; // Fallback if no description data
+  }
 
-  // Remove the cleaned merchant name from the description to avoid redundancy
+  // Combine and deduplicate
+  let combined = sources.join(" ").trim();
+  
+  // Remove merchant name variations to avoid redundancy
+  const cleanedMerchant = cleanMerchantName(merchant).replace(/UNKNOWN MERCHANT/i, "").trim();
   if (cleanedMerchant) {
-    const merchantRegex = new RegExp(`\\b${cleanedMerchant}\\b`, "gi");
-    baseDescription = baseDescription.replace(merchantRegex, "");
+    const merchantRegex = new RegExp(`\\b${cleanedMerchant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
+    combined = combined.replace(merchantRegex, "");
   }
 
-  // Also remove the original merchant string if it's different
+  // Remove original merchant string if different
   if (merchant && merchant !== cleanedMerchant) {
-    const originalMerchantRegex = new RegExp(`\\b${merchant}\\b`, "gi");
-    baseDescription = baseDescription.replace(originalMerchantRegex, "");
+    const originalMerchantRegex = new RegExp(`\\b${merchant.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
+    combined = combined.replace(originalMerchantRegex, "");
   }
 
-  // Remove common unhelpful phrases
-  const noise = [
+  // Remove location information that's already captured separately
+  if (address) {
+    const addressRegex = new RegExp(`\\b${address.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
+    combined = combined.replace(addressRegex, "");
+  }
+  
+  if (cityState) {
+    // Split city/state and remove each part
+    const locationParts = cityState.split(/[,\s]+/).filter(part => part.length > 2);
+    locationParts.forEach(part => {
+      const partRegex = new RegExp(`\\b${part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, "gi");
+      combined = combined.replace(partRegex, "");
+    });
+  }
+
+  // Remove common unhelpful phrases and noise
+  const noisePatterns = [
     /Description\s*:\s*F\//gi,
     /MOBILE PAYM MOBILE PAYMENT - THANK YOU/gi,
     /help\.uber\.com/gi,
     /RESTAURANT/gi,
-    /CHARLOTTE NC/gi,
-    /SAN CA/gi,
-    /TRO MI/gi,
     /UNITED STATES/gi,
     /\b\d{7,}\b/g, // Remove long numbers (likely transaction IDs)
-    /\b[A-Z0-9]{15,}\b/g, // Remove long alphanumeric reference codes
+    /\b[A-Z0-9]{10,}\b/g, // Remove long alphanumeric reference codes
+    /\bPOS\b/gi, // Point of Sale
+    /\b(DEBIT|CREDIT)\s*(CARD|PURCHASE)?\b/gi,
+    /\bONLINE\s*PAYMENT\b/gi,
+    /\bCHECKCARD\b/gi,
+    /\*+/g, // Remove asterisks
+    /#+/g, // Remove hash symbols
   ];
 
-  noise.forEach((regex) => {
-    baseDescription = baseDescription.replace(regex, "");
+  noisePatterns.forEach((regex) => {
+    combined = combined.replace(regex, "");
   });
 
-  // Clean up formatting
-  let combined = baseDescription
-    .replace(/\s+-\s*-\s*/, " - ") // Fix multiple dashes
-    .replace(/\s{2,}/g, " ") // Multiple spaces
-    .replace(/^\s*-\s*/, "") // Leading dash
-    .replace(/\s*-\s*$/, "") // Trailing dash
+  // Clean up formatting and spacing
+  combined = combined
+    .replace(/\s+-\s*-\s*/g, " - ") // Fix multiple dashes
+    .replace(/\s{2,}/g, " ") // Multiple spaces to single
+    .replace(/^\s*[-,]+\s*/, "") // Leading dashes/commas
+    .replace(/\s*[-,]+\s*$/, "") // Trailing dashes/commas
+    .replace(/^[,\s]+|[,\s]+$/g, "") // Leading/trailing commas and spaces
     .trim();
 
-  // If cleaning leaves it empty, use the cleaned merchant name
-  return combined || cleanedMerchant || "Transaction";
+  // Deduplicate repeated words/phrases (case insensitive)
+  const words = combined.split(/\s+/);
+  const uniqueWords = [];
+  const seenWords = new Set();
+  
+  for (const word of words) {
+    const lowerWord = word.toLowerCase();
+    // Only add if we haven't seen this word or if it's a common word that can repeat
+    if (!seenWords.has(lowerWord) || ['the', 'and', 'or', 'at', 'in', 'on', 'for', 'with', 'by'].includes(lowerWord)) {
+      uniqueWords.push(word);
+      seenWords.add(lowerWord);
+    }
+  }
+  
+  combined = uniqueWords.join(' ');
+
+  // Final cleanup and return meaningful result
+  combined = combined
+    .replace(/^\W+|\W+$/g, '') // Remove leading/trailing non-word characters
+    .trim();
+
+  // If cleaning leaves it empty or very short, provide a fallback
+  if (!combined || combined.length < 3) {
+    return cleanedMerchant || "Transaction";
+  }
+
+  // Capitalize first letter for better presentation
+  return combined.charAt(0).toUpperCase() + combined.slice(1);
 };
 
 /**

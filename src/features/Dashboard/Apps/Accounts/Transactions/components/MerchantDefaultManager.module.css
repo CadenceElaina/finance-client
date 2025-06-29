@@ -1,0 +1,366 @@
+.container {
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.header h3 {
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: var(--color-background-light);
+  border-radius: 8px;
+  border: 1px solid var(--color-border-light);
+}
+
+.section h4 {
+  margin: 0 0 8px 0;
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.sectionDescription {
+  margin: 0 0 16px 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.defaultsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.defaultItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.defaultItem.mainDefault {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.defaultInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.defaultName {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mainBadge {
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.autoMainBadge {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.defaultDetails {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.category {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.subCategory {
+  color: var(--color-text-secondary);
+}
+
+.type {
+  color: var(--color-text-secondary);
+  font-style: italic;
+  margin-left: 8px;
+}
+
+.recurringBadge {
+  background-color: var(--color-accent);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  margin-left: 8px;
+}
+
+.defaultNotes {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+.defaultActions {
+  display: flex;
+  gap: 8px;
+  margin-left: 16px;
+}
+
+.deleteButton {
+  color: var(--color-error) !important;
+}
+
+.deleteButton:hover {
+  background-color: var(--color-error-light) !important;
+}
+
+/* Form Styles */
+.defaultForm {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.formRow label {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-background-input);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.formInput:focus,
+.formSelect:focus,
+.formTextarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  background-color: var(--color-background);
+}
+
+.formTextarea {
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.checkboxLabel {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  margin-top: 24px;
+}
+
+/* Raw Mapping Styles */
+.mappingForm {
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.mappingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mappingItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px;
+  background-color: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.mappingInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.mappingName {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  margin-bottom: 4px;
+  font-family: 'Courier New', monospace;
+  background-color: var(--color-background-light);
+  padding: 2px 6px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.mappingLocation {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.mappingMeta {
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+}
+
+.mappingActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.suggestions {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.suggestions span {
+  color: var(--color-text-secondary);
+  font-size: 12px;
+}
+
+.suggestionButton {
+  background-color: var(--color-background-light);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.suggestionButton:hover {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .defaultItem {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .defaultActions {
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+}

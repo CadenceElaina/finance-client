@@ -935,3 +935,68 @@
 .merchantInputContainer {
   position: relative;
 }
+/* Styles for Approved Column in Import Modal */
+.approvedList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.transactionReviewItemApproved {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: var(--color-background-success-light);
+  border: 1px solid var(--color-success-dark);
+  border-radius: 6px;
+}
+
+.approvedItemContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+}
+
+.approvedText {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.approvedSubText {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.approvedItemActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+.approvedAmount {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-prominent);
+}
+
+.reviewButton {
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  min-width: auto !important;
+}
+
+.reviewPanelEmptyApproved {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 20px;
+  border: 2px dashed var(--color-border-light);
+  border-radius: 8px;
+}

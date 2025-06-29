@@ -427,3 +427,99 @@ export const clearAllNamedDefaults = () => {
     return false;
   }
 };
+
+/**
+ * Get the main default for a merchant (looks for "Main Default" first, then most used)
+ * @param {string} merchantName - The merchant name
+ * @returns {object|null} - The main default or null if none found
+ */
+export const getMainNamedDefault = (merchantName) => {
+  const defaults = getMerchantNamedDefaults(merchantName);
+  
+  if (defaults.length === 0) {
+    return null;
+  }
+
+  // First, look for a default named "Main Default"
+  const mainDefault = defaults.find(d => d.name === "Main Default");
+  if (mainDefault) {
+    return mainDefault;
+  }
+
+  // Fall back to the most used default
+  const mostUsed = defaults.reduce((prev, current) => {
+    return (current.usageCount || 0) > (prev.usageCount || 0) ? current : prev;
+  });
+
+  return mostUsed;
+};
+
+/**
+ * Update an existing named default
+ */
+export const updateNamedDefault = (
+  originalMerchantName,
+  originalDefaultName,
+  newDefaultName,
+  category,
+  subCategory = "",
+  notes = "",
+  transactionType = "expense",
+  isRecurring = false
+) => {
+  const defaults = getNamedDefaults();
+  const normalizedName = normalizeMerchantName(originalMerchantName);
+  
+  if (defaults[normalizedName] && defaults[normalizedName].defaults[originalDefaultName]) {
+    // If the name is changing, we need to delete the old and create the new
+    if (originalDefaultName !== newDefaultName) {
+      delete defaults[normalizedName].defaults[originalDefaultName];
+    }
+    
+    defaults[normalizedName].defaults[newDefaultName] = {
+      name: newDefaultName,
+      category,
+      subCategory,
+      notes,
+      transactionType,
+      isRecurring,
+      createdAt: defaults[normalizedName].defaults[originalDefaultName]?.createdAt || Date.now(),
+      lastUpdated: Date.now(),
+      usageCount: defaults[normalizedName].defaults[originalDefaultName]?.usageCount || 0
+    };
+    
+    localStorage.setItem(MERCHANT_DEFAULTS_KEY, JSON.stringify(defaults));
+  }
+};
+
+/**
+ * Delete a named default
+ */
+export const deleteNamedDefault = (merchantName, defaultName) => {
+  const defaults = getNamedDefaults();
+  const normalizedName = normalizeMerchantName(merchantName);
+  
+  if (defaults[normalizedName] && defaults[normalizedName].defaults[defaultName]) {
+    delete defaults[normalizedName].defaults[defaultName];
+    
+    // If no defaults left, remove the merchant entry
+    if (Object.keys(defaults[normalizedName].defaults).length === 0) {
+      delete defaults[normalizedName];
+    }
+    
+    localStorage.setItem(MERCHANT_DEFAULTS_KEY, JSON.stringify(defaults));
+  }
+};
+
+/**
+ * Set the main named default for a merchant
+ */
+export const setMainNamedDefault = (merchantName, defaultName) => {
+  const defaults = getNamedDefaults();
+  const normalizedName = normalizeMerchantName(merchantName);
+  
+  if (defaults[normalizedName] && defaults[normalizedName].defaults[defaultName]) {
+    defaults[normalizedName].mainDefaultName = defaultName;
+    localStorage.setItem(MERCHANT_DEFAULTS_KEY, JSON.stringify(defaults));
+  }
+};

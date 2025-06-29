@@ -307,6 +307,42 @@ export const getMerchantPreferencesStats = () => {
   };
 };
 
+/**
+ * Delete a specific merchant default
+ * @param {string} merchantName - Name of the merchant
+ * @param {string} defaultName - Name of the default to delete
+ */
+export const deleteMerchantDefault = (merchantName, defaultName) => {
+  const allPreferences = getMerchantPreferences();
+  
+  if (allPreferences[merchantName]) {
+    allPreferences[merchantName].defaults = allPreferences[merchantName].defaults.filter(
+      d => d.name !== defaultName
+    );
+    
+    // If this was the main default, clear the main default reference
+    if (allPreferences[merchantName].mainDefaultName === defaultName) {
+      allPreferences[merchantName].mainDefaultName = null;
+    }
+    
+    saveMerchantPreferences(allPreferences);
+  }
+};
+
+/**
+ * Set the main default for a merchant
+ * @param {string} merchantName - Name of the merchant
+ * @param {string} defaultName - Name of the default to set as main
+ */
+export const setMainDefault = (merchantName, defaultName) => {
+  const allPreferences = getMerchantPreferences();
+  
+  if (allPreferences[merchantName]) {
+    allPreferences[merchantName].mainDefaultName = defaultName;
+    saveMerchantPreferences(allPreferences);
+  }
+};
+
 // Helper function to normalize merchant keys (imported from customMerchantNames)
 const normalizeMerchantKey = (rawMerchant, location = '') => {
   const combined = `${rawMerchant} ${location}`.toLowerCase();
