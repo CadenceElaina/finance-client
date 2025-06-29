@@ -5,6 +5,14 @@ import {
   getAllCustomMerchantNames,
 } from "../utils/customMerchantNames";
 import { cleanMerchantName } from "../utils/dataCleaning";
+import {
+  findMatchingTransactions,
+  applyMerchantNameToTransactions,
+  getMatchingTransactionCount
+} from "../utils/bulkTransactionUtils";
+import {
+  linkRawDataToMerchant
+} from "../utils/merchantPreferences";
 import styles from "./InlineMerchantEditor.module.css";
 
 const InlineMerchantEditor = ({
@@ -14,6 +22,11 @@ const InlineMerchantEditor = ({
   onUpdate,
   onCancel,
   existingMerchants: propExistingMerchants,
+  // New props for bulk operations
+  allTransactions = [],
+  currentTransactionIndex = -1,
+  onBulkUpdate = null,
+  onMerchantPreferenceUpdate = null, // New callback for merchant manager updates
 }) => {
   const [customName, setCustomName] = useState(currentName);
   const [suggestions] = useState(() => getMerchantNameSuggestions(rawMerchant));
@@ -21,19 +34,56 @@ const InlineMerchantEditor = ({
   const [existingMerchants, setExistingMerchants] = useState(
     () => propExistingMerchants || getAllCustomMerchantNames()
   );
+  
+  // Show bulk options state
+  const [matchingCount, setMatchingCount] = useState(0);
 
   useEffect(() => {
     // Refresh existing merchants when component mounts or when prop changes
     setExistingMerchants(propExistingMerchants || getAllCustomMerchantNames());
   }, [propExistingMerchants]);
 
+  useEffect(() => {
+    // Calculate matching transactions when relevant data changes
+    if (allTransactions.length > 0 && currentTransactionIndex >= 0) {
+      const currentTransaction = allTransactions[currentTransactionIndex];
+      const count = getMatchingTransactionCount(allTransactions, currentTransaction);
+      setMatchingCount(count);
+    }
+  }, [allTransactions, currentTransactionIndex]);
+
   const handleSave = () => {
     if (customName.trim() && customName.trim() !== currentName) {
-      // Only save if it's different from the current cleaned name
+      // Save the custom merchant name
       const cleanedName = cleanMerchantName(rawMerchant, location);
       if (customName.trim() !== cleanedName) {
         setCustomMerchantName(rawMerchant, location, customName.trim());
       }
+      
+      // Create raw data mapping for smart recognition
+      linkRawDataToMerchant(rawMerchant, location, customName.trim(), true); // auto-apply enabled
+      
+      // Trigger merchant preference update callback
+      if (onMerchantPreferenceUpdate) {
+        onMerchantPreferenceUpdate();
+      }
+      
+      // Check if we should apply to matching transactions
+      if (allTransactions.length > 0 && currentTransactionIndex >= 0 && onBulkUpdate && matchingCount > 1) {
+        const currentTransaction = allTransactions[currentTransactionIndex];
+        const matchingTransactions = findMatchingTransactions(allTransactions, currentTransaction);
+        const indices = matchingTransactions.map(item => item.index);
+        
+        // Apply merchant name to all matching transactions
+        const updatedTransactions = applyMerchantNameToTransactions(
+          allTransactions,
+          indices,
+          customName.trim()
+        );
+        
+        onBulkUpdate(updatedTransactions);
+      }
+      
       onUpdate(customName.trim());
     } else {
       onCancel();
@@ -59,6 +109,13 @@ const InlineMerchantEditor = ({
 
   return (
     <div className={styles.container}>
+      {/* Show bulk operation hint if multiple transactions available */}
+      {allTransactions.length > 0 && onBulkUpdate && (
+        <div className={styles.bulkOperationHint}>
+          ⚡ You'll have the option to apply this name to all similar transactions
+        </div>
+      )}
+      
       <div className={styles.inputSection}>
         <input
           type="text"
@@ -124,6 +181,14 @@ const InlineMerchantEditor = ({
         Original: {rawMerchant}
         {location && ` (${location})`}
       </div>
+
+      {matchingCount > 1 && (
+        <div className={styles.bulkActionInfo}>
+          <small>
+            💡 This will also apply "{customName}" to {matchingCount - 1} other similar transactions
+          </small>
+        </div>
+      )}
     </div>
   );
 };

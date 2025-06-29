@@ -182,33 +182,32 @@ const MerchantManagementTab = () => {
 
   return (
     <div className={styles.container}>
-      <Section title="Merchant Management" className={styles.section}>
-        {/* Search and Controls */}
-        <div className={styles.controls}>
-          <div className={styles.searchContainer}>
-            <input
-              type="text"
-              placeholder="Search merchants..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className={styles.searchInput}
-            />
-          </div>
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateForm(true)}
-            className={styles.createButton}
-          >
-            {" "}
-            + New Merchant
-          </Button>
+      {/* Search and Controls */}
+      <div className={styles.controls}>
+        <div className={styles.searchContainer}>
+          <input
+            type="text"
+            placeholder="Search merchants..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className={styles.searchInput}
+          />
         </div>
+        <Button
+          variant="primary"
+          onClick={() => setShowCreateForm(true)}
+          className={styles.createButton}
+        >
+          New Merchant
+        </Button>
+      </div>
 
-        {/* Create New Merchant Form */}
-        {showCreateForm && (
-          <div className={styles.createForm}>
-            <h4>Create New Merchant Mapping</h4>
-            <div className={styles.formGrid}>
+      {/* Create New Merchant Form */}
+      {showCreateForm && (
+        <div className={styles.createForm}>
+          <h4>Create New Merchant Mapping</h4>
+          <div className={styles.formGrid}>
+            <div className={styles.formContainer}>
               <div className={styles.formGroup}>
                 <label>Raw Merchant Name (from CSV):</label>
                 <input
@@ -338,261 +337,261 @@ const MerchantManagementTab = () => {
                 />
               </div>
             </div>
+          </div>
 
-            <div className={styles.formActions}>
-              <Button variant="primary" onClick={handleCreateMerchant}>
-                Create Merchant
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => setShowCreateForm(false)}
-              >
-                Cancel
-              </Button>
-            </div>
+          <div className={styles.formActions}>
+            <Button variant="primary" onClick={handleCreateMerchant}>
+              Create Merchant
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setShowCreateForm(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs for Different Views */}
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "custom-names" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("custom-names")}
+        >
+          Custom Names ({filteredCustomMerchants.length})
+        </button>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "defaults" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("defaults")}
+        >
+          Named Defaults ({filteredMerchantsWithDefaults.length})
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className={styles.tabContent}>
+        {activeTab === "custom-names" && (
+          <div className={styles.merchantsList}>
+            <h4>Custom Merchant Names</h4>
+            <p className={styles.description}>
+              These are custom names you've assigned to raw merchant data from
+              CSV imports.
+            </p>
+            {filteredCustomMerchants.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No custom merchant names found.</p>
+                <p>Create one above to get started!</p>
+              </div>
+            ) : (
+              filteredCustomMerchants.map((merchant) => (
+                <div key={merchant.key} className={styles.merchantItem}>
+                  <div className={styles.merchantInfo}>
+                    <div className={styles.customName}>
+                      {merchant.customName}
+                    </div>
+                    <div className={styles.rawMerchant}>
+                      Raw: {merchant.rawMerchant}
+                      {merchant.location && ` (${merchant.location})`}
+                    </div>
+                    <div className={styles.stats}>
+                      Used {merchant.usageCount || 0} times
+                      {merchant.lastUsed && (
+                        <span>
+                          {" "}
+                          • Last used:{" "}
+                          {new Date(merchant.lastUsed).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={styles.actions}>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleRemoveCustomName(merchant)}
+                      className={styles.removeButton}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         )}
 
-        {/* Tabs for Different Views */}
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${
-              activeTab === "custom-names" ? styles.active : ""
-            }`}
-            onClick={() => setActiveTab("custom-names")}
-          >
-            Custom Names ({filteredCustomMerchants.length})
-          </button>
-          <button
-            className={`${styles.tab} ${
-              activeTab === "defaults" ? styles.active : ""
-            }`}
-            onClick={() => setActiveTab("defaults")}
-          >
-            Named Defaults ({filteredMerchantsWithDefaults.length})
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className={styles.tabContent}>
-          {activeTab === "custom-names" && (
-            <div className={styles.merchantsList}>
-              <h4>Custom Merchant Names</h4>
-              <p className={styles.description}>
-                These are custom names you've assigned to raw merchant data from
-                CSV imports.
-              </p>
-              {filteredCustomMerchants.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <p>No custom merchant names found.</p>
-                  <p>Create one above to get started!</p>
-                </div>
-              ) : (
-                filteredCustomMerchants.map((merchant) => (
-                  <div key={merchant.key} className={styles.merchantItem}>
-                    <div className={styles.merchantInfo}>
-                      <div className={styles.customName}>
-                        {merchant.customName}
-                      </div>
-                      <div className={styles.rawMerchant}>
-                        Raw: {merchant.rawMerchant}
-                        {merchant.location && ` (${merchant.location})`}
-                      </div>
-                      <div className={styles.stats}>
-                        Used {merchant.usageCount || 0} times
-                        {merchant.lastUsed && (
-                          <span>
-                            {" "}
-                            • Last used:{" "}
-                            {new Date(merchant.lastUsed).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+        {activeTab === "defaults" && (
+          <div className={styles.merchantsList}>
+            <h4>Named Defaults</h4>
+            <p className={styles.description}>
+              Merchants with saved categorization defaults for faster
+              transaction processing.
+            </p>
+            {filteredMerchantsWithDefaults.length === 0 ? (
+              <div className={styles.emptyState}>
+                <p>No merchant defaults found.</p>
+                <p>
+                  Defaults are created when you categorize transactions during
+                  import.
+                </p>
+              </div>
+            ) : (
+              filteredMerchantsWithDefaults.map((merchant) => (
+                <div
+                  key={merchant.merchantName}
+                  className={styles.merchantItem}
+                >
+                  <div className={styles.merchantInfo}>
+                    <div className={styles.merchantName}>
+                      {merchant.merchantName}
                     </div>
-                    <div className={styles.actions}>
-                      <Button
-                        variant="danger"
-                        onClick={() => handleRemoveCustomName(merchant)}
-                        className={styles.removeButton}
-                      >
-                        Remove
-                      </Button>
+                    <div className={styles.defaults}>
+                      {merchant.defaults.map((defaultItem) => {
+                        const editKey = `${merchant.merchantName}-${defaultItem.name}`;
+                        const isEditing = editingDefault === editKey;
+
+                        return (
+                          <div
+                            key={defaultItem.name}
+                            className={styles.defaultItem}
+                          >
+                            {isEditing ? (
+                              <div className={styles.editingDefault}>
+                                <div className={styles.editField}>
+                                  <label>Name:</label>
+                                  <input
+                                    type="text"
+                                    value={editingDefaultData.name}
+                                    onChange={(e) =>
+                                      setEditingDefaultData((prev) => ({
+                                        ...prev,
+                                        name: e.target.value,
+                                      }))
+                                    }
+                                    className={styles.editInput}
+                                  />
+                                </div>
+                                <div className={styles.editField}>
+                                  <label>Category:</label>
+                                  <input
+                                    type="text"
+                                    value={editingDefaultData.category}
+                                    onChange={(e) =>
+                                      setEditingDefaultData((prev) => ({
+                                        ...prev,
+                                        category: e.target.value,
+                                      }))
+                                    }
+                                    className={styles.editInput}
+                                  />
+                                </div>
+                                <div className={styles.editField}>
+                                  <label>Subcategory:</label>
+                                  <input
+                                    type="text"
+                                    value={editingDefaultData.subcategory}
+                                    onChange={(e) =>
+                                      setEditingDefaultData((prev) => ({
+                                        ...prev,
+                                        subcategory: e.target.value,
+                                      }))
+                                    }
+                                    className={styles.editInput}
+                                  />
+                                </div>
+                                <div className={styles.editField}>
+                                  <label>Notes:</label>
+                                  <input
+                                    type="text"
+                                    value={editingDefaultData.notes}
+                                    onChange={(e) =>
+                                      setEditingDefaultData((prev) => ({
+                                        ...prev,
+                                        notes: e.target.value,
+                                      }))
+                                    }
+                                    className={styles.editInput}
+                                  />
+                                </div>
+                                <div className={styles.editActions}>
+                                  <Button
+                                    variant="primary"
+                                    onClick={() =>
+                                      handleSaveDefaultEdit(
+                                        merchant.merchantName,
+                                        defaultItem.name
+                                      )
+                                    }
+                                    className={styles.saveButton}
+                                  >
+                                    Save
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    onClick={handleCancelDefaultEdit}
+                                    className={styles.cancelButton}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className={styles.defaultText}>
+                                  <strong>{defaultItem.name}:</strong>{" "}
+                                  {defaultItem.category}
+                                  {defaultItem.subcategory &&
+                                    ` → ${defaultItem.subcategory}`}
+                                  {defaultItem.notes && (
+                                    <div className={styles.notes}>
+                                      Notes: {defaultItem.notes}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className={styles.defaultActions}>
+                                  <Button
+                                    variant="secondary"
+                                    onClick={() =>
+                                      handleEditDefault(
+                                        merchant.merchantName,
+                                        defaultItem.name,
+                                        defaultItem
+                                      )
+                                    }
+                                    className={styles.editButton}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    variant="danger"
+                                    onClick={() =>
+                                      handleRemoveDefault(
+                                        merchant.merchantName,
+                                        defaultItem.name
+                                      )
+                                    }
+                                    className={styles.removeDefaultButton}
+                                  >
+                                    Remove
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          )}
-
-          {activeTab === "defaults" && (
-            <div className={styles.merchantsList}>
-              <h4>Named Defaults</h4>
-              <p className={styles.description}>
-                Merchants with saved categorization defaults for faster
-                transaction processing.
-              </p>
-              {filteredMerchantsWithDefaults.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <p>No merchant defaults found.</p>
-                  <p>
-                    Defaults are created when you categorize transactions during
-                    import.
-                  </p>
                 </div>
-              ) : (
-                filteredMerchantsWithDefaults.map((merchant) => (
-                  <div
-                    key={merchant.merchantName}
-                    className={styles.merchantItem}
-                  >
-                    <div className={styles.merchantInfo}>
-                      <div className={styles.merchantName}>
-                        {merchant.merchantName}
-                      </div>
-                      <div className={styles.defaults}>
-                        {merchant.defaults.map((defaultItem) => {
-                          const editKey = `${merchant.merchantName}-${defaultItem.name}`;
-                          const isEditing = editingDefault === editKey;
-
-                          return (
-                            <div
-                              key={defaultItem.name}
-                              className={styles.defaultItem}
-                            >
-                              {isEditing ? (
-                                <div className={styles.editingDefault}>
-                                  <div className={styles.editField}>
-                                    <label>Name:</label>
-                                    <input
-                                      type="text"
-                                      value={editingDefaultData.name}
-                                      onChange={(e) =>
-                                        setEditingDefaultData((prev) => ({
-                                          ...prev,
-                                          name: e.target.value,
-                                        }))
-                                      }
-                                      className={styles.editInput}
-                                    />
-                                  </div>
-                                  <div className={styles.editField}>
-                                    <label>Category:</label>
-                                    <input
-                                      type="text"
-                                      value={editingDefaultData.category}
-                                      onChange={(e) =>
-                                        setEditingDefaultData((prev) => ({
-                                          ...prev,
-                                          category: e.target.value,
-                                        }))
-                                      }
-                                      className={styles.editInput}
-                                    />
-                                  </div>
-                                  <div className={styles.editField}>
-                                    <label>Subcategory:</label>
-                                    <input
-                                      type="text"
-                                      value={editingDefaultData.subcategory}
-                                      onChange={(e) =>
-                                        setEditingDefaultData((prev) => ({
-                                          ...prev,
-                                          subcategory: e.target.value,
-                                        }))
-                                      }
-                                      className={styles.editInput}
-                                    />
-                                  </div>
-                                  <div className={styles.editField}>
-                                    <label>Notes:</label>
-                                    <input
-                                      type="text"
-                                      value={editingDefaultData.notes}
-                                      onChange={(e) =>
-                                        setEditingDefaultData((prev) => ({
-                                          ...prev,
-                                          notes: e.target.value,
-                                        }))
-                                      }
-                                      className={styles.editInput}
-                                    />
-                                  </div>
-                                  <div className={styles.editActions}>
-                                    <Button
-                                      variant="primary"
-                                      onClick={() =>
-                                        handleSaveDefaultEdit(
-                                          merchant.merchantName,
-                                          defaultItem.name
-                                        )
-                                      }
-                                      className={styles.saveButton}
-                                    >
-                                      Save
-                                    </Button>
-                                    <Button
-                                      variant="secondary"
-                                      onClick={handleCancelDefaultEdit}
-                                      className={styles.cancelButton}
-                                    >
-                                      Cancel
-                                    </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className={styles.defaultDisplay}>
-                                  <div className={styles.defaultText}>
-                                    <strong>{defaultItem.name}:</strong>{" "}
-                                    {defaultItem.category}
-                                    {defaultItem.subcategory &&
-                                      ` → ${defaultItem.subcategory}`}
-                                    {defaultItem.notes && (
-                                      <div className={styles.notes}>
-                                        Notes: {defaultItem.notes}
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className={styles.defaultActions}>
-                                    <Button
-                                      variant="secondary"
-                                      onClick={() =>
-                                        handleEditDefault(
-                                          merchant.merchantName,
-                                          defaultItem.name,
-                                          defaultItem
-                                        )
-                                      }
-                                      className={styles.editButton}
-                                    >
-                                      Edit
-                                    </Button>
-                                    <Button
-                                      variant="danger"
-                                      onClick={() =>
-                                        handleRemoveDefault(
-                                          merchant.merchantName,
-                                          defaultItem.name
-                                        )
-                                      }
-                                      className={styles.removeDefaultButton}
-                                    >
-                                      Remove
-                                    </Button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
-      </Section>
+              ))
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

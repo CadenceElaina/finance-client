@@ -160,3 +160,42 @@
   color: white;
   border-color: #007bff;
 }
+
+.bulkOperationHint {
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+  border: 1px solid #c8e6c9;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: #2e7d32;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  animation: subtleGlow 2s ease-in-out infinite;
+}
+
+@keyframes subtleGlow {
+  0%, 100% { 
+    box-shadow: 0 0 0 rgba(46, 125, 50, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 6px rgba(46, 125, 50, 0.2);
+  }
+}
+
+.bulkActionInfo {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #0d47a1;
+}
+
+.bulkActionInfo small {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}

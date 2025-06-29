@@ -6,6 +6,11 @@ import {
   applyNamedDefault,
 } from "../utils/merchantHistory";
 import { expenseCategories, incomeCategories } from "../utils/categories";
+import {
+  findMatchingTransactions,
+  getBulkOperationSummary,
+} from "../utils/bulkTransactionUtils";
+import BulkOperationModal from "./BulkOperationModal";
 import styles from "./NamedDefaultsManager.module.css";
 
 const NamedDefaultsManager = ({
@@ -17,6 +22,10 @@ const NamedDefaultsManager = ({
   currentSubCategory = "",
   currentNotes = "",
   autoOpenCreateForm = false,
+  // New props for bulk operations
+  allTransactions = [],
+  currentTransactionIndex = -1,
+  onBulkUpdate = null,
 }) => {
   const [namedDefaults, setNamedDefaults] = useState(() =>
     getMerchantNamedDefaults(merchantName)
@@ -27,6 +36,11 @@ const NamedDefaultsManager = ({
   const [newSubCategory, setNewSubCategory] = useState(currentSubCategory);
   const [newNotes, setNewNotes] = useState(currentNotes);
   const [isCreating, setIsCreating] = useState(false);
+  
+  // Bulk operation state
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkOperationData, setBulkOperationData] = useState(null);
+  const [bulkSummary, setBulkSummary] = useState(null);
 
   const refreshDefaults = useCallback(() => {
     const updated = getMerchantNamedDefaults(merchantName);
@@ -91,6 +105,59 @@ const NamedDefaultsManager = ({
     refreshDefaults();
   };
 
+  const handleSelectDefaultWithBulkOption = (defaultData) => {
+    if (allTransactions.length > 0 && currentTransactionIndex >= 0) {
+      const currentTransaction = allTransactions[currentTransactionIndex];
+      const matchingTransactions = findMatchingTransactions(allTransactions, currentTransaction);
+      
+      if (matchingTransactions.length > 1) {
+        // Show bulk operation modal
+        const summary = getBulkOperationSummary(matchingTransactions);
+        setBulkOperationData({
+          type: 'applyCategory',
+          category: defaultData.category,
+          subCategory: defaultData.subCategory,
+          notes: defaultData.notes,
+          defaultName: defaultData.name,
+          matchingTransactions
+        });
+        setBulkSummary(summary);
+        setShowBulkModal(true);
+        return;
+      }
+    }
+    
+    // Fallback to single transaction update
+    handleSelectDefault(defaultData);
+  };
+
+  const handleBulkOperationConfirm = () => {
+    if (bulkOperationData && onBulkUpdate) {
+      const { matchingTransactions, category, subCategory, notes, defaultName } = bulkOperationData;
+      
+      // Apply the default to the single transaction first
+      const usedDefault = applyNamedDefault(merchantName, defaultName);
+      if (usedDefault && onDefaultSelected) {
+        onDefaultSelected({
+          category: usedDefault.category,
+          subCategory: usedDefault.subCategory,
+          notes: usedDefault.notes,
+          defaultName: usedDefault.name,
+        });
+      }
+      
+      // Then apply to all matching transactions via callback
+      onBulkUpdate({
+        operation: 'applyCategory',
+        data: { category, subCategory, notes },
+        matchingTransactions
+      });
+      
+      refreshDefaults();
+    }
+    setShowBulkModal(false);
+  };
+
   const handleRemoveDefault = (defaultName) => {
     if (
       window.confirm(
@@ -118,6 +185,13 @@ const NamedDefaultsManager = ({
         </button>
       </div>
 
+      {/* Show bulk operation hint if multiple transactions available */}
+      {allTransactions.length > 0 && onBulkUpdate && (
+        <div className={styles.bulkOperationHint}>
+          ⚡ When you select a default, you'll have the option to apply it to all similar transactions
+        </div>
+      )}
+
       {namedDefaults.length > 0 && (
         <div className={styles.defaultsList}>
           {namedDefaults.map((defaultData) => (
@@ -138,8 +212,22 @@ const NamedDefaultsManager = ({
               <div className={styles.defaultActions}>
                 <button
                   type="button"
-                  onClick={() => handleSelectDefault(defaultData)}
-                  className={styles.selectButton}
+                  onClick={() => {
+                    // Use bulk option if we have transaction data, otherwise use regular selection
+                    if (allTransactions.length > 0 && onBulkUpdate) {
+                      handleSelectDefaultWithBulkOption(defaultData);
+                    } else {
+                      handleSelectDefault(defaultData);
+                    }
+                  }}
+                  className={`${styles.selectButton} ${
+                    allTransactions.length > 0 && onBulkUpdate ? styles.withBulkOption : ''
+                  }`}
+                  title={
+                    allTransactions.length > 0 && onBulkUpdate
+                      ? "Click to use this default and optionally apply to all similar transactions"
+                      : "Use this default"
+                  }
                 >
                   Use This
                 </button>
@@ -255,6 +343,15 @@ const NamedDefaultsManager = ({
           </div>
         </div>
       )}
+
+      <BulkOperationModal
+        isOpen={showBulkModal}
+        onClose={() => setShowBulkModal(false)}
+        onConfirm={handleBulkOperationConfirm}
+        operation="applyCategory"
+        summary={bulkSummary}
+        operationData={bulkOperationData}
+      />
     </div>
   );
 };

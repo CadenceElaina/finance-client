@@ -16,7 +16,7 @@ const Modal = ({ isOpen, onClose, title, children, footer }) => {
             variant="icon"
             className={styles.closeButton}
           >
-            &times;
+            ✕
           </Button>
         </div>
         <div className={styles.modalContent}>{children}</div>

@@ -336,29 +336,84 @@
 }
 
 /* Import Modal Step 1 */
-.importStepOneContainer {
-  padding: 20px;
-  text-align: center;
+.importStepOne {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  align-items: center;
+  width: 500px;
+  max-width: 100%;
 }
 
-.importStepOneText {
-  margin: 15px 0;
-  color: var(--text-secondary-color);
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  width: 100%;
+}
+
+.formField label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
+}
+
+.formField select {
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  font-size: var(--font-size-md);
 }
 
 .accountTypeInfo {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background-color: var(--info-light, #e3f2fd);
-  color: var(--info-dark, #0d47a1);
-  border-radius: var(--border-radius-sm);
-  font-size: var(--font-size-xs);
-  border-left: 3px solid var(--info-color, #2196f3);
+  margin-top: 0;
+  padding: var(--space-sm);
+  background-color: var(--surface-dark);
+  color: var(--text-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.fileInputContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border: 2px dashed var(--border-color);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--surface-dark);
+  width: 100%;
+  cursor: pointer;
+  transition: background-color var(--transition-speed-normal), border-color var(--transition-speed-normal);
+}
+
+.fileInputContainer:hover {
+  background-color: var(--surface-light);
+  border-color: var(--primary-color);
+}
+
+.fileInputLabel {
+  padding: var(--space-sm) var(--space-lg);
+  background-color: var(--primary-color);
+  color: var(--button-text-color);
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
 }
 
 .importFileInput {
-  display: block;
-  margin: 20px auto;
+  display: none;
+}
+
+.fileInputText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .importError {

@@ -24,9 +24,18 @@ import {
   getAllCustomMerchantNames,
   setCustomMerchantName,
 } from "./utils/customMerchantNames";
+import {
+  applyCategorizationToTransactions,
+  applyMerchantNameToTransactions,
+} from "./utils/bulkTransactionUtils";
+import {
+  processTransactionWithSmartRecognition,
+} from "./utils/merchantPreferences";
 import NamedDefaultsManager from "./components/NamedDefaultsManager";
 import MerchantManager from "./components/MerchantManager";
+import EnhancedMerchantManager from "./components/EnhancedMerchantManager";
 import InlineMerchantEditor from "./components/InlineMerchantEditor";
+import TransactionInlineActions from "./components/TransactionInlineActions";
 
 const mapCsvRow = (row) => {
   const get = (key, fallback = "") => {
@@ -182,7 +191,8 @@ const TransactionImportModal = ({
             );
           const id = original.reference || `import-${Date.now()}-${index}`;
 
-          return {
+          // Create initial transaction structure
+          const initialTransaction = {
             id,
             original,
             suggested, // Store the suggestion metadata
@@ -202,6 +212,14 @@ const TransactionImportModal = ({
             },
             approved: false,
           };
+
+          // Apply smart merchant recognition and auto-application
+          const processedTransaction = processTransactionWithSmartRecognition(
+            initialTransaction,
+            true // Apply defaults
+          );
+
+          return processedTransaction;
         });
 
         // Filter out duplicates
@@ -663,6 +681,31 @@ const TransactionImportModal = ({
     setShowingMerchantListFor(null);
   };
 
+  // Bulk operation handlers - Updated to handle direct transaction array updates
+  const handleBulkUpdate = (updatedTransactions) => {
+    // If it's the new format (direct array), use it directly
+    if (Array.isArray(updatedTransactions)) {
+      setTransactions(updatedTransactions);
+      return;
+    }
+    
+    // Legacy format support for existing components
+    const { operation, data, matchingTransactions } = updatedTransactions;
+
+    if (!matchingTransactions || matchingTransactions.length === 0) return;
+
+    const indices = matchingTransactions.map((item) => item.index);
+
+    setTransactions((prev) => {
+      if (operation === "applyCategory") {
+        return applyCategorizationToTransactions(prev, indices, data);
+      } else if (operation === "applyMerchantName") {
+        return applyMerchantNameToTransactions(prev, indices, data.merchantName);
+      }
+      return prev;
+    });
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -672,42 +715,51 @@ const TransactionImportModal = ({
       contentClassName="themedModalContent"
     >
       {step === 1 && (
-        <div className={styles.importStepOneContainer}>
+        <div className={styles.importStepOne}>
           <div className={styles.formField}>
-            <label htmlFor="import-account">Account</label>
+            <label htmlFor="import-account">Select Account</label>
             <select
               id="import-account"
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               required
             >
-              <option value="">Select Account</option>
+              <option value="">Select an account...</option>
               {importableAccounts?.map((acc) => (
                 <option key={acc.id || acc.name} value={acc.id || acc.name}>
                   {acc.name} - {acc.category} ({acc.subType})
                 </option>
               ))}
             </select>
-            {selectedAccountId && (
-              <p className={styles.accountTypeInfo}>
-                {importableAccounts.find(
-                  (acc) => (acc.id || acc.name) === selectedAccountId
-                )?.category === "Debt"
-                  ? "For debt accounts: positive amounts = new charges/expenses, negative amounts = payments/credits"
-                  : "For cash accounts: positive amounts = deposits/income, negative amounts = withdrawals/expenses"}
-              </p>
-            )}
           </div>
-          <p className={styles.importStepOneText}>
-            Upload a CSV file of your transactions.
-          </p>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleFile}
-            disabled={!selectedAccountId}
-            className={styles.importFileInput}
-          />
+
+          {selectedAccountId && (
+            <p className={styles.accountTypeInfo}>
+              {importableAccounts.find(
+                (acc) => (acc.id || acc.name) === selectedAccountId
+              )?.category === "Debt"
+                ? "For debt accounts: positive amounts = new charges/expenses, negative amounts = payments/credits"
+                : "For cash accounts: positive amounts = deposits/income, negative amounts = withdrawals/expenses"}
+            </p>
+          )}
+
+          <div className={styles.fileInputContainer}>
+            <label htmlFor="csv-upload" className={styles.fileInputLabel}>
+              Browse
+            </label>
+            <input
+              id="csv-upload"
+              type="file"
+              accept=".csv"
+              onChange={handleFile}
+              disabled={!selectedAccountId}
+              className={styles.importFileInput}
+            />
+            <span className={styles.fileInputText}>
+              Upload a CSV file of your transactions.
+            </span>
+          </div>
+
           {error && <div className={styles.importError}>{error}</div>}
         </div>
       )}
@@ -890,6 +942,10 @@ const TransactionImportModal = ({
                                     }
                                     onCancel={() => setEditingMerchantFor(null)}
                                     existingMerchants={existingMerchants}
+                                    allTransactions={transactions}
+                                    currentTransactionIndex={transactions.findIndex(t => t.id === tx.id)}
+                                    onBulkUpdate={handleBulkUpdate}
+                                    onMerchantPreferenceUpdate={() => setPreferencesUpdateKey((prev) => prev + 1)}
                                   />
                                 ) : (
                                   <div
@@ -1311,6 +1367,9 @@ const TransactionImportModal = ({
                                   tx.proposed.merchant_name
                                 ).length === 0
                               }
+                              allTransactions={transactions}
+                              currentTransactionIndex={transactions.findIndex(t => t.id === tx.id)}
+                              onBulkUpdate={handleBulkUpdate}
                             />
                           )}
                       </div>
@@ -1380,10 +1439,31 @@ const TransactionImportModal = ({
                                 tx.proposed.merchant_name
                               ).length === 0
                             }
+                            allTransactions={transactions}
+                            currentTransactionIndex={transactions.findIndex(t => t.id === tx.id)}
+                            onBulkUpdate={handleBulkUpdate}
                             key={preferencesUpdateKey} // Re-render when preferences change
                           />
                         </div>
                       )}
+                    
+                    {/* Inline Transaction Actions */}
+                    <TransactionInlineActions
+                      transaction={tx}
+                      allTransactions={transactions}
+                      transactionIndex={transactions.findIndex(t => t.id === tx.id)}
+                      onTransactionUpdate={(txId, updates) => {
+                        setTransactions(prev => prev.map(t => 
+                          t.id === txId ? {
+                            ...t,
+                            proposed: { ...t.proposed, ...updates }
+                          } : t
+                        ));
+                      }}
+                      onBulkUpdate={(updatedTransactions) => {
+                        setTransactions(updatedTransactions);
+                      }}
+                    />
                   </div>
                 ))
               )}
@@ -1465,9 +1545,10 @@ const TransactionImportModal = ({
         </div>
       )}
 
-      {/* Merchant Manager Modal */}
+      {/* Enhanced Merchant Manager Modal */}
       {showMerchantManager && (
-        <MerchantManager
+        <EnhancedMerchantManager
+          isOpen={showMerchantManager}
           onClose={() => {
             setShowMerchantManager(false);
             // Refresh transactions to reflect any merchant name changes

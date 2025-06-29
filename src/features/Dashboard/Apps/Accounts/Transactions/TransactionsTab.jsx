@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import styles from "./Transactions.module.css";
+import transactionActionStyles from "./TransactionActions.module.css";
 import TransactionForm from "./TransactionForm";
 import TransactionsTable from "./TransactionsTable";
 import TransactionImportModal from "./TransactionImportModal";
@@ -278,22 +279,27 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
     <div className={styles.transactionsContainer}>
       <div className={styles.header}>
         <h2>Transactions</h2>
-        <div className={styles.controls}>
-          <TransactionForm
-            onSubmit={handleAddTransaction}
-            initialAccountId={selectedAccountId}
-            openTransactionImportModal={() => setImportModalOpen(true)}
-            isLoading={isLoading}
-          />
-          <Button
-            variant="primary"
+        <div className={transactionActionStyles.transactionActions}>
+          <button
+            className={`${transactionActionStyles.btn} ${transactionActionStyles["btn-primary"]}`}
+            onClick={handleAddTransaction}
+          >
+            Add Transaction
+          </button>
+          <button
+            className={`${transactionActionStyles.btn} ${transactionActionStyles["btn-primary"]}`}
+            onClick={() => setImportModalOpen(true)}
+          >
+            Import Transactions
+          </button>
+          <button
+            className={`${transactionActionStyles.btn} ${transactionActionStyles["btn-secondary"]}`}
             onClick={() => setMerchantModalOpen(true)}
-            className={styles.merchantButton}
           >
             Merchants
-          </Button>
-          <Button
-            variant="danger"
+          </button>
+          <button
+            className={`${transactionActionStyles.btn} ${transactionActionStyles["btn-destructive"]}`}
             onClick={handleClearTransactions}
             disabled={isLoading || transactions.length === 0}
             title={
@@ -303,7 +309,7 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
             }
           >
             Clear All
-          </Button>
+          </button>
           <div className={styles.storageIndicator}>
             <span
               className={`${styles.storageStatus} ${styles[storageStatus]}`}

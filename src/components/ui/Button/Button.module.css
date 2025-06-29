@@ -1,4 +1,16 @@
 /* src/ui/Button/Button.module.css */
+.button.icon {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: var(--space-xs);
+    border-radius: var(--border-radius-circle);
+}
+
+.button.icon:hover {
+    background: var(--surface-dark);
+    color: var(--color-primary);
+}
 /* Base Button */
 .button {
     background: var(--gradient-primary);

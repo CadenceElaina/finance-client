@@ -1,11 +1,11 @@
 .container {
-  padding: 0;
+  padding: var(--space-md);
   height: 100%;
+  background-color: var(--surface-light);
 }
 
 .section {
   height: 100%;
-  background-color: var(--surface-color);
 }
 
 .controls {
@@ -61,6 +61,10 @@
   margin-bottom: var(--space-lg);
 }
 
+.formContainer {
+  display: contents;
+}
+
 .formGroup {
   display: flex;
   flex-direction: column;
@@ -79,7 +83,8 @@
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius-sm);
   font-size: var(--font-size-sm);
-  background-color: white;
+  background-color: var(--surface-dark);
+  color: var(--text-primary);
 }
 
 .input:focus,
@@ -177,11 +182,10 @@
 }
 
 .merchantItem {
-  background-color: white;
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-md);
-  padding: var(--space-md);
-  margin-bottom: var(--space-md);
+  background-color: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-sm);
+  margin-bottom: var(--space-sm);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -198,10 +202,10 @@
 
 .customName,
 .merchantName {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-primary);
-  font-size: var(--font-size-md);
-  margin-bottom: var(--space-xs);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-xxs);
 }
 
 .rawMerchant {
@@ -226,15 +230,67 @@
 }
 
 .defaultItem {
-  background-color: var(--background-light);
-  border: 1px solid var(--border-color-light);
-  border-radius: var(--border-radius-sm);
-  padding: var(--space-sm);
-  margin-bottom: var(--space-sm);
+  background-color: var(--surface-dark);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.editingDefault {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.editField {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.editField label {
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.editInput {
+  padding: var(--space-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+}
+
+.editActions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
   gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.defaultDisplay {
+  display: contents;
+}
+
+.defaultText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.defaultActions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
 }
 
 .defaultItem strong {
