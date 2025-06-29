@@ -40,6 +40,7 @@ export const transactionCategories = {
           'Takeout / Delivery',
           'Alcohol & Bars',
           'Pet Food & Supplies',
+          'Food (General)', // Convenience option
           'Other Food',
         ],
         'Personal Care & Health': [

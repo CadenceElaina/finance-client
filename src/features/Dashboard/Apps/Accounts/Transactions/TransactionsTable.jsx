@@ -74,15 +74,6 @@ const TransactionsTable = ({ transactions, columns, accounts }) => {
 
   return (
     <div className={styles.tableContainer}>
-      <div className={styles.tableControls}>
-        <div className={styles.controlsRight}>
-          <span className={styles.transactionCount}>
-            {transactions.length} transaction
-            {transactions.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-      </div>
-
       <div className={styles.tableWrapper}>
         <Table
           data={transactions}

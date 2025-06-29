@@ -133,6 +133,7 @@ const Accounts = React.memo(() => {
           setImportModalOpen(false);
         }}
         accounts={data?.accounts}
+        existingTransactions={data?.transactions || []}
       />
     </div>
   );

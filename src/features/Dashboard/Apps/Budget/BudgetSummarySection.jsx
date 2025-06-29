@@ -118,8 +118,3 @@ const BudgetSummarySection = ({ budget, smallApp }) => {
 };
 
 export default BudgetSummarySection;
-
-.amountColumn {
-  text-align: right;
-  padding-right: var(--space-xs);
-}

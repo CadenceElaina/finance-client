@@ -167,96 +167,102 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
   const renderTabContent = () => {
     return (
       <>
-        {/* Filtering Controls */}
-        <div className={styles.filterSection}>
-          <div className={styles.filterGroup}>
-            <label htmlFor="account-select">Account:</label>
-            <select
-              id="account-select"
-              value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="all">All Accounts</option>
-              {accounts?.map((acc) => (
-                <option key={acc.id || acc.name} value={acc.id || acc.name}>
-                  {acc.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label htmlFor="time-period-type">Time Period:</label>
-            <select
-              id="time-period-type"
-              value={timePeriodType}
-              onChange={(e) => setTimePeriodType(e.target.value)}
-              className={styles.filterSelect}
-            >
-              <option value="month">Month</option>
-              <option value="quarter">Quarter</option>
-              <option value="year">Year</option>
-            </select>
-          </div>
-
-          <div className={styles.filterGroup}>
-            <label htmlFor="year-select">Year:</label>
-            <select
-              id="year-select"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className={styles.filterSelect}
-            >
-              {availableYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {timePeriodType === "month" && (
+        {/* Compact Filtering Controls above table */}
+        <div className={styles.tableHeaderSection}>
+          <div className={styles.tableFilters}>
             <div className={styles.filterGroup}>
-              <label htmlFor="month-select">Month:</label>
+              <label htmlFor="account-select">Account:</label>
               <select
-                id="month-select"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                id="account-select"
+                value={selectedAccountId}
+                onChange={(e) => setSelectedAccountId(e.target.value)}
                 className={styles.filterSelect}
               >
-                <option value={1}>January</option>
-                <option value={2}>February</option>
-                <option value={3}>March</option>
-                <option value={4}>April</option>
-                <option value={5}>May</option>
-                <option value={6}>June</option>
-                <option value={7}>July</option>
-                <option value={8}>August</option>
-                <option value={9}>September</option>
-                <option value={10}>October</option>
-                <option value={11}>November</option>
-                <option value={12}>December</option>
+                <option value="all">All Accounts</option>
+                {accounts?.map((acc) => (
+                  <option key={acc.id || acc.name} value={acc.id || acc.name}>
+                    {acc.name}
+                  </option>
+                ))}
               </select>
             </div>
-          )}
 
-          {timePeriodType === "quarter" && (
             <div className={styles.filterGroup}>
-              <label htmlFor="quarter-select">Quarter:</label>
+              <label htmlFor="time-period-type">Time Period:</label>
               <select
-                id="quarter-select"
-                value={selectedQuarter}
-                onChange={(e) => setSelectedQuarter(parseInt(e.target.value))}
+                id="time-period-type"
+                value={timePeriodType}
+                onChange={(e) => setTimePeriodType(e.target.value)}
                 className={styles.filterSelect}
               >
-                <option value={1}>Q1 (Jan-Mar)</option>
-                <option value={2}>Q2 (Apr-Jun)</option>
-                <option value={3}>Q3 (Jul-Sep)</option>
-                <option value={4}>Q4 (Oct-Dec)</option>
+                <option value="month">Month</option>
+                <option value="quarter">Quarter</option>
+                <option value="year">Year</option>
               </select>
             </div>
-          )}
+
+            <div className={styles.filterGroup}>
+              <label htmlFor="year-select">Year:</label>
+              <select
+                id="year-select"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                className={styles.filterSelect}
+              >
+                {availableYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {timePeriodType === "month" && (
+              <div className={styles.filterGroup}>
+                <label htmlFor="month-select">Month:</label>
+                <select
+                  id="month-select"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                  className={styles.filterSelect}
+                >
+                  <option value={1}>January</option>
+                  <option value={2}>February</option>
+                  <option value={3}>March</option>
+                  <option value={4}>April</option>
+                  <option value={5}>May</option>
+                  <option value={6}>June</option>
+                  <option value={7}>July</option>
+                  <option value={8}>August</option>
+                  <option value={9}>September</option>
+                  <option value={10}>October</option>
+                  <option value={11}>November</option>
+                  <option value={12}>December</option>
+                </select>
+              </div>
+            )}
+
+            {timePeriodType === "quarter" && (
+              <div className={styles.filterGroup}>
+                <label htmlFor="quarter-select">Quarter:</label>
+                <select
+                  id="quarter-select"
+                  value={selectedQuarter}
+                  onChange={(e) => setSelectedQuarter(parseInt(e.target.value))}
+                  className={styles.filterSelect}
+                >
+                  <option value={1}>Q1 (Jan-Mar)</option>
+                  <option value={2}>Q2 (Apr-Jun)</option>
+                  <option value={3}>Q3 (Jul-Sep)</option>
+                  <option value={4}>Q4 (Oct-Dec)</option>
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.transactionCount}>
+            {filteredTransactions.length} transactions
+          </div>
         </div>
 
         <TransactionsTable
@@ -296,7 +302,7 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
                 : `Clear all ${transactions.length} transactions`
             }
           >
-            Clear All ({transactions.length})
+            Clear All
           </Button>
           <div className={styles.storageIndicator}>
             <span
@@ -316,6 +322,7 @@ const TransactionsTab = ({ accountId: initialAccountId }) => {
         onClose={() => setImportModalOpen(false)}
         onImport={handleImportTransactions}
         accounts={accounts}
+        existingTransactions={transactions}
         isLoading={isLoading}
       />
 

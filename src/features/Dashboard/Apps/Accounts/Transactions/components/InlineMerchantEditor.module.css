@@ -106,3 +106,57 @@
   border-top: 1px solid #e9ecef;
   padding-top: 6px;
 }
+
+.folderButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.folderButton:hover {
+  background: #5a6268;
+}
+
+.existingMerchants {
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.existingMerchantsLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 4px;
+}
+
+.existingMerchantButton {
+  background: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  transition: all 0.2s;
+  display: block;
+  width: 100%;
+  text-align: left;
+}
+
+.existingMerchantButton:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}

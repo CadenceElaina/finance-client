@@ -266,6 +266,23 @@ export const merchantPatterns = [
     defaultSubCategory: 'Video Games',
     confidence: 0.9,
   },
+
+  // Credit Card Payments & Transfers
+  {
+    patterns: [
+      /mobile payment/i,
+      /credit card payment/i,
+      /payment\s*-\s*thank you/i,
+      /autopay/i,
+      /online payment/i,
+      /electronic payment/i,
+      /transfer\s*(to|from)/i,
+    ],
+    defaultCategory: 'Transfer',
+    defaultSubCategory: 'Credit Card Payment',
+    confidence: 0.9,
+    transactionType: 'transfer',
+  },
 ];
 
 /**

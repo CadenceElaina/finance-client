@@ -13,15 +13,19 @@ const NamedDefaultsManager = ({
   onDefaultSelected,
   onDefaultsChanged,
   transactionType = "expense",
+  currentCategory = "",
+  currentSubCategory = "",
+  currentNotes = "",
+  autoOpenCreateForm = false,
 }) => {
   const [namedDefaults, setNamedDefaults] = useState(() =>
     getMerchantNamedDefaults(merchantName)
   );
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(autoOpenCreateForm);
   const [newDefaultName, setNewDefaultName] = useState("");
-  const [newCategory, setNewCategory] = useState("");
-  const [newSubCategory, setNewSubCategory] = useState("");
-  const [newNotes, setNewNotes] = useState("");
+  const [newCategory, setNewCategory] = useState(currentCategory);
+  const [newSubCategory, setNewSubCategory] = useState(currentSubCategory);
+  const [newNotes, setNewNotes] = useState(currentNotes);
   const [isCreating, setIsCreating] = useState(false);
 
   const refreshDefaults = useCallback(() => {
@@ -52,15 +56,25 @@ const NamedDefaultsManager = ({
     );
 
     if (success) {
-      // Reset form
+      // Reset form to current values
       setNewDefaultName("");
-      setNewCategory("");
-      setNewSubCategory("");
-      setNewNotes("");
+      setNewCategory(currentCategory);
+      setNewSubCategory(currentSubCategory);
+      setNewNotes(currentNotes);
       setShowCreateForm(false);
       refreshDefaults();
     }
     setIsCreating(false);
+  };
+
+  const handleToggleCreateForm = () => {
+    if (!showCreateForm) {
+      // Pre-fill with current transaction values when opening
+      setNewCategory(currentCategory);
+      setNewSubCategory(currentSubCategory);
+      setNewNotes(currentNotes);
+    }
+    setShowCreateForm(!showCreateForm);
   };
 
   const handleSelectDefault = (defaultData) => {
@@ -97,7 +111,7 @@ const NamedDefaultsManager = ({
         <h4>Saved Defaults for "{merchantName}"</h4>
         <button
           type="button"
-          onClick={() => setShowCreateForm(!showCreateForm)}
+          onClick={handleToggleCreateForm}
           className={styles.createButton}
         >
           {showCreateForm ? "Cancel" : "+ Create New Default"}

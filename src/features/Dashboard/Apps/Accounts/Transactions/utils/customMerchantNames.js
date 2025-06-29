@@ -153,6 +153,19 @@ export const clearCustomMerchantNames = () => {
 };
 
 /**
+ * Clear all custom merchant names (for reset/cleanup purposes)
+ */
+export const clearAllCustomMerchantNames = () => {
+  try {
+    localStorage.removeItem(CUSTOM_MERCHANT_NAMES_KEY);
+    return true;
+  } catch (error) {
+    console.warn('Failed to clear custom merchant names:', error);
+    return false;
+  }
+};
+
+/**
  * Get suggestions for common merchant name improvements
  * @param {string} rawMerchant - Raw merchant name
  * @returns {array} - Array of suggested improvements

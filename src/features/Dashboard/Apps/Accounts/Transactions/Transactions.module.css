@@ -1,18 +1,18 @@
 .transactionsContainer {
-  padding: var(--space-lg);
+  padding: var(--space-md);
   background-color: var(--surface-color);
   border-radius: var(--border-radius-md);
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
 }
 
 .header h2 {
@@ -24,7 +24,7 @@
 
 .controls {
   display: flex;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   align-items: center;
   flex-wrap: wrap;
 }
@@ -52,49 +52,75 @@
   color: var(--warning-dark);
 }
 
+/* Table Header Section */
+.tableHeaderSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-color);
+  margin-bottom: 0;
+}
+
+.tableFilters {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.transactionCount {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 /* Filter Section */
 .filterSection {
   display: flex;
-  gap: var(--space-md);
+  gap: var(--space-sm);
   align-items: center;
-  padding: var(--space-md);
+  padding: var(--space-sm);
   background-color: var(--surface-dark);
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-sm);
   border: 1px solid var(--border-color);
-  margin-bottom: var(--space-md);
+  margin-bottom: var(--space-sm);
   flex-wrap: wrap;
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  min-width: 120px;
+  gap: var(--space-xxs);
+  min-width: 100px;
 }
 
 /* Make the first filter group (account selector) more prominent */
 .filterGroup:first-child {
-  min-width: 160px;
+  min-width: 140px;
 }
 
 .filterGroup:first-child label {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
 }
 
 .filterGroup label {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
   color: var(--text-secondary);
 }
 
 .filterSelect {
-  padding: var(--space-xs) var(--space-sm);
+  padding: var(--space-xxs) var(--space-xs);
   border-radius: var(--border-radius-sm);
   border: 1px solid var(--border-color);
   background-color: var(--surface-color);
   color: var(--text-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   transition: border-color var(--transition-speed-normal);
 }
 
@@ -344,71 +370,71 @@
 .reviewContainer {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-sm);
   width: 95vw;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 16px;
+  padding: var(--space-sm);
 }
 
 .reviewHeaderRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
+  padding-bottom: var(--space-xs);
   border-bottom: 1px solid var(--border-color);
 }
 
 .reviewTitle {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary-color);
 }
 
 .reviewProgressWrapper {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-xs);
   flex-grow: 1;
-  margin: 0 20px;
+  margin: 0 var(--space-sm);
 }
 
 .reviewProgressBarBg {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background-color: var(--surface-dark);
-  border-radius: 4px;
+  border-radius: var(--border-radius-sm);
 }
 
 .reviewProgressBarFill {
   height: 100%;
   background-color: var(--primary-color);
-  border-radius: 4px;
-  transition: width 0.3s ease-in-out;
+  border-radius: var(--border-radius-sm);
+  transition: width var(--transition-speed-normal);
 }
 
 .reviewProgressText {
-  font-size: 0.9rem;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary-color);
   white-space: nowrap;
 }
 
 .reviewHeaderActions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-xs);
 }
 
 .reviewGrid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  gap: var(--space-md);
   max-height: 65vh;
   overflow: hidden;
 }
 
 .reviewPanelToReview {
   overflow-y: auto;
-  padding-right: 10px;
+  padding-right: var(--space-xs);
 }
 
 .reviewPanelTitle {
@@ -541,6 +567,8 @@
 .reviewApproveBtnRow {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-sm);
   padding: 0 16px 16px;
   border-top: 1px solid var(--border-color-light);
   margin-top: 10px;
@@ -685,4 +713,170 @@
 /* Merchant Button */
 .merchantButton {
   white-space: nowrap;
+}
+
+/* Suggestion type indicators */
+.defaultIndicator {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--success-dark-color);
+  background-color: var(--success-light-color);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  margin-top: 4px;
+}
+
+.autoSuggestedIndicator {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--info-dark-color);
+  background-color: var(--info-light-color);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  margin-top: 4px;
+}
+
+.manualIndicator {
+  display: block;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-secondary-color);
+  background-color: var(--surface-dark-color);
+  padding: 2px 6px;
+  border-radius: var(--border-radius-sm);
+  margin-top: 4px;
+}
+
+/* Merchant input styling */
+.merchantInputContainer {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+}
+
+.merchantInputWrapper {
+  flex: 1;
+}
+
+.merchantHelpText {
+  font-size: var(--font-size-xxs);
+  color: var(--text-secondary);
+  margin-top: var(--space-xxs);
+}
+
+.merchantActions {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: flex-start;
+  margin-top: var(--space-xxs);
+}
+
+.merchantActionBtn {
+  font-size: var(--font-size-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--color-success);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  color: white;
+  transition: background-color var(--transition-speed-normal);
+}
+
+.merchantActionBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.merchantActionBtnSecondary {
+  background: var(--color-primary);
+}
+
+.merchantActionBtnSecondary:hover {
+  background: var(--color-primary-dark);
+}
+
+/* Search container styling */
+.searchContainer {
+  margin: var(--space-md) 0;
+  padding: var(--space-sm);
+  background-color: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-light);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.searchLabel {
+  display: block;
+  margin-bottom: var(--space-xs);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.searchResultsInfo {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+/* Merchant selection dropdown */
+.merchantSelectionDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.merchantSelectionHeader {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.merchantSelectionOption {
+  display: block;
+  width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background-color 0.2s;
+}
+
+.merchantSelectionOption:hover {
+  background-color: var(--color-primary-light);
+  color: white;
+}
+
+.merchantInputContainer {
+  position: relative;
 }

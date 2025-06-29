@@ -19,7 +19,11 @@ import {
   isValidMerchantChoice,
   getMerchantNamedDefaults,
 } from "./utils/merchantHistory";
-import { getFinalMerchantName } from "./utils/customMerchantNames";
+import {
+  getFinalMerchantName,
+  getAllCustomMerchantNames,
+  setCustomMerchantName,
+} from "./utils/customMerchantNames";
 import NamedDefaultsManager from "./components/NamedDefaultsManager";
 import MerchantManager from "./components/MerchantManager";
 import InlineMerchantEditor from "./components/InlineMerchantEditor";
@@ -45,7 +49,13 @@ const mapCsvRow = (row) => {
   };
 };
 
-const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
+const TransactionImportModal = ({
+  isOpen,
+  onClose,
+  onImport,
+  accounts,
+  existingTransactions = [],
+}) => {
   const [step, setStep] = useState(1);
   const [transactions, setTransactions] = useState([]);
   const [approved, setApproved] = useState([]);
@@ -57,6 +67,10 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
   const [showingDefaultsFor, setShowingDefaultsFor] = useState(null); // Track which transaction is showing defaults
   const [showMerchantManager, setShowMerchantManager] = useState(false);
   const [editingMerchantFor, setEditingMerchantFor] = useState(null); // Track which merchant is being edited
+  const [showingMerchantListFor, setShowingMerchantListFor] = useState(null); // Track which merchant is showing selection list
+  const [existingMerchants, setExistingMerchants] = useState(() =>
+    getAllCustomMerchantNames()
+  );
 
   const importableAccounts = useMemo(() => {
     if (!accounts || accounts.length === 0) return [];
@@ -90,6 +104,40 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
       );
     });
   }, [accounts]);
+
+  // Function to detect duplicates
+  const isDuplicateTransaction = (newTx, existingTxs) => {
+    // Check for exact matches on date, amount, and merchant/description
+    return existingTxs.some((existing) => {
+      // Normalize dates for comparison
+      const newDate = new Date(newTx.original.date);
+      const existingDate = new Date(existing.transaction_date);
+
+      // Set hours to 0 to only compare date part
+      newDate.setHours(0, 0, 0, 0);
+      existingDate.setHours(0, 0, 0, 0);
+
+      const isSameDate = newDate.getTime() === existingDate.getTime();
+
+      const isSameAmount =
+        Math.abs(
+          parseFloat(existing.amount) - parseFloat(newTx.original.amount)
+        ) < 0.01;
+
+      const isSameMerchant =
+        existing.merchant_name?.toLowerCase() ===
+        newTx.proposed.merchant_name?.toLowerCase();
+
+      const isSameDescription =
+        existing.description?.toLowerCase() ===
+        newTx.proposed.description?.toLowerCase();
+
+      // Consider it a duplicate if date + amount match AND (merchant OR description match)
+      return (
+        isSameDate && isSameAmount && (isSameMerchant || isSameDescription)
+      );
+    });
+  };
 
   const handleFile = (e) => {
     const file = e.target.files[0];
@@ -155,7 +203,24 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
             approved: false,
           };
         });
-        setTransactions(txs);
+
+        // Filter out duplicates
+        const uniqueTransactions = txs.filter(
+          (tx) => !isDuplicateTransaction(tx, existingTransactions)
+        );
+        const duplicateCount = txs.length - uniqueTransactions.length;
+
+        if (duplicateCount > 0) {
+          setError(
+            `Found and filtered out ${duplicateCount} duplicate transaction${
+              duplicateCount > 1 ? "s" : ""
+            }.`
+          );
+        } else {
+          setError("");
+        }
+
+        setTransactions(uniqueTransactions);
         setApproved([]);
         setUndoStack([]);
         setStep(2);
@@ -256,6 +321,7 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
     setTransactions((prev) =>
       prev.map((tx) => {
         if (tx.id === id) {
+          const isDefaultUpdate = tx.proposed._isDefaultUpdate;
           const updatedTx = {
             ...tx,
             proposed: {
@@ -267,6 +333,15 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                 field === "category" || field === "subCategory"
                   ? false
                   : tx.proposed.isAutoSuggested,
+              // Clear active default when manually changing category/subcategory
+              // But preserve it if this is a programmatic update from named default
+              activeDefault:
+                (field === "category" || field === "subCategory") &&
+                !isDefaultUpdate
+                  ? null
+                  : tx.proposed.activeDefault,
+              // Clear the default update flag after processing
+              _isDefaultUpdate: undefined,
             },
           };
 
@@ -323,6 +398,23 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                   updatedTx.proposed.type
                 );
               }
+            }
+          }
+
+          // Handle merchant name changes - save custom names when manually updated
+          if (field === "merchant_name" && value.trim()) {
+            const cleanedName = cleanMerchantName(
+              tx.original.merchant,
+              tx.proposed.location
+            );
+            if (value.trim() !== cleanedName) {
+              setCustomMerchantName(
+                tx.original.merchant,
+                tx.proposed.location,
+                value.trim()
+              );
+              // Update existing merchants list
+              setExistingMerchants(getAllCustomMerchantNames());
             }
           }
 
@@ -391,6 +483,8 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
     setShowingDefaultsFor(null);
     setShowMerchantManager(false);
     setEditingMerchantFor(null);
+    setShowingMerchantListFor(null);
+    setExistingMerchants(getAllCustomMerchantNames());
     onClose();
   };
 
@@ -485,7 +579,13 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
               category: defaultData.category,
               subCategory: defaultData.subCategory,
               notes: defaultData.notes || tx.proposed.notes,
-              isAutoSuggested: false, // Mark as manually selected
+              isAutoSuggested: false, // Mark as not auto-suggested
+              activeDefault: {
+                name: defaultData.name,
+                id: defaultData.id,
+              },
+              // Flag to indicate this is a programmatic update from named default
+              _isDefaultUpdate: true,
             },
           };
         }
@@ -512,6 +612,19 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
     setTransactions((prev) =>
       prev.map((tx) => {
         if (tx.id === transactionId) {
+          // Store the merchant name if it's different from the cleaned name
+          const cleanedName = cleanMerchantName(
+            tx.original.merchant,
+            tx.proposed.location
+          );
+          if (newName.trim() !== cleanedName) {
+            setCustomMerchantName(
+              tx.original.merchant,
+              tx.proposed.location,
+              newName.trim()
+            );
+          }
+
           return {
             ...tx,
             proposed: {
@@ -527,6 +640,27 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
     setEditingMerchantFor(null);
     // Force refresh to update any cached data
     setPreferencesUpdateKey((prev) => prev + 1);
+    // Update existing merchants list immediately
+    setExistingMerchants(getAllCustomMerchantNames());
+  };
+
+  const handleDirectMerchantSelection = (transactionId, merchant) => {
+    setTransactions((prev) =>
+      prev.map((tx) => {
+        if (tx.id === transactionId) {
+          return {
+            ...tx,
+            proposed: {
+              ...tx.proposed,
+              merchant_name: merchant.customName,
+              isAutoSuggested: false,
+            },
+          };
+        }
+        return tx;
+      })
+    );
+    setShowingMerchantListFor(null);
   };
 
   return (
@@ -648,25 +782,8 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
           </div>
 
           {/* Search Input */}
-          <div
-            className={styles.searchContainer}
-            style={{
-              margin: "16px 0",
-              padding: "12px",
-              backgroundColor: "#f8f9fa",
-              borderRadius: "6px",
-              border: "1px solid #e9ecef",
-            }}
-          >
-            <label
-              htmlFor="transaction-search"
-              style={{
-                display: "block",
-                marginBottom: "8px",
-                fontWeight: "500",
-                fontSize: "14px",
-              }}
-            >
+          <div className={styles.searchContainer}>
+            <label htmlFor="transaction-search" className={styles.searchLabel}>
               Search Transactions:
             </label>
             <input
@@ -675,18 +792,10 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
               placeholder="Search by merchant, description, category, amount..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                fontSize: "14px",
-              }}
+              className={styles.searchInput}
             />
             {searchTerm && (
-              <div
-                style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}
-              >
+              <div className={styles.searchResultsInfo}>
                 Showing {remaining.length + approvedTxs.length} of{" "}
                 {transactions.length} transactions
               </div>
@@ -737,7 +846,7 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                             </tr>
                             <tr>
                               <td>Amount:</td>
-                              <td>{tx.original.amount}</td>
+                              <td>${tx.original.amount}</td>
                             </tr>
                           </tbody>
                         </table>
@@ -747,7 +856,22 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                       </div>
                       {/* Suggested/Editable Data */}
                       <div className={styles.reviewTableCol}>
-                        <div className={styles.reviewTableTitle}>Suggested</div>
+                        <div className={styles.reviewTableTitle}>
+                          Suggested
+                          {tx.proposed.activeDefault ? (
+                            <span className={styles.defaultIndicator}>
+                              Using Default: {tx.proposed.activeDefault.name}
+                            </span>
+                          ) : tx.proposed.isAutoSuggested ? (
+                            <span className={styles.autoSuggestedIndicator}>
+                              Auto-Suggested
+                            </span>
+                          ) : (
+                            <span className={styles.manualIndicator}>
+                              Manual Entry
+                            </span>
+                          )}
+                        </div>
                         <table className={styles.reviewTable}>
                           <tbody>
                             <tr>
@@ -765,51 +889,99 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                                       handleMerchantNameUpdate(tx.id, newName)
                                     }
                                     onCancel={() => setEditingMerchantFor(null)}
+                                    existingMerchants={existingMerchants}
                                   />
                                 ) : (
                                   <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "8px",
-                                    }}
+                                    className={styles.merchantInputContainer}
                                   >
-                                    <input
-                                      type="text"
-                                      value={tx.proposed.merchant_name}
-                                      onChange={(e) =>
-                                        handleTransactionChange(
-                                          tx.id,
-                                          "merchant_name",
-                                          e.target.value
-                                        )
-                                      }
-                                      className={`${styles.reviewInput} ${
-                                        !tx.proposed.merchant_name
-                                          ? styles.invalid
-                                          : ""
-                                      }`}
-                                      required
-                                      style={{ flex: 1 }}
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        setEditingMerchantFor(tx.id)
-                                      }
-                                      style={{
-                                        fontSize: "10px",
-                                        padding: "2px 6px",
-                                        background: "#f8f9fa",
-                                        border: "1px solid #dee2e6",
-                                        borderRadius: "3px",
-                                        cursor: "pointer",
-                                        color: "#6c757d",
-                                      }}
-                                      title="Edit merchant name with suggestions"
+                                    <div
+                                      className={styles.merchantInputWrapper}
                                     >
-                                      ✏️
-                                    </button>
+                                      <input
+                                        type="text"
+                                        value={tx.proposed.merchant_name}
+                                        onChange={(e) =>
+                                          handleTransactionChange(
+                                            tx.id,
+                                            "merchant_name",
+                                            e.target.value
+                                          )
+                                        }
+                                        className={`${styles.reviewInput} ${
+                                          !tx.proposed.merchant_name
+                                            ? styles.invalid
+                                            : ""
+                                        }`}
+                                        required
+                                        placeholder="Suggested merchant name"
+                                      />
+                                      <div className={styles.merchantHelpText}>
+                                        Suggested from transaction data
+                                      </div>
+                                    </div>
+                                    <div className={styles.merchantActions}>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setEditingMerchantFor(tx.id)
+                                        }
+                                        className={styles.merchantActionBtn}
+                                        title="Add new merchant or select existing"
+                                      >
+                                        +
+                                      </button>
+                                      {existingMerchants.length > 0 && (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            setShowingMerchantListFor(
+                                              showingMerchantListFor === tx.id
+                                                ? null
+                                                : tx.id
+                                            )
+                                          }
+                                          className={`${styles.merchantActionBtn} ${styles.merchantActionBtnSecondary}`}
+                                          title="Select from existing merchants"
+                                        >
+                                          📁
+                                        </button>
+                                      )}
+                                    </div>
+                                    {/* Merchant selection dropdown */}
+                                    {showingMerchantListFor === tx.id &&
+                                      existingMerchants.length > 0 && (
+                                        <div
+                                          className={
+                                            styles.merchantSelectionDropdown
+                                          }
+                                        >
+                                          <div
+                                            className={
+                                              styles.merchantSelectionHeader
+                                            }
+                                          >
+                                            Select existing merchant:
+                                          </div>
+                                          {existingMerchants.map((merchant) => (
+                                            <button
+                                              key={merchant.key}
+                                              type="button"
+                                              onClick={() =>
+                                                handleDirectMerchantSelection(
+                                                  tx.id,
+                                                  merchant
+                                                )
+                                              }
+                                              className={
+                                                styles.merchantSelectionOption
+                                              }
+                                            >
+                                              {merchant.customName}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
                                   </div>
                                 )}
                               </td>
@@ -1026,59 +1198,60 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                                       getMerchantNamedDefaults(
                                         tx.proposed.merchant_name
                                       );
-                                    return (
-                                      <div>
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleToggleDefaultsManager(tx.id)
+
+                                    if (namedDefaults.length > 0) {
+                                      return (
+                                        <select
+                                          onChange={(e) => {
+                                            if (e.target.value) {
+                                              const selectedDefault =
+                                                namedDefaults.find(
+                                                  (d) =>
+                                                    d.name === e.target.value
+                                                );
+                                              if (selectedDefault) {
+                                                handleNamedDefaultSelected(
+                                                  tx.id,
+                                                  selectedDefault
+                                                );
+                                              }
+                                            }
+                                          }}
+                                          value={
+                                            tx.proposed.activeDefault?.name ||
+                                            ""
                                           }
+                                          className={styles.reviewInput}
+                                          style={{ fontSize: "12px" }}
+                                        >
+                                          <option value="">
+                                            Select a default...
+                                          </option>
+                                          {namedDefaults.map((defaultData) => (
+                                            <option
+                                              key={defaultData.name}
+                                              value={defaultData.name}
+                                            >
+                                              {defaultData.name}:{" "}
+                                              {defaultData.category}
+                                              {defaultData.subCategory &&
+                                                ` → ${defaultData.subCategory}`}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      );
+                                    } else {
+                                      return (
+                                        <span
                                           style={{
                                             fontSize: "12px",
-                                            padding: "4px 8px",
-                                            background:
-                                              showingDefaultsFor === tx.id
-                                                ? "#0056b3"
-                                                : namedDefaults.length > 0
-                                                ? "#28a745"
-                                                : "#007bff",
-                                            color: "white",
-                                            border: "none",
-                                            borderRadius: "4px",
-                                            cursor: "pointer",
+                                            color: "#666",
                                           }}
                                         >
-                                          {showingDefaultsFor === tx.id
-                                            ? "Hide Defaults"
-                                            : namedDefaults.length > 0
-                                            ? `Use ${
-                                                namedDefaults.length
-                                              } Saved Default${
-                                                namedDefaults.length !== 1
-                                                  ? "s"
-                                                  : ""
-                                              }`
-                                            : "Create New Default"}
-                                        </button>
-                                        {namedDefaults.length > 0 &&
-                                          showingDefaultsFor !== tx.id && (
-                                            <div
-                                              style={{
-                                                fontSize: "10px",
-                                                color: "#666",
-                                                marginTop: "2px",
-                                              }}
-                                            >
-                                              {namedDefaults.length} saved
-                                              default
-                                              {namedDefaults.length !== 1
-                                                ? "s"
-                                                : ""}{" "}
-                                              available
-                                            </div>
-                                          )}
-                                      </div>
-                                    );
+                                          No saved defaults
+                                        </span>
+                                      );
+                                    }
                                   })()}
                                 </td>
                               </tr>
@@ -1129,7 +1302,15 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                                 handleNamedDefaultSelected(tx.id, defaultData)
                               }
                               onDefaultsChanged={handleDefaultsChanged}
+                              currentCategory={tx.proposed.category}
+                              currentSubCategory={tx.proposed.subCategory}
+                              currentNotes={tx.proposed.notes}
                               transactionType={tx.proposed.type}
+                              autoOpenCreateForm={
+                                getMerchantNamedDefaults(
+                                  tx.proposed.merchant_name
+                                ).length === 0
+                              }
                             />
                           )}
                       </div>
@@ -1148,31 +1329,61 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                       >
                         Approve
                       </Button>
-                    </div>
-                    {/* Named Defaults Manager */}
-                    {tx.proposed.merchant_name && (
-                      <div className={styles.namedDefaultsContainer}>
+                      {/* Named Defaults Button */}
+                      {tx.proposed.merchant_name && (
                         <Button
-                          variant="link"
-                          onClick={() => handleToggleDefaultsManager(tx.id)}
+                          variant="secondary"
+                          onClick={() => {
+                            const namedDefaults = getMerchantNamedDefaults(
+                              tx.proposed.merchant_name
+                            );
+                            if (namedDefaults.length === 0) {
+                              // Auto-open new default form if no defaults exist
+                              setShowingDefaultsFor(tx.id);
+                            } else {
+                              handleToggleDefaultsManager(tx.id);
+                            }
+                          }}
+                          size="small"
                           className={styles.namedDefaultsToggle}
                         >
-                          {showingDefaultsFor === tx.id
-                            ? "Hide Named Defaults"
-                            : "Show Named Defaults"}
+                          {(() => {
+                            const namedDefaults = getMerchantNamedDefaults(
+                              tx.proposed.merchant_name
+                            );
+                            if (showingDefaultsFor === tx.id) {
+                              return "Hide Defaults";
+                            }
+                            return namedDefaults.length > 0
+                              ? `Defaults (${namedDefaults.length})`
+                              : "New Default";
+                          })()}
                         </Button>
-                        {showingDefaultsFor === tx.id && (
+                      )}
+                    </div>
+                    {/* Named Defaults Manager */}
+                    {tx.proposed.merchant_name &&
+                      showingDefaultsFor === tx.id && (
+                        <div className={styles.namedDefaultsContainer}>
                           <NamedDefaultsManager
                             merchantName={tx.proposed.merchant_name}
                             onSelectDefault={(defaultData) =>
                               handleNamedDefaultSelected(tx.id, defaultData)
                             }
                             onClose={() => setShowingDefaultsFor(null)}
+                            currentCategory={tx.proposed.category}
+                            currentSubCategory={tx.proposed.subCategory}
+                            currentNotes={tx.proposed.notes}
+                            transactionType={tx.proposed.type}
+                            autoOpenCreateForm={
+                              getMerchantNamedDefaults(
+                                tx.proposed.merchant_name
+                              ).length === 0
+                            }
                             key={preferencesUpdateKey} // Re-render when preferences change
                           />
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
                   </div>
                 ))
               )}
@@ -1216,7 +1427,7 @@ const TransactionImportModal = ({ isOpen, onClose, onImport, accounts }) => {
                           }}
                         >
                           <span className={styles.approvedAmount}>
-                            {tx.original.amount}
+                            ${tx.original.amount}
                           </span>
                           <Button
                             variant="secondary"

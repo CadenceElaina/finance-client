@@ -264,6 +264,79 @@
   flex-shrink: 0;
 }
 
+/* Data Management Section */
+.dataManagement {
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  border: 2px solid var(--danger-light-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--danger-ultra-light-color);
+}
+
+.dangerSection {
+  color: var(--danger-dark-color);
+  margin-bottom: var(--space-sm);
+}
+
+.warningText {
+  color: var(--danger-dark-color);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-md);
+  font-weight: 500;
+}
+
+.dangerButtons {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.dangerButton {
+  background-color: var(--danger-color) !important;
+  border-color: var(--danger-color) !important;
+  color: white !important;
+  font-size: var(--font-size-sm);
+}
+
+.dangerButton:hover {
+  background-color: var(--danger-dark-color) !important;
+  border-color: var(--danger-dark-color) !important;
+}
+
+/* Quick Reset Section */
+.quickResetSection {
+  margin: var(--space-md) 0;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--warning-light-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--warning-ultra-light-color);
+}
+
+.resetSectionTitle {
+  color: var(--warning-dark-color);
+  margin: 0 0 var(--space-sm) 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+}
+
+.quickResetButtons {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.quickResetButton {
+  background-color: var(--warning-color) !important;
+  border-color: var(--warning-color) !important;
+  color: white !important;
+  font-size: var(--font-size-sm);
+}
+
+.quickResetButton:hover {
+  background-color: var(--warning-dark-color) !important;
+  border-color: var(--warning-dark-color) !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .controls {

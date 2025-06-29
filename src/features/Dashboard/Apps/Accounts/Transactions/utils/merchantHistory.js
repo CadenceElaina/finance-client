@@ -401,3 +401,29 @@ export const getAllMerchantsWithDefaults = () => {
 export const clearNamedDefaults = () => {
   localStorage.removeItem(MERCHANT_DEFAULTS_KEY);
 };
+
+/**
+ * Clear all merchant history (for reset/cleanup purposes)
+ */
+export const clearAllMerchantHistory = () => {
+  try {
+    localStorage.removeItem(MERCHANT_HISTORY_KEY);
+    return true;
+  } catch (error) {
+    console.warn('Failed to clear merchant history:', error);
+    return false;
+  }
+};
+
+/**
+ * Clear all named defaults (for reset/cleanup purposes)
+ */
+export const clearAllNamedDefaults = () => {
+  try {
+    localStorage.removeItem(MERCHANT_DEFAULTS_KEY);
+    return true;
+  } catch (error) {
+    console.warn('Failed to clear named defaults:', error);
+    return false;
+  }
+};

@@ -23,6 +23,13 @@ const MerchantManagementTab = () => {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("custom-names");
+  const [editingDefault, setEditingDefault] = useState(null); // Track which default is being edited
+  const [editingDefaultData, setEditingDefaultData] = useState({
+    name: "",
+    category: "",
+    subcategory: "",
+    notes: "",
+  });
 
   // New merchant creation
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -98,6 +105,59 @@ const MerchantManagementTab = () => {
     }
   };
 
+  const handleEditDefault = (merchantName, defaultName, defaultData) => {
+    setEditingDefault(`${merchantName}-${defaultName}`);
+    setEditingDefaultData({
+      name: defaultName,
+      category: defaultData.category,
+      subcategory: defaultData.subCategory || defaultData.subcategory,
+      notes: defaultData.notes || "",
+    });
+  };
+
+  const handleSaveDefaultEdit = (merchantName, originalDefaultName) => {
+    if (
+      !editingDefaultData.name.trim() ||
+      !editingDefaultData.category.trim()
+    ) {
+      alert("Please provide both a name and category for the default");
+      return;
+    }
+
+    // If the name changed, remove the old default
+    if (originalDefaultName !== editingDefaultData.name.trim()) {
+      removeNamedDefault(merchantName, originalDefaultName);
+    }
+
+    // Create/update the default
+    createNamedDefault(
+      merchantName,
+      editingDefaultData.name.trim(),
+      editingDefaultData.category,
+      editingDefaultData.subcategory,
+      editingDefaultData.notes
+    );
+
+    setEditingDefault(null);
+    setEditingDefaultData({
+      name: "",
+      category: "",
+      subcategory: "",
+      notes: "",
+    });
+    refreshData();
+  };
+
+  const handleCancelDefaultEdit = () => {
+    setEditingDefault(null);
+    setEditingDefaultData({
+      name: "",
+      category: "",
+      subcategory: "",
+      notes: "",
+    });
+  };
+
   const filteredCustomMerchants = useMemo(() => {
     if (!searchTerm) return customMerchants;
     const term = searchTerm.toLowerCase();
@@ -139,6 +199,7 @@ const MerchantManagementTab = () => {
             onClick={() => setShowCreateForm(true)}
             className={styles.createButton}
           >
+            {" "}
             + New Merchant
           </Button>
         </div>
@@ -389,34 +450,140 @@ const MerchantManagementTab = () => {
                         {merchant.merchantName}
                       </div>
                       <div className={styles.defaults}>
-                        {merchant.defaults.map((defaultItem) => (
-                          <div
-                            key={defaultItem.name}
-                            className={styles.defaultItem}
-                          >
-                            <strong>{defaultItem.name}:</strong>{" "}
-                            {defaultItem.category}
-                            {defaultItem.subcategory &&
-                              ` > ${defaultItem.subcategory}`}
-                            {defaultItem.notes && (
-                              <div className={styles.notes}>
-                                Notes: {defaultItem.notes}
-                              </div>
-                            )}
-                            <Button
-                              variant="danger"
-                              onClick={() =>
-                                handleRemoveDefault(
-                                  merchant.merchantName,
-                                  defaultItem.name
-                                )
-                              }
-                              className={styles.removeDefaultButton}
+                        {merchant.defaults.map((defaultItem) => {
+                          const editKey = `${merchant.merchantName}-${defaultItem.name}`;
+                          const isEditing = editingDefault === editKey;
+
+                          return (
+                            <div
+                              key={defaultItem.name}
+                              className={styles.defaultItem}
                             >
-                              Remove
-                            </Button>
-                          </div>
-                        ))}
+                              {isEditing ? (
+                                <div className={styles.editingDefault}>
+                                  <div className={styles.editField}>
+                                    <label>Name:</label>
+                                    <input
+                                      type="text"
+                                      value={editingDefaultData.name}
+                                      onChange={(e) =>
+                                        setEditingDefaultData((prev) => ({
+                                          ...prev,
+                                          name: e.target.value,
+                                        }))
+                                      }
+                                      className={styles.editInput}
+                                    />
+                                  </div>
+                                  <div className={styles.editField}>
+                                    <label>Category:</label>
+                                    <input
+                                      type="text"
+                                      value={editingDefaultData.category}
+                                      onChange={(e) =>
+                                        setEditingDefaultData((prev) => ({
+                                          ...prev,
+                                          category: e.target.value,
+                                        }))
+                                      }
+                                      className={styles.editInput}
+                                    />
+                                  </div>
+                                  <div className={styles.editField}>
+                                    <label>Subcategory:</label>
+                                    <input
+                                      type="text"
+                                      value={editingDefaultData.subcategory}
+                                      onChange={(e) =>
+                                        setEditingDefaultData((prev) => ({
+                                          ...prev,
+                                          subcategory: e.target.value,
+                                        }))
+                                      }
+                                      className={styles.editInput}
+                                    />
+                                  </div>
+                                  <div className={styles.editField}>
+                                    <label>Notes:</label>
+                                    <input
+                                      type="text"
+                                      value={editingDefaultData.notes}
+                                      onChange={(e) =>
+                                        setEditingDefaultData((prev) => ({
+                                          ...prev,
+                                          notes: e.target.value,
+                                        }))
+                                      }
+                                      className={styles.editInput}
+                                    />
+                                  </div>
+                                  <div className={styles.editActions}>
+                                    <Button
+                                      variant="primary"
+                                      onClick={() =>
+                                        handleSaveDefaultEdit(
+                                          merchant.merchantName,
+                                          defaultItem.name
+                                        )
+                                      }
+                                      className={styles.saveButton}
+                                    >
+                                      Save
+                                    </Button>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={handleCancelDefaultEdit}
+                                      className={styles.cancelButton}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className={styles.defaultDisplay}>
+                                  <div className={styles.defaultText}>
+                                    <strong>{defaultItem.name}:</strong>{" "}
+                                    {defaultItem.category}
+                                    {defaultItem.subcategory &&
+                                      ` → ${defaultItem.subcategory}`}
+                                    {defaultItem.notes && (
+                                      <div className={styles.notes}>
+                                        Notes: {defaultItem.notes}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className={styles.defaultActions}>
+                                    <Button
+                                      variant="secondary"
+                                      onClick={() =>
+                                        handleEditDefault(
+                                          merchant.merchantName,
+                                          defaultItem.name,
+                                          defaultItem
+                                        )
+                                      }
+                                      className={styles.editButton}
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button
+                                      variant="danger"
+                                      onClick={() =>
+                                        handleRemoveDefault(
+                                          merchant.merchantName,
+                                          defaultItem.name
+                                        )
+                                      }
+                                      className={styles.removeDefaultButton}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>

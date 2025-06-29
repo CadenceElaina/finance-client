@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   setCustomMerchantName,
   getMerchantNameSuggestions,
+  getAllCustomMerchantNames,
 } from "../utils/customMerchantNames";
 import { cleanMerchantName } from "../utils/dataCleaning";
 import styles from "./InlineMerchantEditor.module.css";
@@ -12,9 +13,19 @@ const InlineMerchantEditor = ({
   currentName,
   onUpdate,
   onCancel,
+  existingMerchants: propExistingMerchants,
 }) => {
   const [customName, setCustomName] = useState(currentName);
   const [suggestions] = useState(() => getMerchantNameSuggestions(rawMerchant));
+  const [showExistingMerchants, setShowExistingMerchants] = useState(false);
+  const [existingMerchants, setExistingMerchants] = useState(
+    () => propExistingMerchants || getAllCustomMerchantNames()
+  );
+
+  useEffect(() => {
+    // Refresh existing merchants when component mounts or when prop changes
+    setExistingMerchants(propExistingMerchants || getAllCustomMerchantNames());
+  }, [propExistingMerchants]);
 
   const handleSave = () => {
     if (customName.trim() && customName.trim() !== currentName) {
@@ -31,6 +42,11 @@ const InlineMerchantEditor = ({
 
   const handleUseSuggestion = (suggestion) => {
     setCustomName(suggestion);
+  };
+
+  const handleUseExistingMerchant = (merchant) => {
+    setCustomName(merchant.customName);
+    setShowExistingMerchants(false);
   };
 
   const handleKeyPress = (e) => {
@@ -60,8 +76,34 @@ const InlineMerchantEditor = ({
           <button onClick={onCancel} className={styles.cancelButton}>
             ×
           </button>
+          {existingMerchants.length > 0 && (
+            <button
+              onClick={() => setShowExistingMerchants(!showExistingMerchants)}
+              className={styles.folderButton}
+              title="Select from existing merchants"
+            >
+              📁
+            </button>
+          )}
         </div>
       </div>
+
+      {showExistingMerchants && existingMerchants.length > 0 && (
+        <div className={styles.existingMerchants}>
+          <div className={styles.existingMerchantsLabel}>
+            Existing Merchants:
+          </div>
+          {existingMerchants.map((merchant) => (
+            <button
+              key={merchant.key}
+              onClick={() => handleUseExistingMerchant(merchant)}
+              className={styles.existingMerchantButton}
+            >
+              {merchant.customName}
+            </button>
+          ))}
+        </div>
+      )}
 
       {suggestions.length > 0 && (
         <div className={styles.suggestions}>
