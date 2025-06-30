@@ -3,16 +3,16 @@ import { useAppSize } from "../../../../contexts/AppSizeContext";
 import { useAppSizeRef } from "../../../../hooks/useAppSizeRegistration";
 import { getAppSizeClasses } from "../../../../utils/getAppSize";
 import FlexibleTabs from "../../../../components/ui/Tabs/Tabs";
+import RoadmapsTab from "./Roadmaps/RoadmapsTab";
 import CalculatorsTab from "./Calculators/CalculatorsTab";
 import ProjectionsTab from "./Projections/ProjectionsTab";
-import InvestmentRoadmapTab from "./Investments/InvestmentRoadmapTab";
 import planStyles from "./plan.module.css";
 
 const Plan = React.memo(() => {
   const appId = "plan";
   const containerRef = useAppSizeRef(appId);
   const appSize = useAppSize(appId);
-  const [activeTabId, setActiveTabId] = useState("invest");
+  const [activeTabId, setActiveTabId] = useState("roadmaps");
 
   const { smallApp, largeApp } = useMemo(
     () => getAppSizeClasses(appSize),
@@ -21,11 +21,9 @@ const Plan = React.memo(() => {
 
   const tabs = [
     {
-      id: "invest",
-      label: "Invest",
-      component: ({ smallApp: flexTabsSmallApp }) => (
-        <InvestmentRoadmapTab smallApp={flexTabsSmallApp} />
-      ),
+      id: "roadmaps",
+      label: "Roadmaps",
+      component: () => <RoadmapsTab />,
     },
     {
       id: "calculators",

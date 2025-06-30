@@ -25,6 +25,7 @@ import {
   DEMO_PORTFOLIOS,
   BASE_CASH_ACCOUNT,
   DEMO_GOALS,
+  DEMO_PLANS,
 } from "../utils/constants";
 
 // Split contexts for better performance
@@ -253,6 +254,8 @@ export const FinancialDataProvider = ({ children }) => {
         budget: loadedData.budget || DEFAULT_DEMO_BUDGET,
         portfolios: loadedData.portfolios || DEMO_PORTFOLIOS,
         goals: loadedData.goals || DEMO_GOALS,
+        plans: loadedData.plans || DEMO_PLANS,
+        reconciliationPeriods: loadedData.reconciliationPeriods || [],
         transactions: normalizeTransactions(loadedData.transactions),
       };
 
@@ -293,6 +296,8 @@ export const FinancialDataProvider = ({ children }) => {
         budget: enrichBudgetWithCalculations(DEFAULT_DEMO_BUDGET),
         portfolios: DEMO_PORTFOLIOS,
         goals: DEMO_GOALS,
+        plans: DEMO_PLANS,
+        reconciliationPeriods: [],
         transactions: [],
       };
 
@@ -687,6 +692,20 @@ export const FinancialDataProvider = ({ children }) => {
         saveData({
           ...data,
           goals: DEMO_GOALS,
+        });
+      },
+      resetPlansToDemo: () => {
+        if (!data) return;
+        saveData({
+          ...data,
+          plans: DEMO_PLANS,
+        });
+      },
+      clearPlans: () => {
+        if (!data) return;
+        saveData({
+          ...data,
+          plans: [],
         });
       },
       clearGoals: () => {

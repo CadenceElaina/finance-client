@@ -1,0 +1,160 @@
+.planEditor {
+  padding: var(--space-md);
+}
+
+.editorForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.basicInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.formGroup label {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.textInput,
+.numberInput,
+.selectInput,
+.textArea {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.textInput:focus,
+.numberInput:focus,
+.selectInput:focus,
+.textArea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha);
+}
+
+.textArea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.milestonesSection {
+  background: var(--surface-secondary);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.milestonesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.milestonesHeader h4 {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.milestoneEditor {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.milestoneEditor:last-child {
+  margin-bottom: 0;
+}
+
+.milestoneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.milestoneNumber {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.1);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+}
+
+.milestoneForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+.formActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-light);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+    gap: var(--space-sm);
+  }
+  
+  .milestonesHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+  
+  .milestoneHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  
+  .formActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .planEditor {
+    padding: var(--space-sm);
+  }
+  
+  .milestoneEditor {
+    padding: var(--space-sm);
+  }
+  
+  .milestonesSection {
+    padding: var(--space-sm);
+  }
+}

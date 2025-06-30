@@ -209,3 +209,53 @@ export const DEMO_GOALS = [
     linkedAccounts: [{ accountId: "acc-4", allocatedAmount: 2500 }],
   },
 ];
+
+export const DEMO_PLANS = [
+  {
+    id: "plan-investment-roadmap",
+    name: "Investment Roadmap",
+    description:
+      "A general guide to investing, starting with the basics. This is a template, and you can edit it to fit your needs.",
+    milestones: [
+      {
+        id: "milestone-1",
+        name: "Employer Retirement Plan Match",
+        description:
+          "Contribute enough to your employer's retirement plan to get the full match. It's free money!",
+        targetAmount: 0, // This is a behavioral goal, not a specific amount
+        linkedSource: null,
+      },
+      {
+        id: "milestone-2",
+        name: "6-Month Emergency Fund",
+        description:
+          "Save enough to cover 6 months of essential expenses. This should be in a liquid, safe account.",
+        targetAmount: 20000, // Placeholder, should be calculated based on user's expenses
+        linkedSource: { type: "goal", id: "emergency-fund-goal" }, // Assumes a goal with this ID exists
+      },
+      {
+        id: "milestone-3",
+        name: "Pay Off High-Interest Debt",
+        description: "Pay off any debt with an interest rate higher than 6%.",
+        targetAmount: 0, // Represents paying off the balance
+        linkedSource: { type: "account", category: "Debt" }, // This will need special handling to check all debt accounts
+      },
+      {
+        id: "milestone-4",
+        name: "Max IRA Contribution",
+        description:
+          "Contribute the maximum amount to your IRA for the year. Defaulting to Roth IRA.",
+        targetAmount: 7000,
+        linkedSource: { type: "goal", id: "ira-contribution-goal" }, // Assumes a goal with this ID exists
+      },
+      {
+        id: "milestone-5",
+        name: "(Optional) Max Out HSA",
+        description:
+          "If you have a High Deductible Health Plan, max out your Health Savings Account.",
+        targetAmount: 3850, // Placeholder for single coverage, can be edited
+        linkedSource: { type: "goal", id: "hsa-contribution-goal" }, // Assumes a goal with this ID exists
+      },
+    ],
+  }
+];

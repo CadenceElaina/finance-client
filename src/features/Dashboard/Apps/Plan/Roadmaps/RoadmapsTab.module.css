@@ -1,0 +1,272 @@
+.roadmapsTab {
+  padding: var(--space-md);
+}
+
+.roadmapControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.roadmapSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.selectorLabel {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.roadmapSelect {
+  background: var(--surface-light);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.roadmapSelect:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha);
+}
+
+.actionButtons {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+/* Control panel for Reset to Demo and Clear All - positioned at bottom right like Goals tab */
+.controlPanel {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-light);
+}
+
+/* Empty state when no roadmaps exist */
+.emptyState {
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--text-secondary);
+  background: var(--surface-light);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+  margin: var(--space-md) 0;
+}
+
+.emptyState h3 {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-primary);
+}
+
+.emptyState p {
+  margin: 0 0 var(--space-xs) 0;
+  line-height: 1.5;
+}
+
+.emptyState p:last-child {
+  margin-bottom: 0;
+}
+
+.roadmapContent {
+  margin-top: var(--space-md);
+}
+
+.userPlanDisplay {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.planHeader {
+  background: var(--surface-light);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.planHeader h3 {
+  margin: 0 0 var(--space-xs) 0;
+  color: var(--text-primary);
+}
+
+.planHeader p {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-secondary);
+}
+
+.progressIndicator {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.progressIndicator span {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-primary);
+}
+
+.progressBar {
+  height: 8px;
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.milestonesSection {
+  background: var(--surface-secondary);
+  padding: var(--space-md);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.milestonesSection h4 {
+  margin: 0 0 var(--space-md) 0;
+  color: var(--text-primary);
+}
+
+.milestonesList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.milestoneItem {
+  background: var(--surface-light);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.milestoneItem:hover {
+  border-color: var(--color-primary);
+}
+
+.milestoneItem.complete {
+  background: rgba(var(--status-success-rgb), 0.1);
+  border-color: var(--status-success);
+}
+
+.milestoneHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.milestoneHeader h5 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.milestoneStatus {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+}
+
+.milestoneItem.complete .milestoneStatus {
+  color: var(--status-success);
+}
+
+.milestoneDetails {
+  margin-bottom: var(--space-xs);
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.milestoneProgress {
+  height: 4px;
+  background: var(--surface-dark);
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+}
+
+.milestoneProgressFill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
+.milestoneItem.complete .milestoneProgressFill {
+  background: var(--status-success);
+}
+
+/* Legacy styles for backward compatibility */
+.roadmapList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-md);
+}
+
+.roadmapItem {
+  background-color: var(--surface-2);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.roadmapItem h3 {
+  margin-top: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .roadmapControls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .roadmapSelector {
+    justify-content: space-between;
+  }
+  
+  .roadmapSelect {
+    min-width: auto;
+    flex: 1;
+  }
+  
+  .actionButtons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .roadmapsTab {
+    padding: var(--space-sm);
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .milestoneHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-xs);
+  }
+}
